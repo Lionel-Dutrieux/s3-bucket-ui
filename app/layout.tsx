@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   description: "Read-only file browser for your storage buckets.",
 };
 
+// Every page hangs off the live SQLite database (the sidebar lists sources),
+// so nothing is prerendered at build time — builds run without a database.
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: Readonly<{

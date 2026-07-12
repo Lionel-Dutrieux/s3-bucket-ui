@@ -6,10 +6,6 @@ import { listSources } from "@/lib/dal/sources";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-// The sources list lives in SQLite — always render from the live database
-// rather than a build-time snapshot.
-export const dynamic = "force-dynamic";
-
 export default async function HomePage() {
   const sources = await listSources();
 

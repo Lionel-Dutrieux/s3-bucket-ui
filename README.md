@@ -78,6 +78,7 @@ style); a provider with its own protocol also needs a case in
 
 ```bash
 pnpm build
+pnpm db:push   # creates/updates the SQLite schema (idempotent — run once per deploy)
 pnpm start
 ```
 
