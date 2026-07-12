@@ -7,6 +7,7 @@ import { AddSourceDialog } from "@/features/sources/components/add-source-dialog
 import { getProvider } from "@/features/sources/providers";
 import type { SourceSummary } from "@/lib/dal/sources";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -41,45 +42,48 @@ export function CommandPalette({ sources }: { sources: SourceSummary[] }) {
         title="Command palette"
         description="Jump to a source or add a new one"
       >
-        <CommandInput placeholder="Search sources…" />
-        <CommandList>
-          <CommandEmpty>No results.</CommandEmpty>
-          {sources.length > 0 ? (
-            <CommandGroup heading="Sources">
-              {sources.map((source) => {
-                const Icon = getProvider(source.provider)?.icon ?? HardDrive;
-                return (
-                  <CommandItem
-                    key={source.id}
-                    value={`${source.name} ${source.bucket}`}
-                    onSelect={() => {
-                      setOpen(false);
-                      router.push(`/source/${source.id}`);
-                    }}
-                  >
-                    <Icon aria-hidden />
-                    <span className="truncate">{source.name}</span>
-                    <span className="ml-auto truncate font-mono text-xs text-muted-foreground">
-                      {source.bucket}
-                    </span>
-                  </CommandItem>
-                );
-              })}
+        {/* This CommandDialog doesn't wrap children in <Command> itself. */}
+        <Command>
+          <CommandInput placeholder="Search sources…" />
+          <CommandList>
+            <CommandEmpty>No results.</CommandEmpty>
+            {sources.length > 0 ? (
+              <CommandGroup heading="Sources">
+                {sources.map((source) => {
+                  const Icon = getProvider(source.provider)?.icon ?? HardDrive;
+                  return (
+                    <CommandItem
+                      key={source.id}
+                      value={`${source.name} ${source.bucket}`}
+                      onSelect={() => {
+                        setOpen(false);
+                        router.push(`/source/${source.id}`);
+                      }}
+                    >
+                      <Icon aria-hidden />
+                      <span className="truncate">{source.name}</span>
+                      <span className="ml-auto truncate font-mono text-xs text-muted-foreground">
+                        {source.bucket}
+                      </span>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            ) : null}
+            <CommandSeparator />
+            <CommandGroup heading="Actions">
+              <CommandItem
+                onSelect={() => {
+                  setOpen(false);
+                  setAddOpen(true);
+                }}
+              >
+                <Plus aria-hidden />
+                Add source
+              </CommandItem>
             </CommandGroup>
-          ) : null}
-          <CommandSeparator />
-          <CommandGroup heading="Actions">
-            <CommandItem
-              onSelect={() => {
-                setOpen(false);
-                setAddOpen(true);
-              }}
-            >
-              <Plus aria-hidden />
-              Add source
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
+          </CommandList>
+        </Command>
       </CommandDialog>
 
       <AddSourceDialog open={addOpen} onOpenChange={setAddOpen} />
