@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { removeSource } from "@/features/sources/actions";
+import { getSourceForEdit, removeSource } from "@/features/sources/actions";
+import { SourceForm } from "@/features/sources/components/source-form";
+import type { SourceFormValues } from "@/features/sources/schema";
 import type { SourceSummary } from "@/lib/dal/sources";
 import {
   AlertDialog,
@@ -16,6 +18,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,8 +41,22 @@ export function SourceMenu({
   isActive: boolean;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editValues, setEditValues] = useState<SourceFormValues | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+
+  // The summary in the sidebar doesn't carry endpoint/keys — fetch the full
+  // record (minus the secret) right before opening the edit dialog.
+  const handleEdit = () => {
+    startTransition(async () => {
+      const result = await getSourceForEdit(source.id);
+      if (!result.source) {
+        toast.error(result.error ?? "Couldn't load this source.");
+        return;
+      }
+      setEditValues({ ...result.source, secretAccessKey: "" });
+    });
+  };
 
   const handleRemove = () => {
     startTransition(async () => {
@@ -56,6 +79,10 @@ export function SourceMenu({
           </SidebarMenuAction>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="start">
+          <DropdownMenuItem onSelect={handleEdit}>
+            <Pencil aria-hidden />
+            Edit
+          </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onSelect={() => setConfirmOpen(true)}
@@ -65,6 +92,28 @@ export function SourceMenu({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Dialog
+        open={editValues !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditValues(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit {source.name}</DialogTitle>
+            <DialogDescription>
+              The connection is verified again when you save.
+            </DialogDescription>
+          </DialogHeader>
+          {editValues ? (
+            <SourceForm
+              edit={{ sourceId: source.id, initialValues: editValues }}
+              onSuccess={() => setEditValues(null)}
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>

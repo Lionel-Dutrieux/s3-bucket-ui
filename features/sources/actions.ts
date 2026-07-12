@@ -1,11 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { sourceInputSchema, type SourceFormValues } from "@/features/sources/schema";
+import {
+  sourceInputSchema,
+  sourceUpdateSchema,
+  type SourceFormValues,
+} from "@/features/sources/schema";
 import { getFilesClient } from "@/features/sources/storage";
 import {
   createSource as dalCreateSource,
   deleteSource as dalDeleteSource,
+  getSource as dalGetSource,
+  updateSource as dalUpdateSource,
   type SourceInput,
 } from "@/lib/dal/sources";
 
@@ -27,15 +33,48 @@ async function checkConnection(data: SourceInput): Promise<string | null> {
   }
 }
 
-export async function testSourceConnection(
+/**
+ * Resolves edit-mode input into a full SourceInput: a blank secret falls back
+ * to the one already stored for `sourceId`.
+ */
+async function resolveUpdateInput(
+  sourceId: string,
   input: SourceFormValues
-): Promise<ActionResult> {
-  const parsed = sourceInputSchema.safeParse(input);
+): Promise<{ data?: SourceInput; error?: string }> {
+  const parsed = sourceUpdateSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
-  const connectionError = await checkConnection(parsed.data);
+  const existing = await dalGetSource(sourceId);
+  if (!existing) return { error: "Source not found." };
+
+  return {
+    data: {
+      ...parsed.data,
+      secretAccessKey: parsed.data.secretAccessKey || existing.secretAccessKey,
+    },
+  };
+}
+
+export async function testSourceConnection(
+  input: SourceFormValues,
+  sourceId?: string
+): Promise<ActionResult> {
+  let data: SourceInput;
+  if (sourceId) {
+    const resolved = await resolveUpdateInput(sourceId, input);
+    if (!resolved.data) return { error: resolved.error };
+    data = resolved.data;
+  } else {
+    const parsed = sourceInputSchema.safeParse(input);
+    if (!parsed.success) {
+      return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+    }
+    data = parsed.data;
+  }
+
+  const connectionError = await checkConnection(data);
   return connectionError ? { error: connectionError } : { success: true };
 }
 
@@ -53,6 +92,39 @@ export async function createSource(
   await dalCreateSource(parsed.data);
   revalidatePath("/", "layout");
   return { success: true };
+}
+
+export async function updateSource(
+  sourceId: string,
+  input: SourceFormValues
+): Promise<ActionResult> {
+  const resolved = await resolveUpdateInput(sourceId, input);
+  if (!resolved.data) return { error: resolved.error };
+
+  const connectionError = await checkConnection(resolved.data);
+  if (connectionError) return { error: connectionError };
+
+  await dalUpdateSource(sourceId, resolved.data);
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+
+/** Everything the edit form needs to pre-fill — the secret never leaves the server. */
+export async function getSourceForEdit(id: string): Promise<{
+  source?: Omit<SourceInput, "secretAccessKey">;
+  error?: string;
+}> {
+  const source = await dalGetSource(id);
+  if (!source) return { error: "Source not found." };
+  return {
+    source: {
+      name: source.name,
+      provider: source.provider,
+      endpoint: source.endpoint,
+      bucket: source.bucket,
+      accessKeyId: source.accessKeyId,
+    },
+  };
 }
 
 export async function removeSource(id: string): Promise<void> {
