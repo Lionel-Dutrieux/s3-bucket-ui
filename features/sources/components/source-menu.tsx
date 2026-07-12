@@ -71,8 +71,8 @@ export function SourceMenu({
           <AlertDialogHeader>
             <AlertDialogTitle>Remove {source.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This only removes the source from Basin — nothing in your bucket
-              is touched.
+              This only removes the source from Bucket UI — nothing in your
+              bucket is touched.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

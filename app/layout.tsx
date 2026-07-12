@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Basin",
-    template: "%s – Basin",
+    default: "Bucket UI",
+    template: "%s – Bucket UI",
   },
   description: "Read-only file browser for your storage buckets.",
 };

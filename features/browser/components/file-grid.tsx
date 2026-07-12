@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Folder } from "lucide-react";
 import { formatBytes } from "@/lib/format";
 import { FileIcon } from "@/features/browser/components/file-icon";
-import type { FileEntry, FolderEntry } from "@/features/browser/components/file-table";
+import type { FileEntry, FolderEntry } from "@/features/browser/listing";
 
 export function FileGrid({
   sourceId,

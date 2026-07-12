@@ -45,7 +45,9 @@ export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
             <Cylinder className="size-4" aria-hidden />
           </div>
           <div className="grid leading-tight">
-            <span className="text-sm font-semibold tracking-tight">Basin</span>
+            <span className="text-sm font-semibold tracking-tight">
+              Bucket UI
+            </span>
             <span className="text-xs text-muted-foreground">File browser</span>
           </div>
         </Link>

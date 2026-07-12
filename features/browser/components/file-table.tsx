@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Download, Folder } from "lucide-react";
 import { formatBytes, formatDate } from "@/lib/format";
 import { FileIcon } from "@/features/browser/components/file-icon";
+import type { FileEntry, FolderEntry } from "@/features/browser/listing";
 import {
   Table,
   TableBody,
@@ -10,19 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-export interface FolderEntry {
-  /** Full prefix including trailing slash, e.g. "photos/2024/" */
-  prefix: string;
-  name: string;
-}
-
-export interface FileEntry {
-  key: string;
-  name: string;
-  size: number;
-  lastModified?: number;
-}
 
 export function FileTable({
   sourceId,

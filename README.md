@@ -1,10 +1,13 @@
-# Basin
+# Bucket UI
 
-A read-only file browser for your storage buckets (Cloudflare R2, Azure Blob
-Storage), with a Google-Drive-style UI. Add as many sources as you want, browse
-folders, download files via presigned URLs.
+A read-only file browser for your storage buckets, with a Google-Drive-style
+UI. Add as many sources as you want, browse folders, download files via
+presigned URLs.
 
-> **Authentication is not built in.** Deploy Basin behind an authenticating
+Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
+Azure Blob Storage, MinIO, Wasabi, Backblaze B2, DigitalOcean Spaces.
+
+> **Authentication is not built in.** Deploy Bucket UI behind an authenticating
 > reverse proxy (nginx `auth_basic`, Traefik `basicAuth` middleware, Authelia,
 > …). Anyone who can reach the app can browse every source.
 
@@ -20,12 +23,16 @@ folders, download files via presigned URLs.
 
 ```
 app/          routes only (thin pages, layouts, route handlers)
-features/     feature modules: sources/, browser/ (actions + components)
-forms/        TanStack Form infrastructure: reusable fields, validators
+features/     feature modules: sources/, browser/ (schema, actions, services, components)
+forms/        TanStack Form infrastructure: reusable fields, form components
 lib/dal/      data access layer (Prisma queries)
 lib/          shared: prisma client, crypto, formatting
 prisma/       schema (client generated into lib/generated/, gitignored)
 ```
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for layers, key decisions and the
+"how do I…" guide, and [CONTRIBUTING.md](./CONTRIBUTING.md) for the workflow
+(`pnpm typecheck && pnpm lint && pnpm test && pnpm build` — CI runs the same).
 
 After `pnpm install`, the Prisma client is generated automatically (postinstall).
 Schema changes: edit `prisma/schema.prisma` then `pnpm db:push`.
@@ -46,17 +53,25 @@ pnpm dev
 
 ## Adding a source
 
-- **Cloudflare R2**: create an R2 API token (**Object Read only**, scoped to the
-  bucket). Cloudflare shows an S3 endpoint
-  (`https://<account-id>.r2.cloudflarestorage.com`), an access key ID and a
-  secret access key.
-- **Azure Blob Storage**: endpoint `https://<account>.blob.core.windows.net`,
-  container name, storage account name and account key.
+Every source is endpoint + bucket/container + a key pair (read-only
+credentials recommended):
+
+- **Cloudflare R2**: R2 API token (**Object Read only**) —
+  `https://<account-id>.r2.cloudflarestorage.com`.
+- **Amazon S3**: IAM access key with `s3:ListBucket` + `s3:GetObject` —
+  `https://s3.<region>.amazonaws.com` (the region is read from the endpoint).
+- **Google Cloud Storage**: [HMAC keys](https://cloud.google.com/storage/docs/authentication/hmackeys)
+  on a service account — `https://storage.googleapis.com`.
+- **Azure Blob Storage**: storage account name + account key —
+  `https://<account>.blob.core.windows.net`.
+- **MinIO / Wasabi / Backblaze B2 / DigitalOcean Spaces**: the service's S3
+  endpoint and key pair.
 
 Use **Test connection** to check the credentials; the connection is verified
 again when the source is saved. Providers live in
-`features/sources/providers.ts` — an S3-compatible provider is one registry
-entry; a provider with its own protocol also needs a case in
+`features/sources/providers.ts` — an S3-compatible provider is one declarative
+registry entry (label, icon, endpoint placeholder, signing region, addressing
+style); a provider with its own protocol also needs a case in
 `features/sources/storage.ts`.
 
 ## Production

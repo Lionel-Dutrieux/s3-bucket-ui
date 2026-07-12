@@ -1,6 +1,7 @@
 "use client";
 
 import { useFieldContext } from "@/forms/context";
+import { fieldErrors } from "@/forms/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,7 @@ export function TextField({
       />
       {showError ? (
         <p className="text-sm text-destructive">
-          {field.state.meta.errors.join(" ")}
+          {fieldErrors(field).join(" ")}
         </p>
       ) : null}
     </div>

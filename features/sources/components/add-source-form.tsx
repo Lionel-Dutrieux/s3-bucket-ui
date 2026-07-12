@@ -4,9 +4,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { createSource, testSourceConnection } from "@/features/sources/actions";
 import { getProvider, PROVIDERS } from "@/features/sources/providers";
+import { sourceInputSchema } from "@/features/sources/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
-import { httpsUrl, required, validate } from "@/forms/validators";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Loader2Icon } from "lucide-react";
@@ -29,6 +29,10 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
       bucket: "",
       accessKeyId: "",
       secretAccessKey: "",
+    },
+    validators: {
+      // Same schema as the server actions — errors map onto the fields.
+      onChange: sourceInputSchema,
     },
     listeners: {
       // Any edit invalidates a previous connection test result.
@@ -73,7 +77,7 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
         )}
       </form.AppField>
 
-      <form.AppField name="name" validators={validate(required("Name"))}>
+      <form.AppField name="name">
         {(field) => (
           <field.TextField label="Name" placeholder="Team documents" autoFocus />
         )}
@@ -86,10 +90,7 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
           const { bucket, accessKeyId, secretAccessKey } = provider.fieldLabels;
           return (
             <>
-              <form.AppField
-                name="endpoint"
-                validators={validate(required("Endpoint"), httpsUrl())}
-              >
+              <form.AppField name="endpoint">
                 {(field) => (
                   <field.TextField
                     label="Endpoint"
@@ -99,21 +100,15 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
                 )}
               </form.AppField>
 
-              <form.AppField name="bucket" validators={validate(required(bucket))}>
+              <form.AppField name="bucket">
                 {(field) => <field.TextField label={bucket} mono />}
               </form.AppField>
 
-              <form.AppField
-                name="accessKeyId"
-                validators={validate(required(accessKeyId))}
-              >
+              <form.AppField name="accessKeyId">
                 {(field) => <field.TextField label={accessKeyId} mono />}
               </form.AppField>
 
-              <form.AppField
-                name="secretAccessKey"
-                validators={validate(required(secretAccessKey))}
-              >
+              <form.AppField name="secretAccessKey">
                 {(field) => (
                   <field.TextField label={secretAccessKey} type="password" mono />
                 )}

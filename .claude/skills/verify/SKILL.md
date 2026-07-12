@@ -1,9 +1,9 @@
 ---
 name: verify
-description: Build, run and drive Basin (Next.js R2 file viewer) end-to-end with Playwright
+description: Build, run and drive Bucket UI (Next.js bucket file viewer) end-to-end with Playwright
 ---
 
-# Verifying Basin (this repo)
+# Verifying Bucket UI (this repo)
 
 ## Build & launch
 
