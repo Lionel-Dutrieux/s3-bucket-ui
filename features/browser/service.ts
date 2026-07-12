@@ -16,37 +16,45 @@ export type ListFolderResult =
   | { ok: false; reason: ListErrorReason };
 
 /**
- * Maps provider SDK errors (AWS S3 shapes, Azure REST errors, Node network
- * failures) onto the small set of causes the error page can act on.
+ * Maps storage failures onto the small set of causes the error page can act
+ * on. files-sdk wraps provider errors in a FilesError with a normalized code
+ * and keeps the original in `cause`, so unmapped codes fall through to a walk
+ * of the cause chain (raw AWS/Azure shapes, Node network errors).
  */
 export function classifyStorageError(error: unknown): ListErrorReason {
-  const err = error as {
-    name?: string;
-    code?: string;
-    statusCode?: number;
-    $metadata?: { httpStatusCode?: number };
-    cause?: { code?: string };
-  } | null;
+  const topCode = (error as { code?: unknown } | null)?.code;
+  if (topCode === "Unauthorized") return "credentials";
+  if (topCode === "NotFound") return "bucket-missing";
 
-  const name = err?.name ?? "";
-  const status = err?.$metadata?.httpStatusCode ?? err?.statusCode;
-  if (
-    ["AccessDenied", "InvalidAccessKeyId", "SignatureDoesNotMatch", "AuthenticationFailed"].includes(name) ||
-    status === 401 ||
-    status === 403
-  ) {
-    return "credentials";
-  }
-  if (["NoSuchBucket", "ContainerNotFound"].includes(name) || status === 404) {
-    return "bucket-missing";
-  }
+  let current: unknown = error;
+  for (let depth = 0; current && depth < 4; depth++) {
+    const err = current as {
+      name?: string;
+      code?: string;
+      statusCode?: number;
+      $metadata?: { httpStatusCode?: number };
+      cause?: unknown;
+    };
 
-  const code = err?.code ?? err?.cause?.code ?? "";
-  if (
-    ["ENOTFOUND", "ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "EAI_AGAIN", "UND_ERR_CONNECT_TIMEOUT"].includes(code) ||
-    name === "TimeoutError"
-  ) {
-    return "network";
+    const name = err.name ?? "";
+    const status = err.$metadata?.httpStatusCode ?? err.statusCode;
+    if (
+      ["AccessDenied", "InvalidAccessKeyId", "SignatureDoesNotMatch", "AuthenticationFailed"].includes(name) ||
+      status === 401 ||
+      status === 403
+    ) {
+      return "credentials";
+    }
+    if (["NoSuchBucket", "ContainerNotFound"].includes(name) || status === 404) {
+      return "bucket-missing";
+    }
+    if (
+      ["ENOTFOUND", "ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "EAI_AGAIN", "UND_ERR_CONNECT_TIMEOUT"].includes(err.code ?? "") ||
+      name === "TimeoutError"
+    ) {
+      return "network";
+    }
+    current = err.cause;
   }
   return "unknown";
 }
