@@ -1,19 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import {
-  ArrowDown,
-  ArrowUp,
-  ChevronsUpDown,
-  Download,
-  Folder,
-  Link2,
-} from "lucide-react";
-import { formatBytes, formatDate } from "@/lib/format";
-import { FileIcon } from "@/features/browser/components/file-icon";
-import { isPreviewable } from "@/features/browser/components/preview-dialog";
-import type { FileEntry, FolderEntry } from "@/features/browser/listing";
-import type { SortKey, SortState } from "@/features/browser/sort";
+  flexRender,
+  type Header,
+  type Table as TableInstance,
+} from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
+import type { BrowserEntry } from "@/features/browser/entries";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -24,179 +17,82 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const NAME_CELL_CLASS = "flex h-12 w-full items-center gap-3 px-2 text-left";
-const ROW_ACTION_CLASS =
-  "inline-flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100";
+/**
+ * List view over the shared TanStack Table instance. Rows are re-partitioned
+ * folders-first after sorting so the grouping survives both directions.
+ */
+export function FileTable({ table }: { table: TableInstance<BrowserEntry> }) {
+  const rows = table.getRowModel().rows;
+  const ordered = [
+    ...rows.filter((row) => row.original.kind === "folder"),
+    ...rows.filter((row) => row.original.kind === "file"),
+  ];
 
-export function FileTable({
-  sourceId,
-  folders,
-  files,
-  sort,
-  onSort,
-  onPreview,
-  onCopyLink,
-}: {
-  sourceId: string;
-  folders: FolderEntry[];
-  files: FileEntry[];
-  sort: SortState | null;
-  onSort: (key: SortKey) => void;
-  onPreview: (file: FileEntry) => void;
-  onCopyLink: (file: FileEntry) => void;
-}) {
   return (
     <Table>
       <TableHeader>
-        <TableRow className="hover:bg-transparent">
-          <SortableHead
-            label="Name"
-            sortKey="name"
-            sort={sort}
-            onSort={onSort}
-          />
-          <SortableHead
-            label="Size"
-            sortKey="size"
-            sort={sort}
-            onSort={onSort}
-            className="w-28"
-            align="right"
-          />
-          <SortableHead
-            label="Modified"
-            sortKey="modified"
-            sort={sort}
-            onSort={onSort}
-            className="w-36"
-            align="right"
-          />
-          <TableHead className="w-20" />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {folders.map((folder) => (
-          <TableRow key={folder.prefix} className="group">
-            <TableCell className="p-0">
-              <Link
-                href={{
-                  pathname: `/source/${sourceId}`,
-                  query: { prefix: folder.prefix },
-                }}
-                className={cn(NAME_CELL_CLASS, "font-medium")}
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id} className="hover:bg-transparent">
+            {headerGroup.headers.map((header) => (
+              <TableHead
+                key={header.id}
+                className={header.column.columnDef.meta?.headClassName}
               >
-                <Folder
-                  className="size-4 shrink-0 fill-amber-400/80 text-amber-500"
-                  aria-hidden
-                />
-                <span className="truncate">{folder.name}</span>
-              </Link>
-            </TableCell>
-            <TableCell className="text-right font-mono text-xs text-muted-foreground">
-              —
-            </TableCell>
-            <TableCell className="text-right font-mono text-xs text-muted-foreground">
-              —
-            </TableCell>
-            <TableCell />
+                {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                  <SortButton header={header} />
+                ) : (
+                  flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )
+                )}
+              </TableHead>
+            ))}
           </TableRow>
         ))}
-        {files.map((file) => {
-          const downloadHref = `/source/${sourceId}/download?key=${encodeURIComponent(file.key)}`;
-          const previewable = isPreviewable(file.name);
-          return (
-            <TableRow key={file.key} className="group">
-              <TableCell className="p-0">
-                {previewable ? (
-                  <button
-                    type="button"
-                    onClick={() => onPreview(file)}
-                    className={NAME_CELL_CLASS}
-                    title={`Preview ${file.name}`}
-                  >
-                    <FileIcon name={file.name} className="size-4 shrink-0" />
-                    <span className="truncate">{file.name}</span>
-                  </button>
-                ) : (
-                  <a
-                    href={downloadHref}
-                    className={NAME_CELL_CLASS}
-                    title={`Download ${file.name}`}
-                  >
-                    <FileIcon name={file.name} className="size-4 shrink-0" />
-                    <span className="truncate">{file.name}</span>
-                  </a>
-                )}
+      </TableHeader>
+      <TableBody>
+        {ordered.map((row) => (
+          <TableRow key={row.id} className="group">
+            {row.getVisibleCells().map((cell) => (
+              <TableCell
+                key={cell.id}
+                className={cell.column.columnDef.meta?.cellClassName}
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </TableCell>
-              <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                {formatBytes(file.size)}
-              </TableCell>
-              <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                {formatDate(file.lastModified)}
-              </TableCell>
-              <TableCell className="p-0 pr-2 text-right">
-                <button
-                  type="button"
-                  onClick={() => onCopyLink(file)}
-                  className={ROW_ACTION_CLASS}
-                  aria-label={`Copy link to ${file.name}`}
-                  title="Copy link"
-                >
-                  <Link2 className="size-4" aria-hidden />
-                </button>
-                <a
-                  href={downloadHref}
-                  className={ROW_ACTION_CLASS}
-                  aria-label={`Download ${file.name}`}
-                  title="Download"
-                >
-                  <Download className="size-4" aria-hidden />
-                </a>
-              </TableCell>
-            </TableRow>
-          );
-        })}
+            ))}
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );
 }
 
-function SortableHead({
-  label,
-  sortKey,
-  sort,
-  onSort,
-  className,
-  align,
-}: {
-  label: string;
-  sortKey: SortKey;
-  sort: SortState | null;
-  onSort: (key: SortKey) => void;
-  className?: string;
-  align?: "right";
-}) {
-  const active = sort?.key === sortKey;
-  const Icon = !active
+function SortButton({ header }: { header: Header<BrowserEntry, unknown> }) {
+  const sorted = header.column.getIsSorted();
+  const Icon = !sorted
     ? ChevronsUpDown
-    : sort.dir === "asc"
+    : sorted === "asc"
       ? ArrowUp
       : ArrowDown;
+  const label = flexRender(header.column.columnDef.header, header.getContext());
+  const alignRight =
+    header.column.columnDef.meta?.cellClassName?.includes("text-right");
+
   return (
-    <TableHead className={className}>
-      <button
-        type="button"
-        onClick={() => onSort(sortKey)}
-        className={cn(
-          "inline-flex h-full w-full items-center gap-1 hover:text-foreground",
-          align === "right" && "justify-end",
-          active && "text-foreground",
-        )}
-        aria-label={`Sort by ${label.toLowerCase()}`}
-      >
-        {label}
-        <Icon className={cn("size-3.5", !active && "opacity-40")} aria-hidden />
-      </button>
-    </TableHead>
+    <button
+      type="button"
+      onClick={header.column.getToggleSortingHandler()}
+      className={cn(
+        "inline-flex h-full w-full items-center gap-1 hover:text-foreground",
+        alignRight && "justify-end",
+        sorted && "text-foreground",
+      )}
+      aria-label={`Sort by ${header.column.id}`}
+    >
+      {label}
+      <Icon className={cn("size-3.5", !sorted && "opacity-40")} aria-hidden />
+    </button>
   );
 }

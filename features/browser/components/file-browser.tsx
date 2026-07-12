@@ -1,28 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type SortingState,
+} from "@tanstack/react-table";
 import { Search, SearchX } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getShareUrl } from "@/features/browser/actions";
+import { browserColumns } from "@/features/browser/components/browser-columns";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
 import { PreviewDialog } from "@/features/browser/components/preview-dialog";
+import { buildEntries, entryMatches } from "@/features/browser/entries";
 import type { FileEntry, FolderEntry } from "@/features/browser/listing";
-import {
-  matchesQuery,
-  nextSort,
-  sortFiles,
-  sortFolders,
-  type SortKey,
-  type SortState,
-} from "@/features/browser/sort";
 import type { ViewMode } from "@/features/browser/view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 /**
- * Client shell around the listing: filters and sorts the entries the server
- * already loaded (this page only), and owns the preview dialog.
+ * Client shell around the listing: one TanStack Table instance filters and
+ * sorts the entries the server already loaded (this page only). The list view
+ * renders the table; the grid view consumes the same row model, so search and
+ * sort apply to both. Also owns the preview dialog.
  */
 export function FileBrowser({
   sourceId,
@@ -35,29 +38,9 @@ export function FileBrowser({
   files: FileEntry[];
   view: ViewMode;
 }) {
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortState | null>(null);
   const [preview, setPreview] = useState<FileEntry | null>(null);
-
-  const visibleFolders = useMemo(
-    () =>
-      sortFolders(
-        query ? folders.filter((f) => matchesQuery(f.name, query)) : folders,
-        sort,
-      ),
-    [folders, query, sort],
-  );
-  const visibleFiles = useMemo(
-    () =>
-      sortFiles(
-        query ? files.filter((f) => matchesQuery(f.name, query)) : files,
-        sort,
-      ),
-    [files, query, sort],
-  );
-
-  const handleSort = (key: SortKey) =>
-    setSort((current) => nextSort(current, key));
 
   const handleCopyLink = async (file: FileEntry) => {
     const result = await getShareUrl(sourceId, file.key);
@@ -69,10 +52,30 @@ export function FileBrowser({
     toast.success("Link copied — valid for 1 hour");
   };
 
-  const handlePreview = (file: FileEntry) => setPreview(file);
+  const entries = useMemo(() => buildEntries(folders, files), [folders, files]);
 
-  const noMatches =
-    query !== "" && visibleFolders.length === 0 && visibleFiles.length === 0;
+  const table = useReactTable({
+    data: entries,
+    columns: browserColumns,
+    state: { sorting, globalFilter: query },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setQuery,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, _columnId, value) =>
+      entryMatches(row.original, String(value)),
+    sortDescFirst: false,
+    enableMultiSort: false,
+    meta: {
+      sourceId,
+      onPreview: setPreview,
+      onCopyLink: handleCopyLink,
+    },
+  });
+
+  const rows = table.getRowModel().rows;
+  const noMatches = query !== "" && rows.length === 0;
 
   return (
     <div className="space-y-3">
@@ -84,7 +87,7 @@ export function FileBrowser({
           />
           <Input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
             placeholder="Filter by name"
             aria-label="Filter by name"
             className="h-8 pl-8"
@@ -92,8 +95,7 @@ export function FileBrowser({
         </div>
         {query ? (
           <span className="text-xs text-muted-foreground tabular-nums">
-            {visibleFolders.length + visibleFiles.length} match
-            {visibleFolders.length + visibleFiles.length === 1 ? "" : "es"}
+            {rows.length} match{rows.length === 1 ? "" : "es"}
           </span>
         ) : null}
       </div>
@@ -104,27 +106,27 @@ export function FileBrowser({
           <p className="text-sm text-muted-foreground">
             Nothing in this folder matches “{query}”.
           </p>
-          <Button variant="outline" size="sm" onClick={() => setQuery("")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.setGlobalFilter("")}
+          >
             Clear filter
           </Button>
         </div>
       ) : view === "grid" ? (
         <FileGrid
           sourceId={sourceId}
-          folders={visibleFolders}
-          files={visibleFiles}
-          onPreview={handlePreview}
+          folders={rows
+            .map((row) => row.original)
+            .filter((entry) => entry.kind === "folder")}
+          files={rows
+            .map((row) => row.original)
+            .filter((entry) => entry.kind === "file")}
+          onPreview={setPreview}
         />
       ) : (
-        <FileTable
-          sourceId={sourceId}
-          folders={visibleFolders}
-          files={visibleFiles}
-          sort={sort}
-          onSort={handleSort}
-          onPreview={handlePreview}
-          onCopyLink={handleCopyLink}
-        />
+        <FileTable table={table} />
       )}
 
       <PreviewDialog
