@@ -1,65 +1,81 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ChevronRight, Cylinder, Plus } from "lucide-react";
+import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
+import { getProvider } from "@/features/sources/providers";
+import { listSources } from "@/lib/dal/sources";
+import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export default function Home() {
+// The sources list lives in SQLite — always render from the live database
+// rather than a build-time snapshot.
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const sources = await listSources();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <>
+      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
+        <SidebarTrigger className="-ml-1" />
+        <span className="text-sm font-medium">All sources</span>
+        {sources.length > 0 ? (
+          <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+            {sources.length} source{sources.length === 1 ? "" : "s"}
+          </span>
+        ) : null}
+      </header>
+
+      {sources.length === 0 ? (
+        <main className="flex flex-1 items-center justify-center p-6">
+          <div className="flex max-w-sm flex-col items-center gap-3 text-center">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
+              <Cylinder className="size-6" aria-hidden />
+            </div>
+            <h1 className="text-lg font-semibold tracking-tight">
+              No sources yet
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Connect a storage bucket to start browsing your files.
+            </p>
+            <AddSourceDialog>
+              <Button className="mt-2">
+                <Plus aria-hidden />
+                Add source
+              </Button>
+            </AddSourceDialog>
+          </div>
+        </main>
+      ) : (
+        <main className="flex-1 p-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {sources.map((source) => {
+              const ProviderIcon = getProvider(source.provider)?.icon ?? Cylinder;
+              return (
+              <Link
+                key={source.id}
+                href={`/source/${source.id}`}
+                className="group flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/50"
+              >
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
+                  <ProviderIcon className="size-5" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{source.name}</p>
+                  <p className="truncate font-mono text-xs text-muted-foreground">
+                    {getProvider(source.provider)?.label ?? source.provider} ·{" "}
+                    {source.bucket}
+                  </p>
+                </div>
+                <ChevronRight
+                  className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                  aria-hidden
+                />
+              </Link>
+              );
+            })}
+          </div>
+        </main>
+      )}
+    </>
   );
 }
