@@ -23,7 +23,11 @@ export function SubmitButton({
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   return (
-    <Button type="submit" disabled={disabled || isSubmitting} className={className}>
+    <Button
+      type="submit"
+      disabled={disabled || isSubmitting}
+      className={className}
+    >
       {isSubmitting ? (
         <>
           <Loader2Icon className="animate-spin" aria-hidden />

@@ -18,7 +18,7 @@ const PREVIEW_TTL_SECONDS = 600;
  */
 export async function getShareUrl(
   sourceId: string,
-  key: string
+  key: string,
 ): Promise<UrlResult> {
   const source = await getSource(sourceId);
   if (!source) return { error: "Source not found." };
@@ -33,7 +33,7 @@ export async function getShareUrl(
   } catch (error) {
     console.error(
       `[browser] share link failed (source=${source.id}, provider=${source.provider}):`,
-      error
+      error,
     );
     return { error: "Could not create a link for this file." };
   }
@@ -46,7 +46,7 @@ export async function getShareUrl(
  */
 export async function getPreviewUrl(
   sourceId: string,
-  key: string
+  key: string,
 ): Promise<UrlResult> {
   const filename = key.split("/").pop() || "file";
   const category = categoryOf(filename);
@@ -66,7 +66,7 @@ export async function getPreviewUrl(
   } catch (error) {
     console.error(
       `[browser] preview link failed (source=${source.id}, provider=${source.provider}):`,
-      error
+      error,
     );
     return { error: "Could not load a preview for this file." };
   }

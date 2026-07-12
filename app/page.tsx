@@ -45,28 +45,31 @@ export default async function HomePage() {
         <main className="flex-1 p-6">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {sources.map((source) => {
-              const ProviderIcon = getProvider(source.provider)?.icon ?? Cylinder;
+              const ProviderIcon =
+                getProvider(source.provider)?.icon ?? Cylinder;
               return (
-              <Link
-                key={source.id}
-                href={`/source/${source.id}`}
-                className="group flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/50"
-              >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
-                  <ProviderIcon className="size-5" aria-hidden />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{source.name}</p>
-                  <p className="truncate font-mono text-xs text-muted-foreground">
-                    {getProvider(source.provider)?.label ?? source.provider} ·{" "}
-                    {source.bucket}
-                  </p>
-                </div>
-                <ChevronRight
-                  className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-hidden
-                />
-              </Link>
+                <Link
+                  key={source.id}
+                  href={`/source/${source.id}`}
+                  className="group flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
+                    <ProviderIcon className="size-5" aria-hidden />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {source.name}
+                    </p>
+                    <p className="truncate font-mono text-xs text-muted-foreground">
+                      {getProvider(source.provider)?.label ?? source.provider} ·{" "}
+                      {source.bucket}
+                    </p>
+                  </div>
+                  <ChevronRight
+                    className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                    aria-hidden
+                  />
+                </Link>
               );
             })}
           </div>

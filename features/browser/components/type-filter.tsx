@@ -2,7 +2,10 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListFilter } from "lucide-react";
-import { FILE_CATEGORIES, type FileCategory } from "@/features/browser/file-types";
+import {
+  FILE_CATEGORIES,
+  type FileCategory,
+} from "@/features/browser/file-types";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -43,7 +46,7 @@ export function TypeFilter({ active }: { active?: FileCategory }) {
             "h-7 gap-1.5 px-2 text-xs",
             active
               ? "bg-muted text-foreground"
-              : "text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           <ListFilter className="size-3.5" aria-hidden />

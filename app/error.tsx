@@ -23,8 +23,8 @@ export default function ErrorPage({
         </div>
         <h1 className="text-base font-semibold">Something went wrong</h1>
         <p className="text-sm text-muted-foreground">
-          An unexpected error occurred. Try again — if it keeps happening,
-          check the server logs{error.digest ? ` (digest ${error.digest})` : ""}.
+          An unexpected error occurred. Try again — if it keeps happening, check
+          the server logs{error.digest ? ` (digest ${error.digest})` : ""}.
         </p>
         <Button variant="outline" size="sm" onClick={reset} className="mt-1">
           <RotateCcw aria-hidden />

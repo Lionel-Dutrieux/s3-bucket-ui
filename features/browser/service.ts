@@ -1,6 +1,9 @@
 import "server-only";
 import { getFilesClient } from "@/features/sources/storage";
-import { partitionListing, type FolderListing } from "@/features/browser/listing";
+import {
+  partitionListing,
+  type FolderListing,
+} from "@/features/browser/listing";
 import type { Source } from "@/lib/dal/sources";
 
 const PAGE_SIZE = 200;
@@ -39,17 +42,32 @@ export function classifyStorageError(error: unknown): ListErrorReason {
     const name = err.name ?? "";
     const status = err.$metadata?.httpStatusCode ?? err.statusCode;
     if (
-      ["AccessDenied", "InvalidAccessKeyId", "SignatureDoesNotMatch", "AuthenticationFailed"].includes(name) ||
+      [
+        "AccessDenied",
+        "InvalidAccessKeyId",
+        "SignatureDoesNotMatch",
+        "AuthenticationFailed",
+      ].includes(name) ||
       status === 401 ||
       status === 403
     ) {
       return "credentials";
     }
-    if (["NoSuchBucket", "ContainerNotFound"].includes(name) || status === 404) {
+    if (
+      ["NoSuchBucket", "ContainerNotFound"].includes(name) ||
+      status === 404
+    ) {
       return "bucket-missing";
     }
     if (
-      ["ENOTFOUND", "ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "EAI_AGAIN", "UND_ERR_CONNECT_TIMEOUT"].includes(err.code ?? "") ||
+      [
+        "ENOTFOUND",
+        "ECONNREFUSED",
+        "ECONNRESET",
+        "ETIMEDOUT",
+        "EAI_AGAIN",
+        "UND_ERR_CONNECT_TIMEOUT",
+      ].includes(err.code ?? "") ||
       name === "TimeoutError"
     ) {
       return "network";
@@ -67,7 +85,7 @@ export function classifyStorageError(error: unknown): ListErrorReason {
 export async function listFolder(
   source: Source,
   prefix: string,
-  cursor?: string
+  cursor?: string,
 ): Promise<ListFolderResult> {
   try {
     const result = await getFilesClient(source).list({
@@ -80,7 +98,7 @@ export async function listFolder(
   } catch (error) {
     console.error(
       `[browser] listing failed (source=${source.id}, provider=${source.provider}, prefix="${prefix}"):`,
-      error
+      error,
     );
     return { ok: false, reason: classifyStorageError(error) };
   }

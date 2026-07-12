@@ -43,20 +43,21 @@ export function FileBrowser({
     () =>
       sortFolders(
         query ? folders.filter((f) => matchesQuery(f.name, query)) : folders,
-        sort
+        sort,
       ),
-    [folders, query, sort]
+    [folders, query, sort],
   );
   const visibleFiles = useMemo(
     () =>
       sortFiles(
         query ? files.filter((f) => matchesQuery(f.name, query)) : files,
-        sort
+        sort,
       ),
-    [files, query, sort]
+    [files, query, sort],
   );
 
-  const handleSort = (key: SortKey) => setSort((current) => nextSort(current, key));
+  const handleSort = (key: SortKey) =>
+    setSort((current) => nextSort(current, key));
 
   const handleCopyLink = async (file: FileEntry) => {
     const result = await getShareUrl(sourceId, file.key);

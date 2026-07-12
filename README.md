@@ -17,7 +17,8 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 
 ## Stack
 
-- Next.js 16 (App Router, Turbopack), React 19, TypeScript
+- Next.js 16 (App Router, Turbopack), React 19, TypeScript 7 (native compiler)
+- Biome (linting + formatting)
 - Tailwind CSS v4 + shadcn/ui, TanStack Form
 - [files-sdk](https://files-sdk.dev) (S3 + Azure adapters) for bucket access
 - Prisma 7 + SQLite via better-sqlite3 (embedded DB at `data/app.db`)

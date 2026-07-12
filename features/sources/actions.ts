@@ -27,7 +27,7 @@ async function checkConnection(data: SourceInput): Promise<string | null> {
   } catch (error) {
     console.error(
       `[sources] connection test failed (provider=${data.provider}, endpoint=${data.endpoint}, bucket=${data.bucket}):`,
-      error
+      error,
     );
     return "Connection failed — check the endpoint, bucket name and credentials.";
   }
@@ -39,7 +39,7 @@ async function checkConnection(data: SourceInput): Promise<string | null> {
  */
 async function resolveUpdateInput(
   sourceId: string,
-  input: SourceFormValues
+  input: SourceFormValues,
 ): Promise<{ data?: SourceInput; error?: string }> {
   const parsed = sourceUpdateSchema.safeParse(input);
   if (!parsed.success) {
@@ -59,7 +59,7 @@ async function resolveUpdateInput(
 
 export async function testSourceConnection(
   input: SourceFormValues,
-  sourceId?: string
+  sourceId?: string,
 ): Promise<ActionResult> {
   let data: SourceInput;
   if (sourceId) {
@@ -79,7 +79,7 @@ export async function testSourceConnection(
 }
 
 export async function createSource(
-  input: SourceFormValues
+  input: SourceFormValues,
 ): Promise<ActionResult> {
   const parsed = sourceInputSchema.safeParse(input);
   if (!parsed.success) {
@@ -96,7 +96,7 @@ export async function createSource(
 
 export async function updateSource(
   sourceId: string,
-  input: SourceFormValues
+  input: SourceFormValues,
 ): Promise<ActionResult> {
   const resolved = await resolveUpdateInput(sourceId, input);
   if (!resolved.data) return { error: resolved.error };

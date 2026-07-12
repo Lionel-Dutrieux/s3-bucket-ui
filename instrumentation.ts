@@ -5,7 +5,7 @@ export async function register() {
   if (!key || !/^[0-9a-fA-F]{64}$/.test(key)) {
     throw new Error(
       "ENCRYPTION_KEY is missing or malformed: expected 64 hex characters. " +
-        "Generate one with: openssl rand -hex 32"
+        "Generate one with: openssl rand -hex 32",
     );
   }
 }

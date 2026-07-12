@@ -32,7 +32,7 @@ export interface FolderListing {
  */
 export function partitionListing(
   result: RawListResult,
-  prefix: string
+  prefix: string,
 ): FolderListing {
   const folders = (result.prefixes ?? [])
     .filter((folderPrefix) => folderPrefix !== prefix)

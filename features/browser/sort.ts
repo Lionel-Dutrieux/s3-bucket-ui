@@ -14,7 +14,7 @@ export interface SortState {
 /** Header click cycle: unsorted → ascending → descending → unsorted. */
 export function nextSort(
   current: SortState | null,
-  key: SortKey
+  key: SortKey,
 ): SortState | null {
   if (current?.key !== key) return { key, dir: "asc" };
   if (current.dir === "asc") return { key, dir: "desc" };
@@ -24,7 +24,7 @@ export function nextSort(
 /** Folders have no size or date — they only reorder on the name column. */
 export function sortFolders(
   folders: FolderEntry[],
-  sort: SortState | null
+  sort: SortState | null,
 ): FolderEntry[] {
   if (sort?.key !== "name") return folders;
   const dir = sort.dir === "asc" ? 1 : -1;
@@ -33,20 +33,17 @@ export function sortFolders(
 
 export function sortFiles(
   files: FileEntry[],
-  sort: SortState | null
+  sort: SortState | null,
 ): FileEntry[] {
   if (!sort) return files;
   const dir = sort.dir === "asc" ? 1 : -1;
-  return [...files].sort((a, b) => {
-    switch (sort.key) {
-      case "name":
-        return a.name.localeCompare(b.name) * dir;
-      case "size":
-        return (a.size - b.size) * dir;
-      case "modified":
-        return ((a.lastModified ?? 0) - (b.lastModified ?? 0)) * dir;
-    }
-  });
+  return [...files].sort((a, b) => compareFiles(a, b, sort.key) * dir);
+}
+
+function compareFiles(a: FileEntry, b: FileEntry, key: SortKey): number {
+  if (key === "size") return a.size - b.size;
+  if (key === "modified") return (a.lastModified ?? 0) - (b.lastModified ?? 0);
+  return a.name.localeCompare(b.name);
 }
 
 export function matchesQuery(name: string, query: string): boolean {

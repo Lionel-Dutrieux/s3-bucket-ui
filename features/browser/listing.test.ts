@@ -12,7 +12,7 @@ describe("partitionListing", () => {
         prefixes: ["docs/archive/", "docs/img/"],
         cursor: "next-token",
       },
-      "docs/"
+      "docs/",
     );
 
     expect(listing.folders).toEqual([
@@ -35,7 +35,7 @@ describe("partitionListing", () => {
           { key: "docs/real.txt", size: 10 },
         ],
       },
-      "docs/"
+      "docs/",
     );
 
     expect(listing.files.map((file) => file.name)).toEqual(["real.txt"]);
@@ -44,7 +44,7 @@ describe("partitionListing", () => {
   it("excludes the current prefix from folders", () => {
     const listing = partitionListing(
       { items: [], prefixes: ["docs/", "docs/sub/"] },
-      "docs/"
+      "docs/",
     );
     expect(listing.folders).toEqual([{ prefix: "docs/sub/", name: "sub" }]);
   });

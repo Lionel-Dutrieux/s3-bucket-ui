@@ -36,19 +36,19 @@ describe("sortFiles", () => {
 
   it("sorts by name", () => {
     expect(
-      sortFiles(files, { key: "name", dir: "asc" }).map((f) => f.name)
+      sortFiles(files, { key: "name", dir: "asc" }).map((f) => f.name),
     ).toEqual(["a.txt", "b.txt", "c.txt"]);
   });
 
   it("sorts by size descending", () => {
     expect(
-      sortFiles(files, { key: "size", dir: "desc" }).map((f) => f.size)
+      sortFiles(files, { key: "size", dir: "desc" }).map((f) => f.size),
     ).toEqual([30, 20, 10]);
   });
 
   it("treats a missing date as the oldest", () => {
     expect(
-      sortFiles(files, { key: "modified", dir: "asc" }).map((f) => f.name)
+      sortFiles(files, { key: "modified", dir: "asc" }).map((f) => f.name),
     ).toEqual(["c.txt", "b.txt", "a.txt"]);
   });
 });
@@ -62,7 +62,7 @@ describe("sortFolders", () => {
   it("only reacts to the name column", () => {
     expect(sortFolders(folders, { key: "size", dir: "asc" })).toBe(folders);
     expect(
-      sortFolders(folders, { key: "name", dir: "asc" }).map((f) => f.name)
+      sortFolders(folders, { key: "name", dir: "asc" }).map((f) => f.name),
     ).toEqual(["a", "b"]);
   });
 });

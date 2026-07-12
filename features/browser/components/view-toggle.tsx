@@ -11,6 +11,7 @@ const MODES = [
 ] as const;
 
 function persistView(mode: ViewMode) {
+  // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API is not available in all browsers
   document.cookie = `${VIEW_COOKIE}=${mode}; path=/; max-age=31536000; samesite=lax`;
 }
 
@@ -24,6 +25,7 @@ export function ViewToggle({ view }: { view: ViewMode }) {
   };
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: segmented control, not a form fieldset
     <div
       role="group"
       aria-label="View mode"
@@ -41,7 +43,7 @@ export function ViewToggle({ view }: { view: ViewMode }) {
             "flex size-6.5 items-center justify-center rounded-sm text-muted-foreground transition-colors",
             view === mode
               ? "bg-muted text-foreground"
-              : "hover:text-foreground"
+              : "hover:text-foreground",
           )}
         >
           <Icon className="size-4" aria-hidden />

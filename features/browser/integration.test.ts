@@ -45,9 +45,9 @@ describe.skipIf(!endpoint)("listFolder against a real S3 endpoint", () => {
             Bucket: source.bucket,
             Key: key,
             Body: `content of ${key}`,
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   });
 
@@ -70,7 +70,7 @@ describe.skipIf(!endpoint)("listFolder against a real S3 endpoint", () => {
   it("classifies rejected credentials", async () => {
     const result = await listFolder(
       { ...source, secretAccessKey: "definitely-wrong" },
-      ""
+      "",
     );
     expect(result).toEqual({ ok: false, reason: "credentials" });
   });
@@ -78,7 +78,7 @@ describe.skipIf(!endpoint)("listFolder against a real S3 endpoint", () => {
   it("classifies a missing bucket", async () => {
     const result = await listFolder(
       { ...source, bucket: "does-not-exist-bucket-ui" },
-      ""
+      "",
     );
     expect(result).toEqual({ ok: false, reason: "bucket-missing" });
   });

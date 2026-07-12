@@ -61,7 +61,7 @@ export async function createSource(input: SourceInput): Promise<string> {
 
 export async function updateSource(
   id: string,
-  input: SourceInput
+  input: SourceInput,
 ): Promise<void> {
   await prisma.source.update({
     where: { id },

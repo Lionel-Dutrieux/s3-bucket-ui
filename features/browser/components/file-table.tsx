@@ -49,7 +49,12 @@ export function FileTable({
     <Table>
       <TableHeader>
         <TableRow className="hover:bg-transparent">
-          <SortableHead label="Name" sortKey="name" sort={sort} onSort={onSort} />
+          <SortableHead
+            label="Name"
+            sortKey="name"
+            sort={sort}
+            onSort={onSort}
+          />
           <SortableHead
             label="Size"
             sortKey="size"
@@ -172,7 +177,11 @@ function SortableHead({
   align?: "right";
 }) {
   const active = sort?.key === sortKey;
-  const Icon = !active ? ChevronsUpDown : sort.dir === "asc" ? ArrowUp : ArrowDown;
+  const Icon = !active
+    ? ChevronsUpDown
+    : sort.dir === "asc"
+      ? ArrowUp
+      : ArrowDown;
   return (
     <TableHead className={className}>
       <button
@@ -181,15 +190,12 @@ function SortableHead({
         className={cn(
           "inline-flex h-full w-full items-center gap-1 hover:text-foreground",
           align === "right" && "justify-end",
-          active && "text-foreground"
+          active && "text-foreground",
         )}
         aria-label={`Sort by ${label.toLowerCase()}`}
       >
         {label}
-        <Icon
-          className={cn("size-3.5", !active && "opacity-40")}
-          aria-hidden
-        />
+        <Icon className={cn("size-3.5", !active && "opacity-40")} aria-hidden />
       </button>
     </TableHead>
   );

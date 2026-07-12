@@ -38,4 +38,5 @@ function createClient(): PrismaClient {
 
 // Survive Turbopack HMR re-evaluation in dev without stacking connections.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-export const prisma = (globalForPrisma.prisma ??= createClient());
+globalForPrisma.prisma ??= createClient();
+export const prisma = globalForPrisma.prisma;

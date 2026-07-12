@@ -19,10 +19,11 @@ export function ThemeToggle() {
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: segmented control, not a form fieldset
     <div
       role="group"
       aria-label="Theme"
@@ -40,7 +41,7 @@ export function ThemeToggle() {
             title={label}
             className={cn(
               "flex size-6.5 items-center justify-center rounded-sm text-muted-foreground transition-colors",
-              isActive ? "bg-muted text-foreground" : "hover:text-foreground"
+              isActive ? "bg-muted text-foreground" : "hover:text-foreground",
             )}
           >
             <Icon className="size-4" aria-hidden />

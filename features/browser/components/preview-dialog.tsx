@@ -67,7 +67,9 @@ export function PreviewDialog({
               <DialogTitle className="truncate pr-6">{file.name}</DialogTitle>
               <DialogDescription>
                 {formatBytes(file.size)}
-                {file.lastModified ? <> · {formatDate(file.lastModified)}</> : null}
+                {file.lastModified ? (
+                  <> · {formatDate(file.lastModified)}</>
+                ) : null}
               </DialogDescription>
             </DialogHeader>
 
@@ -82,7 +84,7 @@ export function PreviewDialog({
                   {current.error ?? "Could not load a preview for this file."}
                 </p>
               ) : category === "image" ? (
-                // eslint-disable-next-line @next/next/no-img-element -- presigned bucket URL, not optimizable
+                // biome-ignore lint/performance/noImgElement: presigned bucket URL, not optimizable
                 <img
                   src={current.url}
                   alt={file.name}

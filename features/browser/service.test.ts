@@ -13,11 +13,17 @@ describe("classifyStorageError", () => {
     expect(
       classifyStorageError({
         code: "Provider",
-        cause: { name: "SignatureDoesNotMatch", $metadata: { httpStatusCode: 403 } },
-      })
+        cause: {
+          name: "SignatureDoesNotMatch",
+          $metadata: { httpStatusCode: 403 },
+        },
+      }),
     ).toBe("credentials");
     expect(
-      classifyStorageError({ code: "Provider", cause: { name: "NoSuchBucket" } })
+      classifyStorageError({
+        code: "Provider",
+        cause: { name: "NoSuchBucket" },
+      }),
     ).toBe("bucket-missing");
   });
 
@@ -27,7 +33,7 @@ describe("classifyStorageError", () => {
         name: "TypeError",
         message: "fetch failed",
         cause: { code: "ECONNREFUSED" },
-      })
+      }),
     ).toBe("network");
   });
 

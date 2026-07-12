@@ -71,10 +71,12 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
     setTest({ state: "testing" });
     const result = await testSourceConnection(
       form.state.values,
-      edit?.sourceId
+      edit?.sourceId,
     );
     setTest(
-      result.error ? { state: "failed", message: result.error } : { state: "ok" }
+      result.error
+        ? { state: "failed", message: result.error }
+        : { state: "ok" },
     );
   };
 
@@ -136,7 +138,9 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
                   <field.TextField
                     label={secretAccessKey}
                     type="password"
-                    placeholder={edit ? "Leave blank to keep the current one" : undefined}
+                    placeholder={
+                      edit ? "Leave blank to keep the current one" : undefined
+                    }
                     mono
                   />
                 )}

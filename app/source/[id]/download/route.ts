@@ -4,7 +4,7 @@ import { getSource } from "@/lib/dal/sources";
 
 export async function GET(
   request: NextRequest,
-  ctx: RouteContext<"/source/[id]/download">
+  ctx: RouteContext<"/source/[id]/download">,
 ) {
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
@@ -27,7 +27,7 @@ export async function GET(
   } catch (error) {
     console.error(
       `[download] signing failed (source=${source.id}, provider=${source.provider}):`,
-      error
+      error,
     );
     return new NextResponse("Could not generate a download link", {
       status: 502,
