@@ -72,4 +72,9 @@ region extraction, input schema, listing partition, formatting. Run
 - **Add a table/grid column?** `features/browser/components/file-table.tsx` /
   `file-grid.tsx`; the data shape comes from `features/browser/listing.ts`.
 - **Change the DB schema?** `prisma/schema.prisma`, then `pnpm db:push`
-  (regenerates nothing — run `pnpm exec prisma generate` if types changed).
+  (run `pnpm exec prisma generate` if types changed) — and mirror the change
+  as an idempotent statement in the bootstrap DDL of `lib/prisma.ts`, which is
+  what creates the schema on a fresh database (first Docker boot).
+- **Deploy?** `Dockerfile` (standalone, non-root, `/api/health` healthcheck)
+  + `docker-compose.yml` (Dokploy-ready). Boot fails fast on a malformed
+  `ENCRYPTION_KEY` (`instrumentation.ts`).

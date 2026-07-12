@@ -1,0 +1,29 @@
+# Dokploy-ready compose file.
+#
+# ⚠ Bucket UI has NO built-in authentication. Before exposing a domain, add
+# an auth layer: in Dokploy, attach a basicAuth middleware to the domain
+# (Advanced → Traefik), or front the app with Authelia/authentik.
+#
+# Domain: add it in the Dokploy UI (service → Domains tab, container port 3000).
+# Secrets: set ENCRYPTION_KEY in the Dokploy Environment tab (openssl rand -hex 32).
+#
+# Local usage without Dokploy:
+#   docker build -t bucket-ui . && docker run -p 3000:3000 -e ENCRYPTION_KEY=... -v bucket-ui-data:/app/data bucket-ui
+
+services:
+  bucket-ui:
+    build: .
+    restart: unless-stopped
+    environment:
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+    volumes:
+      - bucket-ui-data:/app/data
+    networks:
+      - dokploy-network
+
+volumes:
+  bucket-ui-data:
+
+networks:
+  dokploy-network:
+    external: true

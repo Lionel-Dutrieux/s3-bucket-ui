@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { ChevronRight, CircleAlert, FolderOpen, ListFilter } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  CircleAlert,
+  FolderOpen,
+  ListFilter,
+} from "lucide-react";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
 import { SourceBreadcrumb } from "@/features/browser/components/source-breadcrumb";
@@ -57,8 +63,9 @@ export default async function SourcePage({
 
   return (
     <>
-      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
+      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
         <SidebarTrigger className="-ml-1" />
+        {prefix ? <UpButton sourceId={source.id} prefix={prefix} /> : null}
         <SourceBreadcrumb
           sourceId={source.id}
           sourceName={source.name}
@@ -119,6 +126,27 @@ export default async function SourcePage({
         )}
       </main>
     </>
+  );
+}
+
+function UpButton({ sourceId, prefix }: { sourceId: string; prefix: string }) {
+  const segments = prefix.split("/").filter(Boolean);
+  const parentPrefix =
+    segments.length > 1 ? `${segments.slice(0, -1).join("/")}/` : "";
+
+  return (
+    <Button variant="ghost" size="icon" className="size-7 shrink-0" asChild>
+      <Link
+        href={{
+          pathname: `/source/${sourceId}`,
+          query: parentPrefix ? { prefix: parentPrefix } : undefined,
+        }}
+        aria-label="Up one level"
+        title="Up one level"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+      </Link>
+    </Button>
   );
 }
 

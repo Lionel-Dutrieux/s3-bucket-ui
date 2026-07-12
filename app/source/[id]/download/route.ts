@@ -18,10 +18,19 @@ export async function GET(
   }
 
   const filename = key.split("/").pop() || "download";
-  const signedUrl = await getFilesClient(source).url(key, {
-    // Forces download; also prevents stored HTML/SVG from rendering inline.
-    responseContentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
-  });
-
-  return NextResponse.redirect(signedUrl);
+  try {
+    const signedUrl = await getFilesClient(source).url(key, {
+      // Forces download; also prevents stored HTML/SVG from rendering inline.
+      responseContentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+    });
+    return NextResponse.redirect(signedUrl);
+  } catch (error) {
+    console.error(
+      `[download] signing failed (source=${source.id}, provider=${source.provider}):`,
+      error
+    );
+    return new NextResponse("Could not generate a download link", {
+      status: 502,
+    });
+  }
 }
