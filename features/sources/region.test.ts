@@ -12,16 +12,6 @@ describe("regionFromEndpoint", () => {
     expect(regionFromEndpoint("https://s3.amazonaws.com")).toBe("us-east-1");
   });
 
-  it("handles Wasabi's default endpoint", () => {
-    expect(regionFromEndpoint("https://s3.wasabisys.com")).toBe("us-east-1");
-  });
-
-  it("extracts Backblaze B2 regions", () => {
-    expect(regionFromEndpoint("https://s3.us-west-004.backblazeb2.com")).toBe(
-      "us-west-004"
-    );
-  });
-
   it("uses the first label for DigitalOcean Spaces", () => {
     expect(regionFromEndpoint("https://nyc3.digitaloceanspaces.com")).toBe(
       "nyc3"

@@ -5,7 +5,7 @@ UI. Add as many sources as you want, browse folders, download files via
 presigned URLs.
 
 Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
-Azure Blob Storage, MinIO, Wasabi, Backblaze B2, DigitalOcean Spaces.
+Azure Blob Storage, MinIO, DigitalOcean Spaces.
 
 > **Authentication is not built in.** Deploy Bucket UI behind an authenticating
 > reverse proxy (nginx `auth_basic`, Traefik `basicAuth` middleware, Authelia,
@@ -64,8 +64,7 @@ credentials recommended):
   on a service account — `https://storage.googleapis.com`.
 - **Azure Blob Storage**: storage account name + account key —
   `https://<account>.blob.core.windows.net`.
-- **MinIO / Wasabi / Backblaze B2 / DigitalOcean Spaces**: the service's S3
-  endpoint and key pair.
+- **MinIO / DigitalOcean Spaces**: the service's S3 endpoint and key pair.
 
 Use **Test connection** to check the credentials; the connection is verified
 again when the source is saved. Providers live in

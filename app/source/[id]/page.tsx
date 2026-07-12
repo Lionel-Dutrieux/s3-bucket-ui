@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { ChevronRight, CircleAlert, FolderOpen } from "lucide-react";
+import { ChevronRight, CircleAlert, FolderOpen, ListFilter } from "lucide-react";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
 import { SourceBreadcrumb } from "@/features/browser/components/source-breadcrumb";
+import { TypeFilter } from "@/features/browser/components/type-filter";
 import { ViewToggle } from "@/features/browser/components/view-toggle";
+import { categoryOf, FILE_CATEGORIES } from "@/features/browser/file-types";
 import { listFolder } from "@/features/browser/service";
 import { VIEW_COOKIE, type ViewMode } from "@/features/browser/view";
 import { getSource } from "@/lib/dal/sources";
@@ -34,6 +36,7 @@ export default async function SourcePage({
   const sp = await searchParams;
   const prefix = typeof sp.prefix === "string" ? sp.prefix : "";
   const cursor = typeof sp.cursor === "string" ? sp.cursor : undefined;
+  const activeType = FILE_CATEGORIES.find((c) => c.id === sp.type)?.id;
 
   const source = await getSource(id);
   if (!source) notFound();
@@ -42,9 +45,14 @@ export default async function SourcePage({
     (await cookies()).get(VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
 
   const listing = await listFolder(source, prefix, cursor);
-  const itemCount = listing
-    ? listing.folders.length + listing.files.length
-    : 0;
+  // An active type filter hides folders and keeps only matching files.
+  const folders = !listing || activeType ? [] : listing.folders;
+  const files = !listing
+    ? []
+    : activeType
+      ? listing.files.filter((file) => categoryOf(file.name) === activeType)
+      : listing.files;
+  const itemCount = folders.length + files.length;
   const isEmpty = listing !== null && itemCount === 0;
 
   return (
@@ -56,13 +64,14 @@ export default async function SourcePage({
           sourceName={source.name}
           prefix={prefix}
         />
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2">
           {itemCount > 0 ? (
             <span className="text-xs text-muted-foreground tabular-nums max-sm:hidden">
               {itemCount} item{itemCount === 1 ? "" : "s"}
               {listing?.nextCursor ? "+" : ""}
             </span>
           ) : null}
+          {listing !== null ? <TypeFilter active={activeType} /> : null}
           <ViewToggle view={view} />
         </div>
       </header>
@@ -70,22 +79,22 @@ export default async function SourcePage({
       <main className="flex-1">
         {listing === null ? (
           <ErrorState />
+        ) : isEmpty && activeType ? (
+          <FilteredEmptyState
+            sourceId={source.id}
+            prefix={prefix}
+            typeLabel={
+              FILE_CATEGORIES.find((c) => c.id === activeType)?.label ?? ""
+            }
+          />
         ) : isEmpty ? (
           <EmptyState />
         ) : (
           <div className={view === "grid" ? "p-4" : "px-4 py-2"}>
             {view === "grid" ? (
-              <FileGrid
-                sourceId={source.id}
-                folders={listing.folders}
-                files={listing.files}
-              />
+              <FileGrid sourceId={source.id} folders={folders} files={files} />
             ) : (
-              <FileTable
-                sourceId={source.id}
-                folders={listing.folders}
-                files={listing.files}
-              />
+              <FileTable sourceId={source.id} folders={folders} files={files} />
             )}
             {listing.nextCursor ? (
               <div className="flex justify-center py-4">
@@ -93,9 +102,11 @@ export default async function SourcePage({
                   <Link
                     href={{
                       pathname: `/source/${source.id}`,
-                      query: prefix
-                        ? { prefix, cursor: listing.nextCursor }
-                        : { cursor: listing.nextCursor },
+                      query: {
+                        ...(prefix ? { prefix } : {}),
+                        ...(activeType ? { type: activeType } : {}),
+                        cursor: listing.nextCursor,
+                      },
                     }}
                   >
                     Next page
@@ -123,6 +134,42 @@ function ErrorState() {
           The bucket didn&apos;t respond. The credentials for this source may
           have been revoked, or the bucket may no longer exist.
         </p>
+      </div>
+    </div>
+  );
+}
+
+function FilteredEmptyState({
+  sourceId,
+  prefix,
+  typeLabel,
+}: {
+  sourceId: string;
+  prefix: string;
+  typeLabel: string;
+}) {
+  return (
+    <div className="flex h-full items-center justify-center p-6">
+      <div className="flex max-w-sm flex-col items-center gap-3 text-center">
+        <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+          <ListFilter className="size-5" aria-hidden />
+        </div>
+        <h2 className="text-base font-semibold">
+          No {typeLabel.toLowerCase()} in this folder
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Nothing at this level matches the filter.
+        </p>
+        <Button variant="outline" size="sm" asChild className="mt-1">
+          <Link
+            href={{
+              pathname: `/source/${sourceId}`,
+              query: prefix ? { prefix } : undefined,
+            }}
+          >
+            Clear filter
+          </Link>
+        </Button>
       </div>
     </div>
   );

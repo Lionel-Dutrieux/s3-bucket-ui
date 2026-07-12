@@ -8,9 +8,11 @@ import { SourceMenu } from "@/features/sources/components/source-menu";
 import { getProvider, PROVIDERS } from "@/features/sources/providers";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -110,6 +112,12 @@ export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
         ) : null}
       </SidebarContent>
 
+      <SidebarFooter className="p-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Theme</span>
+          <ThemeToggle />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

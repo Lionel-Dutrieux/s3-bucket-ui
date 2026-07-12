@@ -3,9 +3,7 @@ import {
   Cloud,
   Cylinder,
   Droplets,
-  Flame,
   Globe,
-  Layers,
   Server,
   type LucideIcon,
 } from "lucide-react";
@@ -97,28 +95,6 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
       bucket: "Bucket",
       accessKeyId: "Access key",
       secretAccessKey: "Secret key",
-    },
-  },
-  {
-    id: "wasabi",
-    label: "Wasabi",
-    icon: Layers,
-    adapter: "s3",
-    region: "from-endpoint",
-    endpointPlaceholder: "https://s3.<region>.wasabisys.com",
-    fieldLabels: S3_FIELD_LABELS,
-  },
-  {
-    id: "backblaze-b2",
-    label: "Backblaze B2",
-    icon: Flame,
-    adapter: "s3",
-    region: "from-endpoint",
-    endpointPlaceholder: "https://s3.<region>.backblazeb2.com",
-    fieldLabels: {
-      bucket: "Bucket",
-      accessKeyId: "Key ID",
-      secretAccessKey: "Application key",
     },
   },
   {
