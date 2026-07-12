@@ -75,11 +75,35 @@ style); a provider with its own protocol also needs a case in
 
 ## Production
 
+### Docker (recommended)
+
+```bash
+docker build -t bucket-ui .
+docker run -d -p 3000:3000 \
+  -e ENCRYPTION_KEY=$(openssl rand -hex 32) \
+  -v bucket-ui-data:/app/data \
+  bucket-ui
+```
+
+The image is a multi-stage standalone build (non-root, healthcheck on
+`/api/health`), and the schema is bootstrapped automatically on first start —
+just persist the `/app/data` volume. `docker-compose.yml` is ready for
+[Dokploy](https://dokploy.com) (external `dokploy-network`, domain and
+`ENCRYPTION_KEY` configured in the UI). **Remember to attach an auth
+middleware (basicAuth) to the domain.**
+
+### Bare Node.js
+
 ```bash
 pnpm build
-pnpm db:push   # creates/updates the SQLite schema (idempotent — run once per deploy)
 pnpm start
 ```
 
 The SQLite database lives in `data/` (gitignored) — persist that directory across
-deploys, and put the app behind your reverse proxy's authentication.
+deploys, and put the app behind your reverse proxy's authentication. Schema
+changes in dev: `pnpm db:push`.
+
+### Monitoring
+
+`GET /api/health` returns `200 {"status":"ok"}` when the app and its database
+respond, `503` otherwise.
