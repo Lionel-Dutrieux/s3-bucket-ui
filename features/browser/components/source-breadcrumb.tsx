@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { buildCrumbs } from "@/features/browser/listing";
 import {
@@ -37,25 +38,27 @@ export function SourceBreadcrumb({
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
           return (
-            <BreadcrumbItem key={crumb.prefix} className="font-mono text-xs">
+            <Fragment key={crumb.prefix}>
               <BreadcrumbSeparator />
-              {isLast ? (
-                <BreadcrumbPage className="font-mono text-xs">
-                  {crumb.label}
-                </BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink asChild>
-                  <Link
-                    href={{
-                      pathname: `/source/${sourceId}`,
-                      query: { prefix: crumb.prefix },
-                    }}
-                  >
+              <BreadcrumbItem className="font-mono text-xs">
+                {isLast ? (
+                  <BreadcrumbPage className="font-mono text-xs">
                     {crumb.label}
-                  </Link>
-                </BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
+                  </BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <Link
+                      href={{
+                        pathname: `/source/${sourceId}`,
+                        query: { prefix: crumb.prefix },
+                      }}
+                    >
+                      {crumb.label}
+                    </Link>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </Fragment>
           );
         })}
       </BreadcrumbList>
