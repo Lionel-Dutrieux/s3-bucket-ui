@@ -9,13 +9,12 @@ import {
   FolderOpen,
   ListFilter,
 } from "lucide-react";
-import { FileGrid } from "@/features/browser/components/file-grid";
-import { FileTable } from "@/features/browser/components/file-table";
+import { FileBrowser } from "@/features/browser/components/file-browser";
 import { SourceBreadcrumb } from "@/features/browser/components/source-breadcrumb";
 import { TypeFilter } from "@/features/browser/components/type-filter";
 import { ViewToggle } from "@/features/browser/components/view-toggle";
 import { categoryOf, FILE_CATEGORIES } from "@/features/browser/file-types";
-import { listFolder } from "@/features/browser/service";
+import { listFolder, type ListErrorReason } from "@/features/browser/service";
 import { VIEW_COOKIE, type ViewMode } from "@/features/browser/view";
 import { getSource } from "@/lib/dal/sources";
 import { Button } from "@/components/ui/button";
@@ -52,14 +51,14 @@ export default async function SourcePage({
 
   const listing = await listFolder(source, prefix, cursor);
   // An active type filter hides folders and keeps only matching files.
-  const folders = !listing || activeType ? [] : listing.folders;
-  const files = !listing
+  const folders = !listing.ok || activeType ? [] : listing.folders;
+  const files = !listing.ok
     ? []
     : activeType
       ? listing.files.filter((file) => categoryOf(file.name) === activeType)
       : listing.files;
   const itemCount = folders.length + files.length;
-  const isEmpty = listing !== null && itemCount === 0;
+  const isEmpty = listing.ok && itemCount === 0;
 
   return (
     <>
@@ -75,17 +74,17 @@ export default async function SourcePage({
           {itemCount > 0 ? (
             <span className="text-xs text-muted-foreground tabular-nums max-sm:hidden">
               {itemCount} item{itemCount === 1 ? "" : "s"}
-              {listing?.nextCursor ? "+" : ""}
+              {listing.ok && listing.nextCursor ? "+" : ""}
             </span>
           ) : null}
-          {listing !== null ? <TypeFilter active={activeType} /> : null}
+          {listing.ok ? <TypeFilter active={activeType} /> : null}
           <ViewToggle view={view} />
         </div>
       </header>
 
       <main className="flex-1">
-        {listing === null ? (
-          <ErrorState />
+        {!listing.ok ? (
+          <ErrorState reason={listing.reason} />
         ) : isEmpty && activeType ? (
           <FilteredEmptyState
             sourceId={source.id}
@@ -97,12 +96,13 @@ export default async function SourcePage({
         ) : isEmpty ? (
           <EmptyState />
         ) : (
-          <div className={view === "grid" ? "p-4" : "px-4 py-2"}>
-            {view === "grid" ? (
-              <FileGrid sourceId={source.id} folders={folders} files={files} />
-            ) : (
-              <FileTable sourceId={source.id} folders={folders} files={files} />
-            )}
+          <div className="p-4 pt-3">
+            <FileBrowser
+              sourceId={source.id}
+              folders={folders}
+              files={files}
+              view={view}
+            />
             {listing.nextCursor ? (
               <div className="flex justify-center py-4">
                 <Button variant="outline" size="sm" asChild>
@@ -150,18 +150,35 @@ function UpButton({ sourceId, prefix }: { sourceId: string; prefix: string }) {
   );
 }
 
-function ErrorState() {
+const ERROR_COPY: Record<ListErrorReason, { title: string; body: string }> = {
+  credentials: {
+    title: "Access denied",
+    body: "The bucket rejected the credentials for this source. They may have been rotated or revoked — edit the source to update them.",
+  },
+  "bucket-missing": {
+    title: "Bucket not found",
+    body: "The bucket this source points to doesn't exist anymore. It may have been renamed or deleted — edit the source to fix the bucket name.",
+  },
+  network: {
+    title: "Endpoint unreachable",
+    body: "The endpoint didn't respond. Check the endpoint URL on this source, or your network connection.",
+  },
+  unknown: {
+    title: "Couldn't load this folder",
+    body: "The bucket returned an unexpected error. Details were written to the server logs.",
+  },
+};
+
+function ErrorState({ reason }: { reason: ListErrorReason }) {
+  const copy = ERROR_COPY[reason];
   return (
     <div className="flex h-full items-center justify-center p-6">
       <div className="flex max-w-sm flex-col items-center gap-3 text-center">
         <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
           <CircleAlert className="size-5" aria-hidden />
         </div>
-        <h2 className="text-base font-semibold">Couldn&apos;t load this folder</h2>
-        <p className="text-sm text-muted-foreground">
-          The bucket didn&apos;t respond. The credentials for this source may
-          have been revoked, or the bucket may no longer exist.
-        </p>
+        <h2 className="text-base font-semibold">{copy.title}</h2>
+        <p className="text-sm text-muted-foreground">{copy.body}</p>
       </div>
     </div>
   );

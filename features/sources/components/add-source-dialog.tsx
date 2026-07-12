@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AddSourceForm } from "@/features/sources/components/add-source-form";
+import { SourceForm } from "@/features/sources/components/source-form";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +11,25 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function AddSourceDialog({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
+interface AddSourceDialogProps {
+  /** Trigger element. Omit when the dialog is controlled from outside. */
+  children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function AddSourceDialog({
+  children,
+  open: controlledOpen,
+  onOpenChange,
+}: AddSourceDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add source</DialogTitle>
@@ -25,7 +38,7 @@ export function AddSourceDialog({ children }: { children: React.ReactNode }) {
             stored.
           </DialogDescription>
         </DialogHeader>
-        {open ? <AddSourceForm onSuccess={() => setOpen(false)} /> : null}
+        {open ? <SourceForm onSuccess={() => setOpen(false)} /> : null}
       </DialogContent>
     </Dialog>
   );

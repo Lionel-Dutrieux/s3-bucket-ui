@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { decrypt, encrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
 
@@ -24,14 +25,16 @@ export interface SourceInput {
   secretAccessKey: string;
 }
 
-export async function listSources(): Promise<SourceSummary[]> {
+// cache() deduplicates reads within one server render — the layout and the
+// page both ask for sources without hitting SQLite twice.
+export const listSources = cache(async (): Promise<SourceSummary[]> => {
   return prisma.source.findMany({
     select: { id: true, name: true, bucket: true, provider: true },
     orderBy: { name: "asc" },
   });
-}
+});
 
-export async function getSource(id: string): Promise<Source | null> {
+export const getSource = cache(async (id: string): Promise<Source | null> => {
   const row = await prisma.source.findUnique({ where: { id } });
   if (!row) return null;
   return {
@@ -43,7 +46,7 @@ export async function getSource(id: string): Promise<Source | null> {
     accessKeyId: decrypt(row.accessKeyId),
     secretAccessKey: decrypt(row.secretAccessKey),
   };
-}
+});
 
 export async function createSource(input: SourceInput): Promise<string> {
   const row = await prisma.source.create({
@@ -54,6 +57,20 @@ export async function createSource(input: SourceInput): Promise<string> {
     },
   });
   return row.id;
+}
+
+export async function updateSource(
+  id: string,
+  input: SourceInput
+): Promise<void> {
+  await prisma.source.update({
+    where: { id },
+    data: {
+      ...input,
+      accessKeyId: encrypt(input.accessKeyId),
+      secretAccessKey: encrypt(input.secretAccessKey),
+    },
+  });
 }
 
 export async function deleteSource(id: string): Promise<void> {

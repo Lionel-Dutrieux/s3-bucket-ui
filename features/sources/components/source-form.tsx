@@ -2,9 +2,17 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { createSource, testSourceConnection } from "@/features/sources/actions";
+import {
+  createSource,
+  testSourceConnection,
+  updateSource,
+} from "@/features/sources/actions";
 import { getProvider, PROVIDERS } from "@/features/sources/providers";
-import { sourceInputSchema } from "@/features/sources/schema";
+import {
+  sourceInputSchema,
+  sourceUpdateSchema,
+  type SourceFormValues,
+} from "@/features/sources/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
 import { Button } from "@/components/ui/button";
@@ -17,12 +25,18 @@ type TestStatus =
   | { state: "ok" }
   | { state: "failed"; message: string };
 
-export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
+interface SourceFormProps {
+  onSuccess: () => void;
+  /** When set, the form edits an existing source instead of creating one. */
+  edit?: { sourceId: string; initialValues: SourceFormValues };
+}
+
+export function SourceForm({ onSuccess, edit }: SourceFormProps) {
   const [serverError, setServerError] = useState<string>();
   const [test, setTest] = useState<TestStatus>({ state: "idle" });
 
   const form = useAppForm({
-    defaultValues: {
+    defaultValues: edit?.initialValues ?? {
       name: "",
       provider: PROVIDERS[0].id,
       endpoint: "",
@@ -31,8 +45,8 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
       secretAccessKey: "",
     },
     validators: {
-      // Same schema as the server actions — errors map onto the fields.
-      onChange: sourceInputSchema,
+      // Same schemas as the server actions — errors map onto the fields.
+      onChange: edit ? sourceUpdateSchema : sourceInputSchema,
     },
     listeners: {
       // Any edit invalidates a previous connection test result.
@@ -40,12 +54,14 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
     },
     onSubmit: async ({ value }) => {
       setServerError(undefined);
-      const result = await createSource(value);
+      const result = edit
+        ? await updateSource(edit.sourceId, value)
+        : await createSource(value);
       if (result.error) {
         setServerError(result.error);
         return;
       }
-      toast.success("Source added");
+      toast.success(edit ? "Source updated" : "Source added");
       onSuccess();
     },
   });
@@ -53,7 +69,10 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
   const handleTest = async () => {
     setServerError(undefined);
     setTest({ state: "testing" });
-    const result = await testSourceConnection(form.state.values);
+    const result = await testSourceConnection(
+      form.state.values,
+      edit?.sourceId
+    );
     setTest(
       result.error ? { state: "failed", message: result.error } : { state: "ok" }
     );
@@ -79,7 +98,11 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
 
       <form.AppField name="name">
         {(field) => (
-          <field.TextField label="Name" placeholder="Team documents" autoFocus />
+          <field.TextField
+            label="Name"
+            placeholder="Team documents"
+            autoFocus={!edit}
+          />
         )}
       </form.AppField>
 
@@ -110,7 +133,12 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
 
               <form.AppField name="secretAccessKey">
                 {(field) => (
-                  <field.TextField label={secretAccessKey} type="password" mono />
+                  <field.TextField
+                    label={secretAccessKey}
+                    type="password"
+                    placeholder={edit ? "Leave blank to keep the current one" : undefined}
+                    mono
+                  />
                 )}
               </form.AppField>
             </>
@@ -145,10 +173,10 @@ export function AddSourceForm({ onSuccess }: { onSuccess: () => void }) {
         </form.Subscribe>
         <form.AppForm>
           <form.SubmitButton
-            pendingLabel="Adding…"
+            pendingLabel={edit ? "Saving…" : "Adding…"}
             disabled={test.state === "testing"}
           >
-            Add source
+            {edit ? "Save changes" : "Add source"}
           </form.SubmitButton>
         </form.AppForm>
       </DialogFooter>

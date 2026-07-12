@@ -27,5 +27,11 @@ export const sourceInputSchema = z.object({
   secretAccessKey: z.string().trim().min(1, "Secret is required."),
 });
 
+// Editing an existing source: a blank secret means "keep the stored one",
+// so the min(1) requirement is lifted — everything else validates the same.
+export const sourceUpdateSchema = sourceInputSchema.extend({
+  secretAccessKey: z.string().trim(),
+});
+
 /** Raw form values (before parsing/normalization). */
 export type SourceFormValues = z.input<typeof sourceInputSchema>;

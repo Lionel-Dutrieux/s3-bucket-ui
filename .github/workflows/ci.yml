@@ -33,3 +33,36 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  # Proves the storage layer talks to a real S3 endpoint — unit tests mock
+  # nothing here: MinIO runs in a container and listFolder hits it for real.
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+            minio/minio server /data
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:9000/minio/health/live && exit 0
+            sleep 1
+          done
+          echo "MinIO did not become healthy" && docker logs minio && exit 1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Integration tests (MinIO)
+        run: pnpm vitest run features/browser/integration.test.ts
+        env:
+          S3_TEST_ENDPOINT: http://localhost:9000

@@ -4,6 +4,10 @@ A read-only file browser for your storage buckets, with a Google-Drive-style
 UI. Add as many sources as you want, browse folders, download files via
 presigned URLs.
 
+Features: list/grid views, name filter and column sorting (current page),
+file-type filter, image/PDF preview, shareable presigned links (1 h),
+`Ctrl+K` command palette, dark mode.
+
 Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
 Azure Blob Storage, MinIO, DigitalOcean Spaces.
 
@@ -32,7 +36,9 @@ prisma/       schema (client generated into lib/generated/, gitignored)
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for layers, key decisions and the
 "how do I…" guide, and [CONTRIBUTING.md](./CONTRIBUTING.md) for the workflow
-(`pnpm typecheck && pnpm lint && pnpm test && pnpm build` — CI runs the same).
+(`pnpm typecheck && pnpm lint && pnpm test && pnpm build` — CI runs the same,
+plus an integration job that exercises the storage layer against a real MinIO
+container).
 
 After `pnpm install`, the Prisma client is generated automatically (postinstall).
 Schema changes: edit `prisma/schema.prisma` then `pnpm db:push`.
