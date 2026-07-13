@@ -1,6 +1,12 @@
 "use client";
 
-import { Download, Link2, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Link2,
+  Loader2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { getPreviewUrl, getTextPreview } from "@/features/browser/actions";
 import { categoryOf, isTextFile } from "@/features/browser/file-types";
@@ -45,14 +51,22 @@ interface LoadedPreview {
   error?: string;
 }
 
+const NAV_BUTTON_CLASS =
+  "absolute top-1/2 z-10 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full border bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:text-foreground";
+
 export function PreviewDialog({
   sourceId,
   file,
+  files,
+  onFileChange,
   onOpenChange,
   onCopyLink,
 }: {
   sourceId: string;
   file: FileEntry | null;
+  /** Previewable files of the folder, in display order, for ←/→ browsing. */
+  files: FileEntry[];
+  onFileChange: (file: FileEntry) => void;
   onOpenChange: (open: boolean) => void;
   onCopyLink: (file: FileEntry) => void;
 }) {
@@ -89,9 +103,32 @@ export function PreviewDialog({
   const current = loaded?.key === file?.key ? loaded : null;
   const kind = file ? previewKindOf(file.name) : undefined;
 
+  const index = file ? files.findIndex((f) => f.key === file.key) : -1;
+  const previous = index > 0 ? files[index - 1] : undefined;
+  const next =
+    index >= 0 && index < files.length - 1 ? files[index + 1] : undefined;
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    // Focused media elements use the arrow keys to seek — leave them alone.
+    const target = event.target;
+    if (
+      target instanceof HTMLVideoElement ||
+      target instanceof HTMLAudioElement
+    ) {
+      return;
+    }
+    if (event.key === "ArrowLeft" && previous) {
+      event.preventDefault();
+      onFileChange(previous);
+    } else if (event.key === "ArrowRight" && next) {
+      event.preventDefault();
+      onFileChange(next);
+    }
+  };
+
   return (
     <Dialog open={file !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl" onKeyDown={handleKeyDown}>
         {file ? (
           <>
             <DialogHeader>
@@ -101,10 +138,16 @@ export function PreviewDialog({
                 {file.lastModified ? (
                   <> · {formatDate(file.lastModified)}</>
                 ) : null}
+                {index >= 0 && files.length > 1 ? (
+                  <>
+                    {" "}
+                    · {index + 1} of {files.length}
+                  </>
+                ) : null}
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex min-h-48 items-center justify-center overflow-hidden rounded-md border bg-muted/40">
+            <div className="relative flex min-h-48 items-center justify-center overflow-hidden rounded-md border bg-muted/40">
               {!current ? (
                 <Loader2
                   className="size-6 animate-spin text-muted-foreground"
@@ -154,6 +197,28 @@ export function PreviewDialog({
                   className="h-[70vh] w-full"
                 />
               )}
+              {previous ? (
+                <button
+                  type="button"
+                  onClick={() => onFileChange(previous)}
+                  className={`${NAV_BUTTON_CLASS} left-2`}
+                  aria-label={`Previous file: ${previous.name}`}
+                  title="Previous file (←)"
+                >
+                  <ChevronLeft className="size-4" aria-hidden />
+                </button>
+              ) : null}
+              {next ? (
+                <button
+                  type="button"
+                  onClick={() => onFileChange(next)}
+                  className={`${NAV_BUTTON_CLASS} right-2`}
+                  aria-label={`Next file: ${next.name}`}
+                  title="Next file (→)"
+                >
+                  <ChevronRight className="size-4" aria-hidden />
+                </button>
+              ) : null}
             </div>
 
             <DialogFooter>

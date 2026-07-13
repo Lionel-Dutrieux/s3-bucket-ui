@@ -17,8 +17,16 @@ import { browserColumns } from "@/features/browser/components/browser-columns";
 import { DetailsDialog } from "@/features/browser/components/details-dialog";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
-import { PreviewDialog } from "@/features/browser/components/preview-dialog";
-import { buildEntries, entryMatches } from "@/features/browser/entries";
+import { GridSortMenu } from "@/features/browser/components/grid-sort-menu";
+import {
+  isPreviewable,
+  PreviewDialog,
+} from "@/features/browser/components/preview-dialog";
+import {
+  buildEntries,
+  entryMatches,
+  type BrowserEntry,
+} from "@/features/browser/entries";
 import type { FileEntry, FolderEntry } from "@/features/browser/listing";
 import { sortParser } from "@/features/browser/sort-param";
 import type { ViewMode } from "@/features/browser/view";
@@ -96,6 +104,13 @@ export function FileBrowser({
 
   const rows = table.getRowModel().rows;
   const noMatches = query !== "" && rows.length === 0;
+  // Previewable files in display order — the dialog's ←/→ walk this list.
+  const previewFiles = rows
+    .map((row) => row.original)
+    .filter(
+      (entry): entry is Extract<BrowserEntry, { kind: "file" }> =>
+        entry.kind === "file" && isPreviewable(entry.name),
+    );
 
   return (
     <div className="space-y-3">
@@ -117,6 +132,14 @@ export function FileBrowser({
           <span className="text-xs text-muted-foreground tabular-nums">
             {rows.length} match{rows.length === 1 ? "" : "es"}
           </span>
+        ) : null}
+        {view === "grid" ? (
+          <div className="ml-auto">
+            <GridSortMenu
+              sorting={sorting}
+              onSortingChange={handleSortingChange}
+            />
+          </div>
         ) : null}
       </div>
 
@@ -144,6 +167,8 @@ export function FileBrowser({
             .map((row) => row.original)
             .filter((entry) => entry.kind === "file")}
           onPreview={setPreview}
+          onCopyLink={handleCopyLink}
+          onDetails={setDetails}
         />
       ) : (
         <FileTable table={table} />
@@ -152,6 +177,8 @@ export function FileBrowser({
       <PreviewDialog
         sourceId={sourceId}
         file={preview}
+        files={previewFiles}
+        onFileChange={setPreview}
         onOpenChange={(open) => {
           if (!open) setPreview(null);
         }}
