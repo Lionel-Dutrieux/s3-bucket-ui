@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useStore } from "@tanstack/react-form";
+import { useEffect } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { renameFolder, renameObject } from "@/features/browser/actions";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
-import { Button } from "@/components/ui/button";
+import { entryNameSchema } from "@/features/browser/lib/schemas";
+import { useAppForm } from "@/forms/form";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+const renameSchema = z.object({ name: entryNameSchema });
 
 export function RenameDialog({
   sourceId,
@@ -27,42 +30,46 @@ export function RenameDialog({
   onOpenChange: (open: boolean) => void;
   onRenamed: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [pending, setPending] = useState(false);
+  const form = useAppForm({
+    defaultValues: { name: entry?.name ?? "" },
+    validators: {
+      // Same schema as the server actions — errors map onto the field.
+      onChange: renameSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (!entry) return;
+      const trimmed = value.name.trim();
+      // Unchanged name: close silently, nothing to do.
+      if (trimmed === entry.name) {
+        onOpenChange(false);
+        return;
+      }
+      const result =
+        entry.kind === "folder"
+          ? await renameFolder(sourceId, entry.prefix, trimmed)
+          : await renameObject(sourceId, entry.key, trimmed);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(`Renamed to ${trimmed}`);
+      onOpenChange(false);
+      onRenamed();
+    },
+  });
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   // Seed the field with the current name whenever a new entry opens.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset is keyed on the entry changing
   useEffect(() => {
-    if (entry) setName(entry.name);
+    if (entry) form.reset({ name: entry.name });
   }, [entry]);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!entry) return;
-    const trimmed = name.trim();
-    if (trimmed === "" || trimmed === entry.name) {
-      onOpenChange(false);
-      return;
-    }
-    setPending(true);
-    const result =
-      entry.kind === "folder"
-        ? await renameFolder(sourceId, entry.prefix, trimmed)
-        : await renameObject(sourceId, entry.key, trimmed);
-    setPending(false);
-    if (!result.ok) {
-      toast.error(result.error);
-      return;
-    }
-    toast.success(`Renamed to ${trimmed}`);
-    onOpenChange(false);
-    onRenamed();
-  };
 
   return (
     <Dialog
       open={entry !== null}
       onOpenChange={(next) => {
-        if (!pending) onOpenChange(next);
+        if (!isSubmitting) onOpenChange(next);
       }}
     >
       <DialogContent className="sm:max-w-sm">
@@ -76,27 +83,29 @@ export function RenameDialog({
               : "The file keeps its place in this folder."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="rename-name">Name</Label>
-            <Input
-              id="rename-name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              autoFocus
-              spellCheck={false}
-              disabled={pending}
-            />
-          </div>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            form.handleSubmit();
+          }}
+          className="space-y-4"
+        >
+          <form.AppField name="name">
+            {(field) => <field.TextField label="Name" autoFocus />}
+          </form.AppField>
           <DialogFooter>
-            <Button
-              type="submit"
-              disabled={
-                pending || name.trim() === "" || name.trim() === entry?.name
-              }
-            >
-              {pending ? "Renaming…" : "Rename"}
-            </Button>
+            <form.Subscribe selector={(state) => state.values.name}>
+              {(name) => (
+                <form.AppForm>
+                  <form.SubmitButton
+                    pendingLabel="Renaming…"
+                    disabled={name.trim() === "" || name.trim() === entry?.name}
+                  >
+                    Rename
+                  </form.SubmitButton>
+                </form.AppForm>
+              )}
+            </form.Subscribe>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useStore } from "@tanstack/react-form";
 import { toast } from "sonner";
+import { z } from "zod";
 import { createFolder } from "@/features/browser/actions";
-import { Button } from "@/components/ui/button";
+import { folderNameSchema } from "@/features/browser/lib/schemas";
+import { useAppForm } from "@/forms/form";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+const newFolderSchema = z.object({ name: folderNameSchema });
 
 export function NewFolderDialog({
   sourceId,
@@ -28,30 +30,32 @@ export function NewFolderDialog({
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [pending, setPending] = useState(false);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setPending(true);
-    const result = await createFolder(sourceId, prefix, name);
-    setPending(false);
-    if (!result.ok) {
-      toast.error(result.error);
-      return;
-    }
-    toast.success(`Created ${name.trim()}`);
-    setName("");
-    onOpenChange(false);
-    onCreated();
-  };
+  const form = useAppForm({
+    defaultValues: { name: "" },
+    validators: {
+      // Same schema as the server action — errors map onto the field.
+      onChange: newFolderSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await createFolder(sourceId, prefix, value.name);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(`Created ${value.name.trim()}`);
+      form.reset();
+      onOpenChange(false);
+      onCreated();
+    },
+  });
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!pending) {
-          if (!next) setName("");
+        if (!isSubmitting) {
+          if (!next) form.reset();
           onOpenChange(next);
         }
       }}
@@ -63,22 +67,31 @@ export function NewFolderDialog({
             Created inside the current folder.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="new-folder-name">Name</Label>
-            <Input
-              id="new-folder-name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Invoices"
-              autoFocus
-              spellCheck={false}
-            />
-          </div>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            form.handleSubmit();
+          }}
+          className="space-y-4"
+        >
+          <form.AppField name="name">
+            {(field) => (
+              <field.TextField label="Name" placeholder="Invoices" autoFocus />
+            )}
+          </form.AppField>
           <DialogFooter>
-            <Button type="submit" disabled={pending || name.trim() === ""}>
-              {pending ? "Creating…" : "Create folder"}
-            </Button>
+            <form.Subscribe selector={(state) => state.values.name}>
+              {(name) => (
+                <form.AppForm>
+                  <form.SubmitButton
+                    pendingLabel="Creating…"
+                    disabled={name.trim() === ""}
+                  >
+                    Create folder
+                  </form.SubmitButton>
+                </form.AppForm>
+              )}
+            </form.Subscribe>
           </DialogFooter>
         </form>
       </DialogContent>
