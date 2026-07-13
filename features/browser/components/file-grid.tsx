@@ -1,16 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { Download, Folder, Info, Link2 } from "lucide-react";
+import { Download, Folder, Info, Link2, Pencil, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { formatBytes } from "@/lib/format";
+import { Checkbox } from "@/components/ui/checkbox";
 import { downloadHref } from "@/features/browser/components/browser-columns";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
+import type { BrowserEntry } from "@/features/browser/entries";
 import { categoryOf } from "@/features/browser/file-types";
 import type { FileEntry, FolderEntry } from "@/features/browser/listing";
 
 const GRID_ACTION_CLASS =
   "inline-flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground";
+
+/** Multi-select wiring, present only when the source allows deletions.
+ * Ids are the row ids the table uses: folder prefix or file key. */
+export interface GridSelection {
+  isSelected: (id: string) => boolean;
+  toggle: (id: string) => void;
+  /** True while anything is selected — keeps every checkbox visible. */
+  active: boolean;
+}
 
 export function FileGrid({
   sourceId,
@@ -19,6 +31,9 @@ export function FileGrid({
   onPreview,
   onCopyLink,
   onDetails,
+  onDelete,
+  onRename,
+  selection,
 }: {
   sourceId: string;
   folders: FolderEntry[];
@@ -26,6 +41,12 @@ export function FileGrid({
   onPreview: (file: FileEntry) => void;
   onCopyLink: (file: FileEntry) => void;
   onDetails: (file: FileEntry) => void;
+  /** Only set when the source allows deletions — absent hides the action.
+   * Folders delete recursively (every object under the prefix). */
+  onDelete?: (entry: BrowserEntry) => void;
+  /** Only set when the source allows both upload and delete. */
+  onRename?: (entry: BrowserEntry) => void;
+  selection?: GridSelection;
 }) {
   return (
     <div className="space-y-6">
@@ -36,26 +57,84 @@ export function FileGrid({
           </h3>
           <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))]">
             {folders.map((folder) => (
-              <Link
+              <div
                 key={folder.prefix}
-                href={{
-                  pathname: `/source/${sourceId}`,
-                  query: { prefix: folder.prefix },
-                }}
-                title={folder.name}
-                className="flex items-center gap-3 rounded-lg border bg-card px-3.5 py-3 transition-colors hover:bg-muted/50"
+                className="group relative flex items-center gap-3 rounded-lg border bg-card px-3.5 py-3 transition-colors hover:bg-muted/50"
               >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-amber-500/10">
-                  <Folder
-                    className="size-4.5 fill-amber-400/80 text-amber-500"
-                    aria-hidden
-                  />
+                {/* When selection is on, hovering swaps the folder icon for
+                    its checkbox — the Drive pattern. */}
+                <div className="relative z-10 flex size-9 shrink-0 items-center justify-center rounded-md bg-amber-500/10">
+                  {selection ? (
+                    <>
+                      <Folder
+                        className={cn(
+                          "size-4.5 fill-amber-400/80 text-amber-500",
+                          selection.active ||
+                            selection.isSelected(folder.prefix)
+                            ? "hidden"
+                            : "group-hover:hidden",
+                        )}
+                        aria-hidden
+                      />
+                      <Checkbox
+                        checked={selection.isSelected(folder.prefix)}
+                        onCheckedChange={() => selection.toggle(folder.prefix)}
+                        aria-label={`Select ${folder.name}`}
+                        className={cn(
+                          "bg-background",
+                          selection.active ||
+                            selection.isSelected(folder.prefix)
+                            ? undefined
+                            : "hidden group-hover:flex",
+                        )}
+                      />
+                    </>
+                  ) : (
+                    <Folder
+                      className="size-4.5 fill-amber-400/80 text-amber-500"
+                      aria-hidden
+                    />
+                  )}
                 </div>
-                <div className="min-w-0 space-y-0.5">
+                <div className="min-w-0 flex-1 space-y-0.5">
                   <p className="truncate text-sm font-medium">{folder.name}</p>
                   <p className="text-xs text-muted-foreground">Folder</p>
                 </div>
-              </Link>
+                {/* Overlay link keeps the whole card clickable without
+                    nesting the delete button inside it. */}
+                <Link
+                  href={{
+                    pathname: `/source/${sourceId}`,
+                    query: { prefix: folder.prefix },
+                  }}
+                  title={folder.name}
+                  className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="sr-only">Open {folder.name}</span>
+                </Link>
+                {onRename ? (
+                  <button
+                    type="button"
+                    onClick={() => onRename({ kind: "folder", ...folder })}
+                    className={`${GRID_ACTION_CLASS} relative z-10 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100`}
+                    aria-label={`Rename ${folder.name}`}
+                    title="Rename"
+                  >
+                    <Pencil className="size-3.5" aria-hidden />
+                  </button>
+                ) : null}
+                {onDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => onDelete({ kind: "folder", ...folder })}
+                    className={`${GRID_ACTION_CLASS} relative z-10 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 hover:text-destructive`}
+                    aria-label={`Delete ${folder.name}`}
+                    title="Delete folder"
+                  >
+                    <Trash2 className="size-3.5" aria-hidden />
+                  </button>
+                ) : null}
+              </div>
             ))}
           </div>
         </section>
@@ -116,6 +195,19 @@ export function FileGrid({
                   </a>
                 )}
 
+                {selection ? (
+                  <Checkbox
+                    checked={selection.isSelected(file.key)}
+                    onCheckedChange={() => selection.toggle(file.key)}
+                    aria-label={`Select ${file.name}`}
+                    className={cn(
+                      "absolute left-2 top-2 z-10 bg-background/90 shadow-sm backdrop-blur transition-opacity",
+                      selection.active || selection.isSelected(file.key)
+                        ? undefined
+                        : "opacity-0 focus-visible:opacity-100 group-hover:opacity-100",
+                    )}
+                  />
+                ) : null}
                 <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-md border bg-background/90 p-0.5 opacity-0 shadow-sm backdrop-blur transition-opacity focus-within:opacity-100 group-hover:opacity-100">
                   <button
                     type="button"
@@ -143,6 +235,28 @@ export function FileGrid({
                   >
                     <Download className="size-3.5" aria-hidden />
                   </a>
+                  {onRename ? (
+                    <button
+                      type="button"
+                      onClick={() => onRename({ kind: "file", ...file })}
+                      className={GRID_ACTION_CLASS}
+                      aria-label={`Rename ${file.name}`}
+                      title="Rename"
+                    >
+                      <Pencil className="size-3.5" aria-hidden />
+                    </button>
+                  ) : null}
+                  {onDelete ? (
+                    <button
+                      type="button"
+                      onClick={() => onDelete({ kind: "file", ...file })}
+                      className={`${GRID_ACTION_CLASS} hover:text-destructive`}
+                      aria-label={`Delete ${file.name}`}
+                      title="Delete"
+                    >
+                      <Trash2 className="size-3.5" aria-hidden />
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ))}

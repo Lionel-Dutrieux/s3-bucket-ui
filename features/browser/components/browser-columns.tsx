@@ -1,8 +1,9 @@
 "use client";
 
 import type { ColumnDef, Row, RowData } from "@tanstack/react-table";
-import { Download, Folder, Info, Link2 } from "lucide-react";
+import { Download, Folder, Info, Link2, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
 import {
@@ -21,6 +22,12 @@ declare module "@tanstack/react-table" {
     onPreview: (file: FileEntry) => void;
     onCopyLink: (file: FileEntry) => void;
     onDetails: (file: FileEntry) => void;
+    /** Only set when the source allows deletions — absent hides the action.
+     * Folders delete recursively (every object under the prefix). */
+    onDelete?: (entry: BrowserEntry) => void;
+    /** Only set when the source allows both upload and delete (rename moves
+     * the object). */
+    onRename?: (entry: BrowserEntry) => void;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -43,6 +50,49 @@ const sortBy =
   (compare: (a: BrowserEntry, b: BrowserEntry) => number) =>
   (rowA: Row<BrowserEntry>, rowB: Row<BrowserEntry>) =>
     compare(rowA.original, rowB.original);
+
+/**
+ * Leading checkbox column, prepended only when the source allows deletions.
+ * The header checkbox acts on the visible (filtered) rows so a select-all
+ * can never touch rows a name filter is hiding.
+ */
+export const selectColumn: ColumnDef<BrowserEntry> = {
+  id: "select",
+  enableSorting: false,
+  meta: { headClassName: "w-10", cellClassName: "w-10" },
+  header: ({ table }) => {
+    const rows = table.getRowModel().rows;
+    const allSelected =
+      rows.length > 0 && rows.every((row) => row.getIsSelected());
+    const someSelected = rows.some((row) => row.getIsSelected());
+    return (
+      <Checkbox
+        checked={allSelected || (someSelected && "indeterminate")}
+        onCheckedChange={(value) =>
+          table.setRowSelection(
+            value === true
+              ? Object.fromEntries(rows.map((row) => [row.id, true]))
+              : {},
+          )
+        }
+        aria-label="Select all"
+      />
+    );
+  },
+  cell: ({ row, table }) => (
+    <Checkbox
+      checked={row.getIsSelected()}
+      onCheckedChange={(value) => row.toggleSelected(value === true)}
+      aria-label={`Select ${row.original.name}`}
+      className={cn(
+        "transition-opacity",
+        !row.getIsSelected() &&
+          table.getSelectedRowModel().rows.length === 0 &&
+          "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+      )}
+    />
+  ),
+};
 
 export const browserColumns: ColumnDef<BrowserEntry>[] = [
   {
@@ -125,13 +175,44 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     header: "",
     enableSorting: false,
     meta: {
-      headClassName: "w-28",
+      headClassName: "w-44",
       cellClassName: "p-0 pr-2 text-right",
     },
     cell: ({ row, table }) => {
       const entry = row.original;
-      if (entry.kind !== "file") return null;
-      const { sourceId, onCopyLink, onDetails } = table.options.meta ?? {};
+      const { sourceId, onCopyLink, onDetails, onDelete, onRename } =
+        table.options.meta ?? {};
+      const renameButton = onRename ? (
+        <button
+          type="button"
+          onClick={() => onRename(entry)}
+          className={ROW_ACTION_CLASS}
+          aria-label={`Rename ${entry.name}`}
+          title="Rename"
+        >
+          <Pencil className="size-4" aria-hidden />
+        </button>
+      ) : null;
+      const deleteButton = onDelete ? (
+        <button
+          type="button"
+          onClick={() => onDelete(entry)}
+          className={cn(ROW_ACTION_CLASS, "hover:text-destructive")}
+          aria-label={`Delete ${entry.name}`}
+          title={entry.kind === "folder" ? "Delete folder" : "Delete"}
+        >
+          <Trash2 className="size-4" aria-hidden />
+        </button>
+      ) : null;
+
+      if (entry.kind === "folder") {
+        return (
+          <>
+            {renameButton}
+            {deleteButton}
+          </>
+        );
+      }
       return (
         <>
           <button
@@ -160,6 +241,8 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
           >
             <Download className="size-4" aria-hidden />
           </a>
+          {renameButton}
+          {deleteButton}
         </>
       );
     },

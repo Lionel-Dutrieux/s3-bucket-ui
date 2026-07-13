@@ -2,13 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  ChevronRight,
-  CircleAlert,
-  FolderOpen,
-  ListFilter,
-} from "lucide-react";
+import { ArrowLeft, ChevronRight, CircleAlert, ListFilter } from "lucide-react";
 import { FileBrowser } from "@/features/browser/components/file-browser";
 import { SourceBreadcrumb } from "@/features/browser/components/source-breadcrumb";
 import { TypeFilter } from "@/features/browser/components/type-filter";
@@ -93,15 +87,18 @@ export default async function SourcePage({
               FILE_CATEGORIES.find((c) => c.id === activeType)?.label ?? ""
             }
           />
-        ) : isEmpty ? (
-          <EmptyState />
         ) : (
           <div className="p-4 pt-3">
             <FileBrowser
               sourceId={source.id}
+              prefix={prefix}
               folders={folders}
               files={files}
               view={view}
+              permissions={{
+                upload: source.allowUpload,
+                delete: source.allowDelete,
+              }}
             />
             {listing.nextCursor ? (
               <div className="flex justify-center py-4">
@@ -215,22 +212,6 @@ function FilteredEmptyState({
             Clear filter
           </Link>
         </Button>
-      </div>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="flex h-full items-center justify-center p-6">
-      <div className="flex max-w-sm flex-col items-center gap-3 text-center">
-        <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-          <FolderOpen className="size-5" aria-hidden />
-        </div>
-        <h2 className="text-base font-semibold">This folder is empty</h2>
-        <p className="text-sm text-muted-foreground">
-          Files uploaded to this location will show up here.
-        </p>
       </div>
     </div>
   );

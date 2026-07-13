@@ -15,13 +15,19 @@ Features:
   text/code/Markdown (first 1 MB), without leaving the app.
 - **Share & inspect** — presigned download links (1 h), per-file details
   (Content-Type, ETag, user metadata, copyable key).
+- **Write, if you allow it** — sources are read-only by default; two per-source
+  permissions optionally enable uploads (button or drag & drop of files and
+  whole folders, with a progress tray, plus folder creation) and deletions
+  (single, multi-select, or a whole folder, with confirmation). With both on,
+  files and folders can be renamed. Every write is enforced server-side.
 
 Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
 Azure Blob Storage, MinIO, DigitalOcean Spaces.
 
 > **Authentication is not built in.** Deploy Bucket UI behind an authenticating
 > reverse proxy (nginx `auth_basic`, Traefik `basicAuth` middleware, Authelia,
-> …). Anyone who can reach the app can browse every source.
+> …). Anyone who can reach the app can browse every source — and can upload to
+> or delete from any source whose write permissions you enabled.
 
 ## Stack
 
@@ -69,7 +75,8 @@ pnpm dev
 ## Adding a source
 
 Every source is endpoint + bucket/container + a key pair (read-only
-credentials recommended):
+credentials recommended — grant write scopes only if you enable the source's
+write permissions):
 
 - **Cloudflare R2**: R2 API token (**Object Read only**) —
   `https://<account-id>.r2.cloudflarestorage.com`.

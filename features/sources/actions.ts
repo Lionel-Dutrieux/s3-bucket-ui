@@ -123,6 +123,8 @@ export async function getSourceForEdit(id: string): Promise<{
       endpoint: source.endpoint,
       bucket: source.bucket,
       accessKeyId: source.accessKeyId,
+      allowUpload: source.allowUpload,
+      allowDelete: source.allowDelete,
     },
   };
 }
