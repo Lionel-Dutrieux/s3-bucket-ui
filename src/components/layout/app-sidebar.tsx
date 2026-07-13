@@ -1,15 +1,10 @@
 "use client";
 
+import { Cylinder, HardDrive, History, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cylinder, HardDrive, History, Plus } from "lucide-react";
-import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
-import { providerIcon } from "@/features/sources/components/provider-icons";
-import { SourceMenu } from "@/features/sources/components/source-menu";
-import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
-import type { SourceSummary } from "@/lib/dal/sources";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +17,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
+import { providerIcon } from "@/features/sources/components/provider-icons";
+import { SourceMenu } from "@/features/sources/components/source-menu";
+import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
+import type { SourceSummary } from "@/lib/dal/sources";
 
 export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
   const pathname = usePathname();

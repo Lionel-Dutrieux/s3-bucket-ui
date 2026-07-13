@@ -4,10 +4,6 @@ import { useStore } from "@tanstack/react-form";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { renameFolder, renameObject } from "@/features/browser/actions";
-import type { BrowserEntry } from "@/features/browser/lib/entries";
-import { entryNameSchema } from "@/features/browser/lib/schemas";
-import { useAppForm } from "@/forms/form";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { renameFolder, renameObject } from "@/features/browser/actions";
+import type { BrowserEntry } from "@/features/browser/lib/entries";
+import { entryNameSchema } from "@/features/browser/lib/schemas";
+import { useAppForm } from "@/forms/form";
 
 const renameSchema = z.object({ name: entryNameSchema });
 

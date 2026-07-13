@@ -1,11 +1,7 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListFilter } from "lucide-react";
-import {
-  FILE_CATEGORIES,
-  type FileCategory,
-} from "@/features/browser/lib/file-types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  FILE_CATEGORIES,
+  type FileCategory,
+} from "@/features/browser/lib/file-types";
 import { cn } from "@/lib/utils";
 
 export function TypeFilter({ active }: { active?: FileCategory }) {

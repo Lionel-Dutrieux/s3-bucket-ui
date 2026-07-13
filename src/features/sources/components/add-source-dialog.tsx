@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { SourceForm } from "@/features/sources/components/source-form";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { SourceForm } from "@/features/sources/components/source-form";
 
 interface AddSourceDialogProps {
   /** Trigger element. Omit when the dialog is controlled from outside. */

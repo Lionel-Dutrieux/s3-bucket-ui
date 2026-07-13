@@ -1,8 +1,8 @@
 "use client";
 
-import { useFieldContext } from "@/forms/context";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useFieldContext } from "@/forms/context";
 
 interface SwitchFieldProps {
   label: string;

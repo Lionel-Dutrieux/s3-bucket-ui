@@ -1,7 +1,5 @@
 "use client";
 
-import { useFieldContext } from "@/forms/context";
-import { fieldErrors } from "@/forms/utils";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -10,6 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFieldContext } from "@/forms/context";
+import { fieldErrors } from "@/forms/utils";
 
 export interface SelectFieldOption {
   value: string;

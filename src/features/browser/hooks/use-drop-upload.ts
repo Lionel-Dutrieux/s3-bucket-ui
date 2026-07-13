@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import {
-  filesFromDataTransfer,
   type DroppedFile,
+  filesFromDataTransfer,
 } from "@/features/browser/lib/drop";
 
 /**

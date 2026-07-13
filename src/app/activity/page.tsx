@@ -1,9 +1,5 @@
-import type { Metadata } from "next";
 import { History } from "lucide-react";
-import { operationLabel } from "@/features/browser/lib/operation-labels";
-import { listOperations } from "@/lib/dal/operations";
-import { formatDateTime } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Table,
@@ -13,6 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { operationLabel } from "@/features/browser/lib/operation-labels";
+import { listOperations } from "@/lib/dal/operations";
+import { formatDateTime } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Activity" };
 

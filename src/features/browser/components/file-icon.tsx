@@ -2,11 +2,11 @@ import {
   FileArchive,
   FileAudio,
   FileCode,
+  File as FileIconBase,
   FileImage,
   FileSpreadsheet,
   FileText,
   FileVideo,
-  File as FileIconBase,
   type LucideIcon,
 } from "lucide-react";
 import {

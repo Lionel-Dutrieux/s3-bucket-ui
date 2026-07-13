@@ -2,38 +2,40 @@
 
 import {
   DndContext,
+  type DragEndEvent,
   DragOverlay,
+  type DragStartEvent,
   KeyboardSensor,
   MeasuringStrategy,
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
 } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
-  useReactTable,
   type OnChangeFn,
   type RowSelectionState,
   type SortingState,
+  useReactTable,
 } from "@tanstack/react-table";
 import { FolderOpen, SearchX } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { downloadUrl } from "@/features/browser/api/client";
-import { browserQueries } from "@/features/browser/api/queries";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Button } from "@/components/ui/button";
 import {
   deleteEntries,
   deleteFolder,
   deleteObject,
 } from "@/features/browser/actions";
+import { downloadUrl } from "@/features/browser/api/client";
+import { browserQueries } from "@/features/browser/api/queries";
 import {
   browserColumns,
   selectColumn,
@@ -41,10 +43,10 @@ import {
 import { BrowserToolbar } from "@/features/browser/components/browser-toolbar";
 import { DetailsDialog } from "@/features/browser/components/details-dialog";
 import {
-  DragPreview,
-  ParentDropZone,
   type DragData,
+  DragPreview,
   type DropData,
+  ParentDropZone,
 } from "@/features/browser/components/dnd";
 import { DropOverlay } from "@/features/browser/components/drop-overlay";
 import { FileGrid } from "@/features/browser/components/file-grid";
@@ -61,23 +63,21 @@ import {
 import { RenameDialog } from "@/features/browser/components/rename-dialog";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
 import { UploadTray } from "@/features/browser/components/upload-tray";
+import { useDropUpload } from "@/features/browser/hooks/use-drop-upload";
+import { useUploads } from "@/features/browser/hooks/use-uploads";
 import {
+  type BrowserEntry,
   buildEntries,
   entryMatches,
-  type BrowserEntry,
 } from "@/features/browser/lib/entries";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 import {
+  type EntryTarget,
   folderName,
   planMove,
-  type EntryTarget,
 } from "@/features/browser/lib/move";
 import { sortParser } from "@/features/browser/lib/sort-param";
-import { useDropUpload } from "@/features/browser/hooks/use-drop-upload";
-import { useUploads } from "@/features/browser/hooks/use-uploads";
 import type { ViewMode } from "@/features/browser/lib/view";
-import { ConfirmDialog } from "@/components/confirm-dialog";
-import { Button } from "@/components/ui/button";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
 
 export interface BrowserPermissions {

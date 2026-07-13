@@ -8,10 +8,10 @@ import { downloadUrl } from "@/features/browser/api/client";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
 import {
+  type BrowserEntry,
   compareByModified,
   compareByName,
   compareBySize,
-  type BrowserEntry,
 } from "@/features/browser/lib/entries";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";

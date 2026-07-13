@@ -7,9 +7,6 @@ import {
   type Table as TableInstance,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
-import { useEntryDnd } from "@/features/browser/components/dnd";
-import type { BrowserEntry } from "@/features/browser/lib/entries";
-import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -18,6 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useEntryDnd } from "@/features/browser/components/dnd";
+import type { BrowserEntry } from "@/features/browser/lib/entries";
+import { cn } from "@/lib/utils";
 
 export function FileTable({
   table,

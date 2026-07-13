@@ -1,7 +1,10 @@
 "use client";
 
+import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
 import {
   createSource,
   testSourceConnection,
@@ -9,15 +12,12 @@ import {
 } from "@/features/sources/actions";
 import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
 import {
+  type SourceFormValues,
   sourceInputSchema,
   sourceUpdateSchema,
-  type SourceFormValues,
 } from "@/features/sources/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Loader2Icon } from "lucide-react";
 
 type TestStatus =
   | { state: "idle" }

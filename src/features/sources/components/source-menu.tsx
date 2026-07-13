@@ -1,15 +1,10 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { removeSource } from "@/features/sources/actions";
-import { sourcesQueries } from "@/features/sources/api/queries";
-import { SourceForm } from "@/features/sources/components/source-form";
-import type { SourceFormValues } from "@/features/sources/lib/schema";
-import type { SourceSummary } from "@/lib/dal/sources";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   Dialog,
@@ -25,6 +20,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuAction } from "@/components/ui/sidebar";
+import { removeSource } from "@/features/sources/actions";
+import { sourcesQueries } from "@/features/sources/api/queries";
+import { SourceForm } from "@/features/sources/components/source-form";
+import type { SourceFormValues } from "@/features/sources/lib/schema";
+import type { SourceSummary } from "@/lib/dal/sources";
 
 export function SourceMenu({
   source,

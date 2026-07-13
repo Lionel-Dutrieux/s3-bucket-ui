@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   basename,
   destinationFor,
+  type EntryTarget,
   folderName,
   isIntoSelfOrDescendant,
   isNoop,
   parentOf,
   planMove,
-  type EntryTarget,
 } from "@/features/browser/lib/move";
 
 const file = (key: string): EntryTarget => ({ kind: "file", key });

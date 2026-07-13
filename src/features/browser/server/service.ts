@@ -1,9 +1,9 @@
 import "server-only";
-import {
-  partitionListing,
-  type FolderListing,
-} from "@/features/browser/lib/listing";
 import { PAGE_SIZE } from "@/features/browser/lib/limits";
+import {
+  type FolderListing,
+  partitionListing,
+} from "@/features/browser/lib/listing";
 import { getFilesClient } from "@/features/sources/server/storage";
 import type { Source } from "@/lib/dal/sources";
 

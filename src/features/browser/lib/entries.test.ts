@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  type BrowserEntry,
   buildEntries,
   compareByModified,
   compareByName,
   compareBySize,
   entryMatches,
-  type BrowserEntry,
 } from "@/features/browser/lib/entries";
 
 const folder = (name: string): BrowserEntry => ({

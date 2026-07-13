@@ -1,11 +1,11 @@
-import Link from "next/link";
 import { ChevronRight, Cylinder, Plus } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { getProvider } from "@/features/sources/lib/providers";
 import { listSources } from "@/lib/dal/sources";
-import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default async function HomePage() {
   const sources = await listSources();

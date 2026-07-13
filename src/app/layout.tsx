@@ -5,9 +5,9 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { listSources } from "@/lib/dal/sources";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { listSources } from "@/lib/dal/sources";
 import "./globals.css";
 
 const geistSans = Geist({

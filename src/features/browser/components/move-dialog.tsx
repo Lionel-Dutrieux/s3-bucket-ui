@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import type { EntryTarget } from "@/features/browser/lib/move";
-import { moveEntries } from "@/features/browser/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { moveEntries } from "@/features/browser/actions";
+import type { EntryTarget } from "@/features/browser/lib/move";
 
 export interface MoveRequest {
   targets: EntryTarget[];

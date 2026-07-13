@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  type DraggableAttributes,
   useDraggable,
   useDroppable,
-  type DraggableAttributes,
 } from "@dnd-kit/core";
 import { CornerLeftUp, Folder } from "lucide-react";
 import { useCallback } from "react";

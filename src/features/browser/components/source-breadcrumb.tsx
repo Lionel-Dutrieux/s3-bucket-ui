@@ -1,6 +1,5 @@
-import { Fragment } from "react";
 import Link from "next/link";
-import { buildCrumbs } from "@/features/browser/lib/listing";
+import { Fragment } from "react";
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -10,6 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { buildCrumbs } from "@/features/browser/lib/listing";
 
 // Desktop: full path. Mobile: source / … / current folder, truncated.
 export function SourceBreadcrumb({

@@ -3,9 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { browserQueries } from "@/features/browser/api/queries";
-import type { FileEntry } from "@/features/browser/lib/listing";
-import { formatBytes, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { browserQueries } from "@/features/browser/api/queries";
+import type { FileEntry } from "@/features/browser/lib/listing";
+import { formatBytes, formatDate } from "@/lib/format";
 
 /** Object metadata (HEAD request) with a copy-the-key shortcut. */
 export function DetailsDialog({

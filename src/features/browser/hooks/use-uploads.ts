@@ -1,7 +1,7 @@
 "use client";
 
-import { uploadUrl } from "@/features/browser/api/client";
 import { useCallback, useRef, useState } from "react";
+import { uploadUrl } from "@/features/browser/api/client";
 
 export type UploadStatus = "uploading" | "done" | "error";
 

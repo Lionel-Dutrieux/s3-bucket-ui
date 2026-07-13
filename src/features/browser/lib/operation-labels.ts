@@ -1,10 +1,10 @@
 import {
   FolderInput,
   FolderPlus,
+  type LucideIcon,
   Pencil,
   Trash2,
   Upload,
-  type LucideIcon,
 } from "lucide-react";
 
 // Presentation for each audited action. `destructive` tints the icon so a

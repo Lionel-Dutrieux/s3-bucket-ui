@@ -1,9 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { apiError } from "@/lib/api-error";
+import { type NextRequest, NextResponse } from "next/server";
 import type { TextPreviewResult } from "@/features/browser/api/client";
 import { isTextFile } from "@/features/browser/lib/file-types";
 import { TEXT_PREVIEW_MAX_BYTES } from "@/features/browser/lib/limits";
 import { getFilesClient } from "@/features/sources/server/storage";
+import { apiError } from "@/lib/api-error";
 import { getSource } from "@/lib/dal/sources";
 
 /**

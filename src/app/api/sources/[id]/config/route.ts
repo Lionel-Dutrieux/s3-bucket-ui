@@ -1,6 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { apiError } from "@/lib/api-error";
+import { type NextRequest, NextResponse } from "next/server";
 import type { SourceConfigResult } from "@/features/sources/api/client";
+import { apiError } from "@/lib/api-error";
 import { getSource } from "@/lib/dal/sources";
 
 /**

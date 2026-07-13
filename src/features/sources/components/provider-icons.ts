@@ -5,8 +5,8 @@ import {
   Droplets,
   Globe,
   HardDrive,
-  Server,
   type LucideIcon,
+  Server,
 } from "lucide-react";
 
 // UI counterpart of lib/providers.ts — kept separate so the provider

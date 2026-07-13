@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
-import { providerIcon } from "@/features/sources/components/provider-icons";
-import type { SourceSummary } from "@/lib/dal/sources";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Command,
   CommandDialog,
@@ -16,6 +13,9 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
+import { providerIcon } from "@/features/sources/components/provider-icons";
+import type { SourceSummary } from "@/lib/dal/sources";
 
 /** Ctrl/Cmd+K palette: jump to a source or add a new one. */
 export function CommandPalette({ sources }: { sources: SourceSummary[] }) {

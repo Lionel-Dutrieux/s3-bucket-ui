@@ -1,17 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { Download, Folder, Info, Link2, Pencil, Trash2 } from "lucide-react";
-import { useEntryDnd } from "@/features/browser/components/dnd";
-import { cn } from "@/lib/utils";
-import { formatBytes } from "@/lib/format";
+import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { downloadUrl, thumbnailSrc } from "@/features/browser/api/client";
+import { useEntryDnd } from "@/features/browser/components/dnd";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
+import { formatBytes } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 const GRID_ACTION_CLASS =
   "inline-flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground";

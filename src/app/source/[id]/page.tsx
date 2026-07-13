@@ -1,22 +1,22 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
 import { ArrowLeft, ChevronRight, CircleAlert, ListFilter } from "lucide-react";
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { FileBrowser } from "@/features/browser/components/file-browser";
 import { SourceBreadcrumb } from "@/features/browser/components/source-breadcrumb";
 import { TypeFilter } from "@/features/browser/components/type-filter";
 import { ViewToggle } from "@/features/browser/components/view-toggle";
 import { categoryOf, FILE_CATEGORIES } from "@/features/browser/lib/file-types";
-import {
-  listFolder,
-  type ListErrorReason,
-} from "@/features/browser/server/service";
 import { VIEW_COOKIE, type ViewMode } from "@/features/browser/lib/view";
+import {
+  type ListErrorReason,
+  listFolder,
+} from "@/features/browser/server/service";
 import { getSource } from "@/lib/dal/sources";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
-import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface SourcePageProps {
   params: Promise<{ id: string }>;

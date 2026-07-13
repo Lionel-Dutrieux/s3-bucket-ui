@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,13 +8,7 @@ import {
   Link2,
   Loader2,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { downloadUrl, previewSrc } from "@/features/browser/api/client";
-import { browserQueries } from "@/features/browser/api/queries";
-import { categoryOf, isTextFile } from "@/features/browser/lib/file-types";
-import type { FileEntry } from "@/features/browser/lib/listing";
-import { formatBytes, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +18,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { downloadUrl, previewSrc } from "@/features/browser/api/client";
+import { browserQueries } from "@/features/browser/api/queries";
+import { categoryOf, isTextFile } from "@/features/browser/lib/file-types";
+import type { FileEntry } from "@/features/browser/lib/listing";
+import { formatBytes, formatDate } from "@/lib/format";
 
 type PreviewKind = "image" | "pdf" | "video" | "audio" | "text";
 

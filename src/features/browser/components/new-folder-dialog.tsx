@@ -3,9 +3,6 @@
 import { useStore } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { createFolder } from "@/features/browser/actions";
-import { folderNameSchema } from "@/features/browser/lib/schemas";
-import { useAppForm } from "@/forms/form";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createFolder } from "@/features/browser/actions";
+import { folderNameSchema } from "@/features/browser/lib/schemas";
+import { useAppForm } from "@/forms/form";
 
 const newFolderSchema = z.object({ name: folderNameSchema });
 

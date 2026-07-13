@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { LayoutGrid, List } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { VIEW_COOKIE, type ViewMode } from "@/features/browser/lib/view";
 import { cn } from "@/lib/utils";
 
