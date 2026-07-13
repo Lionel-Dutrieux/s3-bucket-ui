@@ -64,10 +64,7 @@ export function isIntoSelfOrDescendant(
  * itself or a descendant. I/O-free — the conflict check that needs the bucket
  * lives in the server action.
  */
-export function planMove(
-  targets: EntryTarget[],
-  destPrefix: string,
-): MovePlan {
+export function planMove(targets: EntryTarget[], destPrefix: string): MovePlan {
   const moves: MoveOp[] = [];
   for (const target of targets) {
     if (isNoop(target, destPrefix)) continue;
