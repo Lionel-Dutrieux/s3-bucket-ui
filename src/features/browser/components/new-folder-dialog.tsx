@@ -36,7 +36,7 @@ export function NewFolderDialog({
     setPending(true);
     const result = await createFolder(sourceId, prefix, name);
     setPending(false);
-    if (result.error) {
+    if (!result.ok) {
       toast.error(result.error);
       return;
     }

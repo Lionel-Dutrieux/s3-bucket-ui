@@ -7,6 +7,7 @@ import {
   type SourceFormValues,
 } from "@/features/sources/lib/schema";
 import { getFilesClient } from "@/features/sources/server/storage";
+import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import {
   createSource as dalCreateSource,
   deleteSource as dalDeleteSource,
@@ -14,11 +15,6 @@ import {
   updateSource as dalUpdateSource,
   type SourceInput,
 } from "@/lib/dal/sources";
-
-export interface ActionResult {
-  error?: string;
-  success?: boolean;
-}
 
 async function checkConnection(data: SourceInput): Promise<string | null> {
   try {
@@ -64,18 +60,20 @@ export async function testSourceConnection(
   let data: SourceInput;
   if (sourceId) {
     const resolved = await resolveUpdateInput(sourceId, input);
-    if (!resolved.data) return { error: resolved.error };
+    if (!resolved.data) {
+      return actionError(resolved.error ?? "Invalid input.");
+    }
     data = resolved.data;
   } else {
     const parsed = sourceInputSchema.safeParse(input);
     if (!parsed.success) {
-      return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+      return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
     }
     data = parsed.data;
   }
 
   const connectionError = await checkConnection(data);
-  return connectionError ? { error: connectionError } : { success: true };
+  return connectionError ? actionError(connectionError) : actionOk();
 }
 
 export async function createSource(
@@ -83,15 +81,15 @@ export async function createSource(
 ): Promise<ActionResult> {
   const parsed = sourceInputSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+    return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
   }
 
   const connectionError = await checkConnection(parsed.data);
-  if (connectionError) return { error: connectionError };
+  if (connectionError) return actionError(connectionError);
 
   await dalCreateSource(parsed.data);
   revalidatePath("/", "layout");
-  return { success: true };
+  return actionOk();
 }
 
 export async function updateSource(
@@ -99,17 +97,23 @@ export async function updateSource(
   input: SourceFormValues,
 ): Promise<ActionResult> {
   const resolved = await resolveUpdateInput(sourceId, input);
-  if (!resolved.data) return { error: resolved.error };
+  if (!resolved.data) return actionError(resolved.error ?? "Invalid input.");
 
   const connectionError = await checkConnection(resolved.data);
-  if (connectionError) return { error: connectionError };
+  if (connectionError) return actionError(connectionError);
 
   await dalUpdateSource(sourceId, resolved.data);
   revalidatePath("/", "layout");
-  return { success: true };
+  return actionOk();
 }
 
-export async function removeSource(id: string): Promise<void> {
-  await dalDeleteSource(id);
+export async function removeSource(id: string): Promise<ActionResult> {
+  try {
+    await dalDeleteSource(id);
+  } catch (error) {
+    console.error(`[sources] remove failed (source=${id}):`, error);
+    return actionError("Could not remove this source.");
+  }
   revalidatePath("/", "layout");
+  return actionOk();
 }

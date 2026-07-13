@@ -68,7 +68,11 @@ export function SourceMenu({
 
   const handleRemove = () => {
     startTransition(async () => {
-      await removeSource(source.id);
+      const result = await removeSource(source.id);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
       setConfirmOpen(false);
       toast.success("Source removed");
       if (isActive) {

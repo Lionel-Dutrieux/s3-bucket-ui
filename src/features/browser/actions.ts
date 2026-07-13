@@ -1,27 +1,26 @@
 "use server";
 
-import { withWriteAccess } from "@/features/browser/server/guards";
 import {
   DELETE_ENTRIES_MAX,
   MOVE_ENTRIES_MAX,
 } from "@/features/browser/lib/limits";
-import { deletePrefix, movePrefix } from "@/features/browser/server/mutations";
 import {
   basename,
   type EntryTarget,
   folderName,
   planMove,
 } from "@/features/browser/lib/move";
+import {
+  entryNameSchema,
+  folderNameSchema,
+} from "@/features/browser/lib/schemas";
+import { withWriteAccess } from "@/features/browser/server/guards";
+import { deletePrefix, movePrefix } from "@/features/browser/server/mutations";
+import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import { recordOperation } from "@/lib/dal/operations";
 
 const RENAME_DENIED =
   "Renaming needs both upload and delete enabled on this source.";
-
-function invalidEntryName(name: string): string | null {
-  if (!name) return "Name is required.";
-  if (name.includes("/")) return "Names can't contain “/”.";
-  return null;
-}
 
 /**
  * Creates a folder by writing the zero-byte `prefix/` marker object — the
@@ -32,12 +31,12 @@ export async function createFolder(
   sourceId: string,
   prefix: string,
   name: string,
-): Promise<{ error?: string }> {
-  const trimmed = name.trim();
-  if (!trimmed) return { error: "Folder name is required." };
-  if (trimmed.includes("/")) {
-    return { error: "Folder names can't contain “/”." };
+): Promise<ActionResult> {
+  const parsed = folderNameSchema.safeParse(name);
+  if (!parsed.success) {
+    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
   }
+  const trimmed = parsed.data;
 
   return withWriteAccess(
     sourceId,
@@ -54,7 +53,7 @@ export async function createFolder(
         sourceName: source.name,
         target: `${prefix}${trimmed}/`,
       });
-      return {};
+      return actionOk();
     },
   );
 }
@@ -68,10 +67,12 @@ export async function renameObject(
   sourceId: string,
   key: string,
   newName: string,
-): Promise<{ error?: string }> {
-  const trimmed = newName.trim();
-  const invalid = invalidEntryName(trimmed);
-  if (invalid) return { error: invalid };
+): Promise<ActionResult> {
+  const parsed = entryNameSchema.safeParse(newName);
+  if (!parsed.success) {
+    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
+  }
+  const trimmed = parsed.data;
 
   return withWriteAccess(
     sourceId,
@@ -82,9 +83,9 @@ export async function renameObject(
     },
     async ({ source, files }) => {
       const newKey = key.slice(0, key.lastIndexOf("/") + 1) + trimmed;
-      if (newKey === key) return {};
+      if (newKey === key) return actionOk();
       if (await files.exists(newKey)) {
-        return { error: "Something with that name already exists here." };
+        return actionError("Something with that name already exists here.");
       }
       await files.move(key, newKey);
       await recordOperation({
@@ -94,7 +95,7 @@ export async function renameObject(
         target: key,
         detail: `→ ${trimmed}`,
       });
-      return {};
+      return actionOk();
     },
   );
 }
@@ -105,11 +106,13 @@ export async function renameFolder(
   sourceId: string,
   prefix: string,
   newName: string,
-): Promise<{ error?: string }> {
-  if (!prefix.endsWith("/")) return { error: "Invalid folder." };
-  const trimmed = newName.trim();
-  const invalid = invalidEntryName(trimmed);
-  if (invalid) return { error: invalid };
+): Promise<ActionResult> {
+  if (!prefix.endsWith("/")) return actionError("Invalid folder.");
+  const parsed = folderNameSchema.safeParse(newName);
+  if (!parsed.success) {
+    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
+  }
+  const trimmed = parsed.data;
 
   return withWriteAccess(
     sourceId,
@@ -126,15 +129,15 @@ export async function renameFolder(
         prefix.lastIndexOf("/", prefix.length - 2) + 1,
       );
       const newPrefix = `${parent}${trimmed}/`;
-      if (newPrefix === prefix) return {};
+      if (newPrefix === prefix) return actionOk();
 
       const conflict = await files.list({ prefix: newPrefix, limit: 1 });
       if (conflict.items.length > 0) {
-        return { error: "A folder with that name already exists here." };
+        return actionError("A folder with that name already exists here.");
       }
 
       const result = await movePrefix(files, prefix, newPrefix);
-      if (result.error) return { error: result.error };
+      if (result.error) return actionError(result.error);
 
       await recordOperation({
         action: "rename-folder",
@@ -143,7 +146,7 @@ export async function renameFolder(
         target: prefix,
         detail: `→ ${trimmed}/ (${result.count} object${result.count === 1 ? "" : "s"})`,
       });
-      return {};
+      return actionOk();
     },
   );
 }
@@ -155,7 +158,7 @@ export async function renameFolder(
 export async function deleteObject(
   sourceId: string,
   key: string,
-): Promise<{ error?: string }> {
+): Promise<ActionResult> {
   return withWriteAccess(
     sourceId,
     {
@@ -171,7 +174,7 @@ export async function deleteObject(
         sourceName: source.name,
         target: key,
       });
-      return {};
+      return actionOk();
     },
   );
 }
@@ -180,10 +183,10 @@ export async function deleteObject(
 export async function deleteFolder(
   sourceId: string,
   prefix: string,
-): Promise<{ error?: string }> {
+): Promise<ActionResult> {
   // A folder prefix is never empty — refuse anything that could sweep the
   // whole bucket.
-  if (!prefix.endsWith("/")) return { error: "Invalid folder." };
+  if (!prefix.endsWith("/")) return actionError("Invalid folder.");
 
   return withWriteAccess(
     sourceId,
@@ -194,15 +197,14 @@ export async function deleteFolder(
     },
     async ({ source, files }) => {
       const error = await deletePrefix(files, prefix);
-      if (!error) {
-        await recordOperation({
-          action: "delete-folder",
-          sourceId: source.id,
-          sourceName: source.name,
-          target: prefix,
-        });
-      }
-      return error ? { error } : {};
+      if (error) return actionError(error);
+      await recordOperation({
+        action: "delete-folder",
+        sourceId: source.id,
+        sourceName: source.name,
+        target: prefix,
+      });
+      return actionOk();
     },
   );
 }
@@ -214,17 +216,17 @@ export async function deleteFolder(
 export async function deleteEntries(
   sourceId: string,
   targets: EntryTarget[],
-): Promise<{ error?: string }> {
-  if (targets.length === 0) return {};
+): Promise<ActionResult> {
+  if (targets.length === 0) return actionOk();
   if (targets.length > DELETE_ENTRIES_MAX) {
-    return { error: `Select at most ${DELETE_ENTRIES_MAX} items at a time.` };
+    return actionError(`Select at most ${DELETE_ENTRIES_MAX} items at a time.`);
   }
   if (
     targets.some(
       (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
     )
   ) {
-    return { error: "Invalid folder." };
+    return actionError("Invalid folder.");
   }
 
   return withWriteAccess(
@@ -261,10 +263,10 @@ export async function deleteEntries(
         });
       }
       return failures.length > 0
-        ? {
-            error: `${failures.length} item${failures.length === 1 ? "" : "s"} could not be deleted.`,
-          }
-        : {};
+        ? actionError(
+            `${failures.length} item${failures.length === 1 ? "" : "s"} could not be deleted.`,
+          )
+        : actionOk();
     },
   );
 }
@@ -278,25 +280,25 @@ export async function moveEntries(
   sourceId: string,
   targets: EntryTarget[],
   destPrefix: string,
-): Promise<{ error?: string }> {
+): Promise<ActionResult> {
   if (destPrefix !== "" && !destPrefix.endsWith("/")) {
-    return { error: "Invalid destination." };
+    return actionError("Invalid destination.");
   }
-  if (targets.length === 0) return {};
+  if (targets.length === 0) return actionOk();
   if (targets.length > MOVE_ENTRIES_MAX) {
-    return { error: `Move at most ${MOVE_ENTRIES_MAX} items at a time.` };
+    return actionError(`Move at most ${MOVE_ENTRIES_MAX} items at a time.`);
   }
   if (
     targets.some(
       (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
     )
   ) {
-    return { error: "Invalid folder." };
+    return actionError("Invalid folder.");
   }
 
   const plan = planMove(targets, destPrefix);
-  if (plan.error) return { error: plan.error };
-  if (plan.moves.length === 0) return {};
+  if (plan.error) return actionError(plan.error);
+  if (plan.moves.length === 0) return actionOk();
 
   return withWriteAccess(
     sourceId,
@@ -319,9 +321,9 @@ export async function moveEntries(
         }
       }
       if (conflicts.length > 0) {
-        return {
-          error: `Already exists in the destination: ${conflicts.join(", ")}.`,
-        };
+        return actionError(
+          `Already exists in the destination: ${conflicts.join(", ")}.`,
+        );
       }
 
       for (const move of plan.moves) {
@@ -329,7 +331,7 @@ export async function moveEntries(
           await files.move(move.from, move.to);
         } else {
           const result = await movePrefix(files, move.from, move.to);
-          if (result.error) return { error: result.error };
+          if (result.error) return actionError(result.error);
         }
       }
 
@@ -340,7 +342,7 @@ export async function moveEntries(
         target: `${plan.moves.length} item${plan.moves.length === 1 ? "" : "s"}`,
         detail: `→ ${destPrefix || "/"}`,
       });
-      return {};
+      return actionOk();
     },
   );
 }

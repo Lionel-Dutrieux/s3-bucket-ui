@@ -59,7 +59,7 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
       const result = edit
         ? await updateSource(edit.sourceId, value)
         : await createSource(value);
-      if (result.error) {
+      if (!result.ok) {
         setServerError(result.error);
         return;
       }
@@ -76,9 +76,7 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
       edit?.sourceId,
     );
     setTest(
-      result.error
-        ? { state: "failed", message: result.error }
-        : { state: "ok" },
+      result.ok ? { state: "ok" } : { state: "failed", message: result.error },
     );
   };
 

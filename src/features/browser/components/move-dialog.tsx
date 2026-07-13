@@ -46,7 +46,7 @@ export function MoveDialog({
       request.destPrefix,
     );
     setPending(false);
-    if (result.error) {
+    if (!result.ok) {
       toast.error(result.error);
       return;
     }

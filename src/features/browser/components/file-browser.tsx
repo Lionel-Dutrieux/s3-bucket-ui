@@ -198,7 +198,7 @@ export function FileBrowser({
         ? await deleteFolder(sourceId, deleteTarget.prefix)
         : await deleteObject(sourceId, deleteTarget.key);
     setDeleting(false);
-    if (result.error) {
+    if (!result.ok) {
       toast.error(result.error);
       return;
     }
@@ -323,7 +323,7 @@ export function FileBrowser({
     setRowSelection({});
     // Partial failures still deleted some objects — refresh either way.
     router.refresh();
-    if (result.error) {
+    if (!result.ok) {
       toast.error(result.error);
     } else {
       toast.success(

@@ -49,7 +49,7 @@ export function RenameDialog({
         ? await renameFolder(sourceId, entry.prefix, trimmed)
         : await renameObject(sourceId, entry.key, trimmed);
     setPending(false);
-    if (result.error) {
+    if (!result.ok) {
       toast.error(result.error);
       return;
     }
