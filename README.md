@@ -109,21 +109,21 @@ style); a provider with its own protocol also needs a case in
 
 ### Docker Compose (recommended)
 
-`docker-compose.yml` ships the app **and** its PostgreSQL database, ready for
-[Dokploy](https://dokploy.com) (external `dokploy-network`, domain and secrets
-configured in the UI):
+`docker-compose.yml` runs the app, ready for [Dokploy](https://dokploy.com)
+(external `dokploy-network`, domain and secrets configured in the UI). Bring
+your own PostgreSQL — a Dokploy-managed database or any reachable instance — and
+point `DATABASE_URL` at it:
 
 ```bash
-POSTGRES_PASSWORD=$(openssl rand -hex 16) \
 ENCRYPTION_KEY=$(openssl rand -hex 32) \
+DATABASE_URL=postgresql://user:password@host:5432/bucket_ui \
 docker compose up --build -d
 ```
 
 The image is a multi-stage standalone build (non-root, healthcheck on
 `/api/health`). On boot the container applies any pending migrations
-(`prisma migrate deploy`) before serving, so the schema is always up to date —
-persist the `bucket-ui-db` volume and that is all. **Remember to attach an auth
-middleware (basicAuth) to the domain.**
+(`prisma migrate deploy`) before serving, so the schema is always up to date.
+**Remember to attach an auth middleware (basicAuth) to the domain.**
 
 ### Bare Node.js
 

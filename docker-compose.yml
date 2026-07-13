@@ -5,11 +5,16 @@
 # (Advanced → Traefik), or front the app with Authelia/authentik.
 #
 # Domain: add it in the Dokploy UI (service → Domains tab, container port 3000).
-# Secrets: set ENCRYPTION_KEY and POSTGRES_PASSWORD in the Dokploy Environment
-# tab (ENCRYPTION_KEY = openssl rand -hex 32).
+# Secrets: set ENCRYPTION_KEY (openssl rand -hex 32) and DATABASE_URL in the
+# Dokploy Environment tab.
+#
+# Database: bring your own PostgreSQL — a Dokploy-managed database, or any
+# reachable instance. Point DATABASE_URL at it; the container applies pending
+# migrations on boot. (For local dev, see the README for a one-line
+# `docker run postgres`.)
 #
 # Local usage without Dokploy:
-#   POSTGRES_PASSWORD=... ENCRYPTION_KEY=... docker compose up --build
+#   ENCRYPTION_KEY=... DATABASE_URL=... docker compose up --build
 
 services:
   bucket-ui:
@@ -17,32 +22,9 @@ services:
     restart: unless-stopped
     environment:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      DATABASE_URL: postgresql://bucket_ui:${POSTGRES_PASSWORD}@postgres:5432/bucket_ui
-    depends_on:
-      postgres:
-        condition: service_healthy
+      DATABASE_URL: ${DATABASE_URL}
     networks:
       - dokploy-network
-
-  postgres:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: bucket_ui
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: bucket_ui
-    volumes:
-      - bucket-ui-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bucket_ui -d bucket_ui"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - dokploy-network
-
-volumes:
-  bucket-ui-db:
 
 networks:
   dokploy-network:

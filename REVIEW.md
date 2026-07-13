@@ -53,7 +53,7 @@ appliquées automatiquement.
 | `pnpm-workspace.yaml` | Retire `better-sqlite3` de `onlyBuiltDependencies`. |
 | `Dockerfile` | Runner embarque désormais la CLI Prisma + les engines (via `pnpm prune --prod`, `prisma` étant une dependency), le schéma et les migrations. `ENTRYPOINT` = `docker-entrypoint.sh`. |
 | `docker-entrypoint.sh` | `prisma migrate deploy` (idempotent) **puis** `node server.js`. |
-| `docker-compose.yml` | Ajoute un service `postgres:17-alpine` (healthcheck `pg_isready`, volume `bucket-ui-db`), `DATABASE_URL` câblé, `depends_on: service_healthy`. |
+| `docker-compose.yml` | Ne fait tourner que l'app ; `DATABASE_URL` fourni par l'environnement (Postgres externe / managé Dokploy, **pas** embarqué). |
 | `.env.example`, `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `.claude/skills/verify/SKILL.md` | Docs alignées (setup Postgres, `db:migrate`, plus de `data/app.db`). |
 | `.gitattributes` | **Nouveau.** Normalisation LF (cf. §4). |
 
@@ -232,8 +232,10 @@ la logique pure. Ajouter `service.test.ts` avec des erreurs AWS/Azure simulées.
   feature de l'autre agent).
 - **P3.2** — `pnpm-lock.yaml` : bien vérifier après merge que `better-sqlite3` a
   totalement disparu de l'arbre (je l'ai retiré de `package.json` + workspace).
-- **P3.3** — Envisager un `docker-compose.dev.yml` (juste Postgres) pour le dev
-  local, référencé par le README, plutôt qu'un `docker run` à copier-coller.
+- **P3.3** — Le Postgres n'est **pas** embarqué dans le compose (choix
+  volontaire : DB managée / externe fournie via `DATABASE_URL`). Envisager un
+  `docker-compose.dev.yml` (juste Postgres) pour le dev local, référencé par le
+  README, plutôt qu'un `docker run` à copier-coller.
 
 ---
 

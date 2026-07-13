@@ -84,7 +84,7 @@ region extraction, input schema, listing partition, formatting. Run
   Production applies it automatically on the next deploy (`prisma migrate
   deploy` in the entrypoint) — nothing to mirror by hand.
 - **Deploy?** `Dockerfile` (standalone + Prisma CLI, non-root, `/api/health`
-  healthcheck) + `docker-compose.yml` (Dokploy-ready, ships PostgreSQL). Boot
-  fails fast on a malformed `ENCRYPTION_KEY` or a missing `DATABASE_URL`
-  (`instrumentation.ts`); the entrypoint runs pending migrations before the
-  server starts.
+  healthcheck) + `docker-compose.yml` (Dokploy-ready; bring your own PostgreSQL
+  via `DATABASE_URL`). Boot fails fast on a malformed `ENCRYPTION_KEY` or a
+  missing `DATABASE_URL` (`instrumentation.ts`); the entrypoint runs pending
+  migrations before the server starts.
