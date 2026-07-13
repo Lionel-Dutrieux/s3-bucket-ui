@@ -35,7 +35,7 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 - Biome (linting + formatting)
 - Tailwind CSS v4 + shadcn/ui, TanStack Form + TanStack Table, nuqs (URL state)
 - [files-sdk](https://files-sdk.dev) (S3 + Azure adapters) for bucket access
-- Prisma 7 + SQLite via better-sqlite3 (embedded DB at `data/app.db`)
+- Prisma 7 + PostgreSQL (via the `@prisma/adapter-pg` driver adapter)
 - Bucket secrets encrypted at rest (AES-256-GCM)
 
 ## Architecture
@@ -56,13 +56,22 @@ plus an integration job that exercises the storage layer against a real MinIO
 container).
 
 After `pnpm install`, the Prisma client is generated automatically (postinstall).
-Schema changes: edit `prisma/schema.prisma` then `pnpm db:push`.
+Schema changes: edit `prisma/schema.prisma` then `pnpm db:migrate`.
 
 ## Setup
 
+You need a PostgreSQL database. For local dev, the quickest option:
+
+```bash
+docker run -d --name bucket-ui-db \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=bucket_ui \
+  -p 5432:5432 postgres:17-alpine
+```
+
 ```bash
 pnpm install
-cp .env.example .env   # then fill it in
+cp .env.example .env    # then fill it in (DATABASE_URL, ENCRYPTION_KEY)
+pnpm db:migrate         # apply migrations to the database
 pnpm dev
 ```
 
@@ -70,6 +79,7 @@ pnpm dev
 
 | Variable | Purpose |
 |---|---|
+| `DATABASE_URL` | PostgreSQL connection string, e.g. `postgresql://postgres:postgres@localhost:5432/bucket_ui`. |
 | `ENCRYPTION_KEY` | Encrypts stored bucket credentials — `openssl rand -hex 32`. Changing it makes saved sources unreadable (delete and re-add them). |
 
 ## Adding a source
@@ -97,33 +107,34 @@ style); a provider with its own protocol also needs a case in
 
 ## Production
 
-### Docker (recommended)
+### Docker Compose (recommended)
+
+`docker-compose.yml` ships the app **and** its PostgreSQL database, ready for
+[Dokploy](https://dokploy.com) (external `dokploy-network`, domain and secrets
+configured in the UI):
 
 ```bash
-docker build -t bucket-ui .
-docker run -d -p 3000:3000 \
-  -e ENCRYPTION_KEY=$(openssl rand -hex 32) \
-  -v bucket-ui-data:/app/data \
-  bucket-ui
+POSTGRES_PASSWORD=$(openssl rand -hex 16) \
+ENCRYPTION_KEY=$(openssl rand -hex 32) \
+docker compose up --build -d
 ```
 
 The image is a multi-stage standalone build (non-root, healthcheck on
-`/api/health`), and the schema is bootstrapped automatically on first start —
-just persist the `/app/data` volume. `docker-compose.yml` is ready for
-[Dokploy](https://dokploy.com) (external `dokploy-network`, domain and
-`ENCRYPTION_KEY` configured in the UI). **Remember to attach an auth
+`/api/health`). On boot the container applies any pending migrations
+(`prisma migrate deploy`) before serving, so the schema is always up to date —
+persist the `bucket-ui-db` volume and that is all. **Remember to attach an auth
 middleware (basicAuth) to the domain.**
 
 ### Bare Node.js
 
 ```bash
 pnpm build
+pnpm db:deploy   # apply migrations (prisma migrate deploy)
 pnpm start
 ```
 
-The SQLite database lives in `data/` (gitignored) — persist that directory across
-deploys, and put the app behind your reverse proxy's authentication. Schema
-changes in dev: `pnpm db:push`.
+Point `DATABASE_URL` at your PostgreSQL instance, persist that database across
+deploys, and put the app behind your reverse proxy's authentication.
 
 ### Monitoring
 

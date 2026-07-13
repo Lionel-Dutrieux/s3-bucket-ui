@@ -4,7 +4,8 @@
 
 ```bash
 pnpm install            # also generates the Prisma client (postinstall)
-cp .env.example .env    # fill ENCRYPTION_KEY (openssl rand -hex 32)
+cp .env.example .env    # fill DATABASE_URL + ENCRYPTION_KEY (openssl rand -hex 32)
+pnpm db:migrate         # apply migrations to a local PostgreSQL (see README)
 pnpm dev
 ```
 

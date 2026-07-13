@@ -1,38 +1,21 @@
 import "server-only";
-import Database from "better-sqlite3";
-import { mkdirSync } from "node:fs";
-import path from "node:path";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/lib/generated/prisma/client";
 
-// Bootstrap DDL so a fresh database (first boot, empty Docker volume) works
-// without a deploy step. MUST stay in sync with prisma/schema.prisma — for
-// schema evolutions, prefer `pnpm db:push` in dev and add idempotent
-// statements here for production.
-const BOOTSTRAP_DDL = `
-  CREATE TABLE IF NOT EXISTS sources (
-    id                TEXT PRIMARY KEY,
-    name              TEXT NOT NULL,
-    provider          TEXT NOT NULL DEFAULT 'r2',
-    endpoint          TEXT NOT NULL,
-    bucket            TEXT NOT NULL,
-    access_key_id     TEXT NOT NULL,
-    secret_access_key TEXT NOT NULL,
-    created_at        TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-`;
-
+// Schema evolution is handled by real Prisma migrations (`prisma/migrations/`,
+// applied with `prisma migrate deploy` on boot in production) — this module
+// only opens the connection. There is no hand-written bootstrap DDL to keep in
+// sync with the schema.
 function createClient(): PrismaClient {
-  const dataDir = path.join(process.cwd(), "data");
-  mkdirSync(dataDir, { recursive: true });
-  const dbPath = path.join(dataDir, "app.db");
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error(
+      "DATABASE_URL is not set. Point it at your PostgreSQL database, " +
+        "e.g. postgresql://user:password@localhost:5432/bucket_ui",
+    );
+  }
 
-  const bootstrap = new Database(dbPath);
-  bootstrap.pragma("journal_mode = WAL");
-  bootstrap.exec(BOOTSTRAP_DDL);
-  bootstrap.close();
-
-  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
 }
 

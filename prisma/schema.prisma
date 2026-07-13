@@ -4,23 +4,23 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Source {
-  id              String @id @default(uuid())
+  id              String   @id @default(uuid()) @db.Uuid
   name            String
-  provider        String @default("r2")
+  provider        String   @default("r2")
   endpoint        String
   bucket          String
   /// Encrypted with ENCRYPTION_KEY (AES-256-GCM)
-  accessKeyId     String @map("access_key_id")
+  accessKeyId     String   @map("access_key_id")
   /// Encrypted with ENCRYPTION_KEY (AES-256-GCM)
-  secretAccessKey String  @map("secret_access_key")
+  secretAccessKey String   @map("secret_access_key")
   /// Write permissions — sources are read-only unless explicitly enabled.
-  allowUpload     Boolean @default(false) @map("allow_upload")
-  allowDelete     Boolean @default(false) @map("allow_delete")
-  createdAt       String  @default(dbgenerated("(datetime('now'))")) @map("created_at")
+  allowUpload     Boolean  @default(false) @map("allow_upload")
+  allowDelete     Boolean  @default(false) @map("allow_delete")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@map("sources")
 }

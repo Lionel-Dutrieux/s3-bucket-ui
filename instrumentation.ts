@@ -8,4 +8,11 @@ export async function register() {
         "Generate one with: openssl rand -hex 32",
     );
   }
+
+  if (!process.env.DATABASE_URL) {
+    throw new Error(
+      "DATABASE_URL is missing: point it at your PostgreSQL database, " +
+        "e.g. postgresql://user:password@localhost:5432/bucket_ui",
+    );
+  }
 }

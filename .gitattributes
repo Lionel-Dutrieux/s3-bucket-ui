@@ -1,0 +1,9 @@
+# Normalize line endings to LF in the repository. Without this, Windows
+# contributors commit CRLF, which breaks Biome's formatter check (it expects
+# LF) and, more importantly, would put a CR into shell scripts run inside the
+# Linux container — a CRLF shebang makes `docker-entrypoint.sh` fail to exec.
+* text=auto eol=lf
+
+# Always LF, regardless of platform — these run in / are validated on Linux.
+*.sh text eol=lf
+*.sql text eol=lf

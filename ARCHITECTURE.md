@@ -22,7 +22,8 @@ forms/         TanStack Form infrastructure (createFormHook): reusable field
 lib/dal/       Data access layer — the only place that touches Prisma.
 lib/           Shared low-level modules: prisma client, crypto, formatting.
 components/    App shell (sidebar) and shadcn/ui primitives (components/ui/).
-prisma/        Schema. The client is generated into lib/generated/ (gitignored).
+prisma/        Schema + versioned SQL migrations (migrations/). The client is
+               generated into lib/generated/ (gitignored).
 ```
 
 Dependency direction: `app → features → (forms | lib) → lib/generated`.
@@ -40,6 +41,12 @@ Dependency direction: `app → features → (forms | lib) → lib/generated`.
   `features/sources/storage.ts`.
 - **Secrets are encrypted at rest** (AES-256-GCM, `lib/crypto.ts`) with
   `ENCRYPTION_KEY`; encryption/decryption only happens inside `lib/dal/sources.ts`.
+- **PostgreSQL via Prisma, schema owned by migrations**: the runtime client
+  connects through the `@prisma/adapter-pg` driver adapter (`lib/prisma.ts`,
+  reads `DATABASE_URL`). Schema changes are real, versioned SQL migrations in
+  `prisma/migrations/`, applied with `prisma migrate deploy` — on every
+  container boot via the Docker entrypoint. There is **no** hand-written
+  bootstrap DDL to keep in sync with the schema.
 - **No built-in auth**: the app is deployed behind an authenticating reverse
   proxy. Do not add auth logic without revisiting this decision.
 - **Navigation state lives in the URL** (`?prefix=`, `?cursor=`) and the view
@@ -71,10 +78,13 @@ region extraction, input schema, listing partition, formatting. Run
   `useFieldContext`, then register it in `forms/form.ts`.
 - **Add a table/grid column?** `features/browser/components/file-table.tsx` /
   `file-grid.tsx`; the data shape comes from `features/browser/listing.ts`.
-- **Change the DB schema?** `prisma/schema.prisma`, then `pnpm db:push`
-  (run `pnpm exec prisma generate` if types changed) — and mirror the change
-  as an idempotent statement in the bootstrap DDL of `lib/prisma.ts`, which is
-  what creates the schema on a fresh database (first Docker boot).
-- **Deploy?** `Dockerfile` (standalone, non-root, `/api/health` healthcheck)
-  + `docker-compose.yml` (Dokploy-ready). Boot fails fast on a malformed
-  `ENCRYPTION_KEY` (`instrumentation.ts`).
+- **Change the DB schema?** Edit `prisma/schema.prisma`, then
+  `pnpm db:migrate` (`prisma migrate dev`) to generate a migration and
+  regenerate the client. Commit the new folder under `prisma/migrations/`.
+  Production applies it automatically on the next deploy (`prisma migrate
+  deploy` in the entrypoint) — nothing to mirror by hand.
+- **Deploy?** `Dockerfile` (standalone + Prisma CLI, non-root, `/api/health`
+  healthcheck) + `docker-compose.yml` (Dokploy-ready, ships PostgreSQL). Boot
+  fails fast on a malformed `ENCRYPTION_KEY` or a missing `DATABASE_URL`
+  (`instrumentation.ts`); the entrypoint runs pending migrations before the
+  server starts.

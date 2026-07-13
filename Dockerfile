@@ -19,25 +19,35 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm exec prisma generate && pnpm build
+# Drop dev-only dependencies; `prisma` stays (it is a runtime dependency used
+# by `migrate deploy` in the entrypoint).
+RUN pnpm prune --prod
 
-# ---- Runtime: standalone server, non-root, ~200 MB
+# ---- Runtime: standalone server + Prisma CLI for migrations, non-root
 FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-RUN mkdir -p /app/data && chown -R node:node /app
+RUN chown -R node:node /app
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
+# Prod node_modules (with the Prisma CLI + engines), schema, migrations and the
+# Prisma config — everything `prisma migrate deploy` needs at boot.
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/lib/generated ./lib/generated
+COPY --from=build --chown=node:node /app/prisma ./prisma
+COPY --from=build --chown=node:node /app/prisma.config.ts ./prisma.config.ts
+COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
 
 USER node
 EXPOSE 3000
-# SQLite database lives here — mount a volume to persist it.
-VOLUME /app/data
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-CMD ["node", "server.js"]
+# Runs `prisma migrate deploy`, then `node server.js`.
+ENTRYPOINT ["./docker-entrypoint.sh"]
