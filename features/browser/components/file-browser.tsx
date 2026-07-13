@@ -422,14 +422,13 @@ export function FileBrowser({
           <span className="text-sm font-medium tabular-nums">
             {selectedCount} selected
           </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8"
+          <button
+            type="button"
             onClick={toggleSelectAll}
+            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
             {allVisibleSelected ? "Deselect all" : "Select all"}
-          </Button>
+          </button>
           <div className="ml-auto flex items-center gap-2">
             <Button
               variant="outline"
