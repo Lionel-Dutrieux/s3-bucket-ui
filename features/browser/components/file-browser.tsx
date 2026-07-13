@@ -1,6 +1,16 @@
 "use client";
 
 import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import {
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
@@ -36,9 +46,19 @@ import {
   selectColumn,
 } from "@/features/browser/components/browser-columns";
 import { DetailsDialog } from "@/features/browser/components/details-dialog";
+import {
+  DragChip,
+  ParentDropZone,
+  type DragData,
+  type DropData,
+} from "@/features/browser/components/dnd";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
 import { GridSortMenu } from "@/features/browser/components/grid-sort-menu";
+import {
+  MoveDialog,
+  type MoveRequest,
+} from "@/features/browser/components/move-dialog";
 import { NewFolderDialog } from "@/features/browser/components/new-folder-dialog";
 import {
   isPreviewable,
@@ -53,6 +73,11 @@ import {
   type BrowserEntry,
 } from "@/features/browser/entries";
 import type { FileEntry, FolderEntry } from "@/features/browser/listing";
+import {
+  folderName,
+  planMove,
+  type EntryTarget as MoveTarget,
+} from "@/features/browser/move";
 import { sortParser } from "@/features/browser/sort-param";
 import { useUploads } from "@/features/browser/use-uploads";
 import type { ViewMode } from "@/features/browser/view";
@@ -126,6 +151,17 @@ export function FileBrowser({
   const uploads = useUploads(sourceId, prefix, refresh);
   // Rename writes the new object and deletes the old one, so it needs both.
   const canRename = permissions.upload && permissions.delete;
+  // Moving needs both too — a move is a copy + delete under the hood.
+  const canMove = permissions.upload && permissions.delete;
+  const [activeDrag, setActiveDrag] = useState<{
+    label: string;
+    count: number;
+  } | null>(null);
+  const [moveRequest, setMoveRequest] = useState<MoveRequest | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor),
+  );
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((prev) =>
@@ -201,6 +237,17 @@ export function FileBrowser({
   const noMatches = query !== "" && rows.length === 0;
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedCount = selectedRows.length;
+
+  // The "move to parent folder" drop zone's destination — null at the root.
+  const parentPrefix =
+    prefix === ""
+      ? null
+      : (() => {
+          const segments = prefix.split("/").filter(Boolean);
+          return segments.length > 1
+            ? `${segments.slice(0, -1).join("/")}/`
+            : "";
+        })();
 
   const gridSelection = {
     isSelected: (id: string) => rowSelection[id] === true,
@@ -301,6 +348,51 @@ export function FileBrowser({
         },
       }
     : {};
+
+  // The moving set: the whole selection if the dragged row is part of it,
+  // otherwise just the dragged row.
+  const movingTargets = (dragged: DragData): MoveTarget[] => {
+    const selectedIds = new Set(Object.keys(rowSelection));
+    const source =
+      selectedIds.size > 1 && selectedIds.has(dragged.rowId)
+        ? selectedRows.map((row) => row.original)
+        : null;
+    if (!source) return [dragged.target];
+    return source.map((entry) =>
+      entry.kind === "folder"
+        ? { kind: "folder", prefix: entry.prefix }
+        : { kind: "file", key: entry.key },
+    );
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const data = event.active.data.current as DragData | undefined;
+    if (!data) return;
+    const count = movingTargets(data).length;
+    setActiveDrag({ label: data.label, count });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveDrag(null);
+    const data = event.active.data.current as DragData | undefined;
+    const over = event.over?.data.current as DropData | undefined;
+    if (!data || !over) return;
+    const targets = movingTargets(data);
+    const plan = planMove(targets, over.prefix);
+    if (plan.error) {
+      toast.error(plan.error);
+      return;
+    }
+    if (plan.moves.length === 0) return; // no-op drop (already there / self)
+    const destLabel =
+      over.prefix === "" ? "the parent folder" : folderName(over.prefix);
+    setMoveRequest({
+      targets,
+      destPrefix: over.prefix,
+      destLabel,
+      count: plan.moves.length,
+    });
+  };
 
   return (
     <div className="relative space-y-3" {...dropZoneProps}>
@@ -428,24 +520,42 @@ export function FileBrowser({
         </div>
       ) : entries.length === 0 ? (
         <EmptyFolder canUpload={permissions.upload} />
-      ) : view === "grid" ? (
-        <FileGrid
-          sourceId={sourceId}
-          folders={rows
-            .map((row) => row.original)
-            .filter((entry) => entry.kind === "folder")}
-          files={rows
-            .map((row) => row.original)
-            .filter((entry) => entry.kind === "file")}
-          onPreview={setPreview}
-          onCopyLink={handleCopyLink}
-          onDetails={setDetails}
-          onDelete={permissions.delete ? setDeleteTarget : undefined}
-          onRename={canRename ? setRenameTarget : undefined}
-          selection={gridSelection}
-        />
       ) : (
-        <FileTable table={table} />
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => setActiveDrag(null)}
+        >
+          {canMove && parentPrefix !== null ? (
+            <ParentDropZone parentPrefix={parentPrefix} />
+          ) : null}
+          {view === "grid" ? (
+            <FileGrid
+              sourceId={sourceId}
+              folders={rows
+                .map((row) => row.original)
+                .filter((entry) => entry.kind === "folder")}
+              files={rows
+                .map((row) => row.original)
+                .filter((entry) => entry.kind === "file")}
+              onPreview={setPreview}
+              onCopyLink={handleCopyLink}
+              onDetails={setDetails}
+              onDelete={permissions.delete ? setDeleteTarget : undefined}
+              onRename={canRename ? setRenameTarget : undefined}
+              selection={gridSelection}
+              canMove={canMove}
+            />
+          ) : (
+            <FileTable table={table} canMove={canMove} />
+          )}
+          <DragOverlay>
+            {activeDrag ? (
+              <DragChip label={activeDrag.label} count={activeDrag.count} />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {dragging ? (
@@ -546,6 +656,19 @@ export function FileBrowser({
           if (!open) setRenameTarget(null);
         }}
         onRenamed={refresh}
+      />
+
+      <MoveDialog
+        sourceId={sourceId}
+        request={moveRequest}
+        onOpenChange={(open) => {
+          if (!open) setMoveRequest(null);
+        }}
+        onMoved={() => {
+          setMoveRequest(null);
+          setRowSelection({});
+          router.refresh();
+        }}
       />
 
       <NewFolderDialog

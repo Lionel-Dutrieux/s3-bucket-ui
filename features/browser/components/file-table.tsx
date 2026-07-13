@@ -3,9 +3,11 @@
 import {
   flexRender,
   type Header,
+  type Row,
   type Table as TableInstance,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
+import { useEntryDnd } from "@/features/browser/components/dnd";
 import type { BrowserEntry } from "@/features/browser/entries";
 import { cn } from "@/lib/utils";
 import {
@@ -17,11 +19,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-/**
- * List view over the shared TanStack Table instance. Rows are re-partitioned
- * folders-first after sorting so the grouping survives both directions.
- */
-export function FileTable({ table }: { table: TableInstance<BrowserEntry> }) {
+export function FileTable({
+  table,
+  canMove,
+}: {
+  table: TableInstance<BrowserEntry>;
+  canMove: boolean;
+}) {
   const rows = table.getRowModel().rows;
   const ordered = [
     ...rows.filter((row) => row.original.kind === "folder"),
@@ -53,19 +57,56 @@ export function FileTable({ table }: { table: TableInstance<BrowserEntry> }) {
       </TableHeader>
       <TableBody>
         {ordered.map((row) => (
-          <TableRow key={row.id} className="group">
-            {row.getVisibleCells().map((cell) => (
-              <TableCell
-                key={cell.id}
-                className={cell.column.columnDef.meta?.cellClassName}
-              >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </TableCell>
-            ))}
-          </TableRow>
+          <BrowserRow key={row.id} row={row} canMove={canMove} />
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+function BrowserRow({
+  row,
+  canMove,
+}: {
+  row: Row<BrowserEntry>;
+  canMove: boolean;
+}) {
+  const entry = row.original;
+  const dnd = useEntryDnd({
+    rowId: row.id,
+    data: {
+      target:
+        entry.kind === "folder"
+          ? { kind: "folder", prefix: entry.prefix }
+          : { kind: "file", key: entry.key },
+      label: entry.name,
+      rowId: row.id,
+    },
+    droppablePrefix: entry.kind === "folder" ? entry.prefix : undefined,
+    disabled: !canMove,
+  });
+
+  return (
+    <TableRow
+      ref={canMove ? dnd.setNodeRef : undefined}
+      className={cn(
+        "group",
+        canMove && "cursor-grab",
+        dnd.isDragging && "opacity-40",
+        dnd.isOver && "bg-primary/10 outline outline-2 outline-primary",
+      )}
+      {...(canMove ? dnd.attributes : {})}
+      {...(canMove ? dnd.listeners : {})}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <TableCell
+          key={cell.id}
+          className={cell.column.columnDef.meta?.cellClassName}
+        >
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableRow>
   );
 }
 
