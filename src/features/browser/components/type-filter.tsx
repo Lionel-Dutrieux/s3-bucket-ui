@@ -5,7 +5,7 @@ import { ListFilter } from "lucide-react";
 import {
   FILE_CATEGORIES,
   type FileCategory,
-} from "@/features/browser/file-types";
+} from "@/features/browser/lib/file-types";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

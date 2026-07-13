@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { renameFolder, renameObject } from "@/features/browser/write-actions";
-import type { BrowserEntry } from "@/features/browser/entries";
+import { renameFolder, renameObject } from "@/features/browser/actions";
+import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

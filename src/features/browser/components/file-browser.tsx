@@ -36,12 +36,12 @@ import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { fetchShareUrl } from "@/features/browser/api";
+import { fetchShareUrl } from "@/features/browser/api/client";
 import {
   deleteEntries,
   deleteFolder,
   deleteObject,
-} from "@/features/browser/write-actions";
+} from "@/features/browser/actions";
 import {
   browserColumns,
   downloadHref,
@@ -68,21 +68,21 @@ import {
 } from "@/features/browser/components/preview-dialog";
 import { RenameDialog } from "@/features/browser/components/rename-dialog";
 import { UploadTray } from "@/features/browser/components/upload-tray";
-import { filesFromDataTransfer } from "@/features/browser/drop";
+import { filesFromDataTransfer } from "@/features/browser/lib/drop";
 import {
   buildEntries,
   entryMatches,
   type BrowserEntry,
-} from "@/features/browser/entries";
-import type { FileEntry, FolderEntry } from "@/features/browser/listing";
+} from "@/features/browser/lib/entries";
+import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 import {
   folderName,
   planMove,
   type EntryTarget as MoveTarget,
-} from "@/features/browser/move";
-import { sortParser } from "@/features/browser/sort-param";
-import { useUploads } from "@/features/browser/use-uploads";
-import type { ViewMode } from "@/features/browser/view";
+} from "@/features/browser/lib/move";
+import { sortParser } from "@/features/browser/lib/sort-param";
+import { useUploads } from "@/features/browser/hooks/use-uploads";
+import type { ViewMode } from "@/features/browser/lib/view";
 import {
   AlertDialog,
   AlertDialogAction,

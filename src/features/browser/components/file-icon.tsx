@@ -9,7 +9,10 @@ import {
   File as FileIconBase,
   type LucideIcon,
 } from "lucide-react";
-import { categoryOf, type FileCategory } from "@/features/browser/file-types";
+import {
+  categoryOf,
+  type FileCategory,
+} from "@/features/browser/lib/file-types";
 import { cn } from "@/lib/utils";
 
 // Google-Drive-style: each file category gets an icon AND a color.

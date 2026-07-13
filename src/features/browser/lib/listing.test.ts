@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCrumbs, partitionListing } from "@/features/browser/listing";
+import { buildCrumbs, partitionListing } from "@/features/browser/lib/listing";
 
 describe("partitionListing", () => {
   it("splits folders and files relative to the prefix", () => {

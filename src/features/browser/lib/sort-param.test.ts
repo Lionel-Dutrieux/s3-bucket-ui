@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseSortParam,
   serializeSortParam,
-} from "@/features/browser/sort-param";
+} from "@/features/browser/lib/sort-param";
 
 describe("parseSortParam", () => {
   it("parses a column name as ascending", () => {

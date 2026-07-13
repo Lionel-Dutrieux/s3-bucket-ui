@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { LayoutGrid, List } from "lucide-react";
-import { VIEW_COOKIE, type ViewMode } from "@/features/browser/view";
+import { VIEW_COOKIE, type ViewMode } from "@/features/browser/lib/view";
 import { cn } from "@/lib/utils";
 
 const MODES = [

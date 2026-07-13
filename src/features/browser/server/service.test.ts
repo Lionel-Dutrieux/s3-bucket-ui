@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyStorageError } from "@/features/browser/service";
+import { classifyStorageError } from "@/features/browser/server/service";
 
 // Shapes mirror what reaches listFolder in practice: files-sdk FilesError
 // (normalized code + original error in cause) or raw SDK/network errors.

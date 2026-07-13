@@ -8,7 +8,7 @@ import {
   parentOf,
   planMove,
   type EntryTarget,
-} from "@/features/browser/move";
+} from "@/features/browser/lib/move";
 
 const file = (key: string): EntryTarget => ({ kind: "file", key });
 const folder = (prefix: string): EntryTarget => ({ kind: "folder", prefix });

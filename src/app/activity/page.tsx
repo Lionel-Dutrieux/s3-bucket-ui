@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { History } from "lucide-react";
-import { operationLabel } from "@/features/browser/operation-labels";
+import { operationLabel } from "@/features/browser/lib/operation-labels";
 import { listOperations } from "@/lib/dal/operations";
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";

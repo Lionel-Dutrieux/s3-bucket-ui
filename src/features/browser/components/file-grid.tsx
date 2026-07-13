@@ -9,9 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { downloadHref } from "@/features/browser/components/browser-columns";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
-import type { BrowserEntry } from "@/features/browser/entries";
-import { categoryOf } from "@/features/browser/file-types";
-import type { FileEntry, FolderEntry } from "@/features/browser/listing";
+import type { BrowserEntry } from "@/features/browser/lib/entries";
+import { categoryOf } from "@/features/browser/lib/file-types";
+import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 
 const GRID_ACTION_CLASS =
   "inline-flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground";

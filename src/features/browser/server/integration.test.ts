@@ -8,7 +8,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { beforeAll, describe, expect, it } from "vitest";
-import { listFolder } from "@/features/browser/service";
+import { listFolder } from "@/features/browser/server/service";
 import type { Source } from "@/lib/dal/sources";
 
 const endpoint = process.env.S3_TEST_ENDPOINT;

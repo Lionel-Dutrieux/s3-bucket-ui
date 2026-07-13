@@ -6,7 +6,7 @@
 // the sort is stable, and the view re-partitions rows folders-first after
 // sorting, so grouping survives both sort directions.
 
-import type { FileEntry, FolderEntry } from "@/features/browser/listing";
+import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 
 export type BrowserEntry =
   | ({ kind: "folder" } & FolderEntry)

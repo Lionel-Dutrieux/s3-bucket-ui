@@ -11,8 +11,8 @@ import {
   compareByName,
   compareBySize,
   type BrowserEntry,
-} from "@/features/browser/entries";
-import type { FileEntry } from "@/features/browser/listing";
+} from "@/features/browser/lib/entries";
+import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 

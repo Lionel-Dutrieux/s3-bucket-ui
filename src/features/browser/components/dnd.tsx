@@ -8,7 +8,7 @@ import {
 import { CornerLeftUp, Folder } from "lucide-react";
 import { useCallback } from "react";
 import { FileIcon } from "@/features/browser/components/file-icon";
-import type { EntryTarget } from "@/features/browser/move";
+import type { EntryTarget } from "@/features/browser/lib/move";
 import { cn } from "@/lib/utils";
 
 type SyntheticListenerMap = ReturnType<typeof useDraggable>["listeners"];

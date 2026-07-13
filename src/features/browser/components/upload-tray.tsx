@@ -3,7 +3,7 @@
 import { Check, ChevronDown, CircleAlert, X } from "lucide-react";
 import { useState } from "react";
 import { FileIcon } from "@/features/browser/components/file-icon";
-import type { UploadItem } from "@/features/browser/use-uploads";
+import type { UploadItem } from "@/features/browser/hooks/use-uploads";
 import { formatBytes } from "@/lib/format";
 import { cn } from "@/lib/utils";
 

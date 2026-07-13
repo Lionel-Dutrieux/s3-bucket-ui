@@ -7,9 +7,12 @@ import { FileBrowser } from "@/features/browser/components/file-browser";
 import { SourceBreadcrumb } from "@/features/browser/components/source-breadcrumb";
 import { TypeFilter } from "@/features/browser/components/type-filter";
 import { ViewToggle } from "@/features/browser/components/view-toggle";
-import { categoryOf, FILE_CATEGORIES } from "@/features/browser/file-types";
-import { listFolder, type ListErrorReason } from "@/features/browser/service";
-import { VIEW_COOKIE, type ViewMode } from "@/features/browser/view";
+import { categoryOf, FILE_CATEGORIES } from "@/features/browser/lib/file-types";
+import {
+  listFolder,
+  type ListErrorReason,
+} from "@/features/browser/server/service";
+import { VIEW_COOKIE, type ViewMode } from "@/features/browser/lib/view";
 import { getSource } from "@/lib/dal/sources";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";

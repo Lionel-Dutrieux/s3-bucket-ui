@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import type { FileDetailsResult } from "@/features/browser/api";
+import type { FileDetailsResult } from "@/features/browser/api/client";
 import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 

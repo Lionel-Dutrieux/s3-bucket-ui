@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchFileDetails } from "@/features/browser/api";
-import type { FileEntry } from "@/features/browser/listing";
+import { fetchFileDetails } from "@/features/browser/api/client";
+import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import {

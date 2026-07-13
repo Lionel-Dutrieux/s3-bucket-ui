@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { useEntryDnd } from "@/features/browser/components/dnd";
-import type { BrowserEntry } from "@/features/browser/entries";
+import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { cn } from "@/lib/utils";
 import {
   Table,

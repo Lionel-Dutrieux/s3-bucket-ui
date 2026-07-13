@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { categoryOf } from "@/features/browser/file-types";
+import { categoryOf } from "@/features/browser/lib/file-types";
 import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 

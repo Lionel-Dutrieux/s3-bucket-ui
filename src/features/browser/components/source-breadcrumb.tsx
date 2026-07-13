@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { buildCrumbs } from "@/features/browser/listing";
+import { buildCrumbs } from "@/features/browser/lib/listing";
 import {
   Breadcrumb,
   BreadcrumbEllipsis,

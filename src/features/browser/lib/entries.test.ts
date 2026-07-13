@@ -6,7 +6,7 @@ import {
   compareBySize,
   entryMatches,
   type BrowserEntry,
-} from "@/features/browser/entries";
+} from "@/features/browser/lib/entries";
 
 const folder = (name: string): BrowserEntry => ({
   kind: "folder",

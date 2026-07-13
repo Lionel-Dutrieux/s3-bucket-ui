@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { fetchTextPreview, previewSrc } from "@/features/browser/api";
-import { categoryOf, isTextFile } from "@/features/browser/file-types";
-import type { FileEntry } from "@/features/browser/listing";
+import { fetchTextPreview, previewSrc } from "@/features/browser/api/client";
+import { categoryOf, isTextFile } from "@/features/browser/lib/file-types";
+import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import {

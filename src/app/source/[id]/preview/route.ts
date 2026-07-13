@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { categoryOf } from "@/features/browser/file-types";
-import { PREVIEW_TTL_SECONDS } from "@/features/browser/limits";
+import { categoryOf } from "@/features/browser/lib/file-types";
+import { PREVIEW_TTL_SECONDS } from "@/features/browser/lib/limits";
 import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 
