@@ -5,11 +5,13 @@ import {
   useDroppable,
   type DraggableAttributes,
 } from "@dnd-kit/core";
-import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { CornerLeftUp } from "lucide-react";
 import { useCallback } from "react";
 import type { EntryTarget } from "@/features/browser/move";
 import { cn } from "@/lib/utils";
+
+// biome-ignore lint/complexity/noBannedTypes: intentional, avoids internal dnd-kit dependency
+type SyntheticListenerMap = Record<string, Function>;
 
 export interface DragData {
   target: EntryTarget;
