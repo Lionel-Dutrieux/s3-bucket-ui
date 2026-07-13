@@ -19,8 +19,6 @@ import {
 } from "@/features/browser/move";
 import { recordOperation } from "@/lib/dal/operations";
 
-export type { EntryTarget };
-
 const RENAME_DENIED =
   "Renaming needs both upload and delete enabled on this source.";
 

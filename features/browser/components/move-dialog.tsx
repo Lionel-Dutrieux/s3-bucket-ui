@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  type EntryTarget,
-  moveEntries,
-} from "@/features/browser/write-actions";
+import type { EntryTarget } from "@/features/browser/move";
+import { moveEntries } from "@/features/browser/write-actions";
 import {
   AlertDialog,
   AlertDialogAction,
