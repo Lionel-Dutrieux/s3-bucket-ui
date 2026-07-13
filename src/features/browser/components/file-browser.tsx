@@ -36,7 +36,7 @@ import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { fetchShareUrl } from "@/features/browser/api/client";
+import { downloadUrl, fetchShareUrl } from "@/features/browser/api/client";
 import {
   deleteEntries,
   deleteFolder,
@@ -44,7 +44,6 @@ import {
 } from "@/features/browser/actions";
 import {
   browserColumns,
-  downloadHref,
   selectColumn,
 } from "@/features/browser/components/browser-columns";
 import { DetailsDialog } from "@/features/browser/components/details-dialog";
@@ -297,7 +296,7 @@ export function FileBrowser({
     selectedFiles.forEach((file, index) => {
       setTimeout(() => {
         const anchor = document.createElement("a");
-        anchor.href = downloadHref(sourceId, file.key);
+        anchor.href = downloadUrl(sourceId, file.key);
         document.body.appendChild(anchor);
         anchor.click();
         anchor.remove();

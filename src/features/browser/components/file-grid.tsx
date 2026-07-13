@@ -6,7 +6,7 @@ import { useEntryDnd } from "@/features/browser/components/dnd";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/lib/format";
 import { Checkbox } from "@/components/ui/checkbox";
-import { downloadHref } from "@/features/browser/components/browser-columns";
+import { downloadUrl, thumbnailSrc } from "@/features/browser/api/client";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
@@ -260,7 +260,7 @@ function FileCard({
         {categoryOf(file.name) === "image" ? (
           // biome-ignore lint/performance/noImgElement: redirects to a presigned bucket URL, not optimizable
           <img
-            src={`/source/${sourceId}/thumbnail?key=${encodeURIComponent(file.key)}`}
+            src={thumbnailSrc(sourceId, file.key)}
             alt=""
             loading="lazy"
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
@@ -292,7 +292,7 @@ function FileCard({
         </button>
       ) : (
         <a
-          href={downloadHref(sourceId, file.key)}
+          href={downloadUrl(sourceId, file.key)}
           title={`Download ${file.name}`}
           className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -333,7 +333,7 @@ function FileCard({
           <Link2 className="size-3.5" aria-hidden />
         </button>
         <a
-          href={downloadHref(sourceId, file.key)}
+          href={downloadUrl(sourceId, file.key)}
           className={GRID_ACTION_CLASS}
           aria-label={`Download ${file.name}`}
           title="Download"

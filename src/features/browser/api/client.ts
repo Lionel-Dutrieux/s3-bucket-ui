@@ -1,8 +1,10 @@
-// Client-side access to the browser feature's read endpoints
-// (app/source/[id]/{share,text,details,preview}). Reads never go through
-// server actions: on-demand dialog data comes from these GET routes, consumed
-// through TanStack Query. Fetchers throw on failure (with the route's error
-// message) so query error states carry the message to render.
+// Client-side access to the browser feature's endpoints
+// (app/api/sources/[id]/…). Reads never go through server actions: on-demand
+// dialog data comes from these GET routes, consumed through TanStack Query.
+// Fetchers throw on failure (with the route's error message) so query error
+// states carry the message to render. URL builders for routes consumed
+// directly by the browser (src/href attributes, XHR upload) live here too so
+// endpoint paths have a single home.
 
 export interface UrlResult {
   url?: string;
@@ -35,7 +37,23 @@ export interface FileDetailsResult {
 /** URL used directly as the `src` of preview media elements — the route
  *  redirects to a short-lived inline presigned URL, no fetch needed. */
 export function previewSrc(sourceId: string, key: string): string {
-  return `/source/${sourceId}/preview?key=${encodeURIComponent(key)}`;
+  return `/api/sources/${sourceId}/preview?key=${encodeURIComponent(key)}`;
+}
+
+/** URL used as the `src` of grid thumbnails (redirects to an inline
+ *  presigned URL, lazy-loaded by the browser). */
+export function thumbnailSrc(sourceId: string, key: string): string {
+  return `/api/sources/${sourceId}/thumbnail?key=${encodeURIComponent(key)}`;
+}
+
+/** URL used as a download `href` (redirects to an attachment presigned URL). */
+export function downloadUrl(sourceId: string, key: string): string {
+  return `/api/sources/${sourceId}/download?key=${encodeURIComponent(key)}`;
+}
+
+/** Endpoint the XHR uploader POSTs one file body to. */
+export function uploadUrl(sourceId: string, key: string): string {
+  return `/api/sources/${sourceId}/upload?key=${encodeURIComponent(key)}`;
 }
 
 // Error routes still respond with JSON ({ error }); anything else (network
@@ -60,7 +78,7 @@ export async function fetchShareUrl(
   key: string,
 ): Promise<string> {
   const result = await getJson<UrlResult>(
-    `/source/${sourceId}/share?key=${encodeURIComponent(key)}`,
+    `/api/sources/${sourceId}/share?key=${encodeURIComponent(key)}`,
     "Could not create a link for this file.",
   );
   if (!result.url) throw new Error("Could not create a link for this file.");
@@ -72,7 +90,7 @@ export async function fetchTextPreview(
   key: string,
 ): Promise<TextPreview> {
   const result = await getJson<TextPreviewResult>(
-    `/source/${sourceId}/text?key=${encodeURIComponent(key)}`,
+    `/api/sources/${sourceId}/text?key=${encodeURIComponent(key)}`,
     "Could not load a preview for this file.",
   );
   return { text: result.text ?? "", truncated: result.truncated };
@@ -83,7 +101,7 @@ export async function fetchFileDetails(
   key: string,
 ): Promise<FileDetails> {
   const result = await getJson<FileDetailsResult>(
-    `/source/${sourceId}/details?key=${encodeURIComponent(key)}`,
+    `/api/sources/${sourceId}/details?key=${encodeURIComponent(key)}`,
     "Could not load the details for this file.",
   );
   if (!result.details) {

@@ -10,6 +10,8 @@ export const PAGE_SIZE = 200;
 export const SHARE_TTL_SECONDS = 3600;
 /** Presigned preview-link lifetime (inline) — 10 minutes. */
 export const PREVIEW_TTL_SECONDS = 600;
+/** Presigned grid-thumbnail lifetime (inline) — 10 minutes. */
+export const THUMBNAIL_TTL_SECONDS = 600;
 
 /** Bytes fetched for the inline text preview (first 1 MiB of the file). */
 export const TEXT_PREVIEW_MAX_BYTES = 1024 * 1024;

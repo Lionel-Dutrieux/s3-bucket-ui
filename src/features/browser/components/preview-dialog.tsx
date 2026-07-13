@@ -9,7 +9,11 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { fetchTextPreview, previewSrc } from "@/features/browser/api/client";
+import {
+  downloadUrl,
+  fetchTextPreview,
+  previewSrc,
+} from "@/features/browser/api/client";
 import { categoryOf, isTextFile } from "@/features/browser/lib/file-types";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";
@@ -217,9 +221,7 @@ export function PreviewDialog({
                 Copy link
               </Button>
               <Button asChild>
-                <a
-                  href={`/source/${sourceId}/download?key=${encodeURIComponent(file.key)}`}
-                >
+                <a href={downloadUrl(sourceId, file.key)}>
                   <Download aria-hidden />
                   Download
                 </a>

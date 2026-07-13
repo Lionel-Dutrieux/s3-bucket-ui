@@ -18,7 +18,7 @@ export async function fetchSourceConfig(
   const fallback = "Couldn't load this source.";
   let result: SourceConfigResult;
   try {
-    const response = await fetch(`/source/${sourceId}/config`);
+    const response = await fetch(`/api/sources/${sourceId}/config`);
     result = (await response.json()) as SourceConfigResult;
   } catch {
     throw new Error(fallback);

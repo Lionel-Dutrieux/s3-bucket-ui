@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { apiError } from "@/lib/api-error";
 import type { SourceConfigResult } from "@/features/sources/api/client";
 import { getSource } from "@/lib/dal/sources";
 
@@ -9,12 +10,12 @@ import { getSource } from "@/lib/dal/sources";
  */
 export async function GET(
   _request: NextRequest,
-  ctx: RouteContext<"/source/[id]/config">,
+  ctx: RouteContext<"/api/sources/[id]/config">,
 ): Promise<NextResponse<SourceConfigResult>> {
   const { id } = await ctx.params;
   const source = await getSource(id);
   if (!source) {
-    return NextResponse.json({ error: "Source not found." }, { status: 404 });
+    return apiError(404, "Source not found.");
   }
 
   return NextResponse.json({

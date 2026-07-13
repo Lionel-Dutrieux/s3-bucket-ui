@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { apiError } from "@/lib/api-error";
 import type { UrlResult } from "@/features/browser/api/client";
 import { SHARE_TTL_SECONDS } from "@/features/browser/lib/limits";
 import { getFilesClient } from "@/features/sources/server/storage";
@@ -11,17 +12,17 @@ import { getSource } from "@/lib/dal/sources";
  */
 export async function GET(
   request: NextRequest,
-  ctx: RouteContext<"/source/[id]/share">,
+  ctx: RouteContext<"/api/sources/[id]/share">,
 ): Promise<NextResponse<UrlResult>> {
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
   if (!key) {
-    return NextResponse.json({ error: "Missing key." }, { status: 400 });
+    return apiError(400, "Missing key.");
   }
 
   const source = await getSource(id);
   if (!source) {
-    return NextResponse.json({ error: "Source not found." }, { status: 404 });
+    return apiError(404, "Source not found.");
   }
 
   const filename = key.split("/").pop() || "file";
@@ -36,9 +37,6 @@ export async function GET(
       `[share] signing failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return NextResponse.json(
-      { error: "Could not create a link for this file." },
-      { status: 502 },
-    );
+    return apiError(502, "Could not create a link for this file.");
   }
 }

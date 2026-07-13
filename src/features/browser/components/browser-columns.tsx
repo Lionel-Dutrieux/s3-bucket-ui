@@ -4,6 +4,7 @@ import type { ColumnDef, Row, RowData } from "@tanstack/react-table";
 import { Download, Folder, Info, Link2, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
+import { downloadUrl } from "@/features/browser/api/client";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
 import {
@@ -33,10 +34,6 @@ declare module "@tanstack/react-table" {
     headClassName?: string;
     cellClassName?: string;
   }
-}
-
-export function downloadHref(sourceId: string, key: string): string {
-  return `/source/${sourceId}/download?key=${encodeURIComponent(key)}`;
 }
 
 const NAME_CELL_CLASS = "flex h-12 w-full items-center gap-3 px-2 text-left";
@@ -133,7 +130,7 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
         </button>
       ) : (
         <a
-          href={downloadHref(sourceId ?? "", entry.key)}
+          href={downloadUrl(sourceId ?? "", entry.key)}
           className={NAME_CELL_CLASS}
           title={`Download ${entry.name}`}
         >
@@ -234,7 +231,7 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
             <Link2 className="size-4" aria-hidden />
           </button>
           <a
-            href={downloadHref(sourceId ?? "", entry.key)}
+            href={downloadUrl(sourceId ?? "", entry.key)}
             className={ROW_ACTION_CLASS}
             aria-label={`Download ${entry.name}`}
             title="Download"

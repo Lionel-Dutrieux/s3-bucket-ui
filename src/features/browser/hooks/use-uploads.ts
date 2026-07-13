@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadUrl } from "@/features/browser/api/client";
 import { useCallback, useRef, useState } from "react";
 
 export type UploadStatus = "uploading" | "done" | "error";
@@ -91,10 +92,7 @@ export function useUploads(
           settle();
         };
 
-        xhr.open(
-          "POST",
-          `/source/${sourceId}/upload?key=${encodeURIComponent(prefix + path)}`,
-        );
+        xhr.open("POST", uploadUrl(sourceId, prefix + path));
         xhr.send(file);
       }
     },

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { getFilesClient } from "@/features/sources/server/storage";
 import { recordOperation } from "@/lib/dal/operations";
 import { getSource } from "@/lib/dal/sources";
@@ -14,26 +15,24 @@ import { getSource } from "@/lib/dal/sources";
  */
 export async function POST(
   request: NextRequest,
-  ctx: RouteContext<"/source/[id]/upload">,
+  ctx: RouteContext<"/api/sources/[id]/upload">,
 ) {
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
   if (!key || key.endsWith("/")) {
-    return new NextResponse("Invalid key", { status: 400 });
+    return apiError(400, "Invalid key.");
   }
 
   const source = await getSource(id);
   if (!source) {
-    return new NextResponse("Source not found", { status: 404 });
+    return apiError(404, "Source not found.");
   }
   if (!source.allowUpload) {
-    return new NextResponse("Uploads are not allowed on this source", {
-      status: 403,
-    });
+    return apiError(403, "Uploads are not allowed on this source.");
   }
 
   if (!request.body) {
-    return new NextResponse("Missing body", { status: 400 });
+    return apiError(400, "Missing body.");
   }
 
   try {
@@ -52,6 +51,6 @@ export async function POST(
       `[upload] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return new NextResponse("Upload failed", { status: 502 });
+    return apiError(502, "Upload failed.");
   }
 }
