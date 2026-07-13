@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cylinder, HardDrive, Plus } from "lucide-react";
+import { Cylinder, HardDrive, History, Plus } from "lucide-react";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import { getProvider, PROVIDERS } from "@/features/sources/providers";
@@ -50,7 +50,7 @@ export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
             <span className="text-sm font-semibold tracking-tight">
               Bucket UI
             </span>
-            <span className="text-xs text-muted-foreground">File browser</span>
+            <span className="text-xs text-muted-foreground">File manager</span>
           </div>
         </Link>
         <AddSourceDialog>
@@ -112,7 +112,17 @@ export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
         ) : null}
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="gap-3 p-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname === "/activity"}>
+              <Link href="/activity">
+                <History className="size-4" aria-hidden />
+                Activity
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Theme</span>
           <ThemeToggle />

@@ -2,9 +2,10 @@
 
 [![CI](https://github.com/Lionel-Dutrieux/s3-bucket-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/Lionel-Dutrieux/s3-bucket-ui/actions/workflows/ci.yml)
 
-A read-only file browser for your storage buckets, with a Google-Drive-style
-UI. Add as many sources as you want, browse folders, download files via
-presigned URLs.
+A file manager for your storage buckets, with a Google-Drive-style UI. Add as
+many sources as you want, browse folders, and — on sources where you enable
+it — upload, delete and rename. Read-only by default; every write is opt-in
+per source and enforced server-side.
 
 Features:
 
@@ -15,11 +16,12 @@ Features:
   text/code/Markdown (first 1 MB), without leaving the app.
 - **Share & inspect** — presigned download links (1 h), per-file details
   (Content-Type, ETag, user metadata, copyable key).
-- **Write, if you allow it** — sources are read-only by default; two per-source
-  permissions optionally enable uploads (button or drag & drop of files and
-  whole folders, with a progress tray, plus folder creation) and deletions
-  (single, multi-select, or a whole folder, with confirmation). With both on,
-  files and folders can be renamed. Every write is enforced server-side.
+- **Write, if you allow it** — two per-source permissions unlock uploads
+  (button or drag & drop of files and whole folders, with a progress tray,
+  plus folder creation) and deletions (single, multi-select, or a whole
+  folder, with confirmation). With both on, files and folders can be renamed.
+- **Activity log** — every write across all sources (who, what, when) on the
+  Activity page. Read actions aren't recorded.
 
 Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
 Azure Blob Storage, MinIO, DigitalOcean Spaces.
@@ -27,7 +29,9 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 > **Authentication is not built in.** Deploy Bucket UI behind an authenticating
 > reverse proxy (nginx `auth_basic`, Traefik `basicAuth` middleware, Authelia,
 > …). Anyone who can reach the app can browse every source — and can upload to
-> or delete from any source whose write permissions you enabled.
+> or delete from any source whose write permissions you enabled. The activity
+> log attributes actions to the identity the proxy forwards
+> (`X-Forwarded-User` / `Remote-User`), when it sets one.
 
 ## Stack
 
@@ -41,10 +45,10 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 ## Architecture
 
 ```
-app/          routes only (thin pages, layouts, route handlers)
+app/          routes only (thin pages, layouts, route handlers, /activity)
 features/     feature modules: sources/, browser/ (schema, actions, services, components)
 forms/        TanStack Form infrastructure: reusable fields, form components
-lib/dal/      data access layer (Prisma queries)
+lib/dal/      data access layer (Prisma queries): sources, operations (audit log)
 lib/          shared: prisma client, crypto, formatting
 prisma/       schema (client generated into lib/generated/, gitignored)
 ```

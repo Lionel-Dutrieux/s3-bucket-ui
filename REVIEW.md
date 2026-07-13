@@ -18,11 +18,15 @@
   de bug que cette migration supprime. Ton intuition sur la DB était juste.
 - **Ajout** : `.gitattributes` (normalisation LF) — nécessaire pour que
   `docker-entrypoint.sh` ne casse pas en CRLF, et pour un lint stable sous Windows.
-- **Volontairement PAS fait** : les refactors profonds de `features/browser/*`,
-  `app/activity/*` et `lib/dal/operations.ts`. Un autre agent édite ces fichiers
-  en ce moment (feature audit-log non commitée). Y toucher créerait un enfer de
-  merge. Ils sont documentés en §5 avec des exemples prêts à appliquer **après**
-  le merge.
+- **Merge effectué** : la feature audit-log de l'autre agent (commit `828dbd9`,
+  entre-temps commitée sur master) a été **fusionnée** dans cette branche. La
+  réconciliation portait le modèle `Operation`, `lib/dal/operations.ts` et
+  `formatDateTime` du monde SQLite (timestamps string, DDL manuel) vers
+  PostgreSQL (`DateTime`/`timestamptz`, migrations). Détails en §8.
+- **Volontairement PAS fait** : les refactors profonds de `features/browser/*`
+  (découpage read/write, factorisation des gardes). Documentés en §5 avec des
+  exemples prêts à appliquer — à faire dans un commit dédié, séparé de la
+  migration, pour garder des diffs lisibles.
 
 ---
 
@@ -151,8 +155,8 @@ ciblés sur la logique pure — c'est du niveau des bons dépôts open-source.
 raffinements, pas des corrections d'un code cassé.
 
 > ⚠️ **Non implémentées volontairement** : la plupart touchent
-> `features/browser/*`, activement édité par l'autre agent. À appliquer **après**
-> le merge de sa feature audit-log, pour éviter les conflits.
+> `features/browser/*`. À faire dans un commit dédié, séparé de la migration DB,
+> pour garder des diffs relisables.
 
 ### P1 — Fort impact, faible risque
 
@@ -256,13 +260,37 @@ serveur séparé, Docker-in-Docker). Le mono-app KISS d'ici est un atout — le 
 
 ---
 
-## 7. Pour demain (merge)
+## 7. Pour demain
 
-1. `git log`/`git diff master` sur cette branche pour relire.
+1. `git log`/`git diff` pour relire (tout est déjà sur `master`).
 2. **Teste `docker compose up --build`** (le seul point non vérifié end-to-end).
-3. Merge la feature audit-log de l'autre agent **d'abord**, puis rebase cette
-   branche : le seul vrai conflit attendu est `prisma/schema.prisma` (ajouter le
-   modèle `Operation`) et `lib/prisma.ts`. Avec les vraies migrations, réintégrer
-   `Operation` = éditer le schéma + `pnpm db:migrate` (plus de DDL à la main).
-4. Applique les refactors P1 une fois le merge stabilisé.
-5. Supprime ce `REVIEW.md` (ou transforme-le en description de PR).
+3. Applique les refactors P1 (§5) dans un commit dédié.
+4. Supprime ce `REVIEW.md` (ou transforme-le en description de PR).
+
+---
+
+## 8. Réconciliation du merge (feature audit-log → PostgreSQL)
+
+La feature audit-log (commit `828dbd9`, « Add write audit log and fix production
+schema bootstrap ») a été mergée dans cette branche. Points résolus :
+
+- **`prisma/schema.prisma`** : le modèle `Operation` a été porté sur PostgreSQL —
+  `id`/`sourceId` en `@db.Uuid`, `createdAt` en `DateTime @default(now())
+  @db.Timestamptz(3)` (au lieu de `String` + `dbgenerated("datetime('now')")`,
+  qui est de la syntaxe SQLite invalide en Postgres). La migration `init` a été
+  régénérée : elle crée **les deux** tables (`sources`, `operations` + index).
+- **`lib/prisma.ts`** : le DDL de bootstrap de l'autre agent (qui ajoutait la
+  table `operations` au `BOOTSTRAP_DDL` + `COLUMN_MIGRATIONS`) est supprimé — les
+  migrations s'en chargent. C'est justement ce que sa mention « fix production
+  schema bootstrap » corrigeait à la main ; les migrations le rendent inutile.
+- **`lib/dal/operations.ts`** : `OperationRecord.createdAt` passe de `string` à
+  `Date` (Postgres/Prisma renvoie un `Date` pour un `timestamptz`).
+- **`lib/format.ts`** : `formatDateTime` prend désormais un `Date` (plus de
+  parsing de la string SQLite « YYYY-MM-DD HH:MM:SS »). `app/activity/page.tsx`
+  lui passe `operation.createdAt` (un `Date`) — inchangé, compatible.
+- **`README.md` / `ARCHITECTURE.md`** : fusion des deux jeux de modifs (contenu
+  audit-log de l'autre agent + contenu PostgreSQL/migrations).
+
+Vérifié après merge : `typecheck` + `lint` (102 fichiers) + `test` (42 passed) +
+`build` (route `/activity` incluse) verts, et `migrate deploy` applique bien les
+deux tables sur un `postgres:17` réel.

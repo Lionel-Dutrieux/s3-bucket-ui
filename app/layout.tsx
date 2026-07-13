@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     default: "Bucket UI",
     template: "%s – Bucket UI",
   },
-  description: "Read-only file browser for your storage buckets.",
+  description: "File manager for your storage buckets — read-only by default.",
 };
 
 // Every page hangs off the live SQLite database (the sidebar lists sources),

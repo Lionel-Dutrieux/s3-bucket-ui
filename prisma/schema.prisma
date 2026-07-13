@@ -24,3 +24,19 @@ model Source {
 
   @@map("sources")
 }
+
+/// Audit trail of write operations (upload, delete, rename, folder create).
+/// Source name is denormalized so history survives a source being removed.
+model Operation {
+  id         String   @id @default(uuid()) @db.Uuid
+  action     String
+  sourceId   String?  @map("source_id") @db.Uuid
+  sourceName String   @map("source_name")
+  target     String
+  detail     String?
+  actor      String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([createdAt])
+  @@map("operations")
+}

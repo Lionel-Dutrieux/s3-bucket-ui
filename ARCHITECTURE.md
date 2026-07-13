@@ -13,13 +13,16 @@ features/      One folder per domain. Owns its server actions, services,
                schemas and components. Features may import from lib/ and
                forms/, never from app/ or from another feature's internals.
   sources/     Source management: provider registry, storage client factory,
-               Zod schema, actions, add/remove UI.
-  browser/     File browsing: listing service, pure listing helpers,
-               table/grid/breadcrumb/view-toggle components.
+               Zod schema, actions, add/remove UI. Per-source write
+               permissions (allowUpload, allowDelete).
+  browser/     File browsing and writing: listing service, pure helpers,
+               table/grid/preview/upload components, write actions (upload
+               route, delete, rename) that record to the audit log.
 forms/         TanStack Form infrastructure (createFormHook): reusable field
                components (fields/), form components (SubmitButton, FormAlert)
                and error helpers. No domain knowledge.
 lib/dal/       Data access layer — the only place that touches Prisma.
+               sources.ts (encrypted credentials), operations.ts (audit log).
 lib/           Shared low-level modules: prisma client, crypto, formatting.
 components/    App shell (sidebar) and shadcn/ui primitives (components/ui/).
 prisma/        Schema + versioned SQL migrations (migrations/). The client is
@@ -47,8 +50,15 @@ Dependency direction: `app → features → (forms | lib) → lib/generated`.
   `prisma/migrations/`, applied with `prisma migrate deploy` — on every
   container boot via the Docker entrypoint. There is **no** hand-written
   bootstrap DDL to keep in sync with the schema.
+- **Writes are opt-in and gated server-side**: sources are read-only unless
+  `allowUpload` / `allowDelete` are set. Every write action re-checks the
+  permission on the server — hiding a control is only cosmetic. Renaming
+  (move = copy + delete) needs both.
 - **No built-in auth**: the app is deployed behind an authenticating reverse
-  proxy. Do not add auth logic without revisiting this decision.
+  proxy. Do not add auth logic without revisiting this decision. Write
+  operations are audited (`operations` table) and attributed to the proxy's
+  forwarded identity when present — that's the accountability layer, not app
+  auth.
 - **Navigation state lives in the URL** (`?prefix=`, `?cursor=`) and the view
   preference in a cookie read server-side — no client data fetching, no flash.
 
@@ -83,6 +93,9 @@ region extraction, input schema, listing partition, formatting. Run
   regenerate the client. Commit the new folder under `prisma/migrations/`.
   Production applies it automatically on the next deploy (`prisma migrate
   deploy` in the entrypoint) — nothing to mirror by hand.
+- **Audit a new write action?** Call `recordOperation` from
+  `lib/dal/operations.ts` after the write succeeds, and add a label/icon in
+  `features/browser/operation-labels.ts`.
 - **Deploy?** `Dockerfile` (standalone + Prisma CLI, non-root, `/api/health`
   healthcheck) + `docker-compose.yml` (Dokploy-ready; bring your own PostgreSQL
   via `DATABASE_URL`). Boot fails fast on a malformed `ENCRYPTION_KEY` or a

@@ -25,3 +25,14 @@ export function formatDate(timestamp?: number): string {
   if (!timestamp) return "—";
   return dateFormatter.format(new Date(timestamp));
 }
+
+const dateTimeFormatter = new Intl.DateTimeFormat("en", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+// Timestamps come from Postgres as Date instances (timestamptz). Guard against
+// an invalid date rather than throwing in the render path.
+export function formatDateTime(value: Date): string {
+  return Number.isNaN(value.getTime()) ? "—" : dateTimeFormatter.format(value);
+}
