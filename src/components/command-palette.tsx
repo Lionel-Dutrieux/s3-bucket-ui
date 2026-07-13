@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { HardDrive, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
-import { getProvider } from "@/features/sources/providers";
+import { providerIcon } from "@/features/sources/components/provider-icons";
 import type { SourceSummary } from "@/lib/dal/sources";
 import {
   Command,
@@ -50,7 +50,7 @@ export function CommandPalette({ sources }: { sources: SourceSummary[] }) {
             {sources.length > 0 ? (
               <CommandGroup heading="Sources">
                 {sources.map((source) => {
-                  const Icon = getProvider(source.provider)?.icon ?? HardDrive;
+                  const Icon = providerIcon(source.provider);
                   return (
                     <CommandItem
                       key={source.id}

@@ -7,12 +7,12 @@ import {
   testSourceConnection,
   updateSource,
 } from "@/features/sources/actions";
-import { getProvider, PROVIDERS } from "@/features/sources/providers";
+import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
 import {
   sourceInputSchema,
   sourceUpdateSchema,
   type SourceFormValues,
-} from "@/features/sources/schema";
+} from "@/features/sources/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
 import { Button } from "@/components/ui/button";

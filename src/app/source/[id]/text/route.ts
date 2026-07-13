@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { TextPreviewResult } from "@/features/browser/api";
 import { isTextFile } from "@/features/browser/file-types";
 import { TEXT_PREVIEW_MAX_BYTES } from "@/features/browser/limits";
-import { getFilesClient } from "@/features/sources/storage";
+import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 
 /**

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import type { SourceConfigResult } from "@/features/sources/api";
+import type { SourceConfigResult } from "@/features/sources/api/client";
 import { getSource } from "@/lib/dal/sources";
 
 /**

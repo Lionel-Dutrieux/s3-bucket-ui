@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { FileDetailsResult } from "@/features/browser/api";
-import { getFilesClient } from "@/features/sources/storage";
+import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 
 /** Object metadata for the details dialog — a HEAD request, no body. */

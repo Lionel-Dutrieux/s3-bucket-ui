@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ChevronRight, Cylinder, Plus } from "lucide-react";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
-import { getProvider } from "@/features/sources/providers";
+import { providerIcon } from "@/features/sources/components/provider-icons";
+import { getProvider } from "@/features/sources/lib/providers";
 import { listSources } from "@/lib/dal/sources";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -45,8 +46,7 @@ export default async function HomePage() {
         <main className="flex-1 p-6">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {sources.map((source) => {
-              const ProviderIcon =
-                getProvider(source.provider)?.icon ?? Cylinder;
+              const ProviderIcon = providerIcon(source.provider);
               return (
                 <Link
                   key={source.id}

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getFilesClient } from "@/features/sources/storage";
+import { getFilesClient } from "@/features/sources/server/storage";
 import { recordOperation } from "@/lib/dal/operations";
 import { getSource } from "@/lib/dal/sources";
 

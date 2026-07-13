@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { UrlResult } from "@/features/browser/api";
 import { SHARE_TTL_SECONDS } from "@/features/browser/limits";
-import { getFilesClient } from "@/features/sources/storage";
+import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 
 /**

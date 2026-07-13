@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { regionFromEndpoint } from "@/features/sources/region";
+import { regionFromEndpoint } from "@/features/sources/lib/region";
 
 describe("regionFromEndpoint", () => {
   it("extracts the region from a regional AWS endpoint", () => {

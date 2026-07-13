@@ -1,21 +1,12 @@
-import {
-  Box,
-  Cloud,
-  Cylinder,
-  Droplets,
-  Globe,
-  Server,
-  type LucideIcon,
-} from "lucide-react";
-
 // Registry of supported storage providers. An S3-compatible provider is one
 // entry here — adapter, signing region and addressing style are all config.
 // A provider with its own protocol (like Azure) also needs a case in
-// features/sources/storage.ts.
+// features/sources/server/storage.ts.
+// Kept free of UI concerns so server-only modules can import it; the
+// provider → icon mapping lives in components/provider-icons.ts.
 export interface ProviderDefinition {
   id: string;
   label: string;
-  icon: LucideIcon;
   adapter: "s3" | "azure";
   /**
    * Region used to sign S3 requests. "from-endpoint" extracts it from the
@@ -43,7 +34,6 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
   {
     id: "r2",
     label: "Cloudflare R2",
-    icon: Cylinder,
     adapter: "s3",
     region: "auto",
     endpointPlaceholder: "https://<account-id>.r2.cloudflarestorage.com",
@@ -52,7 +42,6 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
   {
     id: "aws-s3",
     label: "Amazon S3",
-    icon: Box,
     adapter: "s3",
     region: "from-endpoint",
     forcePathStyle: false, // AWS prefers virtual-hosted addressing
@@ -62,7 +51,6 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
   {
     id: "gcs",
     label: "Google Cloud Storage",
-    icon: Globe,
     adapter: "s3", // S3-interoperability XML API with HMAC keys
     region: "auto",
     endpointPlaceholder: "https://storage.googleapis.com",
@@ -75,7 +63,6 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
   {
     id: "azure-blob",
     label: "Azure Blob Storage",
-    icon: Cloud,
     adapter: "azure",
     endpointPlaceholder: "https://<account>.blob.core.windows.net",
     fieldLabels: {
@@ -87,7 +74,6 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
   {
     id: "minio",
     label: "MinIO",
-    icon: Server,
     adapter: "s3",
     region: "us-east-1", // MinIO's default; ignored unless configured server-side
     endpointPlaceholder: "https://minio.example.com",
@@ -100,7 +86,6 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
   {
     id: "digitalocean-spaces",
     label: "DigitalOcean Spaces",
-    icon: Droplets,
     adapter: "s3",
     region: "from-endpoint",
     endpointPlaceholder: "https://<region>.digitaloceanspaces.com",

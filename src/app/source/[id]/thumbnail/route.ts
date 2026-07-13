@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { categoryOf } from "@/features/browser/file-types";
-import { getFilesClient } from "@/features/sources/storage";
+import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 
 const THUMBNAIL_TTL_SECONDS = 600;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sourceInputSchema } from "@/features/sources/schema";
+import { sourceInputSchema } from "@/features/sources/lib/schema";
 
 const validInput = {
   name: "Team documents",

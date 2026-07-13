@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { categoryOf } from "@/features/browser/file-types";
 import { PREVIEW_TTL_SECONDS } from "@/features/browser/limits";
-import { getFilesClient } from "@/features/sources/storage";
+import { getFilesClient } from "@/features/sources/server/storage";
 import { getSource } from "@/lib/dal/sources";
 
 /** Categories rendered from a presigned URL (img/iframe/video/audio tags). */

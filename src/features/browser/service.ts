@@ -4,7 +4,7 @@ import {
   type FolderListing,
 } from "@/features/browser/listing";
 import { PAGE_SIZE } from "@/features/browser/limits";
-import { getFilesClient } from "@/features/sources/storage";
+import { getFilesClient } from "@/features/sources/server/storage";
 import type { Source } from "@/lib/dal/sources";
 
 export type ListErrorReason =

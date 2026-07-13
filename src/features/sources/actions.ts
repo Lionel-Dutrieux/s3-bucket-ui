@@ -5,8 +5,8 @@ import {
   sourceInputSchema,
   sourceUpdateSchema,
   type SourceFormValues,
-} from "@/features/sources/schema";
-import { getFilesClient } from "@/features/sources/storage";
+} from "@/features/sources/lib/schema";
+import { getFilesClient } from "@/features/sources/server/storage";
 import {
   createSource as dalCreateSource,
   deleteSource as dalDeleteSource,

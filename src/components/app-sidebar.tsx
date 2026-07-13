@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cylinder, HardDrive, History, Plus } from "lucide-react";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
+import { providerIcon } from "@/features/sources/components/provider-icons";
 import { SourceMenu } from "@/features/sources/components/source-menu";
-import { getProvider, PROVIDERS } from "@/features/sources/providers";
+import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -30,7 +31,7 @@ export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
   const known = PROVIDERS.map((provider) => ({
     key: provider.id,
     label: provider.label,
-    icon: provider.icon,
+    icon: providerIcon(provider.id),
     sources: sources.filter((source) => source.provider === provider.id),
   }));
   const orphans = sources.filter((source) => !getProvider(source.provider));

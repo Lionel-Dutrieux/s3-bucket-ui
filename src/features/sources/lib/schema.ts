@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getProvider } from "@/features/sources/providers";
+import { getProvider } from "@/features/sources/lib/providers";
 
 // Single source of truth for source validation: the add-source form validates
 // against it on the client (TanStack Form standard-schema support) and the

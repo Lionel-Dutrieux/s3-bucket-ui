@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { removeSource } from "@/features/sources/actions";
-import { fetchSourceConfig } from "@/features/sources/api";
+import { fetchSourceConfig } from "@/features/sources/api/client";
 import { SourceForm } from "@/features/sources/components/source-form";
-import type { SourceFormValues } from "@/features/sources/schema";
+import type { SourceFormValues } from "@/features/sources/lib/schema";
 import type { SourceSummary } from "@/lib/dal/sources";
 import {
   AlertDialog,
