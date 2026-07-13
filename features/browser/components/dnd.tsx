@@ -5,8 +5,9 @@ import {
   useDroppable,
   type DraggableAttributes,
 } from "@dnd-kit/core";
-import { CornerLeftUp } from "lucide-react";
+import { CornerLeftUp, Folder } from "lucide-react";
 import { useCallback } from "react";
+import { FileIcon } from "@/features/browser/components/file-icon";
 import type { EntryTarget } from "@/features/browser/move";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +75,11 @@ export function useEntryDnd(opts: {
   };
 }
 
-/** Drop target for "move up to the parent folder", shown when not at root. */
+/**
+ * Drop target for "move up to the parent folder". Rendered only while a drag
+ * is in progress (see FileBrowser), so it's given a generous height to make an
+ * easy target.
+ */
 export function ParentDropZone({ parentPrefix }: { parentPrefix: string }) {
   const { setNodeRef, isOver } = useDroppable({
     id: "drop:parent",
@@ -84,10 +89,10 @@ export function ParentDropZone({ parentPrefix }: { parentPrefix: string }) {
     <div
       ref={setNodeRef}
       className={cn(
-        "mb-3 flex items-center gap-2 rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground transition-colors",
+        "mb-3 flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm font-medium transition-colors",
         isOver
           ? "border-primary bg-primary/10 text-foreground"
-          : "border-muted-foreground/30",
+          : "border-muted-foreground/30 text-muted-foreground",
       )}
     >
       <CornerLeftUp className="size-4" aria-hidden />
@@ -96,11 +101,37 @@ export function ParentDropZone({ parentPrefix }: { parentPrefix: string }) {
   );
 }
 
-/** Compact overlay chip that follows the cursor during a drag. */
-export function DragChip({ label, count }: { label: string; count: number }) {
+/**
+ * Overlay preview that follows the cursor during a drag — a small card echoing
+ * the dragged entry (icon + name), with a stacked backdrop for multi-select.
+ */
+export function DragPreview({
+  label,
+  count,
+  kind,
+}: {
+  label: string;
+  count: number;
+  kind: "file" | "folder";
+}) {
   return (
-    <div className="pointer-events-none rounded-md border bg-background px-2.5 py-1.5 text-sm font-medium shadow-lg">
-      {count > 1 ? `${count} items` : label}
+    <div className="pointer-events-none relative w-max">
+      {count > 1 ? (
+        <div className="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-lg border bg-muted shadow-sm" />
+      ) : null}
+      <div className="relative flex items-center gap-2 rounded-lg border bg-background px-3 py-2 shadow-lg">
+        {kind === "folder" ? (
+          <Folder
+            className="size-4 shrink-0 fill-amber-400/80 text-amber-500"
+            aria-hidden
+          />
+        ) : (
+          <FileIcon name={label} className="size-4 shrink-0" />
+        )}
+        <span className="max-w-44 truncate text-sm font-medium">
+          {count > 1 ? `${count} items` : label}
+        </span>
+      </div>
     </div>
   );
 }

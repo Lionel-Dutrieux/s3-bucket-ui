@@ -4,12 +4,14 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -46,7 +48,7 @@ import {
 } from "@/features/browser/components/browser-columns";
 import { DetailsDialog } from "@/features/browser/components/details-dialog";
 import {
-  DragChip,
+  DragPreview,
   ParentDropZone,
   type DragData,
   type DropData,
@@ -155,6 +157,7 @@ export function FileBrowser({
   const [activeDrag, setActiveDrag] = useState<{
     label: string;
     count: number;
+    kind: "file" | "folder";
   } | null>(null);
   const [moveRequest, setMoveRequest] = useState<MoveRequest | null>(null);
   const sensors = useSensors(
@@ -368,7 +371,7 @@ export function FileBrowser({
     const data = event.active.data.current as DragData | undefined;
     if (!data) return;
     const count = movingTargets(data).length;
-    setActiveDrag({ label: data.label, count });
+    setActiveDrag({ label: data.label, count, kind: data.target.kind });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -525,8 +528,11 @@ export function FileBrowser({
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={() => setActiveDrag(null)}
+          // The parent drop zone only mounts mid-drag, so re-measure droppables
+          // continuously to register it.
+          measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
         >
-          {canMove && parentPrefix !== null ? (
+          {canMove && parentPrefix !== null && activeDrag ? (
             <ParentDropZone parentPrefix={parentPrefix} />
           ) : null}
           {view === "grid" ? (
@@ -549,9 +555,13 @@ export function FileBrowser({
           ) : (
             <FileTable table={table} canMove={canMove} />
           )}
-          <DragOverlay>
+          <DragOverlay modifiers={[snapCenterToCursor]}>
             {activeDrag ? (
-              <DragChip label={activeDrag.label} count={activeDrag.count} />
+              <DragPreview
+                label={activeDrag.label}
+                count={activeDrag.count}
+                kind={activeDrag.kind}
+              />
             ) : null}
           </DragOverlay>
         </DndContext>
