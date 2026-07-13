@@ -9,7 +9,7 @@ import { SourceMenu } from "@/features/sources/components/source-menu";
 import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import {
   Sidebar,
   SidebarContent,
