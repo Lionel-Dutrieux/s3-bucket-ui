@@ -36,7 +36,8 @@ import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { downloadUrl, fetchShareUrl } from "@/features/browser/api/client";
+import { downloadUrl } from "@/features/browser/api/client";
+import { browserQueries } from "@/features/browser/api/queries";
 import {
   deleteEntries,
   deleteFolder,
@@ -176,10 +177,9 @@ export function FileBrowser({
     try {
       // fetchQuery (not a bare fetch) dedupes rapid double-clicks; the default
       // staleTime of 0 still mints a fresh link on each later copy.
-      const url = await queryClient.fetchQuery({
-        queryKey: ["share-url", sourceId, file.key],
-        queryFn: () => fetchShareUrl(sourceId, file.key),
-      });
+      const url = await queryClient.fetchQuery(
+        browserQueries.shareUrl(sourceId, file.key),
+      );
       await navigator.clipboard.writeText(url);
       toast.success("Link copied — valid for 1 hour");
     } catch (error) {

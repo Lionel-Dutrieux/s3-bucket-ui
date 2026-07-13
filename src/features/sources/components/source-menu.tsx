@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { removeSource } from "@/features/sources/actions";
-import { fetchSourceConfig } from "@/features/sources/api/client";
+import { sourcesQueries } from "@/features/sources/api/queries";
 import { SourceForm } from "@/features/sources/components/source-form";
 import type { SourceFormValues } from "@/features/sources/lib/schema";
 import type { SourceSummary } from "@/lib/dal/sources";
@@ -53,10 +53,9 @@ export function SourceMenu({
   const handleEdit = () => {
     startTransition(async () => {
       try {
-        const config = await queryClient.fetchQuery({
-          queryKey: ["source-config", source.id],
-          queryFn: () => fetchSourceConfig(source.id),
-        });
+        const config = await queryClient.fetchQuery(
+          sourcesQueries.config(source.id),
+        );
         setEditValues({ ...config, secretAccessKey: "" });
       } catch (error) {
         toast.error(

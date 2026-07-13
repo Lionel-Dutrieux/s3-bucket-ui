@@ -9,11 +9,8 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  downloadUrl,
-  fetchTextPreview,
-  previewSrc,
-} from "@/features/browser/api/client";
+import { downloadUrl, previewSrc } from "@/features/browser/api/client";
+import { browserQueries } from "@/features/browser/api/queries";
 import { categoryOf, isTextFile } from "@/features/browser/lib/file-types";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";
@@ -78,8 +75,7 @@ export function PreviewDialog({
   // CORS never lets the browser read object bodies. Empty files skip it too.
   const key = file?.key;
   const textQuery = useQuery({
-    queryKey: ["text-preview", sourceId, key],
-    queryFn: () => fetchTextPreview(sourceId, key ?? ""),
+    ...browserQueries.textPreview(sourceId, key ?? ""),
     enabled: file !== null && kind === "text" && file.size > 0,
   });
 

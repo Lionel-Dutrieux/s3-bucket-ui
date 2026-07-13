@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchFileDetails } from "@/features/browser/api/client";
+import { browserQueries } from "@/features/browser/api/queries";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -31,8 +31,7 @@ export function DetailsDialog({
     error,
     isPending,
   } = useQuery({
-    queryKey: ["file-details", sourceId, key],
-    queryFn: () => fetchFileDetails(sourceId, key ?? ""),
+    ...browserQueries.fileDetails(sourceId, key ?? ""),
     enabled: key !== undefined,
   });
 
