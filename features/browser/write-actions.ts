@@ -9,8 +9,14 @@ import {
   FOLDER_MOVE_CONCURRENCY,
   FOLDER_MOVE_LIST_BATCH,
   FOLDER_MOVE_MAX_OBJECTS,
+  MOVE_ENTRIES_MAX,
 } from "@/features/browser/limits";
-import type { EntryTarget } from "@/features/browser/move";
+import {
+  basename,
+  type EntryTarget,
+  folderName,
+  planMove,
+} from "@/features/browser/move";
 import { recordOperation } from "@/lib/dal/operations";
 
 export type { EntryTarget };
@@ -327,6 +333,82 @@ export async function deleteEntries(
             error: `${failures.length} item${failures.length === 1 ? "" : "s"} could not be deleted.`,
           }
         : {};
+    },
+  );
+}
+
+/**
+ * Moves a selection of files/folders into `destPrefix` ("" = root). Move is
+ * copy + delete, so it needs both write permissions. All-or-nothing on name
+ * conflicts: if any destination is occupied, nothing moves.
+ */
+export async function moveEntries(
+  sourceId: string,
+  targets: EntryTarget[],
+  destPrefix: string,
+): Promise<{ error?: string }> {
+  if (destPrefix !== "" && !destPrefix.endsWith("/")) {
+    return { error: "Invalid destination." };
+  }
+  if (targets.length === 0) return {};
+  if (targets.length > MOVE_ENTRIES_MAX) {
+    return { error: `Move at most ${MOVE_ENTRIES_MAX} items at a time.` };
+  }
+  if (
+    targets.some(
+      (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
+    )
+  ) {
+    return { error: "Invalid folder." };
+  }
+
+  const plan = planMove(targets, destPrefix);
+  if (plan.error) return { error: plan.error };
+  if (plan.moves.length === 0) return {};
+
+  return withWriteAccess(
+    sourceId,
+    {
+      need: { upload: true, delete: true },
+      denied: "Moving needs both upload and delete enabled on this source.",
+      action: "move the selection",
+      failureMessage:
+        "Could not move everything — some items may have moved already, refresh to check.",
+    },
+    async ({ source, files }) => {
+      // Conflict pre-check: refuse the whole move if any destination exists.
+      const conflicts: string[] = [];
+      for (const move of plan.moves) {
+        if (move.kind === "file") {
+          if (await files.exists(move.to)) conflicts.push(basename(move.to));
+        } else {
+          const existing = await files.list({ prefix: move.to, limit: 1 });
+          if (existing.items.length > 0) conflicts.push(folderName(move.to));
+        }
+      }
+      if (conflicts.length > 0) {
+        return {
+          error: `Already exists in the destination: ${conflicts.join(", ")}.`,
+        };
+      }
+
+      for (const move of plan.moves) {
+        if (move.kind === "file") {
+          await files.move(move.from, move.to);
+        } else {
+          const result = await movePrefix(files, move.from, move.to);
+          if (result.error) return { error: result.error };
+        }
+      }
+
+      await recordOperation({
+        action: "move",
+        sourceId: source.id,
+        sourceName: source.name,
+        target: `${plan.moves.length} item${plan.moves.length === 1 ? "" : "s"}`,
+        detail: `→ ${destPrefix || "/"}`,
+      });
+      return {};
     },
   );
 }

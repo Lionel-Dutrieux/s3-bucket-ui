@@ -1,4 +1,5 @@
 import {
+  FolderInput,
   FolderPlus,
   Pencil,
   Trash2,
@@ -22,6 +23,7 @@ const LABELS: Record<string, OperationLabel> = {
   "delete-many": { label: "Deleted items", icon: Trash2, destructive: true },
   rename: { label: "Renamed", icon: Pencil },
   "rename-folder": { label: "Renamed folder", icon: Pencil },
+  move: { label: "Moved", icon: FolderInput },
 };
 
 export function operationLabel(action: string): OperationLabel {
