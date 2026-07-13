@@ -45,12 +45,14 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 ## Architecture
 
 ```
-app/          routes only (thin pages, layouts, route handlers, /activity)
-features/     feature modules: sources/, browser/ (schema, actions, services, components)
-forms/        TanStack Form infrastructure: reusable fields, form components
-lib/dal/      data access layer (Prisma queries): sources, operations (audit log)
-lib/          shared: prisma client, crypto, formatting
-prisma/       schema (client generated into lib/generated/, gitignored)
+src/app/          routes only (thin pages, layouts, API route handlers)
+src/features/     feature modules: sources/, browser/ — each split into
+                  actions.ts, api/, components/, hooks/, lib/, server/
+src/forms/        TanStack Form infrastructure: reusable fields, form components
+src/lib/dal/      data access layer (Prisma queries): sources, operations (audit log)
+src/lib/          shared: prisma client, crypto, env, formatting, ActionResult
+src/components/   app shell (layout/), providers/, shared widgets, shadcn (ui/)
+prisma/           schema (client generated into src/generated/, gitignored)
 ```
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for layers, key decisions and the
@@ -104,10 +106,11 @@ write permissions):
 
 Use **Test connection** to check the credentials; the connection is verified
 again when the source is saved. Providers live in
-`features/sources/providers.ts` — an S3-compatible provider is one declarative
-registry entry (label, icon, endpoint placeholder, signing region, addressing
-style); a provider with its own protocol also needs a case in
-`features/sources/storage.ts`.
+`src/features/sources/lib/providers.ts` — an S3-compatible provider is one
+declarative registry entry (label, endpoint placeholder, signing region,
+addressing style; its icon goes in
+`src/features/sources/components/provider-icons.ts`); a provider with its own
+protocol also needs a case in `src/features/sources/server/storage.ts`.
 
 ## Production
 
