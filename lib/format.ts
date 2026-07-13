@@ -25,3 +25,15 @@ export function formatDate(timestamp?: number): string {
   if (!timestamp) return "—";
   return dateFormatter.format(new Date(timestamp));
 }
+
+const dateTimeFormatter = new Intl.DateTimeFormat("en", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+// SQLite's datetime('now') is "YYYY-MM-DD HH:MM:SS" in UTC with no zone —
+// normalize to an ISO instant before formatting so it's not read as local.
+export function formatDateTime(value: string): string {
+  const date = new Date(`${value.replace(" ", "T")}Z`);
+  return Number.isNaN(date.getTime()) ? value : dateTimeFormatter.format(date);
+}

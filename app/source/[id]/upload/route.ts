@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getFilesClient } from "@/features/sources/storage";
+import { recordOperation } from "@/lib/dal/operations";
 import { getSource } from "@/lib/dal/sources";
 
 /**
@@ -38,6 +39,12 @@ export async function POST(
   try {
     await getFilesClient(source).upload(key, request.body, {
       contentType: request.headers.get("content-type") ?? undefined,
+    });
+    await recordOperation({
+      action: "upload",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: key,
     });
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {

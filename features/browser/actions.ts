@@ -3,6 +3,7 @@
 import type { Files } from "files-sdk";
 import { categoryOf, isTextFile } from "@/features/browser/file-types";
 import { getFilesClient } from "@/features/sources/storage";
+import { recordOperation } from "@/lib/dal/operations";
 import { getSource } from "@/lib/dal/sources";
 
 export interface UrlResult {
@@ -158,6 +159,12 @@ export async function createFolder(
 
   try {
     await getFilesClient(source).upload(`${prefix}${trimmed}/`, "");
+    await recordOperation({
+      action: "create-folder",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: `${prefix}${trimmed}/`,
+    });
     return {};
   } catch (error) {
     console.error(
@@ -205,6 +212,13 @@ export async function renameObject(
       return { error: "Something with that name already exists here." };
     }
     await files.move(key, newKey);
+    await recordOperation({
+      action: "rename",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: key,
+      detail: `→ ${trimmed}`,
+    });
     return {};
   } catch (error) {
     console.error(
@@ -276,6 +290,13 @@ export async function renameFolder(
           .map((key) => files.move(key, newPrefix + key.slice(prefix.length))),
       );
     }
+    await recordOperation({
+      action: "rename-folder",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: prefix,
+      detail: `→ ${trimmed}/ (${keys.length} object${keys.length === 1 ? "" : "s"})`,
+    });
     return {};
   } catch (error) {
     console.error(
@@ -306,6 +327,12 @@ export async function deleteObject(
 
   try {
     await getFilesClient(source).delete(key);
+    await recordOperation({
+      action: "delete",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: key,
+    });
     return {};
   } catch (error) {
     console.error(
@@ -360,6 +387,14 @@ export async function deleteFolder(
 
   try {
     const error = await deletePrefix(getFilesClient(source), prefix);
+    if (!error) {
+      await recordOperation({
+        action: "delete-folder",
+        sourceId: source.id,
+        sourceName: source.name,
+        target: prefix,
+      });
+    }
     return error ? { error } : {};
   } catch (error) {
     console.error(
@@ -419,6 +454,15 @@ export async function deleteEntries(
         const error = await deletePrefix(files, target.prefix);
         if (error) failures.push(target.prefix);
       }
+    }
+    if (failures.length < targets.length) {
+      await recordOperation({
+        action: "delete-many",
+        sourceId: source.id,
+        sourceName: source.name,
+        target: `${targets.length} item${targets.length === 1 ? "" : "s"}`,
+        detail: failures.length > 0 ? `${failures.length} failed` : undefined,
+      });
     }
     return failures.length > 0
       ? {

@@ -18,5 +18,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // Vitest doesn't honour .gitignore — keep local agent worktrees out so
+    // their test copies don't run twice.
+    exclude: ["**/node_modules/**", "**/.claude/**"],
   },
 });

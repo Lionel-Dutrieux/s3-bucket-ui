@@ -13,13 +13,16 @@ features/      One folder per domain. Owns its server actions, services,
                schemas and components. Features may import from lib/ and
                forms/, never from app/ or from another feature's internals.
   sources/     Source management: provider registry, storage client factory,
-               Zod schema, actions, add/remove UI.
-  browser/     File browsing: listing service, pure listing helpers,
-               table/grid/breadcrumb/view-toggle components.
+               Zod schema, actions, add/remove UI. Per-source write
+               permissions (allowUpload, allowDelete).
+  browser/     File browsing and writing: listing service, pure helpers,
+               table/grid/preview/upload components, write actions (upload
+               route, delete, rename) that record to the audit log.
 forms/         TanStack Form infrastructure (createFormHook): reusable field
                components (fields/), form components (SubmitButton, FormAlert)
                and error helpers. No domain knowledge.
 lib/dal/       Data access layer — the only place that touches Prisma.
+               sources.ts (encrypted credentials), operations.ts (audit log).
 lib/           Shared low-level modules: prisma client, crypto, formatting.
 components/    App shell (sidebar) and shadcn/ui primitives (components/ui/).
 prisma/        Schema. The client is generated into lib/generated/ (gitignored).
@@ -40,8 +43,15 @@ Dependency direction: `app → features → (forms | lib) → lib/generated`.
   `features/sources/storage.ts`.
 - **Secrets are encrypted at rest** (AES-256-GCM, `lib/crypto.ts`) with
   `ENCRYPTION_KEY`; encryption/decryption only happens inside `lib/dal/sources.ts`.
+- **Writes are opt-in and gated server-side**: sources are read-only unless
+  `allowUpload` / `allowDelete` are set. Every write action re-checks the
+  permission on the server — hiding a control is only cosmetic. Renaming
+  (move = copy + delete) needs both.
 - **No built-in auth**: the app is deployed behind an authenticating reverse
-  proxy. Do not add auth logic without revisiting this decision.
+  proxy. Do not add auth logic without revisiting this decision. Write
+  operations are audited (`operations` table) and attributed to the proxy's
+  forwarded identity when present — that's the accountability layer, not app
+  auth.
 - **Navigation state lives in the URL** (`?prefix=`, `?cursor=`) and the view
   preference in a cookie read server-side — no client data fetching, no flash.
 
@@ -72,9 +82,16 @@ region extraction, input schema, listing partition, formatting. Run
 - **Add a table/grid column?** `features/browser/components/file-table.tsx` /
   `file-grid.tsx`; the data shape comes from `features/browser/listing.ts`.
 - **Change the DB schema?** `prisma/schema.prisma`, then `pnpm db:push`
-  (run `pnpm exec prisma generate` if types changed) — and mirror the change
-  as an idempotent statement in the bootstrap DDL of `lib/prisma.ts`, which is
-  what creates the schema on a fresh database (first Docker boot).
+  (run `pnpm exec prisma generate` if types changed) — and mirror it in
+  `lib/prisma.ts`, which is what builds the schema in production (it runs
+  `node server.js`, never `db:push`). A new table: add a
+  `CREATE TABLE IF NOT EXISTS`. A new column on an existing table: add it to
+  the DDL **and** to `COLUMN_MIGRATIONS`, so databases created before the
+  column gain it on next boot (`ALTER TABLE ADD COLUMN` isn't idempotent in
+  SQLite, so it's applied only when `PRAGMA table_info` shows it missing).
+- **Audit a new write action?** Call `recordOperation` from
+  `lib/dal/operations.ts` after the write succeeds, and add a label/icon in
+  `features/browser/operation-labels.ts`.
 - **Deploy?** `Dockerfile` (standalone, non-root, `/api/health` healthcheck)
   + `docker-compose.yml` (Dokploy-ready). Boot fails fast on a malformed
   `ENCRYPTION_KEY` (`instrumentation.ts`).
