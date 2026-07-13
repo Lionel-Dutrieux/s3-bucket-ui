@@ -37,7 +37,7 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 
 - Next.js 16 (App Router, Turbopack), React 19, TypeScript 7 (native compiler)
 - Biome (linting + formatting)
-- Tailwind CSS v4 + shadcn/ui, TanStack Form + TanStack Table, nuqs (URL state)
+- Tailwind CSS v4 + shadcn/ui, TanStack Form + Table + Query, nuqs (URL state)
 - [files-sdk](https://files-sdk.dev) (S3 + Azure adapters) for bucket access
 - Prisma 7 + PostgreSQL (via the `@prisma/adapter-pg` driver adapter)
 - Bucket secrets encrypted at rest (AES-256-GCM)

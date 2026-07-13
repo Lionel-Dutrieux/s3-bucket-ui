@@ -31,11 +31,12 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { getShareUrl } from "@/features/browser/read-actions";
+import { fetchShareUrl } from "@/features/browser/api";
 import {
   deleteEntries,
   deleteFolder,
@@ -125,6 +126,7 @@ export function FileBrowser({
   permissions: BrowserPermissions;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
   const [sorting, setSorting] = useQueryState(
     "sort",
@@ -172,13 +174,20 @@ export function FileBrowser({
   };
 
   const handleCopyLink = async (file: FileEntry) => {
-    const result = await getShareUrl(sourceId, file.key);
-    if (!result.url) {
-      toast.error(result.error ?? "Could not create a link.");
-      return;
+    try {
+      // fetchQuery (not a bare fetch) dedupes rapid double-clicks; the default
+      // staleTime of 0 still mints a fresh link on each later copy.
+      const url = await queryClient.fetchQuery({
+        queryKey: ["share-url", sourceId, file.key],
+        queryFn: () => fetchShareUrl(sourceId, file.key),
+      });
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied — valid for 1 hour");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not create a link.",
+      );
     }
-    await navigator.clipboard.writeText(result.url);
-    toast.success("Link copied — valid for 1 hour");
   };
 
   const handleDelete = async () => {

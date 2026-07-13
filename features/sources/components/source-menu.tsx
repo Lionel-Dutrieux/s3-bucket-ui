@@ -1,10 +1,12 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { getSourceForEdit, removeSource } from "@/features/sources/actions";
+import { removeSource } from "@/features/sources/actions";
+import { fetchSourceConfig } from "@/features/sources/api";
 import { SourceForm } from "@/features/sources/components/source-form";
 import type { SourceFormValues } from "@/features/sources/schema";
 import type { SourceSummary } from "@/lib/dal/sources";
@@ -44,17 +46,23 @@ export function SourceMenu({
   const [editValues, setEditValues] = useState<SourceFormValues | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // The summary in the sidebar doesn't carry endpoint/keys — fetch the full
   // record (minus the secret) right before opening the edit dialog.
   const handleEdit = () => {
     startTransition(async () => {
-      const result = await getSourceForEdit(source.id);
-      if (!result.source) {
-        toast.error(result.error ?? "Couldn't load this source.");
-        return;
+      try {
+        const config = await queryClient.fetchQuery({
+          queryKey: ["source-config", source.id],
+          queryFn: () => fetchSourceConfig(source.id),
+        });
+        setEditValues({ ...config, secretAccessKey: "" });
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Couldn't load this source.",
+        );
       }
-      setEditValues({ ...result.source, secretAccessKey: "" });
     });
   };
 

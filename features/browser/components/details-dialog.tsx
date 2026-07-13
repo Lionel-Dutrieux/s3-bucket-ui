@@ -1,12 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Copy, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-  getFileDetails,
-  type FileDetailsResult,
-} from "@/features/browser/read-actions";
+import { fetchFileDetails } from "@/features/browser/api";
 import type { FileEntry } from "@/features/browser/listing";
 import { formatBytes, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -18,10 +15,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface LoadedDetails extends FileDetailsResult {
-  key: string;
-}
-
 /** Object metadata (HEAD request) with a copy-the-key shortcut. */
 export function DetailsDialog({
   sourceId,
@@ -32,20 +25,16 @@ export function DetailsDialog({
   file: FileEntry | null;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [loaded, setLoaded] = useState<LoadedDetails | null>(null);
-
-  useEffect(() => {
-    if (!file) return;
-    let cancelled = false;
-    getFileDetails(sourceId, file.key).then((result) => {
-      if (!cancelled) setLoaded({ key: file.key, ...result });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [sourceId, file]);
-
-  const current = loaded?.key === file?.key ? loaded : null;
+  const key = file?.key;
+  const {
+    data: details,
+    error,
+    isPending,
+  } = useQuery({
+    queryKey: ["file-details", sourceId, key],
+    queryFn: () => fetchFileDetails(sourceId, key ?? ""),
+    enabled: key !== undefined,
+  });
 
   const handleCopyKey = async (key: string) => {
     await navigator.clipboard.writeText(key);
@@ -79,40 +68,34 @@ export function DetailsDialog({
               </Button>
             </div>
 
-            {!current ? (
+            {isPending ? (
               <div className="flex justify-center py-6">
                 <Loader2
                   className="size-5 animate-spin text-muted-foreground"
                   aria-label="Loading details"
                 />
               </div>
-            ) : current.error || !current.details ? (
+            ) : error || !details ? (
               <p className="py-2 text-sm text-muted-foreground">
-                {current.error ?? "Could not load the details for this file."}
+                {error?.message ?? "Could not load the details for this file."}
               </p>
             ) : (
               <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-                <DetailRow label="Size">
-                  {formatBytes(current.details.size)}
-                </DetailRow>
+                <DetailRow label="Size">{formatBytes(details.size)}</DetailRow>
                 <DetailRow label="Content-Type">
-                  {current.details.contentType ?? "—"}
+                  {details.contentType ?? "—"}
                 </DetailRow>
-                <DetailRow label="ETag">
-                  {current.details.etag ?? "—"}
-                </DetailRow>
+                <DetailRow label="ETag">{details.etag ?? "—"}</DetailRow>
                 <DetailRow label="Modified">
-                  {current.details.lastModified
-                    ? formatDate(current.details.lastModified)
+                  {details.lastModified
+                    ? formatDate(details.lastModified)
                     : "—"}
                 </DetailRow>
-                {Object.entries(current.details.metadata ?? {}).map(
-                  ([name, value]) => (
-                    <DetailRow key={name} label={name}>
-                      {value}
-                    </DetailRow>
-                  ),
-                )}
+                {Object.entries(details.metadata ?? {}).map(([name, value]) => (
+                  <DetailRow key={name} label={name}>
+                    {value}
+                  </DetailRow>
+                ))}
               </dl>
             )}
           </>

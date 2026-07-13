@@ -5,6 +5,10 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 const IV_LENGTH = 12;
 const AUTH_TAG_LENGTH = 16;
 
+// Reads process.env directly (not lib/env.ts) on purpose: the tests swap
+// ENCRYPTION_KEY between calls to prove key isolation, which a value frozen at
+// import time would break. The regex intentionally mirrors lib/env.ts — keep
+// the two in sync.
 function getKey(): Buffer {
   const hex = process.env.ENCRYPTION_KEY;
   if (!hex || !/^[0-9a-fA-F]{64}$/.test(hex)) {

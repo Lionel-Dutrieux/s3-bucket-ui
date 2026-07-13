@@ -1,8 +1,11 @@
 # Architecture
 
 Bucket UI is a single Next.js 16 app (App Router, server components, server
-actions). No API layer, no client-side data fetching: pages read data on the
-server, mutations go through server actions.
+actions). Pages read data on the server (RSC), mutations go through server
+actions. Server actions are **never** used for reads: the few on-demand reads
+a dialog needs after render (preview URLs, file details, text preview, source
+config) come from GET route handlers under `app/source/[id]/`, consumed with
+TanStack Query through the typed fetchers in the feature's `api.ts`.
 
 ## Layers
 
@@ -17,7 +20,8 @@ features/      One folder per domain. Owns its server actions, services,
                permissions (allowUpload, allowDelete).
   browser/     File browsing and writing: listing service, pure helpers,
                table/grid/preview/upload components, write actions (upload
-               route, delete, rename) that record to the audit log.
+               route, delete, rename) that record to the audit log, and
+               api.ts (client fetchers for the read routes).
 forms/         TanStack Form infrastructure (createFormHook): reusable field
                components (fields/), form components (SubmitButton, FormAlert)
                and error helpers. No domain knowledge.
@@ -61,6 +65,14 @@ Dependency direction: `app → features → (forms | lib) → lib/generated`.
   auth.
 - **Navigation state lives in the URL** (`?prefix=`, `?cursor=`) and the view
   preference in a cookie read server-side — no client data fetching, no flash.
+- **Reads are RSC or GET routes, never server actions**: server actions run as
+  serial POSTs and can't be cached — they're reserved for mutations. Preview
+  media point their `src` at `app/source/[id]/preview` (a redirect to a
+  presigned URL — zero client fetch); details, text preview, share links and
+  source config are GET routes returning JSON, wrapped by typed fetchers in
+  `features/*/api.ts` and consumed with TanStack Query (`useQuery` in dialogs,
+  `queryClient.fetchQuery` for on-click reads). Fetchers throw on failure so
+  query error states carry the route's message.
 
 ## Gotchas
 

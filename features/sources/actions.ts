@@ -109,26 +109,6 @@ export async function updateSource(
   return { success: true };
 }
 
-/** Everything the edit form needs to pre-fill — the secret never leaves the server. */
-export async function getSourceForEdit(id: string): Promise<{
-  source?: Omit<SourceInput, "secretAccessKey">;
-  error?: string;
-}> {
-  const source = await dalGetSource(id);
-  if (!source) return { error: "Source not found." };
-  return {
-    source: {
-      name: source.name,
-      provider: source.provider,
-      endpoint: source.endpoint,
-      bucket: source.bucket,
-      accessKeyId: source.accessKeyId,
-      allowUpload: source.allowUpload,
-      allowDelete: source.allowDelete,
-    },
-  };
-}
-
 export async function removeSource(id: string): Promise<void> {
   await dalDeleteSource(id);
   revalidatePath("/", "layout");

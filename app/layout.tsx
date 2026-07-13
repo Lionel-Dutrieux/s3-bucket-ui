@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { AppSidebar } from "@/components/app-sidebar";
 import { CommandPalette } from "@/components/command-palette";
+import { QueryProvider } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { listSources } from "@/lib/dal/sources";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -52,12 +53,14 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SidebarProvider>
-              <AppSidebar sources={sources} />
-              <SidebarInset>{children}</SidebarInset>
-            </SidebarProvider>
-            <CommandPalette sources={sources} />
-            <Toaster />
+            <QueryProvider>
+              <SidebarProvider>
+                <AppSidebar sources={sources} />
+                <SidebarInset>{children}</SidebarInset>
+              </SidebarProvider>
+              <CommandPalette sources={sources} />
+              <Toaster />
+            </QueryProvider>
           </ThemeProvider>
         </NuqsAdapter>
       </body>

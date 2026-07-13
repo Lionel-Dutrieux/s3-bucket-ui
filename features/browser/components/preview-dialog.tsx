@@ -7,8 +7,9 @@ import {
   Link2,
   Loader2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getPreviewUrl, getTextPreview } from "@/features/browser/read-actions";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { fetchTextPreview, previewSrc } from "@/features/browser/api";
 import { categoryOf, isTextFile } from "@/features/browser/file-types";
 import type { FileEntry } from "@/features/browser/listing";
 import { formatBytes, formatDate } from "@/lib/format";
@@ -43,14 +44,6 @@ export function isPreviewable(name: string): boolean {
   return previewKindOf(name) !== undefined;
 }
 
-interface LoadedPreview {
-  key: string;
-  url?: string;
-  text?: string;
-  truncated?: boolean;
-  error?: string;
-}
-
 const NAV_BUTTON_CLASS =
   "absolute top-1/2 z-10 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full border bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:text-foreground";
 
@@ -70,38 +63,24 @@ export function PreviewDialog({
   onOpenChange: (open: boolean) => void;
   onCopyLink: (file: FileEntry) => void;
 }) {
-  const [loaded, setLoaded] = useState<LoadedPreview | null>(null);
+  // Key of the media file whose element failed to load — cleared implicitly
+  // when the dialog moves to another file.
+  const [failedKey, setFailedKey] = useState<string | null>(null);
 
-  // Presigned URLs are short-lived and text is fetched server-side, so one
-  // load runs per opened file.
-  useEffect(() => {
-    if (!file) return;
-    if (previewKindOf(file.name) === "text") {
-      if (file.size === 0) {
-        setLoaded({ key: file.key, text: "" });
-        return;
-      }
-      let cancelled = false;
-      getTextPreview(sourceId, file.key).then((result) => {
-        if (!cancelled) setLoaded({ key: file.key, ...result });
-      });
-      return () => {
-        cancelled = true;
-      };
-    }
-    let cancelled = false;
-    getPreviewUrl(sourceId, file.key).then((result) => {
-      if (!cancelled) {
-        setLoaded({ key: file.key, url: result.url, error: result.error });
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [sourceId, file]);
-
-  const current = loaded?.key === file?.key ? loaded : null;
   const kind = file ? previewKindOf(file.name) : undefined;
+
+  // Media kinds point their src straight at /source/[id]/preview (which
+  // redirects to a presigned URL) — only text needs a fetch, because bucket
+  // CORS never lets the browser read object bodies. Empty files skip it too.
+  const key = file?.key;
+  const textQuery = useQuery({
+    queryKey: ["text-preview", sourceId, key],
+    queryFn: () => fetchTextPreview(sourceId, key ?? ""),
+    enabled: file !== null && kind === "text" && file.size > 0,
+  });
+
+  const src = file ? previewSrc(sourceId, file.key) : "";
+  const mediaError = file !== null && failedKey === file.key;
 
   const index = file ? files.findIndex((f) => f.key === file.key) : -1;
   const previous = index > 0 ? files[index - 1] : undefined;
@@ -148,50 +127,57 @@ export function PreviewDialog({
             </DialogHeader>
 
             <div className="relative flex min-h-48 items-center justify-center overflow-hidden rounded-md border bg-muted/40">
-              {!current ? (
-                <Loader2
-                  className="size-6 animate-spin text-muted-foreground"
-                  aria-label="Loading preview"
-                />
-              ) : current.error ? (
-                <p className="p-6 text-sm text-muted-foreground">
-                  {current.error}
-                </p>
-              ) : kind === "text" ? (
-                <TextPreview
-                  text={current.text}
-                  truncated={current.truncated}
-                />
-              ) : !current.url ? (
+              {kind === "text" ? (
+                file.size === 0 ? (
+                  <TextPreview text="" />
+                ) : textQuery.isPending ? (
+                  <Loader2
+                    className="size-6 animate-spin text-muted-foreground"
+                    aria-label="Loading preview"
+                  />
+                ) : textQuery.error ? (
+                  <p className="p-6 text-sm text-muted-foreground">
+                    {textQuery.error.message}
+                  </p>
+                ) : (
+                  <TextPreview
+                    text={textQuery.data?.text}
+                    truncated={textQuery.data?.truncated}
+                  />
+                )
+              ) : mediaError || !kind ? (
                 <p className="p-6 text-sm text-muted-foreground">
                   Could not load a preview for this file.
                 </p>
               ) : kind === "image" ? (
                 // biome-ignore lint/performance/noImgElement: presigned bucket URL, not optimizable
                 <img
-                  src={current.url}
+                  src={src}
                   alt={file.name}
+                  onError={() => setFailedKey(file.key)}
                   className="max-h-[70vh] w-auto max-w-full object-contain"
                 />
               ) : kind === "video" ? (
                 // biome-ignore lint/a11y/useMediaCaption: arbitrary bucket objects carry no caption tracks
                 <video
-                  src={current.url}
+                  src={src}
                   controls
+                  onError={() => setFailedKey(file.key)}
                   className="max-h-[70vh] w-full bg-black"
                 />
               ) : kind === "audio" ? (
                 // biome-ignore lint/a11y/useMediaCaption: arbitrary bucket objects carry no caption tracks
                 <audio
-                  src={current.url}
+                  src={src}
                   controls
+                  onError={() => setFailedKey(file.key)}
                   className="w-full px-6 py-10"
                 />
               ) : (
                 // Empty sandbox: renders the PDF but blocks any scripts a
                 // mislabeled object could smuggle in.
                 <iframe
-                  src={current.url}
+                  src={src}
                   sandbox=""
                   title={file.name}
                   className="h-[70vh] w-full"
