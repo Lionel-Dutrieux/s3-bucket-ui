@@ -34,11 +34,8 @@ yarn-error.log*
 .env*
 !.env.example
 
-# embedded database
-/data/
-
 # prisma generated client
-/lib/generated/
+/src/generated/
 
 # vercel
 .vercel
