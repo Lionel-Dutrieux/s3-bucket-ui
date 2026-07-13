@@ -21,20 +21,11 @@ import {
   type RowSelectionState,
   type SortingState,
 } from "@tanstack/react-table";
-import {
-  Download,
-  FolderOpen,
-  FolderPlus,
-  Search,
-  SearchX,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
+import { FolderOpen, SearchX } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { downloadUrl } from "@/features/browser/api/client";
 import { browserQueries } from "@/features/browser/api/queries";
@@ -47,6 +38,7 @@ import {
   browserColumns,
   selectColumn,
 } from "@/features/browser/components/browser-columns";
+import { BrowserToolbar } from "@/features/browser/components/browser-toolbar";
 import { DetailsDialog } from "@/features/browser/components/details-dialog";
 import {
   DragPreview,
@@ -54,9 +46,9 @@ import {
   type DragData,
   type DropData,
 } from "@/features/browser/components/dnd";
+import { DropOverlay } from "@/features/browser/components/drop-overlay";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
-import { GridSortMenu } from "@/features/browser/components/grid-sort-menu";
 import {
   MoveDialog,
   type MoveRequest,
@@ -67,8 +59,8 @@ import {
   PreviewDialog,
 } from "@/features/browser/components/preview-dialog";
 import { RenameDialog } from "@/features/browser/components/rename-dialog";
+import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
 import { UploadTray } from "@/features/browser/components/upload-tray";
-import { filesFromDataTransfer } from "@/features/browser/lib/drop";
 import {
   buildEntries,
   entryMatches,
@@ -78,27 +70,26 @@ import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 import {
   folderName,
   planMove,
-  type EntryTarget as MoveTarget,
+  type EntryTarget,
 } from "@/features/browser/lib/move";
 import { sortParser } from "@/features/browser/lib/sort-param";
+import { useDropUpload } from "@/features/browser/hooks/use-drop-upload";
 import { useUploads } from "@/features/browser/hooks/use-uploads";
 import type { ViewMode } from "@/features/browser/lib/view";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { parentPrefix as parentPrefixOf } from "@/lib/paths";
 
 export interface BrowserPermissions {
   upload: boolean;
   delete: boolean;
+}
+
+/** Folder/file union → the shape the move actions take. */
+function toTarget(entry: BrowserEntry): EntryTarget {
+  return entry.kind === "folder"
+    ? { kind: "folder", prefix: entry.prefix }
+    : { kind: "file", key: entry.key };
 }
 
 /**
@@ -140,18 +131,19 @@ export function FileBrowser({
   const [deleting, setDeleting] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [newFolderOpen, setNewFolderOpen] = useState(false);
-  const [dragging, setDragging] = useState(false);
 
   // A selection belongs to one folder — navigating away discards it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is intentionally keyed on the folder change
   useEffect(() => {
     setRowSelection({});
   }, [prefix]);
-  const dragDepth = useRef(0);
-  const fileInput = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => router.refresh(), [router]);
   const uploads = useUploads(sourceId, prefix, refresh);
+  const { dragging, dropZoneProps } = useDropUpload(
+    permissions.upload,
+    uploads.addFiles,
+  );
   // Rename writes the new object and deletes the old one, so it needs both.
   const canRename = permissions.upload && permissions.delete;
   // Moving needs both too — a move is a copy + delete under the hood.
@@ -259,15 +251,7 @@ export function FileBrowser({
     );
 
   // The "move to parent folder" drop zone's destination — null at the root.
-  const parentPrefix =
-    prefix === ""
-      ? null
-      : (() => {
-          const segments = prefix.split("/").filter(Boolean);
-          return segments.length > 1
-            ? `${segments.slice(0, -1).join("/")}/`
-            : "";
-        })();
+  const parentPrefix = parentPrefixOf(prefix);
 
   const gridSelection = {
     isSelected: (id: string) => rowSelection[id] === true,
@@ -310,11 +294,7 @@ export function FileBrowser({
   };
 
   const handleBulkDelete = async () => {
-    const targets: MoveTarget[] = selectedRows.map((row) =>
-      row.original.kind === "folder"
-        ? { kind: "folder", prefix: row.original.prefix }
-        : { kind: "file", key: row.original.key },
-    );
+    const targets = selectedRows.map((row) => toTarget(row.original));
     setDeleting(true);
     const result = await deleteEntries(sourceId, targets);
     setDeleting(false);
@@ -338,51 +318,14 @@ export function FileBrowser({
         entry.kind === "file" && isPreviewable(entry.name),
     );
 
-  // dragenter/dragleave fire for every child the cursor crosses — a depth
-  // counter keeps the overlay stable until the pointer truly leaves.
-  const dropZoneProps = permissions.upload
-    ? {
-        onDragEnter: (event: React.DragEvent) => {
-          if (!event.dataTransfer.types.includes("Files")) return;
-          event.preventDefault();
-          dragDepth.current += 1;
-          setDragging(true);
-        },
-        onDragOver: (event: React.DragEvent) => {
-          if (event.dataTransfer.types.includes("Files")) {
-            event.preventDefault();
-          }
-        },
-        onDragLeave: () => {
-          dragDepth.current = Math.max(0, dragDepth.current - 1);
-          if (dragDepth.current === 0) setDragging(false);
-        },
-        onDrop: (event: React.DragEvent) => {
-          event.preventDefault();
-          dragDepth.current = 0;
-          setDragging(false);
-          // Grabs the entry handles synchronously, then walks folders async.
-          filesFromDataTransfer(event.dataTransfer).then((dropped) => {
-            if (dropped.length > 0) uploads.addFiles(dropped);
-          });
-        },
-      }
-    : {};
-
   // The moving set: the whole selection if the dragged row is part of it,
   // otherwise just the dragged row.
-  const movingTargets = (dragged: DragData): MoveTarget[] => {
+  const movingTargets = (dragged: DragData): EntryTarget[] => {
     const selectedIds = new Set(Object.keys(rowSelection));
-    const source =
-      selectedIds.size > 1 && selectedIds.has(dragged.rowId)
-        ? selectedRows.map((row) => row.original)
-        : null;
-    if (!source) return [dragged.target];
-    return source.map((entry) =>
-      entry.kind === "folder"
-        ? { kind: "folder", prefix: entry.prefix }
-        : { kind: "file", key: entry.key },
-    );
+    if (selectedIds.size > 1 && selectedIds.has(dragged.rowId)) {
+      return selectedRows.map((row) => toTarget(row.original));
+    }
+    return [dragged.target];
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -420,118 +363,29 @@ export function FileBrowser({
       {...dropZoneProps}
     >
       {selectedCount > 0 ? (
-        <div className="flex h-8 items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7"
-            onClick={() => setRowSelection({})}
-            aria-label="Clear selection"
-          >
-            <X className="size-4" aria-hidden />
-          </Button>
-          <span className="text-sm font-medium tabular-nums">
-            {selectedCount} selected
-          </span>
-          <button
-            type="button"
-            onClick={toggleSelectAll}
-            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            {allVisibleSelected ? "Deselect all" : "Select all"}
-          </button>
-          <div className="ml-auto flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8"
-              onClick={handleBulkDownload}
-              disabled={selectedFiles.length === 0}
-            >
-              <Download aria-hidden />
-              Download
-            </Button>
-            {permissions.delete ? (
-              <Button
-                variant="destructive"
-                size="sm"
-                className="h-8"
-                onClick={() => setBulkConfirmOpen(true)}
-              >
-                <Trash2 aria-hidden />
-                Delete
-              </Button>
-            ) : null}
-          </div>
-        </div>
+        <SelectionToolbar
+          selectedCount={selectedCount}
+          allVisibleSelected={allVisibleSelected}
+          onClear={() => setRowSelection({})}
+          onToggleSelectAll={toggleSelectAll}
+          onBulkDownload={handleBulkDownload}
+          bulkDownloadDisabled={selectedFiles.length === 0}
+          canDelete={permissions.delete}
+          onBulkDelete={() => setBulkConfirmOpen(true)}
+        />
       ) : (
-        <div className="flex items-center gap-3">
-          {entries.length > 0 ? (
-            <>
-              <div className="relative w-full max-w-xs">
-                <Search
-                  className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden
-                />
-                <Input
-                  value={query}
-                  onChange={(event) =>
-                    table.setGlobalFilter(event.target.value)
-                  }
-                  placeholder="Filter by name"
-                  aria-label="Filter by name"
-                  className="h-8 pl-8"
-                />
-              </div>
-              {query ? (
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  {rows.length} match{rows.length === 1 ? "" : "es"}
-                </span>
-              ) : null}
-            </>
-          ) : null}
-          <div className="ml-auto flex items-center gap-2">
-            {view === "grid" && entries.length > 0 ? (
-              <GridSortMenu
-                sorting={sorting}
-                onSortingChange={handleSortingChange}
-              />
-            ) : null}
-            {permissions.upload ? (
-              <>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8"
-                  onClick={() => setNewFolderOpen(true)}
-                >
-                  <FolderPlus aria-hidden />
-                  New folder
-                </Button>
-                <input
-                  ref={fileInput}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={(event) => {
-                    if (event.target.files?.length) {
-                      uploads.addFiles(event.target.files);
-                    }
-                    event.target.value = "";
-                  }}
-                />
-                <Button
-                  size="sm"
-                  className="h-8"
-                  onClick={() => fileInput.current?.click()}
-                >
-                  <Upload aria-hidden />
-                  Upload
-                </Button>
-              </>
-            ) : null}
-          </div>
-        </div>
+        <BrowserToolbar
+          hasEntries={entries.length > 0}
+          query={query}
+          matchCount={rows.length}
+          onQueryChange={(value) => table.setGlobalFilter(value)}
+          view={view}
+          sorting={sorting}
+          onSortingChange={handleSortingChange}
+          canUpload={permissions.upload}
+          onNewFolder={() => setNewFolderOpen(true)}
+          onUploadFiles={uploads.addFiles}
+        />
       )}
 
       {noMatches ? (
@@ -595,21 +449,7 @@ export function FileBrowser({
         </DndContext>
       )}
 
-      {dragging ? (
-        <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10 backdrop-blur-[1px]">
-          <div className="flex flex-col items-center gap-3 rounded-xl bg-background/95 px-6 py-5 text-center shadow-lg">
-            <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Upload className="size-6" aria-hidden />
-            </div>
-            <div>
-              <p className="text-sm font-semibold">Drop to upload</p>
-              <p className="text-xs text-muted-foreground">
-                Release to add files to this folder
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {dragging ? <DropOverlay /> : null}
 
       <PreviewDialog
         sourceId={sourceId}
@@ -629,70 +469,36 @@ export function FileBrowser({
         }}
       />
 
-      <AlertDialog
+      <ConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => {
           if (!open && !deleting) setDeleteTarget(null);
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="break-all">
-              Delete {deleteTarget?.name}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {deleteTarget?.kind === "folder"
-                ? "This permanently deletes the folder and everything inside it from the bucket. There is no undo."
-                : "This permanently deletes the object from the bucket. There is no undo."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(event) => {
-                event.preventDefault();
-                handleDelete();
-              }}
-              disabled={deleting}
-              className="bg-destructive text-white hover:bg-destructive/90"
-            >
-              {deleting ? "Deleting…" : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={`Delete ${deleteTarget?.name}?`}
+        titleClassName="break-all"
+        description={
+          deleteTarget?.kind === "folder"
+            ? "This permanently deletes the folder and everything inside it from the bucket. There is no undo."
+            : "This permanently deletes the object from the bucket. There is no undo."
+        }
+        confirmLabel="Delete"
+        pendingLabel="Deleting…"
+        pending={deleting}
+        onConfirm={handleDelete}
+      />
 
-      <AlertDialog
+      <ConfirmDialog
         open={bulkConfirmOpen}
         onOpenChange={(open) => {
           if (!deleting) setBulkConfirmOpen(open);
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Delete {selectedCount} item{selectedCount === 1 ? "" : "s"}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This permanently deletes the selection from the bucket — folders
-              with everything inside them. There is no undo.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(event) => {
-                event.preventDefault();
-                handleBulkDelete();
-              }}
-              disabled={deleting}
-              className="bg-destructive text-white hover:bg-destructive/90"
-            >
-              {deleting ? "Deleting…" : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={`Delete ${selectedCount} item${selectedCount === 1 ? "" : "s"}?`}
+        description="This permanently deletes the selection from the bucket — folders with everything inside them. There is no undo."
+        confirmLabel="Delete"
+        pendingLabel="Deleting…"
+        pending={deleting}
+        onConfirm={handleBulkDelete}
+      />
 
       <RenameDialog
         sourceId={sourceId}

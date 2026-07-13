@@ -10,16 +10,7 @@ import { sourcesQueries } from "@/features/sources/api/queries";
 import { SourceForm } from "@/features/sources/components/source-form";
 import type { SourceFormValues } from "@/features/sources/lib/schema";
 import type { SourceSummary } from "@/lib/dal/sources";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -126,30 +117,16 @@ export function SourceMenu({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove {source.name}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This only removes the source from Bucket UI — nothing in your
-              bucket is touched.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(event) => {
-                event.preventDefault();
-                handleRemove();
-              }}
-              disabled={pending}
-              className="bg-destructive text-white hover:bg-destructive/90"
-            >
-              {pending ? "Removing…" : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`Remove ${source.name}?`}
+        description="This only removes the source from Bucket UI — nothing in your bucket is touched."
+        confirmLabel="Remove"
+        pendingLabel="Removing…"
+        pending={pending}
+        onConfirm={handleRemove}
+      />
     </>
   );
 }

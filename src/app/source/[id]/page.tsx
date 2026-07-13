@@ -14,6 +14,7 @@ import {
 } from "@/features/browser/server/service";
 import { VIEW_COOKIE, type ViewMode } from "@/features/browser/lib/view";
 import { getSource } from "@/lib/dal/sources";
+import { parentPrefix as parentPrefixOf } from "@/lib/paths";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -130,9 +131,8 @@ export default async function SourcePage({
 }
 
 function UpButton({ sourceId, prefix }: { sourceId: string; prefix: string }) {
-  const segments = prefix.split("/").filter(Boolean);
-  const parentPrefix =
-    segments.length > 1 ? `${segments.slice(0, -1).join("/")}/` : "";
+  // Only rendered inside a folder, so the parent is never null.
+  const parentPrefix = parentPrefixOf(prefix) ?? "";
 
   return (
     <Button variant="ghost" size="icon" className="size-7 shrink-0" asChild>
