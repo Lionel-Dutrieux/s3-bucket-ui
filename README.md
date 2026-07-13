@@ -1,12 +1,20 @@
 # Bucket UI
 
+[![CI](https://github.com/Lionel-Dutrieux/s3-bucket-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/Lionel-Dutrieux/s3-bucket-ui/actions/workflows/ci.yml)
+
 A read-only file browser for your storage buckets, with a Google-Drive-style
 UI. Add as many sources as you want, browse folders, download files via
 presigned URLs.
 
-Features: list/grid views, name filter and column sorting (current page),
-file-type filter, image/PDF preview, shareable presigned links (1 h),
-`Ctrl+K` command palette, dark mode.
+Features:
+
+- **Browse** — list and grid views (with lazy image thumbnails), file-type
+  filter, name filter and column sorting shareable via the URL (`?q=`,
+  `?sort=`), `Ctrl+K` command palette, dark mode.
+- **Preview** — images, PDFs (sandboxed), video, audio, and plain
+  text/code/Markdown (first 1 MB), without leaving the app.
+- **Share & inspect** — presigned download links (1 h), per-file details
+  (Content-Type, ETag, user metadata, copyable key).
 
 Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
 Azure Blob Storage, MinIO, DigitalOcean Spaces.
@@ -19,7 +27,7 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 
 - Next.js 16 (App Router, Turbopack), React 19, TypeScript 7 (native compiler)
 - Biome (linting + formatting)
-- Tailwind CSS v4 + shadcn/ui, TanStack Form
+- Tailwind CSS v4 + shadcn/ui, TanStack Form + TanStack Table, nuqs (URL state)
 - [files-sdk](https://files-sdk.dev) (S3 + Azure adapters) for bucket access
 - Prisma 7 + SQLite via better-sqlite3 (embedded DB at `data/app.db`)
 - Bucket secrets encrypted at rest (AES-256-GCM)

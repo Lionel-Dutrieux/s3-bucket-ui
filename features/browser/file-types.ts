@@ -72,3 +72,16 @@ export function categoryOf(name: string): FileCategory | undefined {
   const extension = name.split(".").pop()?.toLowerCase() ?? "";
   return EXTENSION_CATEGORIES[extension];
 }
+
+// Plain-text extensions outside the "code" category. doc/docx/rtf (document)
+// and xls/xlsx (spreadsheet) are binary formats — not text-previewable.
+const TEXT_DOCUMENT_EXTENSIONS = new Set(["txt", "md", "log", "csv"]);
+
+/** Whether the file's content can be rendered as plain text in the preview. */
+export function isTextFile(name: string): boolean {
+  const extension = name.split(".").pop()?.toLowerCase() ?? "";
+  return (
+    EXTENSION_CATEGORIES[extension] === "code" ||
+    TEXT_DOCUMENT_EXTENSIONS.has(extension)
+  );
+}

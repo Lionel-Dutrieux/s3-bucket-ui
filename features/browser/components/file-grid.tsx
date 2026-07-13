@@ -5,6 +5,7 @@ import { Folder } from "lucide-react";
 import { formatBytes } from "@/lib/format";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
+import { categoryOf } from "@/features/browser/file-types";
 import type { FileEntry, FolderEntry } from "@/features/browser/listing";
 
 const CARD_CLASS =
@@ -64,11 +65,21 @@ export function FileGrid({
             {files.map((file) => {
               const body = (
                 <>
-                  <div className="flex aspect-[4/3] items-center justify-center bg-muted/40">
-                    <FileIcon
-                      name={file.name}
-                      className="size-10 transition-transform group-hover:scale-105"
-                    />
+                  <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-muted/40">
+                    {categoryOf(file.name) === "image" ? (
+                      // biome-ignore lint/performance/noImgElement: redirects to a presigned bucket URL, not optimizable
+                      <img
+                        src={`/source/${sourceId}/thumbnail?key=${encodeURIComponent(file.key)}`}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      />
+                    ) : (
+                      <FileIcon
+                        name={file.name}
+                        className="size-10 transition-transform group-hover:scale-105"
+                      />
+                    )}
                   </div>
                   <div className="space-y-0.5 border-t px-3 py-2">
                     <p className="truncate text-sm font-medium">{file.name}</p>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef, Row, RowData } from "@tanstack/react-table";
-import { Download, Folder, Link2 } from "lucide-react";
+import { Download, Folder, Info, Link2 } from "lucide-react";
 import Link from "next/link";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
@@ -20,6 +20,7 @@ declare module "@tanstack/react-table" {
     sourceId: string;
     onPreview: (file: FileEntry) => void;
     onCopyLink: (file: FileEntry) => void;
+    onDetails: (file: FileEntry) => void;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -124,15 +125,24 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     header: "",
     enableSorting: false,
     meta: {
-      headClassName: "w-20",
+      headClassName: "w-28",
       cellClassName: "p-0 pr-2 text-right",
     },
     cell: ({ row, table }) => {
       const entry = row.original;
       if (entry.kind !== "file") return null;
-      const { sourceId, onCopyLink } = table.options.meta ?? {};
+      const { sourceId, onCopyLink, onDetails } = table.options.meta ?? {};
       return (
         <>
+          <button
+            type="button"
+            onClick={() => onDetails?.(entry)}
+            className={ROW_ACTION_CLASS}
+            aria-label={`Details of ${entry.name}`}
+            title="Details"
+          >
+            <Info className="size-4" aria-hidden />
+          </button>
           <button
             type="button"
             onClick={() => onCopyLink?.(entry)}
