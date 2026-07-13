@@ -6,11 +6,14 @@ import {
   DELETE_ENTRIES_MAX,
   DELETE_FOLDER_BATCH,
   DELETE_FOLDER_MAX_ROUNDS,
-  RENAME_FOLDER_CONCURRENCY,
-  RENAME_FOLDER_LIST_BATCH,
-  RENAME_FOLDER_MAX_OBJECTS,
+  FOLDER_MOVE_CONCURRENCY,
+  FOLDER_MOVE_LIST_BATCH,
+  FOLDER_MOVE_MAX_OBJECTS,
 } from "@/features/browser/limits";
+import type { EntryTarget } from "@/features/browser/move";
 import { recordOperation } from "@/lib/dal/operations";
+
+export type { EntryTarget };
 
 const RENAME_DENIED =
   "Renaming needs both upload and delete enabled on this source.";
@@ -97,6 +100,45 @@ export async function renameObject(
   );
 }
 
+/**
+ * Moves every object under `srcPrefix` to `destPrefix` (copy + delete each),
+ * bounded. Returns the moved count, or an error string when the prefix is too
+ * large. Shared by folder rename and folder move.
+ */
+async function movePrefix(
+  files: Files,
+  srcPrefix: string,
+  destPrefix: string,
+): Promise<{ error?: string; count?: number }> {
+  const keys: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await files.list({
+      prefix: srcPrefix,
+      cursor,
+      limit: FOLDER_MOVE_LIST_BATCH,
+    });
+    keys.push(...page.items.map((item) => item.key));
+    cursor = page.cursor;
+    if (keys.length > FOLDER_MOVE_MAX_OBJECTS) {
+      return {
+        error: `This folder holds more than ${FOLDER_MOVE_MAX_OBJECTS} objects — too large to move in one go.`,
+      };
+    }
+  } while (cursor);
+
+  for (let i = 0; i < keys.length; i += FOLDER_MOVE_CONCURRENCY) {
+    await Promise.all(
+      keys
+        .slice(i, i + FOLDER_MOVE_CONCURRENCY)
+        .map((key) =>
+          files.move(key, destPrefix + key.slice(srcPrefix.length)),
+        ),
+    );
+  }
+  return { count: keys.length };
+}
+
 /** Renames a folder by moving everything under its prefix. Needs both write
  * permissions, like {@link renameObject}. */
 export async function renameFolder(
@@ -131,40 +173,15 @@ export async function renameFolder(
         return { error: "A folder with that name already exists here." };
       }
 
-      // Collect every key first so a partially-renamed folder is detectable
-      // before any move happens.
-      const keys: string[] = [];
-      let cursor: string | undefined;
-      do {
-        const page = await files.list({
-          prefix,
-          cursor,
-          limit: RENAME_FOLDER_LIST_BATCH,
-        });
-        keys.push(...page.items.map((item) => item.key));
-        cursor = page.cursor;
-        if (keys.length > RENAME_FOLDER_MAX_OBJECTS) {
-          return {
-            error: `This folder holds more than ${RENAME_FOLDER_MAX_OBJECTS} objects — too large to rename in one go.`,
-          };
-        }
-      } while (cursor);
+      const result = await movePrefix(files, prefix, newPrefix);
+      if (result.error) return { error: result.error };
 
-      for (let i = 0; i < keys.length; i += RENAME_FOLDER_CONCURRENCY) {
-        await Promise.all(
-          keys
-            .slice(i, i + RENAME_FOLDER_CONCURRENCY)
-            .map((key) =>
-              files.move(key, newPrefix + key.slice(prefix.length)),
-            ),
-        );
-      }
       await recordOperation({
         action: "rename-folder",
         sourceId: source.id,
         sourceName: source.name,
         target: prefix,
-        detail: `→ ${trimmed}/ (${keys.length} object${keys.length === 1 ? "" : "s"})`,
+        detail: `→ ${trimmed}/ (${result.count} object${result.count === 1 ? "" : "s"})`,
       });
       return {};
     },
@@ -252,17 +269,13 @@ export async function deleteFolder(
   );
 }
 
-export type DeleteTarget =
-  | { kind: "file"; key: string }
-  | { kind: "folder"; prefix: string };
-
 /**
  * Bulk delete for a multi-selection: files go through one native bulk delete,
  * folders each get the recursive prefix sweep. Gated on allowDelete.
  */
 export async function deleteEntries(
   sourceId: string,
-  targets: DeleteTarget[],
+  targets: EntryTarget[],
 ): Promise<{ error?: string }> {
   if (targets.length === 0) return {};
   if (targets.length > DELETE_ENTRIES_MAX) {

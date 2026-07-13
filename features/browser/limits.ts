@@ -14,13 +14,13 @@ export const PREVIEW_TTL_SECONDS = 600;
 /** Bytes fetched for the inline text preview (first 1 MiB of the file). */
 export const TEXT_PREVIEW_MAX_BYTES = 1024 * 1024;
 
-/** Renaming a folder moves each object (copy + delete) — bounded so a server
- * action can't churn through a giant prefix. */
-export const RENAME_FOLDER_MAX_OBJECTS = 1000;
-/** Objects moved in parallel while renaming a folder. */
-export const RENAME_FOLDER_CONCURRENCY = 10;
-/** Keys listed per page while collecting a folder's contents to rename. */
-export const RENAME_FOLDER_LIST_BATCH = 1000;
+/** Renaming/moving a folder moves each object (copy + delete) — bounded so a
+ * server action can't churn through a giant prefix. */
+export const FOLDER_MOVE_MAX_OBJECTS = 1000;
+/** Objects moved in parallel while renaming/moving a folder. */
+export const FOLDER_MOVE_CONCURRENCY = 10;
+/** Keys listed per page while collecting a folder's contents to move. */
+export const FOLDER_MOVE_LIST_BATCH = 1000;
 
 /** Objects deleted per bulk call (S3 caps bulk delete at 1000 keys). */
 export const DELETE_FOLDER_BATCH = 1000;
@@ -28,3 +28,5 @@ export const DELETE_FOLDER_BATCH = 1000;
 export const DELETE_FOLDER_MAX_ROUNDS = 50;
 /** Maximum items in one multi-select delete. */
 export const DELETE_ENTRIES_MAX = 500;
+/** Maximum items in one drag-and-drop move. */
+export const MOVE_ENTRIES_MAX = 500;

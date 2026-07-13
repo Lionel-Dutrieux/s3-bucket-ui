@@ -28,7 +28,7 @@ import {
   deleteEntries,
   deleteFolder,
   deleteObject,
-  type DeleteTarget,
+  type EntryTarget,
 } from "@/features/browser/write-actions";
 import {
   browserColumns,
@@ -243,7 +243,7 @@ export function FileBrowser({
   };
 
   const handleBulkDelete = async () => {
-    const targets: DeleteTarget[] = selectedRows.map((row) =>
+    const targets: EntryTarget[] = selectedRows.map((row) =>
       row.original.kind === "folder"
         ? { kind: "folder", prefix: row.original.prefix }
         : { kind: "file", key: row.original.key },
