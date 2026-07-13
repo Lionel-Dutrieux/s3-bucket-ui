@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   description: "File manager for your storage buckets — read-only by default.",
 };
 
-// Every page hangs off the live SQLite database (the sidebar lists sources),
-// so nothing is prerendered at build time — builds run without a database.
+// Every page hangs off the live database (the sidebar lists sources), so
+// nothing is prerendered at build time — builds run without a database.
 export const dynamic = "force-dynamic";
 
 export default async function RootLayout({

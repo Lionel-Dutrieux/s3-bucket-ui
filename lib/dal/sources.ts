@@ -30,7 +30,7 @@ export interface SourceInput {
 }
 
 // cache() deduplicates reads within one server render — the layout and the
-// page both ask for sources without hitting SQLite twice.
+// page both ask for sources without hitting the database twice.
 export const listSources = cache(async (): Promise<SourceSummary[]> => {
   return prisma.source.findMany({
     select: { id: true, name: true, bucket: true, provider: true },
