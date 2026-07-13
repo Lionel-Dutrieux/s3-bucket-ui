@@ -7,7 +7,8 @@ source (bucket). Built on `@dnd-kit`, reusing the existing `files.move`
 ## Goals
 
 - In list **and** grid views, drag one or more files/folders onto a **folder**
-  (row or tile) or onto a **breadcrumb** segment to move them there.
+  (row or tile), or onto a **"parent folder" drop zone** shown at the top of the
+  view when not at the root, to move them there.
 - Respect the current multi-selection: dragging a selected item moves the whole
   selection; dragging an unselected item moves just that item.
 - A **confirmation dialog** before every move ("Move N item(s) into "folder"?").
@@ -21,6 +22,10 @@ source (bucket). Built on `@dnd-kit`, reusing the existing `files.move`
 - Progress bars for large folder moves — a spinner in the dialog is enough.
 - Reordering; drag-to-upload (that already exists via the native file drop and
   stays independent).
+- **Breadcrumb** as a drop target — it lives in the page header (a server
+  component) outside the `DndContext`, which lives in `FileBrowser`. "Move to
+  parent" is covered by the in-view parent drop zone instead; a droppable
+  breadcrumb could come later via a page-level client shell.
 
 ## Approach
 
@@ -43,7 +48,7 @@ overlay — the feature is invisible.
 source/[id]/page.tsx
   └─ FileBrowser (canMove)
        └─ <DndContext sensors=[Pointer(distance 8px), Keyboard]>
-            ├─ SourceBreadcrumb   → each ancestor crumb is a droppable {prefix}
+            ├─ ParentDropZone     → droppable {prefix: parentPrefix}, shown when prefix !== ""
             ├─ FileTable          → each row: draggable(entry) + folder rows droppable
             ├─ FileGrid           → each tile: draggable(entry) + folder tiles droppable
             ├─ <DragOverlay>      → compact chip: icon+name, or "N items"
@@ -52,9 +57,9 @@ source/[id]/page.tsx
 
 - **Draggable** (`useDraggable`): file and folder rows/tiles. `id` = the entry's
   key (file) or prefix (folder); `data` carries the `EntryTarget`.
-- **Droppable** (`useDroppable`): folder rows/tiles (`data: { prefix }`) and
-  breadcrumb ancestor segments (`data: { prefix }`). The current folder and the
-  active (last) crumb are **not** targets.
+- **Droppable** (`useDroppable`): folder rows/tiles (`data: { prefix }`) and the
+  parent drop zone (`data: { prefix: parentPrefix }`), rendered only when the
+  current folder isn't the root. The current folder itself is never a target.
 - **PointerSensor** activates after ~8px of movement, so a plain click still
   selects the row, toggles the checkbox, or opens the folder.
 - **onDragStart**: the "moving set" = the current selection if the dragged entry
@@ -151,8 +156,8 @@ Changed:
   `RENAME_FOLDER_*` caps to `FOLDER_MOVE_*` (shared by rename and move).
 - `features/browser/components/file-browser.tsx` — `DndContext`, sensors,
   drag/drop handlers, `DragOverlay`, `MoveDialog` wiring, `canMove`.
-- `features/browser/components/file-table.tsx`, `file-grid.tsx`,
-  `source-breadcrumb.tsx` — register draggable/droppable when `canMove`.
+- `features/browser/components/file-table.tsx`, `file-grid.tsx` — register
+  draggable/droppable rows and tiles when `canMove`.
 - `lib/dal/operations.ts` — `"move"` action.
 - `features/browser/operation-labels.ts` — `move` label/icon.
 - `package.json` — `@dnd-kit/core`, `@dnd-kit/utilities`.
@@ -161,4 +166,5 @@ Changed:
 
 `pnpm typecheck && pnpm lint && pnpm test && pnpm build`, then manual DnD
 checks in `pnpm dev` (move file into folder, move folder, multi-select move,
-move via breadcrumb, no-op/self/conflict refusals, permission-off = no DnD).
+move to parent via the parent drop zone, no-op/self/conflict refusals,
+permission-off = no DnD).
