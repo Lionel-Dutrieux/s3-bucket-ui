@@ -13,7 +13,7 @@ export default defineConfig({
         find: /^server-only$/,
         replacement: path.resolve(rootDir, "test/server-only-stub.ts"),
       },
-      { find: /^@\//, replacement: `${rootDir}/` },
+      { find: /^@\//, replacement: `${rootDir}/src/` },
     ],
   },
   test: {

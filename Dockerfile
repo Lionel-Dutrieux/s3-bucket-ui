@@ -39,7 +39,7 @@ COPY --from=build --chown=node:node /app/public ./public
 # Prod node_modules (with the Prisma CLI + engines), schema, migrations and the
 # Prisma config — everything `prisma migrate deploy` needs at boot.
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/lib/generated ./lib/generated
+COPY --from=build --chown=node:node /app/src/generated ./src/generated
 COPY --from=build --chown=node:node /app/prisma ./prisma
 COPY --from=build --chown=node:node /app/prisma.config.ts ./prisma.config.ts
 COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh

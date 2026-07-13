@@ -1,7 +1,7 @@
 import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { env } from "@/lib/env";
-import { PrismaClient } from "@/lib/generated/prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
 
 // Schema evolution is handled by real Prisma migrations (`prisma/migrations/`,
 // applied with `prisma migrate deploy` on boot in production) — this module
