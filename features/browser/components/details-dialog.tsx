@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   getFileDetails,
   type FileDetailsResult,
-} from "@/features/browser/actions";
+} from "@/features/browser/read-actions";
 import type { FileEntry } from "@/features/browser/listing";
 import { formatBytes, formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";

@@ -1,12 +1,11 @@
 import "server-only";
-import { getFilesClient } from "@/features/sources/storage";
 import {
   partitionListing,
   type FolderListing,
 } from "@/features/browser/listing";
+import { PAGE_SIZE } from "@/features/browser/limits";
+import { getFilesClient } from "@/features/sources/storage";
 import type { Source } from "@/lib/dal/sources";
-
-const PAGE_SIZE = 200;
 
 export type ListErrorReason =
   | "credentials"

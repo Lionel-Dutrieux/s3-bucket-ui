@@ -1,5 +1,6 @@
 import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { env } from "@/lib/env";
 import { PrismaClient } from "@/lib/generated/prisma/client";
 
 // Schema evolution is handled by real Prisma migrations (`prisma/migrations/`,
@@ -7,19 +8,22 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 // only opens the connection. There is no hand-written bootstrap DDL to keep in
 // sync with the schema.
 function createClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error(
-      "DATABASE_URL is not set. Point it at your PostgreSQL database, " +
-        "e.g. postgresql://user:password@localhost:5432/bucket_ui",
-    );
-  }
-
-  const adapter = new PrismaPg({ connectionString });
+  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
   return new PrismaClient({ adapter });
 }
 
-// Survive Turbopack HMR re-evaluation in dev without stacking connections.
+// The connection is created lazily, on first use — never at import time. That
+// keeps `next build` (which imports this module while collecting page data but
+// never runs a query) from needing a database. Survives Turbopack HMR
+// re-evaluation in dev without stacking connections.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-globalForPrisma.prisma ??= createClient();
-export const prisma = globalForPrisma.prisma;
+
+export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    if (!globalForPrisma.prisma) {
+      globalForPrisma.prisma = createClient();
+    }
+    const client = globalForPrisma.prisma;
+    return Reflect.get(client, property, client);
+  },
+});

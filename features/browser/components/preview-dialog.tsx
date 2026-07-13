@@ -8,7 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getPreviewUrl, getTextPreview } from "@/features/browser/actions";
+import { getPreviewUrl, getTextPreview } from "@/features/browser/read-actions";
 import { categoryOf, isTextFile } from "@/features/browser/file-types";
 import type { FileEntry } from "@/features/browser/listing";
 import { formatBytes, formatDate } from "@/lib/format";

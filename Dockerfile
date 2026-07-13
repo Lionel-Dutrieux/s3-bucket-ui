@@ -18,7 +18,9 @@ FROM base AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm exec prisma generate && pnpm build
+# SKIP_ENV_VALIDATION: the build never touches the database or secrets; env is
+# validated at runtime instead (instrumentation.ts).
+RUN pnpm exec prisma generate && SKIP_ENV_VALIDATION=1 pnpm build
 # Drop dev-only dependencies; `prisma` stays (it is a runtime dependency used
 # by `migrate deploy` in the entrypoint).
 RUN pnpm prune --prod

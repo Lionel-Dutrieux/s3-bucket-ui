@@ -25,6 +25,7 @@
     "@azure/storage-blob": "^12.33.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-form": "^1.33.1",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",

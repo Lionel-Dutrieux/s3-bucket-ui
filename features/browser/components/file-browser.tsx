@@ -23,13 +23,13 @@ import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { getShareUrl } from "@/features/browser/read-actions";
 import {
   deleteEntries,
   deleteFolder,
   deleteObject,
-  getShareUrl,
   type DeleteTarget,
-} from "@/features/browser/actions";
+} from "@/features/browser/write-actions";
 import {
   browserColumns,
   downloadHref,

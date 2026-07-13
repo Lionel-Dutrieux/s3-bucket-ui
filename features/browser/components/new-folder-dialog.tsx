@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { createFolder } from "@/features/browser/actions";
+import { createFolder } from "@/features/browser/write-actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

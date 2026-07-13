@@ -33,6 +33,10 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          # The build never touches the database or secrets; env is validated
+          # at runtime (instrumentation.ts), not at build time.
+          SKIP_ENV_VALIDATION: "1"
 
   # Proves the storage layer talks to a real S3 endpoint — unit tests mock
   # nothing here: MinIO runs in a container and listFolder hits it for real.
