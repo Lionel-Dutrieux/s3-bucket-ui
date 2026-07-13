@@ -239,6 +239,16 @@ export function FileBrowser({
   const noMatches = query !== "" && rows.length === 0;
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedCount = selectedRows.length;
+  // Acts on the visible (filtered) rows, so it never selects rows a name
+  // filter is hiding — same rule as the list header checkbox.
+  const allVisibleSelected =
+    rows.length > 0 && rows.every((row) => row.getIsSelected());
+  const toggleSelectAll = () =>
+    setRowSelection(
+      allVisibleSelected
+        ? {}
+        : Object.fromEntries(rows.map((row) => [row.id, true])),
+    );
 
   // The "move to parent folder" drop zone's destination — null at the root.
   const parentPrefix =
@@ -412,6 +422,14 @@ export function FileBrowser({
           <span className="text-sm font-medium tabular-nums">
             {selectedCount} selected
           </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8"
+            onClick={toggleSelectAll}
+          >
+            {allVisibleSelected ? "Deselect all" : "Select all"}
+          </Button>
           <div className="ml-auto flex items-center gap-2">
             <Button
               variant="outline"
