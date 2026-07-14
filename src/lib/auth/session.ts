@@ -38,3 +38,9 @@ export async function requireAdmin(): Promise<Session> {
 export async function currentUser(): Promise<SessionUser | null> {
   return (await getSession())?.user ?? null;
 }
+
+/** Like currentUser, but null unless the caller is an admin. */
+export async function currentAdmin(): Promise<SessionUser | null> {
+  const user = await currentUser();
+  return user && isAdmin(user) ? user : null;
+}

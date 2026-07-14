@@ -20,12 +20,12 @@ import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { recordOperation } from "@/lib/dal/operations";
 
 const RENAME_DENIED =
-  "Renaming needs both upload and delete enabled on this source.";
+  "Renaming needs both edit and delete access on this source.";
 
 /**
  * Creates a folder by writing the zero-byte `prefix/` marker object — the
  * same convention the provider dashboards use, and what makes an otherwise
- * empty folder appear in delimiter listings. Gated on allowUpload.
+ * empty folder appear in delimiter listings. Gated on the edit capability.
  */
 export async function createFolder(
   sourceId: string,
@@ -41,8 +41,8 @@ export async function createFolder(
   return withWriteAccess(
     sourceId,
     {
-      need: { upload: true },
-      denied: "Uploads are not allowed on this source.",
+      need: { edit: true },
+      denied: "You are not allowed to add files to this source.",
       action: "create the folder",
     },
     async ({ source, files }) => {
@@ -60,8 +60,8 @@ export async function createFolder(
 
 /**
  * Renames one object within its folder via move (copy + delete on object
- * stores — not atomic). Writing the new key needs allowUpload, removing the
- * old one needs allowDelete, so renaming requires both.
+ * stores — not atomic). Writing the new key needs edit, removing the
+ * old one needs delete, so renaming requires both.
  */
 export async function renameObject(
   sourceId: string,
@@ -77,7 +77,7 @@ export async function renameObject(
   return withWriteAccess(
     sourceId,
     {
-      need: { upload: true, delete: true },
+      need: { edit: true, delete: true },
       denied: RENAME_DENIED,
       action: "rename this file",
     },
@@ -117,7 +117,7 @@ export async function renameFolder(
   return withWriteAccess(
     sourceId,
     {
-      need: { upload: true, delete: true },
+      need: { edit: true, delete: true },
       denied: RENAME_DENIED,
       action: "rename this folder",
       failureMessage:
@@ -152,7 +152,7 @@ export async function renameFolder(
 }
 
 /**
- * Permanently deletes one object. The allowDelete permission is enforced
+ * Permanently deletes one object. The delete capability is enforced
  * server-side — hiding the delete UI is cosmetic, this check is the real gate.
  */
 export async function deleteObject(
@@ -163,7 +163,7 @@ export async function deleteObject(
     sourceId,
     {
       need: { delete: true },
-      denied: "Deletions are not allowed on this source.",
+      denied: "You are not allowed to delete from this source.",
       action: "delete this file",
     },
     async ({ source, files }) => {
@@ -179,7 +179,7 @@ export async function deleteObject(
   );
 }
 
-/** Deletes a folder and everything inside it. Gated on allowDelete. */
+/** Deletes a folder and everything inside it. Gated on the delete capability. */
 export async function deleteFolder(
   sourceId: string,
   prefix: string,
@@ -192,7 +192,7 @@ export async function deleteFolder(
     sourceId,
     {
       need: { delete: true },
-      denied: "Deletions are not allowed on this source.",
+      denied: "You are not allowed to delete from this source.",
       action: "delete this folder",
     },
     async ({ source, files }) => {
@@ -211,7 +211,7 @@ export async function deleteFolder(
 
 /**
  * Bulk delete for a multi-selection: files go through one native bulk delete,
- * folders each get the recursive prefix sweep. Gated on allowDelete.
+ * folders each get the recursive prefix sweep. Gated on the delete capability.
  */
 export async function deleteEntries(
   sourceId: string,
@@ -233,7 +233,7 @@ export async function deleteEntries(
     sourceId,
     {
       need: { delete: true },
-      denied: "Deletions are not allowed on this source.",
+      denied: "You are not allowed to delete from this source.",
       action: "delete the selection",
     },
     async ({ source, files }) => {
@@ -303,8 +303,8 @@ export async function moveEntries(
   return withWriteAccess(
     sourceId,
     {
-      need: { upload: true, delete: true },
-      denied: "Moving needs both upload and delete enabled on this source.",
+      need: { edit: true, delete: true },
+      denied: "Moving needs both edit and delete access on this source.",
       action: "move the selection",
       failureMessage:
         "Could not move everything — some items may have moved already, refresh to check.",

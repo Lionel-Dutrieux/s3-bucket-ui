@@ -14,8 +14,6 @@ export interface Source extends SourceSummary {
   endpoint: string;
   accessKeyId: string;
   secretAccessKey: string;
-  allowUpload: boolean;
-  allowDelete: boolean;
 }
 
 export interface SourceInput {
@@ -25,8 +23,6 @@ export interface SourceInput {
   bucket: string;
   accessKeyId: string;
   secretAccessKey: string;
-  allowUpload: boolean;
-  allowDelete: boolean;
 }
 
 // cache() deduplicates reads within one server render — the layout and the
@@ -77,8 +73,6 @@ export const getSource = cache(async (id: string): Promise<Source | null> => {
     endpoint: row.endpoint,
     accessKeyId: decrypt(row.accessKeyId),
     secretAccessKey: decrypt(row.secretAccessKey),
-    allowUpload: row.allowUpload,
-    allowDelete: row.allowDelete,
   };
 });
 

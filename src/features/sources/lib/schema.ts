@@ -25,9 +25,6 @@ export const sourceInputSchema = z.object({
   bucket: z.string().trim().min(1, "Bucket is required."),
   accessKeyId: z.string().trim().min(1, "Access key is required."),
   secretAccessKey: z.string().trim().min(1, "Secret is required."),
-  // Write permissions are opt-in — a source is read-only by default.
-  allowUpload: z.boolean(),
-  allowDelete: z.boolean(),
 });
 
 // Editing an existing source: a blank secret means "keep the stored one",

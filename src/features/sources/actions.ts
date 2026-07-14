@@ -7,6 +7,7 @@ import {
   sourceUpdateSchema,
 } from "@/features/sources/lib/schema";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
+import { currentAdmin } from "@/lib/auth/session";
 import {
   createSource as dalCreateSource,
   deleteSource as dalDeleteSource,
@@ -15,6 +16,9 @@ import {
   type SourceInput,
 } from "@/lib/dal/sources";
 import { getFilesClient } from "@/lib/storage/client";
+
+// Managing sources is admin-only — every action re-checks it server-side.
+const NOT_AUTHORIZED = "You are not allowed to manage sources.";
 
 async function checkConnection(data: SourceInput): Promise<string | null> {
   try {
@@ -57,6 +61,8 @@ export async function testSourceConnection(
   input: SourceFormValues,
   sourceId?: string,
 ): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+
   let data: SourceInput;
   if (sourceId) {
     const resolved = await resolveUpdateInput(sourceId, input);
@@ -79,6 +85,8 @@ export async function testSourceConnection(
 export async function createSource(
   input: SourceFormValues,
 ): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+
   const parsed = sourceInputSchema.safeParse(input);
   if (!parsed.success) {
     return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
@@ -96,6 +104,8 @@ export async function updateSource(
   sourceId: string,
   input: SourceFormValues,
 ): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+
   const resolved = await resolveUpdateInput(sourceId, input);
   if (!resolved.data) return actionError(resolved.error ?? "Invalid input.");
 
@@ -108,6 +118,8 @@ export async function updateSource(
 }
 
 export async function removeSource(id: string): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+
   try {
     await dalDeleteSource(id);
   } catch (error) {

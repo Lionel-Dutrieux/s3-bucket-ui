@@ -8,8 +8,6 @@ const validInput = {
   bucket: "documents",
   accessKeyId: "key",
   secretAccessKey: "secret",
-  allowUpload: false,
-  allowDelete: false,
 };
 
 describe("sourceInputSchema", () => {
@@ -62,12 +60,6 @@ describe("sourceInputSchema", () => {
 
   it("rejects blank required fields", () => {
     const result = sourceInputSchema.safeParse({ ...validInput, name: "   " });
-    expect(result.success).toBe(false);
-  });
-
-  it("requires explicit write permissions", () => {
-    const { allowUpload, allowDelete, ...withoutPermissions } = validInput;
-    const result = sourceInputSchema.safeParse(withoutPermissions);
     expect(result.success).toBe(false);
   });
 });

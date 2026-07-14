@@ -1,5 +1,5 @@
 import "server-only";
-import { headers } from "next/headers";
+import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
 export type OperationAction =
@@ -20,35 +20,14 @@ export interface OperationRecord {
   target: string;
   detail: string | null;
   actor: string | null;
+  userId: string | null;
   createdAt: Date;
 }
 
-// The app has no auth of its own, but the reverse proxy in front of it may
-// forward the authenticated identity. Read it best-effort to attribute
-// operations; absent means the proxy doesn't set it.
-const ACTOR_HEADERS = [
-  "x-forwarded-user",
-  "x-forwarded-preferred-username",
-  "x-forwarded-email",
-  "remote-user",
-];
-
-async function currentActor(): Promise<string | null> {
-  try {
-    const headerList = await headers();
-    for (const name of ACTOR_HEADERS) {
-      const value = headerList.get(name);
-      if (value) return value;
-    }
-  } catch {
-    // headers() throws outside a request scope — no actor then.
-  }
-  return null;
-}
-
 /**
- * Appends one row to the audit trail. Never throws: a failure to log must not
- * fail the write it records, so errors are swallowed after logging.
+ * Appends one row to the audit trail, attributed to the session user (email
+ * denormalized so history stays readable after an account is deleted). Never
+ * throws: a failure to log must not fail the write it records.
  */
 export async function recordOperation(input: {
   action: OperationAction;
@@ -58,6 +37,7 @@ export async function recordOperation(input: {
   detail?: string;
 }): Promise<void> {
   try {
+    const session = await getSession();
     await prisma.operation.create({
       data: {
         action: input.action,
@@ -65,7 +45,8 @@ export async function recordOperation(input: {
         sourceName: input.sourceName,
         target: input.target,
         detail: input.detail,
-        actor: await currentActor(),
+        actor: session?.user.email ?? null,
+        userId: session?.user.id ?? null,
       },
     });
   } catch (error) {

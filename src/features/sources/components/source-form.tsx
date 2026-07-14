@@ -43,8 +43,6 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
       bucket: "",
       accessKeyId: "",
       secretAccessKey: "",
-      allowUpload: false,
-      allowDelete: false,
     },
     validators: {
       // Same schemas as the server actions — errors map onto the fields.
@@ -150,29 +148,10 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
         }}
       </form.Subscribe>
 
-      <fieldset className="space-y-3 rounded-md border p-3">
-        <legend className="px-1 text-sm font-medium">Permissions</legend>
-        <form.AppField name="allowUpload">
-          {(field) => (
-            <field.SwitchField
-              label="Allow uploads"
-              description="Files can be added to this bucket."
-            />
-          )}
-        </form.AppField>
-        <form.AppField name="allowDelete">
-          {(field) => (
-            <field.SwitchField
-              label="Allow deletions"
-              description="Files can be permanently deleted from this bucket."
-            />
-          )}
-        </form.AppField>
-        <p className="text-xs text-muted-foreground">
-          Write access applies to anyone who can reach this app — keep both off
-          for a read-only source.
-        </p>
-      </fieldset>
+      <p className="text-xs text-muted-foreground">
+        Who can browse, edit or delete on this source is managed per user and
+        group from the admin area.
+      </p>
 
       <FormAlert
         error={test.state === "failed" ? test.message : serverError}
