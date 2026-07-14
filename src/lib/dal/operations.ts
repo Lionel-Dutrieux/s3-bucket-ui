@@ -10,7 +10,9 @@ export type OperationAction =
   | "delete-many"
   | "rename"
   | "rename-folder"
-  | "move";
+  | "move"
+  | "copy"
+  | "migrate";
 
 export interface OperationRecord {
   id: string;

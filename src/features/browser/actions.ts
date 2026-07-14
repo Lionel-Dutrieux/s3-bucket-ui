@@ -1,5 +1,6 @@
 "use server";
 
+import { duplicateKeyCandidate } from "@/features/browser/lib/duplicate";
 import {
   DELETE_ENTRIES_MAX,
   MOVE_ENTRIES_MAX,
@@ -146,6 +147,47 @@ export async function renameFolder(
         detail: `→ ${trimmed}/ (${result.count} object${result.count === 1 ? "" : "s"})`,
       });
       return actionOk();
+    },
+  );
+}
+
+/** Attempts before giving up on finding a free "… (copy n)" key. */
+const DUPLICATE_MAX_ATTEMPTS = 5;
+
+/**
+ * Duplicates one object next to itself as "name (copy).ext" (server-side
+ * copy — no bytes travel through the app). Creating content is an edit.
+ */
+export async function duplicateObject(
+  sourceId: string,
+  key: string,
+): Promise<ActionResult> {
+  if (!key || key.endsWith("/")) return actionError("Invalid file.");
+
+  return withWriteAccess(
+    sourceId,
+    {
+      need: { edit: true },
+      denied: "You are not allowed to edit this source.",
+      action: "duplicate this file",
+    },
+    async ({ source, files }) => {
+      for (let attempt = 1; attempt <= DUPLICATE_MAX_ATTEMPTS; attempt++) {
+        const candidate = duplicateKeyCandidate(key, attempt);
+        if (await files.exists(candidate)) continue;
+        await files.copy(key, candidate);
+        await recordOperation({
+          action: "copy",
+          sourceId: source.id,
+          sourceName: source.name,
+          target: key,
+          detail: `→ ${basename(candidate)}`,
+        });
+        return actionOk();
+      }
+      return actionError(
+        "Too many copies of this file already exist here — rename one first.",
+      );
     },
   );
 }

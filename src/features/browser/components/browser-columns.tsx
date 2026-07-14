@@ -2,6 +2,7 @@
 
 import type { ColumnDef, Row, RowData } from "@tanstack/react-table";
 import {
+  Copy,
   Download,
   Folder,
   FolderDown,
@@ -37,6 +38,9 @@ declare module "@tanstack/react-table" {
     /** Only set when the source allows both upload and delete (rename moves
      * the object). */
     onRename?: (entry: BrowserEntry) => void;
+    /** Only set when the viewer holds the edit capability (a duplicate
+     * creates content). Files only. */
+    onDuplicate?: (file: FileEntry) => void;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -190,8 +194,14 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     },
     cell: ({ row, table }) => {
       const entry = row.original;
-      const { sourceId, onCopyLink, onDetails, onDelete, onRename } =
-        table.options.meta ?? {};
+      const {
+        sourceId,
+        onCopyLink,
+        onDetails,
+        onDelete,
+        onRename,
+        onDuplicate,
+      } = table.options.meta ?? {};
       const renameButton = onRename ? (
         <button
           type="button"
@@ -259,6 +269,17 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
           >
             <Download className="size-4" aria-hidden />
           </a>
+          {onDuplicate ? (
+            <button
+              type="button"
+              onClick={() => onDuplicate(entry)}
+              className={ROW_ACTION_CLASS}
+              aria-label={`Duplicate ${entry.name}`}
+              title="Duplicate"
+            >
+              <Copy className="size-4" aria-hidden />
+            </button>
+          ) : null}
           {renameButton}
           {deleteButton}
         </>

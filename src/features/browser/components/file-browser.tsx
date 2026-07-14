@@ -35,6 +35,7 @@ import {
   deleteEntries,
   deleteFolder,
   deleteObject,
+  duplicateObject,
 } from "@/features/browser/actions";
 import { downloadUrl } from "@/features/browser/api/client";
 import { browserQueries } from "@/features/browser/api/queries";
@@ -202,6 +203,16 @@ export function FileBrowser({
     router.refresh();
   };
 
+  const handleDuplicate = async (file: FileEntry) => {
+    const result = await duplicateObject(sourceId, file.key);
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success(`Duplicated ${file.name}`);
+    router.refresh();
+  };
+
   const entries = useMemo(() => buildEntries(folders, files), [folders, files]);
   // Selection serves bulk download too, so it's on regardless of
   // permissions — only the bulk Delete button is permission-gated.
@@ -236,6 +247,8 @@ export function FileBrowser({
       onDelete: permissions.delete ? setDeleteTarget : undefined,
       // Rename moves the object (write + delete), so it needs both.
       onRename: canRename ? setRenameTarget : undefined,
+      // Duplicating creates content — an edit, like uploading.
+      onDuplicate: permissions.upload ? handleDuplicate : undefined,
     },
   });
 
@@ -443,6 +456,7 @@ export function FileBrowser({
               onDetails={setDetails}
               onDelete={permissions.delete ? setDeleteTarget : undefined}
               onRename={canRename ? setRenameTarget : undefined}
+              onDuplicate={permissions.upload ? handleDuplicate : undefined}
               selection={gridSelection}
               canMove={canMove}
             />

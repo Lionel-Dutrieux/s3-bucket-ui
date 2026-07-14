@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Copy,
   Download,
   Folder,
   FolderDown,
@@ -52,6 +53,7 @@ export function FileGrid({
   onDetails,
   onDelete,
   onRename,
+  onDuplicate,
   selection,
   canMove = false,
 }: {
@@ -66,6 +68,8 @@ export function FileGrid({
   onDelete?: (entry: BrowserEntry) => void;
   /** Only set when the source allows both upload and delete. */
   onRename?: (entry: BrowserEntry) => void;
+  /** Only set when the viewer holds the edit capability. Files only. */
+  onDuplicate?: (file: FileEntry) => void;
   selection?: GridSelection;
   canMove?: boolean;
 }) {
@@ -109,6 +113,7 @@ export function FileGrid({
                 onCopyLink={onCopyLink}
                 onDetails={onDetails}
                 onRename={onRename}
+                onDuplicate={onDuplicate}
                 onDelete={onDelete}
               />
             ))}
@@ -249,6 +254,7 @@ function FileCard({
   onCopyLink,
   onDetails,
   onRename,
+  onDuplicate,
   onDelete,
 }: {
   sourceId: string;
@@ -259,6 +265,7 @@ function FileCard({
   onCopyLink: (file: FileEntry) => void;
   onDetails: (file: FileEntry) => void;
   onRename?: (entry: BrowserEntry) => void;
+  onDuplicate?: (file: FileEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
 }) {
   const dnd = useEntryDnd({
@@ -372,6 +379,17 @@ function FileCard({
         >
           <Download className="size-3.5" aria-hidden />
         </a>
+        {onDuplicate ? (
+          <button
+            type="button"
+            onClick={() => onDuplicate(file)}
+            className={GRID_ACTION_CLASS}
+            aria-label={`Duplicate ${file.name}`}
+            title="Duplicate"
+          >
+            <Copy className="size-3.5" aria-hidden />
+          </button>
+        ) : null}
         {onRename ? (
           <button
             type="button"

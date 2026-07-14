@@ -1,4 +1,6 @@
 import {
+  ArrowRightLeft,
+  Copy,
   FolderInput,
   FolderPlus,
   type LucideIcon,
@@ -25,6 +27,8 @@ const LABELS: Record<string, OperationLabel> = {
   rename: { label: "Renamed", icon: Pencil },
   "rename-folder": { label: "Renamed folder", icon: Pencil },
   move: { label: "Moved", icon: FolderInput },
+  copy: { label: "Duplicated", icon: Copy },
+  migrate: { label: "Copied source", icon: ArrowRightLeft },
   "sign-in-failed": {
     label: "Sign-in failed",
     icon: ShieldAlert,
