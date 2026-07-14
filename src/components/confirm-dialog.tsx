@@ -10,11 +10,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 /**
- * Destructive confirmation dialog. The action button doesn't auto-close:
- * `onConfirm` runs the (async) work and the caller closes on success, so a
- * failure keeps the dialog open with its pending state released.
+ * Confirmation dialog, destructive-styled by default. The action button
+ * doesn't auto-close: `onConfirm` runs the (async) work and the caller closes
+ * on success, so a failure keeps the dialog open with its pending state
+ * released.
  */
 export function ConfirmDialog({
   open,
@@ -25,6 +27,7 @@ export function ConfirmDialog({
   confirmLabel,
   pendingLabel,
   pending = false,
+  destructive = true,
   onConfirm,
 }: {
   open: boolean;
@@ -35,6 +38,8 @@ export function ConfirmDialog({
   confirmLabel: string;
   pendingLabel?: string;
   pending?: boolean;
+  /** False for consequential-but-not-destructive actions (e.g. promote). */
+  destructive?: boolean;
   onConfirm: () => void;
 }) {
   return (
@@ -54,7 +59,10 @@ export function ConfirmDialog({
               onConfirm();
             }}
             disabled={pending}
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className={cn(
+              destructive &&
+                "bg-destructive text-white hover:bg-destructive/90",
+            )}
           >
             {pending ? (pendingLabel ?? confirmLabel) : confirmLabel}
           </AlertDialogAction>

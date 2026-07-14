@@ -38,7 +38,7 @@ export function GroupsTable({
           <TableRow className="hover:bg-transparent">
             <TableHead>Group</TableHead>
             <TableHead className="w-40">Members</TableHead>
-            <TableHead className="w-44">Created</TableHead>
+            <TableHead className="w-44 max-md:hidden">Created</TableHead>
             <TableHead className="w-24" />
           </TableRow>
         </TableHeader>
@@ -60,7 +60,7 @@ export function GroupsTable({
                 {group.members.length} member
                 {group.members.length === 1 ? "" : "s"}
               </TableCell>
-              <TableCell className="text-xs text-muted-foreground tabular-nums">
+              <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
                 {formatDateTime(group.createdAt)}
               </TableCell>
               <TableCell>

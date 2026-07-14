@@ -40,7 +40,14 @@ export function UploadTray({
       aria-label="Uploads"
     >
       <header className="flex h-10 items-center gap-2 border-b bg-muted/40 pl-3 pr-1.5">
-        <p className="min-w-0 flex-1 truncate text-sm font-medium">{title}</p>
+        {/* Live region: completion/failure is announced without moving focus. */}
+        <p
+          role="status"
+          aria-live="polite"
+          className="min-w-0 flex-1 truncate text-sm font-medium"
+        >
+          {title}
+        </p>
         <button
           type="button"
           onClick={() => setCollapsed((value) => !value)}
@@ -94,7 +101,10 @@ export function UploadTray({
                     <span className="font-mono text-xs text-muted-foreground">
                       {formatBytes(item.size)}
                     </span>
-                    <Check className="size-4 text-emerald-500" aria-hidden />
+                    <Check
+                      className="size-4 text-emerald-600 dark:text-emerald-500"
+                      aria-hidden
+                    />
                   </>
                 ) : (
                   <CircleAlert

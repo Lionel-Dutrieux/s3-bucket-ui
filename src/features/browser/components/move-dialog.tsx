@@ -67,8 +67,8 @@ export function MoveDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="break-all">
-            Move {request?.count} item{request?.count === 1 ? "" : "s"} into "
-            {request?.destLabel}"?
+            Move {request?.count} item{request?.count === 1 ? "" : "s"} into
+            &ldquo;{request?.destLabel}&rdquo;?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Moving copies each object to the destination and deletes the

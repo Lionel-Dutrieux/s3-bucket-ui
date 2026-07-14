@@ -46,6 +46,51 @@ function initialsOf(name: string): string {
   return initials || "?";
 }
 
+/** Menu actions that change what an account can do all confirm first —
+ * promoting, banning and deleting are one mis-click apart in the dropdown. */
+type PendingAction = { kind: "role" | "ban" | "delete"; user: UserRow };
+
+function confirmCopyFor(action: PendingAction) {
+  const { kind, user } = action;
+  if (kind === "role") {
+    return user.role === "admin"
+      ? {
+          title: `Remove admin rights from ${user.email}?`,
+          description:
+            "They keep their account but only see sources they hold a grant on.",
+          confirmLabel: "Make user",
+          pendingLabel: "Updating…",
+          destructive: false,
+        }
+      : {
+          title: `Make ${user.email} an admin?`,
+          description:
+            "Admins see every source, manage accounts and grants, and read the audit log.",
+          confirmLabel: "Make admin",
+          pendingLabel: "Updating…",
+          destructive: false,
+        };
+  }
+  if (kind === "ban") {
+    return {
+      title: `Ban ${user.email}?`,
+      description:
+        "They are signed out everywhere and can no longer sign in until unbanned.",
+      confirmLabel: "Ban user",
+      pendingLabel: "Banning…",
+      destructive: true,
+    };
+  }
+  return {
+    title: `Delete ${user.email}?`,
+    description:
+      "Their account, sessions and grants are permanently deleted. Their past activity stays in the audit log.",
+    confirmLabel: "Delete user",
+    pendingLabel: "Deleting…",
+    destructive: true,
+  };
+}
+
 export function UsersTable({
   users,
   selfId,
@@ -53,7 +98,7 @@ export function UsersTable({
   users: UserRow[];
   selfId: string;
 }) {
-  const [removing, setRemoving] = useState<UserRow | null>(null);
+  const [confirming, setConfirming] = useState<PendingAction | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -76,8 +121,8 @@ export function UsersTable({
           <TableRow className="hover:bg-transparent">
             <TableHead>User</TableHead>
             <TableHead className="w-28">Role</TableHead>
-            <TableHead>Groups</TableHead>
-            <TableHead className="w-44">Joined</TableHead>
+            <TableHead className="max-lg:hidden">Groups</TableHead>
+            <TableHead className="w-44 max-md:hidden">Joined</TableHead>
             <TableHead className="w-12" />
           </TableRow>
         </TableHeader>
@@ -122,7 +167,7 @@ export function UsersTable({
                   </span>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="max-lg:hidden">
                 {user.groups.length === 0 ? (
                   <span className="text-xs text-muted-foreground">—</span>
                 ) : (
@@ -138,7 +183,7 @@ export function UsersTable({
                   </span>
                 )}
               </TableCell>
-              <TableCell className="text-xs text-muted-foreground tabular-nums">
+              <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
                 {formatDateTime(user.createdAt)}
               </TableCell>
               <TableCell>
@@ -157,35 +202,34 @@ export function UsersTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onSelect={() =>
-                          run(() =>
-                            setUserRole(
-                              user.id,
-                              user.role === "admin" ? "user" : "admin",
-                            ),
-                          )
-                        }
+                        onSelect={() => setConfirming({ kind: "role", user })}
                       >
                         <ShieldCheck aria-hidden />
                         {user.role === "admin" ? "Make user" : "Make admin"}
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() =>
-                          run(() =>
-                            user.banned ? unbanUser(user.id) : banUser(user.id),
-                          )
-                        }
-                      >
-                        <ShieldOff aria-hidden />
-                        {user.banned ? "Unban" : "Ban"}
-                      </DropdownMenuItem>
+                      {user.banned ? (
+                        // Unbanning restores access — no confirmation needed.
+                        <DropdownMenuItem
+                          onSelect={() => run(() => unbanUser(user.id))}
+                        >
+                          <ShieldOff aria-hidden />
+                          Unban
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onSelect={() => setConfirming({ kind: "ban", user })}
+                        >
+                          <ShieldOff aria-hidden />
+                          Ban
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         variant="destructive"
-                        onSelect={() => setRemoving(user)}
+                        onSelect={() => setConfirming({ kind: "delete", user })}
                       >
                         <Trash2 aria-hidden />
-                        Remove
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -197,20 +241,29 @@ export function UsersTable({
       </Table>
 
       <ConfirmDialog
-        open={removing !== null}
+        open={confirming !== null}
         onOpenChange={(open) => {
-          if (!open) setRemoving(null);
+          if (!open && !pending) setConfirming(null);
         }}
-        title={`Remove ${removing?.email}?`}
-        description="Their account, sessions and grants are permanently deleted. Their past activity stays in the audit log."
-        confirmLabel="Remove user"
-        pendingLabel="Removing…"
+        {...(confirming
+          ? confirmCopyFor(confirming)
+          : {
+              title: "",
+              description: "",
+              confirmLabel: "Confirm",
+            })}
         pending={pending}
         onConfirm={() => {
-          if (!removing) return;
+          if (!confirming) return;
+          const { kind, user } = confirming;
           run(
-            () => removeUser(removing.id),
-            () => setRemoving(null),
+            () =>
+              kind === "role"
+                ? setUserRole(user.id, user.role === "admin" ? "user" : "admin")
+                : kind === "ban"
+                  ? banUser(user.id)
+                  : removeUser(user.id),
+            () => setConfirming(null),
           );
         }}
       />

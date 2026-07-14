@@ -2,6 +2,7 @@
 
 import { KeyRound, Loader2Icon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
 
@@ -16,7 +17,10 @@ export function OidcButton({ label }: { label: string }) {
       callbackURL: "/",
     });
     // On success the browser navigates away; only errors land here.
-    if (error) setPending(false);
+    if (error) {
+      setPending(false);
+      toast.error(error.message ?? `Could not reach ${label} — try again.`);
+    }
   };
 
   return (

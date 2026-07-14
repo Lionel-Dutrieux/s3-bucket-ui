@@ -17,7 +17,10 @@ export function FormAlert({
   }
   if (success) {
     return (
-      <p className="flex items-center gap-1.5 text-sm text-emerald-600">
+      <p
+        role="status"
+        className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500"
+      >
         <CircleCheck className="size-4" aria-hidden />
         {success}
       </p>
