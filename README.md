@@ -41,7 +41,9 @@ Features:
   recorded.
 
 Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
-Azure Blob Storage, MinIO, DigitalOcean Spaces.
+Azure Blob Storage, MinIO, DigitalOcean Spaces, Backblaze B2, Hetzner Object
+Storage, Wasabi, Scaleway, OVHcloud, Storj — plus a generic S3-compatible
+entry for anything else speaking the S3 API (Garage, SeaweedFS, Ceph RGW, …).
 
 > **Security model.** Every server entry point (page, server action, API
 > route) re-validates the session and the grant — non-admins only ever see
@@ -167,7 +169,21 @@ to hand out edit/delete grants on the source):
   on a service account — `https://storage.googleapis.com`.
 - **Azure Blob Storage**: storage account name + account key —
   `https://<account>.blob.core.windows.net`.
-- **MinIO / DigitalOcean Spaces**: the service's S3 endpoint and key pair.
+- **Backblaze B2**: application key (ID + key) —
+  `https://s3.<cluster>.backblazeb2.com` (the cluster is shown next to the
+  bucket's endpoint in the Backblaze console).
+- **Hetzner Object Storage**: S3 credentials —
+  `https://<location>.your-objectstorage.com` (`fsn1`, `nbg1`, `hel1`).
+- **Wasabi**: access key pair — `https://s3.<region>.wasabisys.com`.
+- **Scaleway**: IAM API key — `https://s3.<region>.scw.cloud` (`fr-par`,
+  `nl-ams`, `pl-waw`).
+- **OVHcloud**: S3 user credentials — `https://s3.<region>.io.cloud.ovh.net`
+  (High Performance) or `https://s3.<region>.cloud.ovh.net` (Standard).
+- **Storj**: S3 gateway credentials — `https://gateway.storjshare.io`, or
+  your self-hosted gateway URL.
+- **MinIO / DigitalOcean Spaces / anything S3-compatible**: the service's S3
+  endpoint and key pair (the generic *S3-compatible* entry covers Garage,
+  SeaweedFS, Ceph RGW, LocalStack, …).
 
 Use **Test connection** to check the credentials; the connection is verified
 again when the source is saved. Providers live in

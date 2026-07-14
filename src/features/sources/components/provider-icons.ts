@@ -1,12 +1,18 @@
 import {
+  Archive,
   Box,
   Cloud,
+  CloudCog,
   Cylinder,
+  Database,
   Droplets,
+  Flame,
   Globe,
   HardDrive,
   type LucideIcon,
+  Network,
   Server,
+  Snowflake,
 } from "lucide-react";
 
 // UI counterpart of lib/providers.ts — kept separate so the provider
@@ -18,6 +24,13 @@ const PROVIDER_ICONS: Record<string, LucideIcon> = {
   "azure-blob": Cloud,
   minio: Server,
   "digitalocean-spaces": Droplets,
+  "backblaze-b2": Flame,
+  hetzner: Snowflake,
+  wasabi: Archive,
+  scaleway: CloudCog,
+  ovhcloud: Database,
+  storj: Network,
+  "s3-compatible": HardDrive,
 };
 
 export function providerIcon(providerId: string): LucideIcon {

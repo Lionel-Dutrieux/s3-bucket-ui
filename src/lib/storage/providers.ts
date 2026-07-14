@@ -95,6 +95,78 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
       secretAccessKey: "Secret key",
     },
   },
+  {
+    id: "backblaze-b2",
+    label: "Backblaze B2",
+    adapter: "s3",
+    region: "from-endpoint", // s3.us-west-002.backblazeb2.com → us-west-002
+    forcePathStyle: false,
+    endpointPlaceholder: "https://s3.<cluster>.backblazeb2.com",
+    fieldLabels: {
+      bucket: "Bucket",
+      accessKeyId: "Application key ID",
+      secretAccessKey: "Application key",
+    },
+  },
+  {
+    id: "hetzner",
+    label: "Hetzner Object Storage",
+    adapter: "s3",
+    region: "from-endpoint", // fsn1.your-objectstorage.com → fsn1
+    forcePathStyle: false,
+    endpointPlaceholder: "https://<location>.your-objectstorage.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "wasabi",
+    label: "Wasabi",
+    adapter: "s3",
+    region: "from-endpoint", // s3.eu-central-1.wasabisys.com → eu-central-1
+    forcePathStyle: false,
+    endpointPlaceholder: "https://s3.<region>.wasabisys.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "scaleway",
+    label: "Scaleway Object Storage",
+    adapter: "s3",
+    region: "from-endpoint", // s3.fr-par.scw.cloud → fr-par
+    forcePathStyle: false,
+    endpointPlaceholder: "https://s3.<region>.scw.cloud",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "ovhcloud",
+    label: "OVHcloud Object Storage",
+    adapter: "s3",
+    region: "from-endpoint", // s3.gra.io.cloud.ovh.net → gra
+    forcePathStyle: false,
+    endpointPlaceholder: "https://s3.<region>.io.cloud.ovh.net",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "storj",
+    label: "Storj",
+    adapter: "s3",
+    // SigV4 needs some region in the signature; the gateway ignores it.
+    region: "us-east-1",
+    endpointPlaceholder: "https://gateway.storjshare.io",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    // Catch-all for anything speaking the S3 API without a dedicated entry:
+    // Garage, SeaweedFS, Ceph RGW, LocalStack, …
+    id: "s3-compatible",
+    label: "S3-compatible",
+    adapter: "s3",
+    region: "us-east-1", // the de-facto default; most services ignore it
+    endpointPlaceholder: "https://storage.example.com",
+    fieldLabels: {
+      bucket: "Bucket",
+      accessKeyId: "Access key",
+      secretAccessKey: "Secret key",
+    },
+  },
 ];
 
 export function getProvider(id: string): ProviderDefinition | undefined {
