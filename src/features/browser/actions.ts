@@ -2,6 +2,7 @@
 
 import { duplicateKeyCandidate } from "@/features/browser/lib/duplicate";
 import {
+  BUFFERED_COPY_MAX_BYTES,
   DELETE_ENTRIES_MAX,
   MOVE_ENTRIES_MAX,
 } from "@/features/browser/lib/limits";
@@ -179,6 +180,16 @@ export async function duplicateObject(
       action: "duplicate this file",
     },
     async ({ source, files }) => {
+      // Without a server-side copy primitive (SFTP, FTP) the whole body is
+      // buffered through this process — refuse sizes that would blow memory.
+      if (!files.capabilities.serverSideCopy) {
+        const stat = await files.head(key);
+        if (stat.size > BUFFERED_COPY_MAX_BYTES) {
+          return actionError(
+            "This file is too large to duplicate on this provider (512 MB max).",
+          );
+        }
+      }
       for (let attempt = 1; attempt <= DUPLICATE_MAX_ATTEMPTS; attempt++) {
         const candidate = duplicateKeyCandidate(key, attempt);
         if (await files.exists(candidate)) continue;

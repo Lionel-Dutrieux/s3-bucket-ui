@@ -16,6 +16,7 @@ import {
   listFolder,
 } from "@/features/browser/server/service";
 import { requireSourceAccess } from "@/lib/auth/access";
+import { getFilesClient } from "@/lib/storage/client";
 
 interface SourcePageProps {
   params: Promise<{ id: string }>;
@@ -48,6 +49,10 @@ export default async function SourcePage({
 
   const view: ViewMode =
     (await cookies()).get(VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
+
+  // Providers with no signing primitive (SFTP, FTP, WebDAV) can't mint share
+  // links — the UI hides the action. Reading capabilities does no I/O.
+  const canShare = getFilesClient(source).capabilities.signedUrl.supported;
 
   const listing = await listFolder(source, prefix, cursor);
   // An active type filter hides folders and keeps only matching files.
@@ -104,6 +109,7 @@ export default async function SourcePage({
                 upload: access.canEdit,
                 delete: access.canDelete,
               }}
+              canShare={canShare}
             />
             {listing.nextCursor ? (
               <div className="flex justify-center py-4">

@@ -62,7 +62,8 @@ export function PreviewDialog({
   files: FileEntry[];
   onFileChange: (file: FileEntry) => void;
   onOpenChange: (open: boolean) => void;
-  onCopyLink: (file: FileEntry) => void;
+  /** Absent when the provider can't mint share links — hides the action. */
+  onCopyLink?: (file: FileEntry) => void;
 }) {
   // Key of the media file whose element failed to load — cleared implicitly
   // when the dialog moves to another file.
@@ -208,14 +209,16 @@ export function PreviewDialog({
             </div>
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onCopyLink(file)}
-              >
-                <Link2 aria-hidden />
-                Copy link
-              </Button>
+              {onCopyLink ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onCopyLink(file)}
+                >
+                  <Link2 aria-hidden />
+                  Copy link
+                </Button>
+              ) : null}
               <Button asChild>
                 <a href={downloadUrl(sourceId, file.key)}>
                   <Download aria-hidden />

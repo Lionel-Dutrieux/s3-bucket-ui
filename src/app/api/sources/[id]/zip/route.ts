@@ -21,7 +21,7 @@ export async function GET(
 ) {
   const { id } = await ctx.params;
   const prefix = request.nextUrl.searchParams.get("prefix");
-  if (!prefix || !prefix.endsWith("/")) {
+  if (!prefix?.endsWith("/")) {
     return apiError(400, "Invalid folder.");
   }
 

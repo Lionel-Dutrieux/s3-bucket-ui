@@ -27,9 +27,19 @@ export async function GET(
   }
   const { source } = result;
 
+  const files = getFilesClient(source);
+  // No signing primitive (SFTP, FTP, WebDAV) → no link that works without
+  // the viewer's own session. The UI hides the action; this is the real gate.
+  if (!files.capabilities.signedUrl.supported) {
+    return apiError(
+      400,
+      "This source's provider can't create share links — use Download instead.",
+    );
+  }
+
   const filename = key.split("/").pop() || "file";
   try {
-    const url = await getFilesClient(source).url(key, {
+    const url = await files.url(key, {
       expiresIn: SHARE_TTL_SECONDS,
       responseContentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
     });

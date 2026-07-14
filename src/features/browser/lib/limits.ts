@@ -43,6 +43,10 @@ export const DELETE_ENTRIES_MAX = 500;
 /** Maximum items in one drag-and-drop move. */
 export const MOVE_ENTRIES_MAX = 500;
 
+/** Ceiling on duplicating one object where the provider has no server-side
+ * copy (SFTP, FTP buffer the whole body through this process). */
+export const BUFFERED_COPY_MAX_BYTES = 512 * 1024 * 1024; // 512 MiB
+
 /** Total objects one cross-source copy may touch (folders expanded). */
 export const CROSS_COPY_MAX_OBJECTS = 1000;
 /** Objects streamed source→destination at once — each in-flight key holds an

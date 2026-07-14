@@ -1,8 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { streamObject } from "@/features/browser/server/stream";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
 
+/**
+ * Download: redirects to a presigned attachment URL where the provider can
+ * sign one; otherwise (SFTP, FTP, WebDAV) the body streams through the app,
+ * with Range support for resumed downloads.
+ */
 export async function GET(
   request: NextRequest,
   ctx: RouteContext<"/api/sources/[id]/download">,
@@ -20,18 +26,29 @@ export async function GET(
   }
   const { source } = result;
 
+  const files = getFilesClient(source);
   const filename = key.split("/").pop() || "download";
   try {
-    const signedUrl = await getFilesClient(source).url(key, {
-      // Forces download; also prevents stored HTML/SVG from rendering inline.
-      responseContentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+    if (files.capabilities.signedUrl.supported) {
+      const signedUrl = await files.url(key, {
+        // Forces download; also prevents stored HTML/SVG from rendering inline.
+        responseContentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      });
+      return NextResponse.redirect(signedUrl);
+    }
+    return await streamObject(files, key, {
+      filename,
+      disposition: "attachment",
+      rangeHeader: request.headers.get("range"),
     });
-    return NextResponse.redirect(signedUrl);
   } catch (error) {
+    if ((error as { code?: string }).code === "NotFound") {
+      return apiError(404, "File not found.");
+    }
     console.error(
-      `[download] signing failed (source=${source.id}, provider=${source.provider}):`,
+      `[download] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return apiError(502, "Could not generate a download link.");
+    return apiError(502, "Could not download this file.");
   }
 }

@@ -1,19 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { PREVIEW_TTL_SECONDS } from "@/features/browser/lib/limits";
+import { streamObject } from "@/features/browser/server/stream";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
 
-/** Categories rendered from a presigned URL (img/iframe/video/audio tags). */
+/** Categories rendered inline (img/iframe/video/audio tags). */
 const URL_PREVIEW_CATEGORIES = new Set(["image", "pdf", "video", "audio"]);
 
 /**
- * Redirects to a short-lived inline presigned URL — used directly as the
- * `src` of the preview dialog's media elements, so previewing needs no client
- * fetch. Only categories the dialog can render safely (<img>/<video>/<audio>
- * never execute scripts; PDFs go into a sandboxed iframe) get an inline
- * disposition — everything else stays download-only.
+ * Preview media source — used directly as the `src` of the preview dialog's
+ * media elements. Providers that can sign get a short-lived inline presigned
+ * URL (no bytes through the app); the rest (SFTP, FTP, WebDAV) stream the
+ * body with Range support so video scrubbing works. Only categories the
+ * dialog renders safely (<img>/<video>/<audio> never execute scripts; PDFs
+ * go into a sandboxed iframe) are served inline.
  */
 export async function GET(
   request: NextRequest,
@@ -38,17 +40,28 @@ export async function GET(
   }
   const { source } = result;
 
+  const files = getFilesClient(source);
   try {
-    const signedUrl = await getFilesClient(source).url(key, {
-      expiresIn: PREVIEW_TTL_SECONDS,
-      responseContentDisposition: `inline; filename*=UTF-8''${encodeURIComponent(filename)}`,
+    if (files.capabilities.signedUrl.supported) {
+      const signedUrl = await files.url(key, {
+        expiresIn: PREVIEW_TTL_SECONDS,
+        responseContentDisposition: `inline; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      });
+      return NextResponse.redirect(signedUrl);
+    }
+    return await streamObject(files, key, {
+      filename,
+      disposition: "inline",
+      rangeHeader: request.headers.get("range"),
     });
-    return NextResponse.redirect(signedUrl);
   } catch (error) {
+    if ((error as { code?: string }).code === "NotFound") {
+      return apiError(404, "File not found.");
+    }
     console.error(
-      `[preview] signing failed (source=${source.id}, provider=${source.provider}):`,
+      `[preview] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return apiError(502, "Could not generate a preview link.");
+    return apiError(502, "Could not load this preview.");
   }
 }

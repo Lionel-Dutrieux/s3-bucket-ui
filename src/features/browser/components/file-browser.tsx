@@ -113,6 +113,7 @@ export function FileBrowser({
   files,
   view,
   permissions,
+  canShare = true,
 }: {
   sourceId: string;
   prefix: string;
@@ -120,6 +121,8 @@ export function FileBrowser({
   files: FileEntry[];
   view: ViewMode;
   permissions: BrowserPermissions;
+  /** False when the provider can't mint share links (SFTP, FTP, WebDAV). */
+  canShare?: boolean;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -244,7 +247,7 @@ export function FileBrowser({
     meta: {
       sourceId,
       onPreview: setPreview,
-      onCopyLink: handleCopyLink,
+      onCopyLink: canShare ? handleCopyLink : undefined,
       onDetails: setDetails,
       onDelete: permissions.delete ? setDeleteTarget : undefined,
       // Rename moves the object (write + delete), so it needs both.
@@ -457,7 +460,7 @@ export function FileBrowser({
                 .map((row) => row.original)
                 .filter((entry) => entry.kind === "file")}
               onPreview={setPreview}
-              onCopyLink={handleCopyLink}
+              onCopyLink={canShare ? handleCopyLink : undefined}
               onDetails={setDetails}
               onDelete={permissions.delete ? setDeleteTarget : undefined}
               onRename={canRename ? setRenameTarget : undefined}
@@ -490,7 +493,7 @@ export function FileBrowser({
         onOpenChange={(open) => {
           if (!open) setPreview(null);
         }}
-        onCopyLink={handleCopyLink}
+        onCopyLink={canShare ? handleCopyLink : undefined}
       />
       <DetailsDialog
         sourceId={sourceId}

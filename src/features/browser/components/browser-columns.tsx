@@ -30,7 +30,8 @@ declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     sourceId: string;
     onPreview: (file: FileEntry) => void;
-    onCopyLink: (file: FileEntry) => void;
+    /** Absent when the provider can't mint share links — hides the action. */
+    onCopyLink?: (file: FileEntry) => void;
     onDetails: (file: FileEntry) => void;
     /** Only set when the source allows deletions — absent hides the action.
      * Folders delete recursively (every object under the prefix). */
@@ -252,15 +253,17 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
           >
             <Info className="size-4" aria-hidden />
           </button>
-          <button
-            type="button"
-            onClick={() => onCopyLink?.(entry)}
-            className={ROW_ACTION_CLASS}
-            aria-label={`Copy link to ${entry.name}`}
-            title="Copy link"
-          >
-            <Link2 className="size-4" aria-hidden />
-          </button>
+          {onCopyLink ? (
+            <button
+              type="button"
+              onClick={() => onCopyLink(entry)}
+              className={ROW_ACTION_CLASS}
+              aria-label={`Copy link to ${entry.name}`}
+              title="Copy link"
+            >
+              <Link2 className="size-4" aria-hidden />
+            </button>
+          ) : null}
           <a
             href={downloadUrl(sourceId ?? "", entry.key)}
             className={ROW_ACTION_CLASS}

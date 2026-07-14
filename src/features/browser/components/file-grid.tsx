@@ -61,7 +61,8 @@ export function FileGrid({
   folders: FolderEntry[];
   files: FileEntry[];
   onPreview: (file: FileEntry) => void;
-  onCopyLink: (file: FileEntry) => void;
+  /** Absent when the provider can't mint share links — hides the action. */
+  onCopyLink?: (file: FileEntry) => void;
   onDetails: (file: FileEntry) => void;
   /** Only set when the source allows deletions — absent hides the action.
    * Folders delete recursively (every object under the prefix). */
@@ -262,7 +263,7 @@ function FileCard({
   canMove: boolean;
   selection?: GridSelection;
   onPreview: (file: FileEntry) => void;
-  onCopyLink: (file: FileEntry) => void;
+  onCopyLink?: (file: FileEntry) => void;
   onDetails: (file: FileEntry) => void;
   onRename?: (entry: BrowserEntry) => void;
   onDuplicate?: (file: FileEntry) => void;
@@ -362,15 +363,17 @@ function FileCard({
         >
           <Info className="size-3.5" aria-hidden />
         </button>
-        <button
-          type="button"
-          onClick={() => onCopyLink(file)}
-          className={GRID_ACTION_CLASS}
-          aria-label={`Copy link to ${file.name}`}
-          title="Copy link"
-        >
-          <Link2 className="size-3.5" aria-hidden />
-        </button>
+        {onCopyLink ? (
+          <button
+            type="button"
+            onClick={() => onCopyLink(file)}
+            className={GRID_ACTION_CLASS}
+            aria-label={`Copy link to ${file.name}`}
+            title="Copy link"
+          >
+            <Link2 className="size-3.5" aria-hidden />
+          </button>
+        ) : null}
         <a
           href={downloadUrl(sourceId, file.key)}
           className={GRID_ACTION_CLASS}
