@@ -17,6 +17,14 @@ export interface SessionRow {
   current: boolean;
 }
 
+/** Loopback/unspecified addresses (local dev, no proxy) carry no signal. */
+function describeIp(ip: string | null): string | null {
+  if (!ip) return null;
+  const compact = ip.replaceAll("0", "").replaceAll(":", "");
+  if (compact === "" || ip === "::1" || ip.startsWith("127.")) return null;
+  return ip;
+}
+
 /** Compact "Chrome · Windows"-style summary out of a raw user agent. */
 function describeAgent(userAgent: string | null): string {
   if (!userAgent) return "Unknown device";
@@ -65,8 +73,11 @@ export function SessionsList({ sessions }: { sessions: SessionRow[] }) {
               ) : null}
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              {session.ipAddress || "unknown IP"} · active{" "}
-              {formatDateTime(session.updatedAt)}
+              {(() => {
+                const ip = describeIp(session.ipAddress);
+                return ip ? `${ip} · ` : "";
+              })()}
+              active {formatDateTime(session.updatedAt)}
             </p>
           </div>
           {session.current ? null : (

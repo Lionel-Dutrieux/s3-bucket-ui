@@ -100,7 +100,7 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     meta: { cellClassName: "p-0" },
     cell: ({ row, table }) => {
       const entry = row.original;
-      const { sourceId, onPreview } = table.options.meta ?? {};
+      const { sourceId, onPreview, onDetails } = table.options.meta ?? {};
       if (entry.kind === "folder") {
         return (
           <Link
@@ -129,14 +129,17 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
           <span className="truncate">{entry.name}</span>
         </button>
       ) : (
-        <a
-          href={downloadUrl(sourceId ?? "", entry.key)}
+        // No preview for this type → open its details, never a surprise
+        // download (that stays an explicit action).
+        <button
+          type="button"
+          onClick={() => onDetails?.(entry)}
           className={NAME_CELL_CLASS}
-          title={`Download ${entry.name}`}
+          title={`Details of ${entry.name}`}
         >
           <FileIcon name={entry.name} className="size-4 shrink-0" />
           <span className="truncate">{entry.name}</span>
-        </a>
+        </button>
       );
     },
   },

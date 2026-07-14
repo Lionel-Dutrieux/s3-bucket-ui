@@ -16,6 +16,12 @@ import { cn } from "@/lib/utils";
 const GRID_ACTION_CLASS =
   "inline-flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground";
 
+/** "TAR.GZ" for archive.tar.gz, "SQLITE3" for dump.sqlite3, null for README. */
+function extensionOf(name: string): string | null {
+  const match = /\.([a-z0-9]{1,7}(?:\.[a-z0-9]{1,4})?)$/i.exec(name);
+  return match ? match[1].toUpperCase() : null;
+}
+
 /** Multi-select wiring, present only when the source allows deletions.
  * Ids are the row ids the table uses: folder prefix or file key. */
 export interface GridSelection {
@@ -266,10 +272,14 @@ function FileCard({
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
           />
         ) : (
-          <FileIcon
-            name={file.name}
-            className="size-10 transition-transform group-hover:scale-105"
-          />
+          <div className="flex flex-col items-center gap-2 transition-transform group-hover:scale-105">
+            <FileIcon name={file.name} className="size-12" />
+            {extensionOf(file.name) ? (
+              <span className="rounded-md border bg-background px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground">
+                {extensionOf(file.name)}
+              </span>
+            ) : null}
+          </div>
         )}
       </div>
       <div className="space-y-0.5 border-t px-3 py-2">
@@ -279,8 +289,9 @@ function FileCard({
         </p>
       </div>
 
-      {/* Primary action stretched over the card; the hover actions
-          sit above it, so nothing interactive ends up nested. */}
+      {/* Primary action stretched over the card; the hover actions sit
+          above it, so nothing interactive ends up nested. Non-previewable
+          files open their details — never a surprise download. */}
       {isPreviewable(file.name) ? (
         <button
           type="button"
@@ -291,13 +302,14 @@ function FileCard({
           <span className="sr-only">Preview {file.name}</span>
         </button>
       ) : (
-        <a
-          href={downloadUrl(sourceId, file.key)}
-          title={`Download ${file.name}`}
+        <button
+          type="button"
+          onClick={() => onDetails(file)}
+          title={`Details of ${file.name}`}
           className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="sr-only">Download {file.name}</span>
-        </a>
+          <span className="sr-only">Details of {file.name}</span>
+        </button>
       )}
 
       {selection ? (
