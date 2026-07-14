@@ -42,3 +42,9 @@ export const DELETE_FOLDER_MAX_ROUNDS = 50;
 export const DELETE_ENTRIES_MAX = 500;
 /** Maximum items in one drag-and-drop move. */
 export const MOVE_ENTRIES_MAX = 500;
+
+/** Total objects one cross-source copy may touch (folders expanded). */
+export const CROSS_COPY_MAX_OBJECTS = 1000;
+/** Objects streamed source→destination at once — each in-flight key holds an
+ * open download stream through this process. */
+export const CROSS_COPY_CONCURRENCY = 4;

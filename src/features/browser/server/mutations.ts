@@ -1,12 +1,19 @@
 import "server-only";
 import type { Files } from "files-sdk";
 import {
+  CROSS_COPY_CONCURRENCY,
+  CROSS_COPY_MAX_OBJECTS,
   DELETE_FOLDER_BATCH,
   DELETE_FOLDER_MAX_ROUNDS,
   FOLDER_MOVE_CONCURRENCY,
   FOLDER_MOVE_LIST_BATCH,
   FOLDER_MOVE_MAX_OBJECTS,
 } from "@/features/browser/lib/limits";
+import {
+  basename,
+  type EntryTarget,
+  folderName,
+} from "@/features/browser/lib/move";
 
 /**
  * Moves every object under `srcPrefix` to `destPrefix` (copy + delete each),
@@ -45,6 +52,93 @@ export async function movePrefix(
     );
   }
   return { count: keys.length };
+}
+
+export interface CrossCopySummary {
+  copied: number;
+  skipped: number;
+  failed: number;
+}
+
+export type CrossCopyResult = { error: string } | { summary: CrossCopySummary };
+
+/**
+ * Copies a selection (files + folders, expanded and bounded) from one source
+ * into a folder of another — each object streams download→upload through
+ * this process, which is what makes the copy work across providers. Existing
+ * destination keys are skipped, per-key failures don't abort the run.
+ */
+export async function copyEntriesAcross(
+  from: Files,
+  to: Files,
+  targets: EntryTarget[],
+  destPrefix: string,
+): Promise<CrossCopyResult> {
+  // Expand the selection into concrete (srcKey → destKey) pairs. Files land
+  // directly in the destination folder; folders come along with their name.
+  const pairs: { srcKey: string; destKey: string }[] = [];
+  for (const target of targets) {
+    if (target.kind === "file") {
+      pairs.push({
+        srcKey: target.key,
+        destKey: destPrefix + basename(target.key),
+      });
+      continue;
+    }
+    const folderDest = `${destPrefix}${folderName(target.prefix)}/`;
+    let cursor: string | undefined;
+    do {
+      const page = await from.list({
+        prefix: target.prefix,
+        cursor,
+        limit: FOLDER_MOVE_LIST_BATCH,
+      });
+      for (const item of page.items) {
+        if (item.key.endsWith("/")) continue; // folder markers
+        pairs.push({
+          srcKey: item.key,
+          destKey: folderDest + item.key.slice(target.prefix.length),
+        });
+      }
+      cursor = page.cursor;
+      if (pairs.length > CROSS_COPY_MAX_OBJECTS) {
+        return {
+          error: `This selection holds more than ${CROSS_COPY_MAX_OBJECTS} objects — too large to copy in one go.`,
+        };
+      }
+    } while (cursor);
+  }
+  if (pairs.length > CROSS_COPY_MAX_OBJECTS) {
+    return {
+      error: `This selection holds more than ${CROSS_COPY_MAX_OBJECTS} objects — too large to copy in one go.`,
+    };
+  }
+
+  const summary: CrossCopySummary = { copied: 0, skipped: 0, failed: 0 };
+  for (let i = 0; i < pairs.length; i += CROSS_COPY_CONCURRENCY) {
+    await Promise.all(
+      pairs.slice(i, i + CROSS_COPY_CONCURRENCY).map(async (pair) => {
+        try {
+          if (await to.exists(pair.destKey)) {
+            summary.skipped++;
+            return;
+          }
+          const stored = await from.download(pair.srcKey);
+          await to.upload(pair.destKey, stored.stream(), {
+            contentType: stored.type || undefined,
+          });
+          summary.copied++;
+        } catch (error) {
+          summary.failed++;
+          console.error(
+            `[browser] cross-copy failed (${pair.srcKey} → ${pair.destKey}):`,
+            error,
+          );
+        }
+      }),
+    );
+  }
+  return { summary };
 }
 
 /**

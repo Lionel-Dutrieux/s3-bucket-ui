@@ -12,6 +12,7 @@ export type OperationAction =
   | "rename-folder"
   | "move"
   | "copy"
+  | "copy-to"
   | "migrate";
 
 export interface OperationRecord {

@@ -44,6 +44,7 @@ import {
   selectColumn,
 } from "@/features/browser/components/browser-columns";
 import { BrowserToolbar } from "@/features/browser/components/browser-toolbar";
+import { CopyToDialog } from "@/features/browser/components/copy-to-dialog";
 import { DetailsDialog } from "@/features/browser/components/details-dialog";
 import {
   type DragData,
@@ -136,6 +137,7 @@ export function FileBrowser({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [newFolderOpen, setNewFolderOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [copyTargets, setCopyTargets] = useState<EntryTarget[] | null>(null);
 
   // A selection belongs to one folder — navigating away discards it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is intentionally keyed on the folder change
@@ -387,6 +389,9 @@ export function FileBrowser({
           onToggleSelectAll={toggleSelectAll}
           onBulkDownload={handleBulkDownload}
           bulkDownloadDisabled={selectedFiles.length === 0}
+          onCopyTo={() =>
+            setCopyTargets(selectedRows.map((row) => toTarget(row.original)))
+          }
           canDelete={permissions.delete}
           onBulkDelete={() => setBulkConfirmOpen(true)}
         />
@@ -561,6 +566,19 @@ export function FileBrowser({
         open={searchOpen}
         onOpenChange={setSearchOpen}
         initialQuery={query}
+      />
+
+      <CopyToDialog
+        sourceId={sourceId}
+        targets={copyTargets}
+        onOpenChange={(open) => {
+          if (!open) setCopyTargets(null);
+        }}
+        onCopied={() => {
+          setCopyTargets(null);
+          setRowSelection({});
+          router.refresh();
+        }}
       />
 
       <UploadTray

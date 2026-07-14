@@ -1,10 +1,11 @@
 "use client";
 
-import { Download, Trash2, X } from "lucide-react";
+import { Copy, Download, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /** Toolbar shown while a selection is active: count, select-all toggle and
- *  the bulk actions (download always, delete only when permitted). */
+ *  the bulk actions (download and copy-to always, delete only when
+ *  permitted — the destination's edit grant is checked server-side). */
 export function SelectionToolbar({
   selectedCount,
   allVisibleSelected,
@@ -12,6 +13,7 @@ export function SelectionToolbar({
   onToggleSelectAll,
   onBulkDownload,
   bulkDownloadDisabled,
+  onCopyTo,
   canDelete,
   onBulkDelete,
 }: {
@@ -21,6 +23,7 @@ export function SelectionToolbar({
   onToggleSelectAll: () => void;
   onBulkDownload: () => void;
   bulkDownloadDisabled: boolean;
+  onCopyTo: () => void;
   canDelete: boolean;
   onBulkDelete: () => void;
 }) {
@@ -55,6 +58,10 @@ export function SelectionToolbar({
         >
           <Download aria-hidden />
           Download
+        </Button>
+        <Button variant="outline" size="sm" className="h-8" onClick={onCopyTo}>
+          <Copy aria-hidden />
+          Copy to…
         </Button>
         {canDelete ? (
           <Button

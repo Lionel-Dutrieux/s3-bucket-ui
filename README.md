@@ -23,9 +23,10 @@ Features:
   or drag & drop of files and whole folders, with a progress tray), folder
   creation, renaming, moving and duplicating; the delete grant unlocks
   deletions (single, multi-select, or a whole folder, with confirmation).
-- **Migrate** — admins can copy a source's entire contents into another
-  source, across providers (S3 → Azure, R2 → S3, …), without touching the
-  origin.
+- **Copy across sources** — send a selection of files and folders into any
+  folder of another source (edit grant required there), or let admins copy a
+  source's entire contents into another one — across providers (S3 → Azure,
+  R2 → S3, …), never touching the origin.
 - **Built-in authentication** — email/password plus an optional generic OIDC
   provider (Pocket ID, Authentik, Keycloak…) configured entirely through
   environment variables. The very first account created becomes the admin;

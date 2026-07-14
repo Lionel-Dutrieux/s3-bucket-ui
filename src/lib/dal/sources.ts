@@ -54,6 +54,27 @@ export const listSourcesFor = cache(
   },
 );
 
+/**
+ * Sources the viewer may write into: everything for admins, otherwise only
+ * sources where a grant (direct or via group) carries canEdit. Feeds the
+ * cross-source copy destination picker.
+ */
+export const listWritableSourcesFor = cache(
+  async (viewer: {
+    id: string;
+    role?: string | null;
+  }): Promise<SourceSummary[]> => {
+    if (viewer.role === "admin") return listSources();
+    return prisma.source.findMany({
+      where: {
+        grants: { some: { canEdit: true, ...grantsForUser(viewer.id) } },
+      },
+      select: { id: true, name: true, bucket: true, provider: true },
+      orderBy: { name: "asc" },
+    });
+  },
+);
+
 export const getSource = cache(async (id: string): Promise<Source | null> => {
   const row = await prisma.source.findUnique({ where: { id } });
   if (!row) return null;

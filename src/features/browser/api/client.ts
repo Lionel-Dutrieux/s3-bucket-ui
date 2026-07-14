@@ -50,6 +50,20 @@ export type SearchResultsResponse = Partial<SearchResults> & {
   error?: string;
 };
 
+/** A source the signed-in user can write into (destination picker). */
+export interface WritableSource {
+  id: string;
+  name: string;
+  bucket: string;
+  provider: string;
+}
+
+export interface FolderOption {
+  /** Full prefix including trailing slash. */
+  prefix: string;
+  name: string;
+}
+
 /** URL used directly as the `src` of preview media elements — the route
  *  redirects to a short-lived inline presigned URL, no fetch needed. */
 export function previewSrc(sourceId: string, key: string): string {
@@ -126,6 +140,25 @@ export async function fetchSearchResults(
     "Search failed — try again.",
   );
   return { hits: result.hits ?? [], truncated: result.truncated };
+}
+
+export async function fetchWritableSources(): Promise<WritableSource[]> {
+  const result = await getJson<{ sources?: WritableSource[]; error?: string }>(
+    "/api/sources",
+    "Could not list your sources.",
+  );
+  return result.sources ?? [];
+}
+
+export async function fetchFolders(
+  sourceId: string,
+  prefix: string,
+): Promise<FolderOption[]> {
+  const result = await getJson<{ folders?: FolderOption[]; error?: string }>(
+    `/api/sources/${sourceId}/folders?prefix=${encodeURIComponent(prefix)}`,
+    "Could not list this folder.",
+  );
+  return result.folders ?? [];
 }
 
 export async function fetchFileDetails(

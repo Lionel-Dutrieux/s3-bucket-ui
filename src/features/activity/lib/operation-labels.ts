@@ -28,6 +28,7 @@ const LABELS: Record<string, OperationLabel> = {
   "rename-folder": { label: "Renamed folder", icon: Pencil },
   move: { label: "Moved", icon: FolderInput },
   copy: { label: "Duplicated", icon: Copy },
+  "copy-to": { label: "Copied", icon: Copy },
   migrate: { label: "Copied source", icon: ArrowRightLeft },
   "sign-in-failed": {
     label: "Sign-in failed",

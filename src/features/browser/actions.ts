@@ -16,9 +16,16 @@ import {
   folderNameSchema,
 } from "@/features/browser/lib/schemas";
 import { withWriteAccess } from "@/features/browser/server/guards";
-import { deletePrefix, movePrefix } from "@/features/browser/server/mutations";
+import {
+  type CrossCopySummary,
+  copyEntriesAcross,
+  deletePrefix,
+  movePrefix,
+} from "@/features/browser/server/mutations";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
+import { requireSourceAccess } from "@/lib/auth/access";
 import { recordOperation } from "@/lib/dal/operations";
+import { getFilesClient } from "@/lib/storage/client";
 
 const RENAME_DENIED = "You are not allowed to edit this source.";
 
@@ -315,6 +322,70 @@ export async function deleteEntries(
         : actionOk();
     },
   );
+}
+
+/**
+ * Copies a selection of files/folders into a folder of another (or the same)
+ * source. Reading the origin needs a read grant; writing the destination
+ * needs its edit capability — both re-checked here, uniform 404-style
+ * messages so unreadable sources stay invisible. Existing destination keys
+ * are skipped rather than overwritten; nothing is removed from the origin.
+ */
+export async function copyEntriesToSource(
+  sourceId: string,
+  destSourceId: string,
+  targets: EntryTarget[],
+  destPrefix: string,
+): Promise<ActionResult<CrossCopySummary>> {
+  if (destPrefix !== "" && !destPrefix.endsWith("/")) {
+    return actionError("Invalid destination.");
+  }
+  if (targets.length === 0) return actionError("Nothing selected.");
+  if (
+    targets.some(
+      (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
+    )
+  ) {
+    return actionError("Invalid folder.");
+  }
+
+  const origin = await requireSourceAccess(sourceId);
+  if (!origin) return actionError("Source not found.");
+  const dest = await requireSourceAccess(destSourceId);
+  if (!dest) return actionError("Destination not found.");
+  if (!dest.access.canEdit) {
+    return actionError("You are not allowed to add files to that source.");
+  }
+
+  try {
+    const result = await copyEntriesAcross(
+      getFilesClient(origin.source),
+      getFilesClient(dest.source),
+      targets,
+      destPrefix,
+    );
+    if ("error" in result) return actionError(result.error);
+
+    const single = targets.length === 1 ? targets[0] : null;
+    await recordOperation({
+      action: "copy-to",
+      sourceId: origin.source.id,
+      sourceName: origin.source.name,
+      target: single
+        ? single.kind === "file"
+          ? single.key
+          : single.prefix
+        : `${targets.length} items`,
+      detail: `→ ${dest.source.name}:/${destPrefix}`,
+    });
+    return actionOk(result.summary);
+  } catch (error) {
+    console.error(
+      `[browser] cross-copy failed (source=${sourceId} → ${destSourceId}):`,
+      error,
+    );
+    return actionError("Could not copy the selection — try again.");
+  }
 }
 
 /**

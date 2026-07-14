@@ -1,9 +1,11 @@
 import { queryOptions } from "@tanstack/react-query";
 import {
   fetchFileDetails,
+  fetchFolders,
   fetchSearchResults,
   fetchShareUrl,
   fetchTextPreview,
+  fetchWritableSources,
 } from "@/features/browser/api/client";
 
 /**
@@ -30,6 +32,20 @@ export const browserQueries = {
     queryOptions({
       queryKey: [...browserQueries.all(sourceId), "search", q],
       queryFn: () => fetchSearchResults(sourceId, q),
+      staleTime: 30_000,
+    }),
+  /** Destinations for the cross-source copy dialog. */
+  writableSources: () =>
+    queryOptions({
+      queryKey: ["sources", "writable"] as const,
+      queryFn: fetchWritableSources,
+      staleTime: 60_000,
+    }),
+  /** One folder level of a source — drives the destination folder picker. */
+  folders: (sourceId: string, prefix: string) =>
+    queryOptions({
+      queryKey: [...browserQueries.all(sourceId), "folders", prefix],
+      queryFn: () => fetchFolders(sourceId, prefix),
       staleTime: 30_000,
     }),
   /** Fetched imperatively (fetchQuery) on copy-link: the default staleTime
