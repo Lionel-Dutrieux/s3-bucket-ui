@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
+import { requireSourceAccess } from "@/lib/auth/access";
 import { recordOperation } from "@/lib/dal/operations";
-import { getSource } from "@/lib/dal/sources";
 import { getFilesClient } from "@/lib/storage/client";
 
 /**
@@ -10,8 +10,8 @@ import { getFilesClient } from "@/lib/storage/client";
  * and going through the app (instead of a presigned PUT straight to the
  * bucket) avoids requiring CORS configuration on every bucket.
  *
- * The allowUpload permission is enforced here, server-side — hiding the
- * upload UI is cosmetic, this check is the real gate.
+ * The edit capability is enforced here, server-side — hiding the upload UI
+ * is cosmetic, this check is the real gate.
  */
 export async function POST(
   request: NextRequest,
@@ -23,12 +23,14 @@ export async function POST(
     return apiError(400, "Invalid key.");
   }
 
-  const source = await getSource(id);
-  if (!source) {
+  // 404 whether the source is missing or the user has no read grant.
+  const result = await requireSourceAccess(id);
+  if (!result) {
     return apiError(404, "Source not found.");
   }
-  if (!source.allowUpload) {
-    return apiError(403, "Uploads are not allowed on this source.");
+  const { source, access } = result;
+  if (!access.canEdit) {
+    return apiError(403, "You are not allowed to upload to this source.");
   }
 
   if (!request.body) {

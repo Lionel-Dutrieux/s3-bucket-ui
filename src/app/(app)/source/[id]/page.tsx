@@ -15,7 +15,7 @@ import {
   type ListErrorReason,
   listFolder,
 } from "@/features/browser/server/service";
-import { getSource } from "@/lib/dal/sources";
+import { requireSourceAccess } from "@/lib/auth/access";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
 
 interface SourcePageProps {
@@ -27,8 +27,8 @@ export async function generateMetadata({
   params,
 }: SourcePageProps): Promise<Metadata> {
   const { id } = await params;
-  const source = await getSource(id);
-  return { title: source?.name ?? "Source" };
+  const result = await requireSourceAccess(id);
+  return { title: result?.source.name ?? "Source" };
 }
 
 export default async function SourcePage({
@@ -41,8 +41,11 @@ export default async function SourcePage({
   const cursor = typeof sp.cursor === "string" ? sp.cursor : undefined;
   const activeType = FILE_CATEGORIES.find((c) => c.id === sp.type)?.id;
 
-  const source = await getSource(id);
-  if (!source) notFound();
+  // Uniform notFound() whether the source doesn't exist or the user simply
+  // has no grant on it — its existence is not revealed.
+  const result = await requireSourceAccess(id);
+  if (!result) notFound();
+  const { source, access } = result;
 
   const view: ViewMode =
     (await cookies()).get(VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
@@ -100,8 +103,8 @@ export default async function SourcePage({
               files={files}
               view={view}
               permissions={{
-                upload: source.allowUpload,
-                delete: source.allowDelete,
+                upload: access.canEdit,
+                delete: access.canDelete,
               }}
             />
             {listing.nextCursor ? (

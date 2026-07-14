@@ -2,7 +2,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { requireSession } from "@/lib/auth/session";
-import { listSources } from "@/lib/dal/sources";
+import { listSourcesFor } from "@/lib/dal/sources";
 
 export default async function AppLayout({
   children,
@@ -12,7 +12,7 @@ export default async function AppLayout({
   // UX guard only — every page, action and route handler re-checks the
   // session itself (a layout protects none of them).
   const session = await requireSession();
-  const sources = await listSources();
+  const sources = await listSourcesFor(session.user);
 
   return (
     <SidebarProvider>

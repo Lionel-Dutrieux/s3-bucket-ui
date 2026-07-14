@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { THUMBNAIL_TTL_SECONDS } from "@/features/browser/lib/limits";
 import { apiError } from "@/lib/api-error";
-import { getSource } from "@/lib/dal/sources";
+import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
 
 /**
@@ -25,10 +25,12 @@ export async function GET(
     return apiError(415, "Not an image.");
   }
 
-  const source = await getSource(id);
-  if (!source) {
+  // 404 whether the source is missing or the user has no read grant.
+  const result = await requireSourceAccess(id);
+  if (!result) {
     return apiError(404, "Source not found.");
   }
+  const { source } = result;
 
   try {
     const signedUrl = await getFilesClient(source).url(key, {

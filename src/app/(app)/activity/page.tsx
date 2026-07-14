@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { operationLabel } from "@/features/browser/lib/operation-labels";
+import { requireAdmin } from "@/lib/auth/session";
 import { listOperations } from "@/lib/dal/operations";
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,9 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "Activity" };
 
 export default async function ActivityPage() {
+  // Admin-only: the journal spans all sources, including ones a regular user
+  // was never granted.
+  await requireAdmin();
   const operations = await listOperations();
 
   return (

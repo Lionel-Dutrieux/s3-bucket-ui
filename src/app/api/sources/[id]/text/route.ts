@@ -3,7 +3,7 @@ import type { TextPreviewResult } from "@/features/browser/api/client";
 import { isTextFile } from "@/features/browser/lib/file-types";
 import { TEXT_PREVIEW_MAX_BYTES } from "@/features/browser/lib/limits";
 import { apiError } from "@/lib/api-error";
-import { getSource } from "@/lib/dal/sources";
+import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
 
 /**
@@ -26,10 +26,12 @@ export async function GET(
     return apiError(415, "This file type has no text preview.");
   }
 
-  const source = await getSource(id);
-  if (!source) {
+  // 404 whether the source is missing or the user has no read grant.
+  const result = await requireSourceAccess(id);
+  if (!result) {
     return apiError(404, "Source not found.");
   }
+  const { source } = result;
 
   try {
     const stored = await getFilesClient(source).download(key, {

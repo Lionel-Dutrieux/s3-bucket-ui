@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
-import { listSources } from "@/lib/dal/sources";
+import { requireSession } from "@/lib/auth/session";
+import { listSourcesFor } from "@/lib/dal/sources";
 import { getProvider } from "@/lib/storage/providers";
 
 export default async function HomePage() {
-  const sources = await listSources();
+  const session = await requireSession();
+  const sources = await listSourcesFor(session.user);
 
   return (
     <>

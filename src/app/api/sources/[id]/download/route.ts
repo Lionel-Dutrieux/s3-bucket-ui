@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
-import { getSource } from "@/lib/dal/sources";
+import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
 
 export async function GET(
@@ -13,10 +13,12 @@ export async function GET(
     return apiError(400, "Missing key.");
   }
 
-  const source = await getSource(id);
-  if (!source) {
+  // 404 whether the source is missing or the user has no read grant.
+  const result = await requireSourceAccess(id);
+  if (!result) {
     return apiError(404, "Source not found.");
   }
+  const { source } = result;
 
   const filename = key.split("/").pop() || "download";
   try {

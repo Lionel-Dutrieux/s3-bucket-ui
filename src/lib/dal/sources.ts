@@ -38,6 +38,34 @@ export const listSources = cache(async (): Promise<SourceSummary[]> => {
   });
 });
 
+/**
+ * Sources the viewer may read: everything for admins, otherwise only sources
+ * they hold a grant on (directly or through a group). Every listing surface
+ * (sidebar, home page, command palette) goes through this.
+ */
+export const listSourcesFor = cache(
+  async (viewer: {
+    id: string;
+    role?: string | null;
+  }): Promise<SourceSummary[]> => {
+    if (viewer.role === "admin") return listSources();
+    return prisma.source.findMany({
+      where: {
+        grants: {
+          some: {
+            OR: [
+              { userId: viewer.id },
+              { group: { members: { some: { userId: viewer.id } } } },
+            ],
+          },
+        },
+      },
+      select: { id: true, name: true, bucket: true, provider: true },
+      orderBy: { name: "asc" },
+    });
+  },
+);
+
 export const getSource = cache(async (id: string): Promise<Source | null> => {
   const row = await prisma.source.findUnique({ where: { id } });
   if (!row) return null;
