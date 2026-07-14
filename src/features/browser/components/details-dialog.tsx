@@ -1,16 +1,18 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Loader2 } from "lucide-react";
+import { Copy, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { downloadUrl } from "@/features/browser/api/client";
 import { browserQueries } from "@/features/browser/api/queries";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { formatBytes, formatDate } from "@/lib/format";
@@ -97,6 +99,15 @@ export function DetailsDialog({
                 ))}
               </dl>
             )}
+
+            <DialogFooter>
+              <Button asChild>
+                <a href={downloadUrl(sourceId, file.key)}>
+                  <Download aria-hidden />
+                  Download
+                </a>
+              </Button>
+            </DialogFooter>
           </>
         ) : null}
       </DialogContent>
