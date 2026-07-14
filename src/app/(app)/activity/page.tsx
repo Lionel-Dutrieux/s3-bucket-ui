@@ -10,19 +10,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ActivityFilters } from "@/features/browser/components/activity-filters";
 import { operationLabel } from "@/features/browser/lib/operation-labels";
 import { requireAdmin } from "@/lib/auth/session";
-import { listOperations } from "@/lib/dal/operations";
+import { listOperationSourceNames, listOperations } from "@/lib/dal/operations";
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Activity" };
 
-export default async function ActivityPage() {
+interface ActivityPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function ActivityPage({
+  searchParams,
+}: ActivityPageProps) {
   // Admin-only: the journal spans all sources, including ones a regular user
   // was never granted.
   await requireAdmin();
-  const operations = await listOperations();
+
+  const sp = await searchParams;
+  const action = typeof sp.action === "string" ? sp.action : undefined;
+  const sourceName = typeof sp.source === "string" ? sp.source : undefined;
+  const q = typeof sp.q === "string" ? sp.q : "";
+  const hasFilters = Boolean(action || sourceName || q);
+
+  const [operations, sourceNames] = await Promise.all([
+    listOperations({ action, sourceName, q: q || undefined }),
+    listOperationSourceNames(),
+  ]);
 
   return (
     <>
@@ -45,8 +62,19 @@ export default async function ActivityPage() {
             ) : null}
           </PageHeader>
 
+          <ActivityFilters
+            action={action}
+            sourceName={sourceName}
+            q={q}
+            sourceNames={sourceNames}
+          />
+
           {operations.length === 0 ? (
-            <EmptyState />
+            hasFilters ? (
+              <NoMatchState />
+            ) : (
+              <EmptyState />
+            )
           ) : (
             <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
               <Table>
@@ -111,6 +139,20 @@ export default async function ActivityPage() {
         </div>
       </main>
     </>
+  );
+}
+
+function NoMatchState() {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-10 text-center">
+      <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+        <History className="size-5" aria-hidden />
+      </div>
+      <h2 className="text-base font-semibold">No matching activity</h2>
+      <p className="max-w-sm text-sm text-muted-foreground">
+        Nothing in the log matches these filters — clear them to see everything.
+      </p>
+    </div>
   );
 }
 

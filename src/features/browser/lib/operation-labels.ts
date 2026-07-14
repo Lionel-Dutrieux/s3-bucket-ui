@@ -35,3 +35,8 @@ const LABELS: Record<string, OperationLabel> = {
 export function operationLabel(action: string): OperationLabel {
   return LABELS[action] ?? { label: action, icon: Pencil };
 }
+
+/** Every known action with its display label — drives the activity filter. */
+export const OPERATION_FILTERS = Object.entries(LABELS).map(
+  ([id, { label }]) => ({ id, label }),
+);

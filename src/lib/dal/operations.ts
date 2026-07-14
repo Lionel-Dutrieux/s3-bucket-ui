@@ -54,9 +54,45 @@ export async function recordOperation(input: {
   }
 }
 
-export async function listOperations(limit = 200): Promise<OperationRecord[]> {
+export interface OperationFilters {
+  /** Exact action id (e.g. "upload", "move", "sign-in-failed"). */
+  action?: string;
+  /** Exact denormalized source name. */
+  sourceName?: string;
+  /** Case-insensitive substring over target, detail and actor. */
+  q?: string;
+}
+
+export async function listOperations(
+  filters: OperationFilters = {},
+  limit = 200,
+): Promise<OperationRecord[]> {
+  const { action, sourceName, q } = filters;
   return prisma.operation.findMany({
+    where: {
+      ...(action ? { action } : {}),
+      ...(sourceName ? { sourceName } : {}),
+      ...(q
+        ? {
+            OR: [
+              { target: { contains: q, mode: "insensitive" } },
+              { detail: { contains: q, mode: "insensitive" } },
+              { actor: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
     orderBy: { createdAt: "desc" },
     take: limit,
   });
+}
+
+/** Distinct source names seen in the log — includes since-removed sources. */
+export async function listOperationSourceNames(): Promise<string[]> {
+  const rows = await prisma.operation.findMany({
+    distinct: ["sourceName"],
+    select: { sourceName: true },
+    orderBy: { sourceName: "asc" },
+  });
+  return rows.map((row) => row.sourceName);
 }

@@ -253,11 +253,16 @@ export async function deleteEntries(
         }
       }
       if (failures.length < targets.length) {
+        const single = targets.length === 1 ? targets[0] : null;
         await recordOperation({
           action: "delete-many",
           sourceId: source.id,
           sourceName: source.name,
-          target: `${targets.length} item${targets.length === 1 ? "" : "s"}`,
+          target: single
+            ? single.kind === "file"
+              ? single.key
+              : single.prefix
+            : `${targets.length} items`,
           detail: failures.length > 0 ? `${failures.length} failed` : undefined,
         });
       }
@@ -338,7 +343,11 @@ export async function moveEntries(
         action: "move",
         sourceId: source.id,
         sourceName: source.name,
-        target: `${plan.moves.length} item${plan.moves.length === 1 ? "" : "s"}`,
+        // A single move logs the actual key — "1 item" tells nobody anything.
+        target:
+          plan.moves.length === 1
+            ? plan.moves[0].from
+            : `${plan.moves.length} items`,
         detail: `→ ${destPrefix || "/"}`,
       });
       return actionOk();
