@@ -57,7 +57,7 @@ export function UserMenu({ user }: { user: SidebarUser }) {
         <DropdownMenuLabel className="flex items-center gap-2">
           {user.role === "admin" ? (
             <>
-              <ShieldCheck className="size-4 text-amber-600" aria-hidden />
+              <ShieldCheck className="size-4 text-primary" aria-hidden />
               Administrator
             </>
           ) : (

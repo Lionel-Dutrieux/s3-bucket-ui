@@ -1,8 +1,8 @@
 import { UserRoundPlus } from "lucide-react";
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { CreateUserDialog } from "@/features/admin/components/create-user-dialog";
-import { PageHeader } from "@/features/admin/components/page-header";
 import { StatCard } from "@/features/admin/components/stat-card";
 import { UsersTable } from "@/features/admin/components/users-table";
 import { requireAdmin } from "@/lib/auth/session";

@@ -141,12 +141,12 @@ function FolderCard({
     >
       {/* When selection is on, hovering swaps the folder icon for
           its checkbox — the Drive pattern. */}
-      <div className="relative z-10 flex size-9 shrink-0 items-center justify-center rounded-md bg-amber-500/10">
+      <div className="relative z-10 flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10">
         {selection ? (
           <>
             <Folder
               className={cn(
-                "size-4.5 fill-amber-400/80 text-amber-500",
+                "size-4.5 fill-amber-400/80 text-primary",
                 selection.active || selection.isSelected(folder.prefix)
                   ? "hidden"
                   : "group-hover:hidden",
@@ -167,7 +167,7 @@ function FolderCard({
           </>
         ) : (
           <Folder
-            className="size-4.5 fill-amber-400/80 text-amber-500"
+            className="size-4.5 fill-amber-400/80 text-primary"
             aria-hidden
           />
         )}

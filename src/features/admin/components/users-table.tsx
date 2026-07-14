@@ -111,7 +111,7 @@ export function UsersTable({
               </TableCell>
               <TableCell>
                 {user.role === "admin" ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600">
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     <ShieldCheck className="size-3.5" aria-hidden />
                     Admin
                   </span>

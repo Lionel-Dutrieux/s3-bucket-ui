@@ -111,7 +111,7 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
             className={cn(NAME_CELL_CLASS, "font-medium")}
           >
             <Folder
-              className="size-4 shrink-0 fill-amber-400/80 text-amber-500"
+              className="size-4 shrink-0 fill-amber-400/80 text-primary"
               aria-hidden
             />
             <span className="truncate">{entry.name}</span>

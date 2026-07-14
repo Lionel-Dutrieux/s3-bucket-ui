@@ -53,7 +53,7 @@ export function AppSidebar({
     <Sidebar>
       <SidebarHeader className="gap-3 p-3">
         <Link href="/" className="flex items-center gap-2.5 px-1 pt-1">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <Cylinder className="size-4" aria-hidden />
           </div>
           <div className="grid leading-tight">
@@ -83,7 +83,7 @@ export function AppSidebar({
                           href={`/source/${source.id}`}
                           title={`${source.name} — ${source.bucket}`}
                         >
-                          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-background text-amber-600">
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-background text-primary">
                             <group.icon className="size-4" aria-hidden />
                           </div>
                           <div className="grid min-w-0 flex-1 leading-tight">

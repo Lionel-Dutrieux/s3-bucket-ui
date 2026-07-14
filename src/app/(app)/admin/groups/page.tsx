@@ -1,9 +1,9 @@
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { CreateGroupDialog } from "@/features/admin/components/create-group-dialog";
 import { GroupsTable } from "@/features/admin/components/groups-table";
-import { PageHeader } from "@/features/admin/components/page-header";
 import { requireAdmin } from "@/lib/auth/session";
 import { listGroups } from "@/lib/dal/groups";
 import { listUserOptions } from "@/lib/dal/users";

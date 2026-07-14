@@ -23,7 +23,7 @@ const CATEGORY_ICONS: Record<
   image: { icon: FileImage, className: "text-emerald-500" },
   video: { icon: FileVideo, className: "text-rose-500" },
   audio: { icon: FileAudio, className: "text-orange-500" },
-  archive: { icon: FileArchive, className: "text-amber-600" },
+  archive: { icon: FileArchive, className: "text-primary" },
   code: { icon: FileCode, className: "text-sky-500" },
   spreadsheet: { icon: FileSpreadsheet, className: "text-green-600" },
   pdf: { icon: FileText, className: "text-red-500" },

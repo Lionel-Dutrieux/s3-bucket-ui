@@ -122,7 +122,7 @@ export function DragPreview({
       <div className="relative flex items-center gap-2 rounded-lg border bg-background px-3 py-2 shadow-lg">
         {kind === "folder" ? (
           <Folder
-            className="size-4 shrink-0 fill-amber-400/80 text-amber-500"
+            className="size-4 shrink-0 fill-amber-400/80 text-primary"
             aria-hidden
           />
         ) : (

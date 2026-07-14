@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/features/admin/components/page-header";
 import { SourceAccess } from "@/features/admin/components/source-access";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
@@ -57,7 +57,7 @@ export default async function AdminSourcesPage() {
                 className="rounded-xl border bg-card shadow-sm"
               >
                 <header className="flex items-center gap-3 border-b px-4 py-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
                     <Icon className="size-4.5" aria-hidden />
                   </div>
                   <div className="min-w-0">
