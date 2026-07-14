@@ -177,7 +177,13 @@ callers return 404/notFound() and never reveal that a source exists.
   as serial POSTs and can't be cached — they're reserved for mutations.
   Preview media point their `src` at `app/api/sources/[id]/preview` (a
   redirect to a presigned URL — zero client fetch); details, text preview,
-  share links and source config are GET routes returning JSON. After a
+  share links and source config are GET routes returning JSON.
+- **Presigned URLs are capability-gated**: providers with no signing
+  primitive (SFTP, FTP, WebDAV — `files.capabilities.signedUrl.supported`)
+  make download/preview/thumbnail stream the body through the app instead
+  (`features/browser/server/stream.ts`, Range-aware, inline HTML/SVG forced
+  to attachment), and the share action is hidden (`canShare` prop) and
+  refused server-side. After a
   mutation the browser calls `router.refresh()` (the listing is RSC-rendered);
   source mutations revalidate with `revalidatePath` (the sidebar lives in the
   layout).

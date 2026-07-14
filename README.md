@@ -44,6 +44,9 @@ Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
 Azure Blob Storage, MinIO, DigitalOcean Spaces, Backblaze B2, Hetzner Object
 Storage, Wasabi, Scaleway, OVHcloud, Storj — plus a generic S3-compatible
 entry for anything else speaking the S3 API (Garage, SeaweedFS, Ceph RGW, …).
+And beyond object stores: **SFTP, FTP/FTPS and WebDAV** (Nextcloud, ownCloud,
+NAS boxes) sources browse with the exact same UI — downloads and previews
+stream through the app since those protocols can't presign URLs.
 
 > **Security model.** Every server entry point (page, server action, API
 > route) re-validates the session and the grant — non-admins only ever see
@@ -184,6 +187,20 @@ to hand out edit/delete grants on the source):
 - **MinIO / DigitalOcean Spaces / anything S3-compatible**: the service's S3
   endpoint and key pair (the generic *S3-compatible* entry covers Garage,
   SeaweedFS, Ceph RGW, LocalStack, …).
+- **SFTP**: `sftp://host:22`, username + password; "Root path" scopes the
+  source to a directory (`/` for the whole tree).
+- **FTP / FTPS**: `ftps://host:21` (or `ftp://` — FTPS strongly recommended),
+  username + password, root path.
+- **WebDAV / Nextcloud**: the DAV base URL — for Nextcloud
+  `https://cloud.example.com/remote.php/dav/files/<user>` — username +
+  password (use an app password), root path.
+
+> [!NOTE]
+> Protocol sources (SFTP/FTP/WebDAV) have no presigned URLs: downloads,
+> previews and thumbnails stream through the app instead of redirecting to
+> the storage origin, and the **Copy link** action is unavailable. Listings
+> walk the directory tree per request, so very large trees browse slower
+> than an object store.
 
 Use **Test connection** to check the credentials; the connection is verified
 again when the source is saved. Providers live in

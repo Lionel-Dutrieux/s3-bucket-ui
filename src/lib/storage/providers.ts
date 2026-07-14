@@ -7,7 +7,7 @@
 export interface ProviderDefinition {
   id: string;
   label: string;
-  adapter: "s3" | "azure";
+  adapter: "s3" | "azure" | "sftp" | "ftp" | "webdav";
   /**
    * Region used to sign S3 requests. "from-endpoint" extracts it from the
    * endpoint hostname (AWS, Wasabi, Backblaze, DigitalOcean encode it there).
@@ -28,6 +28,12 @@ const S3_FIELD_LABELS = {
   bucket: "Bucket",
   accessKeyId: "Access key ID",
   secretAccessKey: "Secret access key",
+};
+
+const SYSTEM_FIELD_LABELS = {
+  bucket: "Root path",
+  accessKeyId: "Username",
+  secretAccessKey: "Password",
 };
 
 export const PROVIDERS: readonly ProviderDefinition[] = [
@@ -167,8 +173,83 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
       secretAccessKey: "Secret key",
     },
   },
+  // Protocol sources (no presigned URLs — downloads/previews stream through
+  // the app; the share action is unavailable). "Bucket" holds the root path.
+  {
+    id: "sftp",
+    label: "SFTP",
+    adapter: "sftp",
+    endpointPlaceholder: "sftp://files.example.com:22",
+    fieldLabels: SYSTEM_FIELD_LABELS,
+  },
+  {
+    id: "ftp",
+    label: "FTP / FTPS",
+    adapter: "ftp",
+    endpointPlaceholder: "ftps://ftp.example.com:21",
+    fieldLabels: SYSTEM_FIELD_LABELS,
+  },
+  {
+    id: "webdav",
+    label: "WebDAV / Nextcloud",
+    adapter: "webdav",
+    endpointPlaceholder:
+      "https://cloud.example.com/remote.php/dav/files/<user>",
+    fieldLabels: SYSTEM_FIELD_LABELS,
+  },
 ];
 
 export function getProvider(id: string): ProviderDefinition | undefined {
   return PROVIDERS.find((provider) => provider.id === id);
+}
+
+export type EndpointCheck =
+  | { ok: true; value: string }
+  | { ok: false; message: string };
+
+/**
+ * Validates and normalizes a source endpoint for its provider's protocol
+ * family. HTTP object stores normalize to the origin; WebDAV keeps its path
+ * (endpoints live under one, e.g. /remote.php/dav/files/<user>); SFTP/FTP
+ * reduce to scheme + host[:port] — `URL.origin` is "null" for non-special
+ * schemes, hence the manual rebuild.
+ */
+export function normalizeEndpoint(
+  providerId: string,
+  raw: string,
+): EndpointCheck {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return { ok: false, message: "Must be a valid URL." };
+  }
+
+  const hostPort = `${url.hostname}${url.port ? `:${url.port}` : ""}`;
+  switch (getProvider(providerId)?.adapter ?? "s3") {
+    case "webdav": {
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        return { ok: false, message: "Must be an http(s):// URL." };
+      }
+      return {
+        ok: true,
+        value: `${url.origin}${url.pathname.replace(/\/+$/, "")}`,
+      };
+    }
+    case "sftp":
+      if (url.protocol !== "sftp:") {
+        return { ok: false, message: "Must be an sftp:// URL." };
+      }
+      return { ok: true, value: `sftp://${hostPort}` };
+    case "ftp":
+      if (url.protocol !== "ftp:" && url.protocol !== "ftps:") {
+        return { ok: false, message: "Must be an ftp:// or ftps:// URL." };
+      }
+      return { ok: true, value: `${url.protocol}//${hostPort}` };
+    default:
+      if (url.protocol !== "https:") {
+        return { ok: false, message: "Must be a valid https:// URL." };
+      }
+      return { ok: true, value: url.origin };
+  }
 }

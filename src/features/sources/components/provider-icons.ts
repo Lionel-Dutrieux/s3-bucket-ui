@@ -1,8 +1,10 @@
 import {
   Archive,
   Box,
+  Cable,
   Cloud,
   CloudCog,
+  Cloudy,
   Cylinder,
   Database,
   Droplets,
@@ -13,6 +15,7 @@ import {
   Network,
   Server,
   Snowflake,
+  SquareTerminal,
 } from "lucide-react";
 
 // UI counterpart of lib/providers.ts — kept separate so the provider
@@ -31,6 +34,9 @@ const PROVIDER_ICONS: Record<string, LucideIcon> = {
   ovhcloud: Database,
   storj: Network,
   "s3-compatible": HardDrive,
+  sftp: SquareTerminal,
+  ftp: Cable,
+  webdav: Cloudy,
 };
 
 export function providerIcon(providerId: string): LucideIcon {
