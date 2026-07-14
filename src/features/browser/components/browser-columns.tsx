@@ -37,8 +37,10 @@ declare module "@tanstack/react-table" {
 }
 
 const NAME_CELL_CLASS = "flex h-12 w-full items-center gap-3 px-2 text-left";
+// pointer-coarse keeps hover-revealed controls reachable on touch screens,
+// where nothing ever hovers.
 const ROW_ACTION_CLASS =
-  "inline-flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100";
+  "inline-flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100";
 const NUMERIC_CELL_CLASS = "text-right font-mono text-xs text-muted-foreground";
 
 // Sorting is delegated to pure comparators; TanStack inverts them for the
@@ -85,7 +87,7 @@ export const selectColumn: ColumnDef<BrowserEntry> = {
         "transition-opacity",
         !row.getIsSelected() &&
           table.getSelectedRowModel().rows.length === 0 &&
-          "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+          "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100",
       )}
     />
   ),

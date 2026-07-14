@@ -31,7 +31,8 @@ export function SourceMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <SidebarMenuAction showOnHover>
+          {/* pointer-coarse: hover never happens on touch — keep it reachable. */}
+          <SidebarMenuAction showOnHover className="pointer-coarse:opacity-100">
             <MoreHorizontal aria-hidden />
             <span className="sr-only">Source options</span>
           </SidebarMenuAction>

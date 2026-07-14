@@ -155,7 +155,7 @@ function FolderCard({
                 "size-4.5 fill-amber-400/80 text-primary",
                 selection.active || selection.isSelected(folder.prefix)
                   ? "hidden"
-                  : "group-hover:hidden",
+                  : "group-hover:hidden pointer-coarse:hidden",
               )}
               aria-hidden
             />
@@ -167,7 +167,7 @@ function FolderCard({
                 "bg-background",
                 selection.active || selection.isSelected(folder.prefix)
                   ? undefined
-                  : "hidden group-hover:flex",
+                  : "hidden group-hover:flex pointer-coarse:flex",
               )}
             />
           </>
@@ -198,7 +198,7 @@ function FolderCard({
         <button
           type="button"
           onClick={() => onRename({ kind: "folder", ...folder })}
-          className={`${GRID_ACTION_CLASS} relative z-10 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100`}
+          className={`${GRID_ACTION_CLASS} relative z-10 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100`}
           aria-label={`Rename ${folder.name}`}
           title="Rename"
         >
@@ -209,7 +209,7 @@ function FolderCard({
         <button
           type="button"
           onClick={() => onDelete({ kind: "folder", ...folder })}
-          className={`${GRID_ACTION_CLASS} relative z-10 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 hover:text-destructive`}
+          className={`${GRID_ACTION_CLASS} relative z-10 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100 hover:text-destructive`}
           aria-label={`Delete ${folder.name}`}
           title="Delete folder"
         >
@@ -321,11 +321,11 @@ function FileCard({
             "absolute left-2 top-2 z-10 bg-background/90 shadow-sm backdrop-blur transition-opacity",
             selection.active || selection.isSelected(file.key)
               ? undefined
-              : "opacity-0 focus-visible:opacity-100 group-hover:opacity-100",
+              : "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100",
           )}
         />
       ) : null}
-      <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-md border bg-background/90 p-0.5 opacity-0 shadow-sm backdrop-blur transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+      <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-md border bg-background/90 p-0.5 opacity-0 shadow-sm backdrop-blur transition-opacity focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100">
         <button
           type="button"
           onClick={() => onDetails(file)}
