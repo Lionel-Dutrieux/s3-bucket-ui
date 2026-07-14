@@ -90,7 +90,7 @@ export function ActivityFilters({
             {actionLabel ?? "Action"}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
+        <DropdownMenuContent align="start" className="min-w-44">
           <DropdownMenuRadioGroup
             value={action ?? "all"}
             onValueChange={(value) =>
@@ -125,7 +125,7 @@ export function ActivityFilters({
               {sourceName ?? "Source"}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
+          <DropdownMenuContent align="start" className="min-w-44">
             <DropdownMenuRadioGroup
               value={sourceName ?? "all"}
               onValueChange={(value) =>

@@ -77,14 +77,16 @@ export default async function ActivityPage({
             )
           ) : (
             <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-              <Table>
+              {/* Fixed layout so long object keys truncate instead of
+                  stretching the table into a horizontal scroll. */}
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-44">Action</TableHead>
-                    <TableHead className="w-40">Source</TableHead>
+                    <TableHead className="w-40">Action</TableHead>
+                    <TableHead className="w-36 max-lg:hidden">Source</TableHead>
                     <TableHead>Target</TableHead>
-                    <TableHead className="w-44">When</TableHead>
-                    <TableHead className="w-40">By</TableHead>
+                    <TableHead className="w-40 max-md:hidden">When</TableHead>
+                    <TableHead className="w-40 max-md:hidden">By</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -110,23 +112,29 @@ export default async function ActivityPage({
                             <span className="font-medium">{label}</span>
                           </span>
                         </TableCell>
-                        <TableCell className="truncate text-muted-foreground">
+                        <TableCell className="truncate text-muted-foreground max-lg:hidden">
                           {operation.sourceName}
                         </TableCell>
                         <TableCell className="font-mono text-xs">
-                          <span className="block truncate">
+                          <span
+                            className="block truncate"
+                            title={operation.target}
+                          >
                             {operation.target}
                           </span>
                           {operation.detail ? (
-                            <span className="block truncate text-muted-foreground">
+                            <span
+                              className="block truncate text-muted-foreground"
+                              title={operation.detail}
+                            >
                               {operation.detail}
                             </span>
                           ) : null}
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground tabular-nums">
+                        <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
                           {formatDateTime(operation.createdAt)}
                         </TableCell>
-                        <TableCell className="truncate text-xs text-muted-foreground">
+                        <TableCell className="truncate text-xs text-muted-foreground max-md:hidden">
                           {operation.actor ?? "—"}
                         </TableCell>
                       </TableRow>
