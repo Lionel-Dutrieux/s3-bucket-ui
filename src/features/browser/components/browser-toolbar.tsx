@@ -1,7 +1,7 @@
 "use client";
 
 import type { OnChangeFn, SortingState } from "@tanstack/react-table";
-import { FolderPlus, Search, Upload } from "lucide-react";
+import { FileSearch, FolderPlus, Search, Upload } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ export function BrowserToolbar({
   canUpload,
   onNewFolder,
   onUploadFiles,
+  onSearchSource,
 }: {
   hasEntries: boolean;
   query: string;
@@ -33,6 +34,8 @@ export function BrowserToolbar({
   canUpload: boolean;
   onNewFolder: () => void;
   onUploadFiles: (files: FileList) => void;
+  /** Opens the source-wide search dialog (the input filters this folder only). */
+  onSearchSource: () => void;
 }) {
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -61,6 +64,15 @@ export function BrowserToolbar({
         </>
       ) : null}
       <div className="ml-auto flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8"
+          onClick={onSearchSource}
+        >
+          <FileSearch aria-hidden />
+          <span className="max-sm:sr-only">Search source</span>
+        </Button>
         {view === "grid" && hasEntries ? (
           <GridSortMenu sorting={sorting} onSortingChange={onSortingChange} />
         ) : null}

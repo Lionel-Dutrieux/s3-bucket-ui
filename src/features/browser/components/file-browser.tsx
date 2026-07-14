@@ -63,6 +63,7 @@ import {
   PreviewDialog,
 } from "@/features/browser/components/preview-dialog";
 import { RenameDialog } from "@/features/browser/components/rename-dialog";
+import { SearchDialog } from "@/features/browser/components/search-dialog";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
 import { UploadTray } from "@/features/browser/components/upload-tray";
 import { useDropUpload } from "@/features/browser/hooks/use-drop-upload";
@@ -133,6 +134,7 @@ export function FileBrowser({
   const [deleting, setDeleting] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // A selection belongs to one folder — navigating away discards it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is intentionally keyed on the folder change
@@ -387,6 +389,7 @@ export function FileBrowser({
           canUpload={permissions.upload}
           onNewFolder={() => setNewFolderOpen(true)}
           onUploadFiles={uploads.addFiles}
+          onSearchSource={() => setSearchOpen(true)}
         />
       )}
 
@@ -537,6 +540,13 @@ export function FileBrowser({
         open={newFolderOpen}
         onOpenChange={setNewFolderOpen}
         onCreated={refresh}
+      />
+
+      <SearchDialog
+        sourceId={sourceId}
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        initialQuery={query}
       />
 
       <UploadTray

@@ -24,6 +24,16 @@ export const FOLDER_MOVE_CONCURRENCY = 10;
 /** Keys listed per page while collecting a folder's contents to move. */
 export const FOLDER_MOVE_LIST_BATCH = 1000;
 
+/** Matches returned by one source-wide search. */
+export const SEARCH_MAX_RESULTS = 50;
+/** Wall-clock budget for one search walk — a huge bucket returns partial
+ * results instead of hanging the request. */
+export const SEARCH_TIMEOUT_MS = 15_000;
+
+/** Entries allowed in one folder-ZIP download (classic ZIP caps at 65 535;
+ * this keeps a single request's runtime sane well before that). */
+export const ZIP_MAX_ENTRIES = 5000;
+
 /** Objects deleted per bulk call (S3 caps bulk delete at 1000 keys). */
 export const DELETE_FOLDER_BATCH = 1000;
 /** Re-list/delete rounds before giving up on a colossal prefix. */

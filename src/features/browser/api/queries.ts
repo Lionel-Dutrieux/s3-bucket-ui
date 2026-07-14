@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import {
   fetchFileDetails,
+  fetchSearchResults,
   fetchShareUrl,
   fetchTextPreview,
 } from "@/features/browser/api/client";
@@ -22,6 +23,14 @@ export const browserQueries = {
     queryOptions({
       queryKey: [...browserQueries.all(sourceId), "text", key],
       queryFn: () => fetchTextPreview(sourceId, key),
+    }),
+  /** Source-wide key search — cached briefly so reopening the dialog with
+   *  the same query doesn't re-walk the bucket. */
+  search: (sourceId: string, q: string) =>
+    queryOptions({
+      queryKey: [...browserQueries.all(sourceId), "search", q],
+      queryFn: () => fetchSearchResults(sourceId, q),
+      staleTime: 30_000,
     }),
   /** Fetched imperatively (fetchQuery) on copy-link: the default staleTime
    *  of 0 dedupes rapid double-clicks yet mints a fresh link on each later

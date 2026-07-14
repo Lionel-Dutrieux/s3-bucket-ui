@@ -34,6 +34,22 @@ export interface FileDetailsResult {
   error?: string;
 }
 
+export interface SearchHit {
+  key: string;
+  size: number;
+  lastModified?: number;
+}
+
+export interface SearchResults {
+  hits: SearchHit[];
+  /** True when the walk stopped early (result cap or time budget). */
+  truncated?: boolean;
+}
+
+export type SearchResultsResponse = Partial<SearchResults> & {
+  error?: string;
+};
+
 /** URL used directly as the `src` of preview media elements — the route
  *  redirects to a short-lived inline presigned URL, no fetch needed. */
 export function previewSrc(sourceId: string, key: string): string {
@@ -94,6 +110,17 @@ export async function fetchTextPreview(
     "Could not load a preview for this file.",
   );
   return { text: result.text ?? "", truncated: result.truncated };
+}
+
+export async function fetchSearchResults(
+  sourceId: string,
+  q: string,
+): Promise<SearchResults> {
+  const result = await getJson<SearchResultsResponse>(
+    `/api/sources/${sourceId}/search?q=${encodeURIComponent(q)}`,
+    "Search failed — try again.",
+  );
+  return { hits: result.hits ?? [], truncated: result.truncated };
 }
 
 export async function fetchFileDetails(
