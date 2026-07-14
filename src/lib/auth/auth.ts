@@ -43,7 +43,9 @@ async function recordFailedSignIn(email: unknown): Promise<void> {
       data: {
         action: "sign-in-failed",
         sourceName: "Authentication",
-        target: typeof email === "string" ? email : "unknown",
+        // Attacker-supplied input — bounded so failed-login floods can't
+        // bloat the audit table (320 = max legal email length).
+        target: typeof email === "string" ? email.slice(0, 320) : "unknown",
       },
     });
   } catch (error) {

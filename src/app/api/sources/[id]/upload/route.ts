@@ -4,6 +4,31 @@ import { requireSourceAccess } from "@/lib/auth/access";
 import { recordOperation } from "@/lib/dal/operations";
 import { getFilesClient } from "@/lib/storage/client";
 
+// Hard ceiling on one upload — the S3 single-PUT object limit. Checked on the
+// declared Content-Length and re-enforced on the actual stream, so a chunked
+// body can't sidestep it.
+const MAX_UPLOAD_BYTES = 5 * 1024 ** 3; // 5 GiB
+const TOO_LARGE = "File is too large — 5 GiB max.";
+
+class UploadTooLargeError extends Error {}
+
+/** Passes the body through while counting bytes; errors past the ceiling. */
+function limitBytes(body: ReadableStream<Uint8Array>) {
+  let received = 0;
+  return body.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        received += chunk.byteLength;
+        if (received > MAX_UPLOAD_BYTES) {
+          controller.error(new UploadTooLargeError(TOO_LARGE));
+          return;
+        }
+        controller.enqueue(chunk);
+      },
+    }),
+  );
+}
+
 /**
  * Receives one file body and streams it into the bucket. The client uses
  * XMLHttpRequest against this route because fetch() has no upload progress —
@@ -36,9 +61,13 @@ export async function POST(
   if (!request.body) {
     return apiError(400, "Missing body.");
   }
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_UPLOAD_BYTES) {
+    return apiError(413, TOO_LARGE);
+  }
 
   try {
-    await getFilesClient(source).upload(key, request.body, {
+    await getFilesClient(source).upload(key, limitBytes(request.body), {
       contentType: request.headers.get("content-type") ?? undefined,
     });
     await recordOperation({
@@ -49,6 +78,9 @@ export async function POST(
     });
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {
+    if (error instanceof UploadTooLargeError) {
+      return apiError(413, TOO_LARGE);
+    }
     console.error(
       `[upload] failed (source=${source.id}, provider=${source.provider}):`,
       error,

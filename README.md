@@ -118,6 +118,17 @@ admin grants them sources (Admin → Sources), directly or through a group
 (Admin → Groups). With OIDC enabled, groups from the IdP's claim that exactly
 match an app group name are assigned automatically at sign-in.
 
+> [!WARNING]
+> The first-account rule also applies to OIDC: on a fresh instance, whoever
+> signs in first — including any user of a shared identity provider — claims
+> the admin role. Create the admin account before exposing the instance to
+> your users.
+
+A note on the **edit** grant: renaming and moving are edits, and on an object
+store both are copy + delete of the original key. A user with edit (and no
+delete) can therefore relocate objects — existing links to the old keys stop
+resolving, even though nothing leaves the bucket. Hand out edit accordingly.
+
 <details>
 <summary>Example: Pocket ID</summary>
 
