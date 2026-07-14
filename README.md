@@ -17,10 +17,10 @@ Features:
   text/code/Markdown (first 1 MB), without leaving the app.
 - **Share & inspect** — presigned download links (1 h), per-file details
   (Content-Type, ETag, user metadata, copyable key).
-- **Write, if you're allowed to** — grants unlock uploads (button or drag &
-  drop of files and whole folders, with a progress tray, plus folder
-  creation) and deletions (single, multi-select, or a whole folder, with
-  confirmation). With both, files and folders can be renamed and moved.
+- **Write, if you're allowed to** — the edit grant unlocks uploads (button
+  or drag & drop of files and whole folders, with a progress tray), folder
+  creation, renaming and moving; the delete grant unlocks deletions (single,
+  multi-select, or a whole folder, with confirmation).
 - **Built-in authentication** — email/password sign-up plus an optional
   generic OIDC provider (Pocket ID, Authentik, Keycloak…) configured entirely
   through environment variables. The very first account created becomes the

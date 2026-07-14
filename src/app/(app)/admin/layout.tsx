@@ -17,9 +17,13 @@ export default async function AdminLayout({
         <SidebarTrigger className="-ml-1" />
         <h1 className="text-sm font-medium">Administration</h1>
       </header>
-      <AdminNav />
-      <main className="flex-1">
-        <div className="mx-auto w-full max-w-5xl space-y-6 p-4 py-6 md:px-6">
+      <div className="border-b bg-background">
+        <div className="mx-auto w-full max-w-5xl px-4 md:px-6">
+          <AdminNav />
+        </div>
+      </div>
+      <main className="flex-1 bg-muted/20">
+        <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 md:px-6">
           {children}
         </div>
       </main>

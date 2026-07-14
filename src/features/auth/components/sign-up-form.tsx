@@ -40,9 +40,9 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
   });
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <h1 className="text-lg font-semibold tracking-tight">
+    <div className="space-y-6">
+      <div className="space-y-1.5">
+        <h1 className="text-2xl font-semibold tracking-tight">
           Create your account
         </h1>
         <p className="text-sm text-muted-foreground">

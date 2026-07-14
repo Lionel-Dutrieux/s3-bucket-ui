@@ -29,7 +29,7 @@ export default async function AdminSourcesPage() {
     <>
       <PageHeader
         title="Sources"
-        description="Connect buckets and decide who can use them. A grant row gives read access; the switches add edit (upload, rename, new folder) and delete — renaming and moving need both."
+        description="Connect buckets and decide who can use them. A grant row gives read access; the switches add edit (upload, rename, move, new folder) and delete."
       >
         <AddSourceDialog>
           <Button size="sm">

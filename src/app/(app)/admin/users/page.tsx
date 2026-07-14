@@ -3,15 +3,19 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { CreateUserDialog } from "@/features/admin/components/create-user-dialog";
 import { PageHeader } from "@/features/admin/components/page-header";
+import { StatCard } from "@/features/admin/components/stat-card";
 import { UsersTable } from "@/features/admin/components/users-table";
 import { requireAdmin } from "@/lib/auth/session";
+import { listGroups } from "@/lib/dal/groups";
 import { listUsers } from "@/lib/dal/users";
 
 export const metadata: Metadata = { title: "Users" };
 
 export default async function AdminUsersPage() {
   const session = await requireAdmin();
-  const users = await listUsers();
+  const [users, groups] = await Promise.all([listUsers(), listGroups()]);
+  const admins = users.filter((user) => user.role === "admin").length;
+  const banned = users.filter((user) => user.banned).length;
 
   return (
     <>
@@ -26,6 +30,24 @@ export default async function AdminUsersPage() {
           </Button>
         </CreateUserDialog>
       </PageHeader>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatCard
+          label="Accounts"
+          value={users.length}
+          detail={banned > 0 ? `${banned} banned` : "none banned"}
+        />
+        <StatCard
+          label="Admins"
+          value={admins}
+          detail="full access to every source"
+        />
+        <StatCard
+          label="Groups"
+          value={groups.length}
+          detail="shared source access"
+        />
+      </div>
 
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <UsersTable users={users} selfId={session.user.id} />

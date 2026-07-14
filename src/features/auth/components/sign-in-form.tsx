@@ -37,9 +37,9 @@ export function SignInForm({ oidcLabel }: SignInFormProps) {
   });
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <h1 className="text-lg font-semibold tracking-tight">Sign in</h1>
+    <div className="space-y-6">
+      <div className="space-y-1.5">
+        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
         <p className="text-sm text-muted-foreground">
           Welcome back — sign in to browse your sources.
         </p>

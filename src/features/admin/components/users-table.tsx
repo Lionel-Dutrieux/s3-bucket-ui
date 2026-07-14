@@ -37,6 +37,15 @@ import type { ActionResult } from "@/lib/action-result";
 import type { UserRow } from "@/lib/dal/users";
 import { formatDateTime } from "@/lib/format";
 
+function initialsOf(name: string): string {
+  const initials = name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+  return initials || "?";
+}
+
 export function UsersTable({
   users,
   selfId,
@@ -76,43 +85,42 @@ export function UsersTable({
           {users.map((user) => (
             <TableRow key={user.id}>
               <TableCell>
-                <p className="truncate text-sm font-medium">
-                  {user.name}
-                  {user.id === selfId ? (
-                    <span className="ml-1.5 text-xs text-muted-foreground">
-                      (you)
+                <span className="flex items-center gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border bg-background text-xs font-semibold">
+                    {initialsOf(user.name)}
+                  </span>
+                  <span className="grid min-w-0 leading-tight">
+                    <span className="truncate text-sm font-medium">
+                      {user.name}
+                      {user.id === selfId ? (
+                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                          (you)
+                        </span>
+                      ) : null}
+                      {user.banned ? (
+                        <span className="ml-1.5 rounded-md border border-destructive/20 bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                          banned
+                        </span>
+                      ) : null}
                     </span>
-                  ) : null}
-                  {user.banned ? (
-                    <span className="ml-1.5 rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
-                      banned
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user.email}
                     </span>
-                  ) : null}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {user.email}
-                </p>
+                  </span>
+                </span>
               </TableCell>
               <TableCell>
-                <span className="flex items-center gap-1.5 text-sm">
-                  {user.role === "admin" ? (
-                    <>
-                      <ShieldCheck
-                        className="size-4 text-amber-600"
-                        aria-hidden
-                      />
-                      Admin
-                    </>
-                  ) : (
-                    <>
-                      <UserRound
-                        className="size-4 text-muted-foreground"
-                        aria-hidden
-                      />
-                      User
-                    </>
-                  )}
-                </span>
+                {user.role === "admin" ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600">
+                    <ShieldCheck className="size-3.5" aria-hidden />
+                    Admin
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border bg-muted/50 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    <UserRound className="size-3.5" aria-hidden />
+                    User
+                  </span>
+                )}
               </TableCell>
               <TableCell>
                 {user.groups.length === 0 ? (

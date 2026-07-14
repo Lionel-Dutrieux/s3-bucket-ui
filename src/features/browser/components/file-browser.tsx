@@ -144,10 +144,10 @@ export function FileBrowser({
     permissions.upload,
     uploads.addFiles,
   );
-  // Rename writes the new object and deletes the old one, so it needs both.
-  const canRename = permissions.upload && permissions.delete;
-  // Moving needs both too — a move is a copy + delete under the hood.
-  const canMove = permissions.upload && permissions.delete;
+  // Renaming and moving keep the content (copy + delete of the old key under
+  // the hood) — they're edits, gated on the edit capability alone.
+  const canRename = permissions.upload;
+  const canMove = permissions.upload;
   const [activeDrag, setActiveDrag] = useState<{
     label: string;
     count: number;

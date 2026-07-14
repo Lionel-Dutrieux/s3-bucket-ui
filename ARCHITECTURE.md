@@ -89,9 +89,8 @@ and hooks). A violation is a lint error, not a review comment.
 Two roles (`user`, `admin` — the **first account ever created becomes
 admin**) and one grant table (`SourcePermission`): a grant gives its subject
 (a user **or** a group, exactly one — CHECK constraint) read access to one
-source; `canEdit` (upload, rename, new folder) and `canDelete` add to it.
-Renaming/moving needs both. Admins implicitly hold every capability and see
-every source. Groups can be synced from an OIDC `groups` claim: names that
+source; `canEdit` (upload, rename, move, new folder) and `canDelete` add to
+it. Admins implicitly hold every capability and see every source. Groups can be synced from an OIDC `groups` claim: names that
 exactly match an app group are assigned at sign-in (`via: "oidc"`), and only
 those are removed when the claim stops listing them — admin-added memberships
 (`via: "manual"`) are never touched.
@@ -156,8 +155,9 @@ callers return 404/notFound() and never reveal that a source exists.
   repository.
 - **Writes are grant-gated server-side**: every write action re-checks the
   session and the grant's capabilities via `withWriteAccess` — hiding a
-  control is only cosmetic. Renaming (move = copy + delete) needs edit +
-  delete.
+  control is only cosmetic. Renaming and moving count as edits (the content
+  survives under a new key, even though the implementation is copy +
+  delete).
 - **Auth is better-auth, sessions in the database**: revocable sessions,
   httpOnly cookies, `nextCookies()` last in the plugin list so server actions
   can set cookies. Public sign-up; the first account becomes admin

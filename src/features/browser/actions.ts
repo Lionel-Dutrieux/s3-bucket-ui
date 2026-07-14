@@ -19,8 +19,7 @@ import { deletePrefix, movePrefix } from "@/features/browser/server/mutations";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { recordOperation } from "@/lib/dal/operations";
 
-const RENAME_DENIED =
-  "Renaming needs both edit and delete access on this source.";
+const RENAME_DENIED = "You are not allowed to edit this source.";
 
 /**
  * Creates a folder by writing the zero-byte `prefix/` marker object — the
@@ -60,8 +59,8 @@ export async function createFolder(
 
 /**
  * Renames one object within its folder via move (copy + delete on object
- * stores — not atomic). Writing the new key needs edit, removing the
- * old one needs delete, so renaming requires both.
+ * stores — not atomic). Renaming is an edit: the object keeps existing
+ * under its new key, so the edit capability alone gates it.
  */
 export async function renameObject(
   sourceId: string,
@@ -77,7 +76,7 @@ export async function renameObject(
   return withWriteAccess(
     sourceId,
     {
-      need: { edit: true, delete: true },
+      need: { edit: true },
       denied: RENAME_DENIED,
       action: "rename this file",
     },
@@ -100,8 +99,8 @@ export async function renameObject(
   );
 }
 
-/** Renames a folder by moving everything under its prefix. Needs both write
- * permissions, like {@link renameObject}. */
+/** Renames a folder by moving everything under its prefix - an edit, like
+ * {@link renameObject}. */
 export async function renameFolder(
   sourceId: string,
   prefix: string,
@@ -117,7 +116,7 @@ export async function renameFolder(
   return withWriteAccess(
     sourceId,
     {
-      need: { edit: true, delete: true },
+      need: { edit: true },
       denied: RENAME_DENIED,
       action: "rename this folder",
       failureMessage:
@@ -272,8 +271,8 @@ export async function deleteEntries(
 }
 
 /**
- * Moves a selection of files/folders into `destPrefix` ("" = root). Move is
- * copy + delete, so it needs both write permissions. All-or-nothing on name
+ * Moves a selection of files/folders into `destPrefix` ("" = root). A move
+ * keeps the content (copy + delete of the old key), so edit gates it. All-or-nothing on name
  * conflicts: if any destination is occupied, nothing moves.
  */
 export async function moveEntries(
@@ -303,8 +302,8 @@ export async function moveEntries(
   return withWriteAccess(
     sourceId,
     {
-      need: { edit: true, delete: true },
-      denied: "Moving needs both edit and delete access on this source.",
+      need: { edit: true },
+      denied: "You are not allowed to edit this source.",
       action: "move the selection",
       failureMessage:
         "Could not move everything — some items may have moved already, refresh to check.",
