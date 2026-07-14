@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { OPERATION_FILTERS } from "@/features/browser/lib/operation-labels";
+import { OPERATION_FILTERS } from "@/features/activity/lib/operation-labels";
 import { cn } from "@/lib/utils";
 
 /** URL-backed filters for the activity log: action, source, text search. */

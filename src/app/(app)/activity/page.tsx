@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ActivityFilters } from "@/features/browser/components/activity-filters";
-import { operationLabel } from "@/features/browser/lib/operation-labels";
+import { ActivityFilters } from "@/features/activity/components/activity-filters";
+import { operationLabel } from "@/features/activity/lib/operation-labels";
 import { requireAdmin } from "@/lib/auth/session";
 import { listOperationSourceNames, listOperations } from "@/lib/dal/operations";
 import { formatDateTime } from "@/lib/format";

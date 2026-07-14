@@ -45,6 +45,8 @@ src/features/     One folder per domain. Features may import from lib/,
                   button, user menu.
   admin/          Admin area UI: users table, groups manager, per-source
                   grant editor, and the admin server actions.
+  activity/       Audit log UI (admin-only page): action/source/search
+                  filters and the operation → label/icon mapping.
 src/forms/        TanStack Form infrastructure (createFormHook): reusable
                   field components (fields/), form components (SubmitButton,
                   FormAlert) and error helpers. No domain knowledge.
@@ -226,7 +228,7 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
   deploy.
 - **Audit a new write action?** Call `recordOperation` from
   `src/lib/dal/operations.ts` after the write succeeds, and add a label/icon
-  in `features/browser/lib/operation-labels.ts`.
+  in `features/activity/lib/operation-labels.ts`.
 - **Deploy?** `Dockerfile` (standalone + Prisma CLI, non-root, `/api/health`
   healthcheck) + `docker-compose.yml` (Dokploy-ready; bring your own
   PostgreSQL via `DATABASE_URL`). Boot fails fast on a malformed

@@ -80,7 +80,10 @@
                     "message": "app/ is the routing layer — nothing imports from it."
                   },
                   {
-                    "group": ["@/features/sources/**"],
+                    "group": [
+                      "@/features/sources/**",
+                      "@/features/activity/**"
+                    ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/storage/) or src/components/."
                   }
                 ]
@@ -108,7 +111,10 @@
                     "message": "app/ is the routing layer — nothing imports from it."
                   },
                   {
-                    "group": ["@/features/browser/**"],
+                    "group": [
+                      "@/features/browser/**",
+                      "@/features/activity/**"
+                    ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/storage/) or src/components/."
                   }
                 ]
@@ -139,7 +145,8 @@
                     "group": [
                       "@/features/browser/**",
                       "@/features/sources/**",
-                      "@/features/auth/**"
+                      "@/features/auth/**",
+                      "@/features/activity/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
                   }
@@ -171,7 +178,41 @@
                     "group": [
                       "@/features/browser/**",
                       "@/features/sources/**",
-                      "@/features/admin/**"
+                      "@/features/admin/**",
+                      "@/features/activity/**"
+                    ],
+                    "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/activity/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/generated/prisma/**", "@/lib/prisma"],
+                    "message": "Only the DAL (src/lib/dal/) touches Prisma."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "app/ is the routing layer — nothing imports from it."
+                  },
+                  {
+                    "group": [
+                      "@/features/browser/**",
+                      "@/features/sources/**",
+                      "@/features/admin/**",
+                      "@/features/auth/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
                   }
