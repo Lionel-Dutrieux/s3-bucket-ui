@@ -17,13 +17,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import {
+  type SidebarUser,
+  UserMenu,
+} from "@/features/auth/components/user-menu";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { getProvider, PROVIDERS } from "@/lib/storage/providers";
 
-export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
+export function AppSidebar({
+  sources,
+  user,
+}: {
+  sources: SourceSummary[];
+  user: SidebarUser;
+}) {
   const pathname = usePathname();
 
   // One sidebar group per provider type, in registry order; sources whose
@@ -128,6 +138,11 @@ export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
           <span className="text-xs text-muted-foreground">Theme</span>
           <ThemeToggle />
         </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <UserMenu user={user} />
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );
