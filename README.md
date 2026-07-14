@@ -21,10 +21,11 @@ Features:
   or drag & drop of files and whole folders, with a progress tray), folder
   creation, renaming and moving; the delete grant unlocks deletions (single,
   multi-select, or a whole folder, with confirmation).
-- **Built-in authentication** — email/password sign-up plus an optional
-  generic OIDC provider (Pocket ID, Authentik, Keycloak…) configured entirely
-  through environment variables. The very first account created becomes the
-  admin.
+- **Built-in authentication** — email/password plus an optional generic OIDC
+  provider (Pocket ID, Authentik, Keycloak…) configured entirely through
+  environment variables. The very first account created becomes the admin;
+  sign-up then closes automatically (admins create accounts, or re-open
+  public sign-up in Admin → Settings).
 - **Users, groups & per-source access** — admins manage accounts (create,
   roles, ban, remove), groups, and who can read/edit/delete on each source. At OIDC
   sign-in, the identity provider's `groups` claim is matched by name against
@@ -108,11 +109,12 @@ pnpm dev
 | `OIDC_SCOPES` | *(optional)* Requested scopes (default `openid profile email groups`). |
 | `OIDC_GROUPS_CLAIM` | *(optional)* Claim carrying group names (default `groups`). |
 
-Once running, **sign up — the very first account becomes the admin**; later
-accounts start with no access until an admin grants them sources (Admin →
-Sources), directly or through a group (Admin → Groups). With OIDC enabled,
-groups from the IdP's claim that exactly match an app group name are assigned
-automatically at sign-in.
+Once running, **sign up — the very first account becomes the admin**, and
+sign-up closes right after (create accounts from Admin → Users, or re-open
+public sign-up in Admin → Settings). Accounts start with no access until an
+admin grants them sources (Admin → Sources), directly or through a group
+(Admin → Groups). With OIDC enabled, groups from the IdP's claim that exactly
+match an app group name are assigned automatically at sign-in.
 
 <details>
 <summary>Example: Pocket ID</summary>

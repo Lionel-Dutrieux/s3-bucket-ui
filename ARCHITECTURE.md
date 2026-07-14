@@ -160,9 +160,10 @@ callers return 404/notFound() and never reveal that a source exists.
   delete).
 - **Auth is better-auth, sessions in the database**: revocable sessions,
   httpOnly cookies, `nextCookies()` last in the plugin list so server actions
-  can set cookies. Public sign-up; the first account becomes admin
-  (`databaseHooks.user.create.before`); `role` is not client-assignable
-  (admin plugin `input: false` + the hook forces it). The optional OIDC
+  can set cookies. The first account becomes admin and sign-up then closes
+  (re-openable via the `allowPublicSignUp` setting, Admin → Settings) — both
+  enforced in `databaseHooks.user.create.before`; `role` is not
+  client-assignable (admin plugin `input: false` + the hook forces it). The optional OIDC
   provider is pure configuration (`OIDC_*` env, genericOAuth plugin) — no
   code change to swap IdPs. Write operations are audited (`operations`
   table), attributed to the session user (email + userId, denormalized so
