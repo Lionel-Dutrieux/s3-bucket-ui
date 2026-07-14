@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SourceAccess } from "@/features/admin/components/source-access";
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
+import { SourceCardActions } from "@/features/sources/components/source-card-actions";
 import { requireAdmin } from "@/lib/auth/session";
 import { listGroupOptions } from "@/lib/dal/groups";
 import { listGrantsForSource } from "@/lib/dal/permissions";
@@ -60,7 +61,7 @@ export default async function AdminSourcesPage() {
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
                     <Icon className="size-4.5" aria-hidden />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-semibold">
                       {source.name}
                     </h3>
@@ -69,6 +70,7 @@ export default async function AdminSourcesPage() {
                       {source.bucket}
                     </p>
                   </div>
+                  <SourceCardActions source={source} />
                 </header>
                 <div className="p-4">
                   <SourceAccess
