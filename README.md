@@ -15,12 +15,17 @@ Features:
   `?sort=`), `Ctrl+K` command palette, dark mode.
 - **Preview** — images, PDFs (sandboxed), video, audio, and plain
   text/code/Markdown (first 1 MB), without leaving the app.
+- **Search & download** — source-wide search across every folder, and any
+  folder downloadable as one streamed ZIP archive.
 - **Share & inspect** — presigned download links (1 h), per-file details
   (Content-Type, ETag, user metadata, copyable key).
 - **Write, if you're allowed to** — the edit grant unlocks uploads (button
   or drag & drop of files and whole folders, with a progress tray), folder
-  creation, renaming and moving; the delete grant unlocks deletions (single,
-  multi-select, or a whole folder, with confirmation).
+  creation, renaming, moving and duplicating; the delete grant unlocks
+  deletions (single, multi-select, or a whole folder, with confirmation).
+- **Migrate** — admins can copy a source's entire contents into another
+  source, across providers (S3 → Azure, R2 → S3, …), without touching the
+  origin.
 - **Built-in authentication** — email/password plus an optional generic OIDC
   provider (Pocket ID, Authentik, Keycloak…) configured entirely through
   environment variables. The very first account created becomes the admin;
