@@ -22,7 +22,8 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { FolderOpen, SearchX } from "lucide-react";
+import { ArrowLeft, FolderOpen, SearchX } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -403,7 +404,11 @@ export function FileBrowser({
           </Button>
         </div>
       ) : entries.length === 0 ? (
-        <EmptyFolder canUpload={permissions.upload} />
+        <EmptyFolder
+          sourceId={sourceId}
+          prefix={prefix}
+          canUpload={permissions.upload}
+        />
       ) : (
         <DndContext
           sensors={sensors}
@@ -539,7 +544,18 @@ export function FileBrowser({
   );
 }
 
-function EmptyFolder({ canUpload }: { canUpload: boolean }) {
+function EmptyFolder({
+  sourceId,
+  prefix,
+  canUpload,
+}: {
+  sourceId: string;
+  prefix: string;
+  canUpload: boolean;
+}) {
+  // At the bucket root there is no parent to go back to.
+  const parent = prefix ? (parentPrefixOf(prefix) ?? "") : null;
+
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
       <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
@@ -551,6 +567,19 @@ function EmptyFolder({ canUpload }: { canUpload: boolean }) {
           ? "Drop files here, or use Upload to add some."
           : "Files uploaded to this location will show up here."}
       </p>
+      {parent !== null ? (
+        <Button variant="outline" size="sm" className="mt-1" asChild>
+          <Link
+            href={{
+              pathname: `/source/${sourceId}`,
+              query: parent ? { prefix: parent } : undefined,
+            }}
+          >
+            <ArrowLeft aria-hidden />
+            Back to parent folder
+          </Link>
+        </Button>
+      ) : null}
     </div>
   );
 }
