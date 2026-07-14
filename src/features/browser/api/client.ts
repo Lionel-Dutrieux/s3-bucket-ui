@@ -67,6 +67,11 @@ export function downloadUrl(sourceId: string, key: string): string {
   return `/api/sources/${sourceId}/download?key=${encodeURIComponent(key)}`;
 }
 
+/** URL used as a folder-download `href` (streams the folder as one ZIP). */
+export function zipUrl(sourceId: string, prefix: string): string {
+  return `/api/sources/${sourceId}/zip?prefix=${encodeURIComponent(prefix)}`;
+}
+
 /** Endpoint the XHR uploader POSTs one file body to. */
 export function uploadUrl(sourceId: string, key: string): string {
   return `/api/sources/${sourceId}/upload?key=${encodeURIComponent(key)}`;

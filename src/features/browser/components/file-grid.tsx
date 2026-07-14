@@ -1,9 +1,21 @@
 "use client";
 
-import { Download, Folder, Info, Link2, Pencil, Trash2 } from "lucide-react";
+import {
+  Download,
+  Folder,
+  FolderDown,
+  Info,
+  Link2,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
-import { downloadUrl, thumbnailSrc } from "@/features/browser/api/client";
+import {
+  downloadUrl,
+  thumbnailSrc,
+  zipUrl,
+} from "@/features/browser/api/client";
 import { useEntryDnd } from "@/features/browser/components/dnd";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { isPreviewable } from "@/features/browser/components/preview-dialog";
@@ -194,6 +206,14 @@ function FolderCard({
       >
         <span className="sr-only">Open {folder.name}</span>
       </Link>
+      <a
+        href={zipUrl(sourceId, folder.prefix)}
+        className={`${GRID_ACTION_CLASS} relative z-10 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100`}
+        aria-label={`Download ${folder.name} as ZIP`}
+        title="Download as ZIP"
+      >
+        <FolderDown className="size-3.5" aria-hidden />
+      </a>
       {onRename ? (
         <button
           type="button"
