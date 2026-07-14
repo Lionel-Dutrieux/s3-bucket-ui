@@ -15,12 +15,56 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { buildCrumbs, type Crumb } from "@/features/browser/lib/listing";
+import { buildCrumbs } from "@/features/browser/lib/listing";
 
 // The Drive pattern: the path IS the title — no back arrow. Every parent
 // segment is a link; deep paths collapse their middle into a "…" menu.
-// Desktop keeps the last two segments visible, mobile only the current one.
+// Desktop keeps the source + last two segments visible; mobile shows one
+// "…" menu holding every ancestor next to the current folder.
 const VISIBLE_TAIL = 2;
+
+interface PathEntry {
+  label: string;
+  /** null = the source root (no prefix query). */
+  prefix: string | null;
+}
+
+function CrumbMenu({
+  sourceId,
+  entries,
+  className,
+}: {
+  sourceId: string;
+  entries: PathEntry[];
+  className?: string;
+}) {
+  return (
+    <BreadcrumbItem className={className}>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className="flex items-center rounded-md px-0.5 hover:text-foreground"
+          aria-label="Show parent folders"
+        >
+          <BreadcrumbEllipsis className="size-5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          {entries.map((entry) => (
+            <DropdownMenuItem key={entry.prefix ?? ""} asChild>
+              <Link
+                href={{
+                  pathname: `/source/${sourceId}`,
+                  query: entry.prefix ? { prefix: entry.prefix } : undefined,
+                }}
+              >
+                {entry.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </BreadcrumbItem>
+  );
+}
 
 export function SourceBreadcrumb({
   sourceId,
@@ -35,52 +79,54 @@ export function SourceBreadcrumb({
   const collapsed =
     crumbs.length > VISIBLE_TAIL ? crumbs.slice(0, -VISIBLE_TAIL) : [];
   const tail = crumbs.slice(collapsed.length);
-
-  const folderHref = (crumb: Crumb) => ({
-    pathname: `/source/${sourceId}`,
-    query: { prefix: crumb.prefix },
-  });
+  // Mobile: everything above the current folder, source included.
+  const ancestors: PathEntry[] = [
+    { label: sourceName, prefix: null },
+    ...crumbs.slice(0, -1),
+  ];
 
   return (
     <Breadcrumb className="min-w-0">
       <BreadcrumbList className="flex-nowrap text-base">
-        <BreadcrumbItem className="min-w-0">
+        {/* The current folder's own separator follows below — no extra one. */}
+        {crumbs.length > 0 ? (
+          <CrumbMenu
+            sourceId={sourceId}
+            entries={ancestors}
+            className="sm:hidden"
+          />
+        ) : null}
+
+        <BreadcrumbItem className="min-w-0 max-sm:hidden">
           {crumbs.length === 0 ? (
             <BreadcrumbPage className="truncate font-semibold">
               {sourceName}
             </BreadcrumbPage>
           ) : (
             <BreadcrumbLink asChild className="min-w-0">
-              <Link
-                href={`/source/${sourceId}`}
-                className="max-w-40 truncate max-sm:hidden"
-              >
+              <Link href={`/source/${sourceId}`} className="max-w-40 truncate">
                 {sourceName}
               </Link>
             </BreadcrumbLink>
           )}
         </BreadcrumbItem>
+        {/* At the root, mobile shows the plain source name (no menu). */}
+        {crumbs.length === 0 ? (
+          <BreadcrumbItem className="min-w-0 sm:hidden">
+            <BreadcrumbPage className="truncate font-semibold">
+              {sourceName}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        ) : null}
 
         {collapsed.length > 0 ? (
           <>
             <BreadcrumbSeparator className="max-sm:hidden" />
-            <BreadcrumbItem className="max-sm:hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className="flex items-center rounded-md px-0.5 hover:text-foreground"
-                  aria-label="Show hidden folders"
-                >
-                  <BreadcrumbEllipsis className="size-5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {collapsed.map((crumb) => (
-                    <DropdownMenuItem key={crumb.prefix} asChild>
-                      <Link href={folderHref(crumb)}>{crumb.label}</Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </BreadcrumbItem>
+            <CrumbMenu
+              sourceId={sourceId}
+              entries={collapsed}
+              className="max-sm:hidden"
+            />
           </>
         ) : null}
 
@@ -98,7 +144,10 @@ export function SourceBreadcrumb({
                 ) : (
                   <BreadcrumbLink asChild className="min-w-0">
                     <Link
-                      href={folderHref(crumb)}
+                      href={{
+                        pathname: `/source/${sourceId}`,
+                        query: { prefix: crumb.prefix },
+                      }}
                       className="max-w-40 truncate"
                     >
                       {crumb.label}
