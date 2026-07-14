@@ -118,6 +118,16 @@ model Verification {
   @@map("verifications")
 }
 
+/// App-wide settings, one row per key (e.g. allowPublicSignUp) — managed
+/// from Admin → Settings.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("settings")
+}
+
 // --- authorization models (ours) ---
 
 /// App-side group. `name` is the key OIDC group claims are matched against

@@ -1,10 +1,12 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { admin, genericOAuth } from "better-auth/plugins";
 import { normalizeGroupsClaim } from "@/lib/authz/oidc-groups";
 import { syncOidcMemberships } from "@/lib/dal/groups";
+import { isPublicSignUpEnabled } from "@/lib/dal/settings";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { buildOidcProvider } from "./oidc";
@@ -43,16 +45,27 @@ export const auth = betterAuth({
       create: {
         // The very first account becomes admin (self-hosted bootstrap).
         // Accounts created by an admin (admin plugin endpoint) keep the role
-        // the admin chose; every other creation (public sign-up, OIDC) is
-        // forced to "user" — defence in depth on top of the admin plugin
-        // already marking `role` as non-inputable. The race of two
-        // simultaneous first signups on an empty database is accepted
-        // (single-instance bootstrap).
+        // the admin chose. Email/password self-registration is refused
+        // unless an admin enabled it (Admin → Settings) — OIDC sign-ins are
+        // not governed by that switch, the IdP decides who exists. Every
+        // non-admin creation is forced to "user" — defence in depth on top
+        // of the admin plugin already marking `role` as non-inputable. The
+        // race of two simultaneous first signups on an empty database is
+        // accepted (single-instance bootstrap).
         before: async (user, ctx) => {
           if ((await prisma.user.count()) === 0) {
             return { data: { ...user, role: "admin" } };
           }
           if (ctx?.path === "/admin/create-user") return;
+          if (
+            ctx?.path === "/sign-up/email" &&
+            !(await isPublicSignUpEnabled())
+          ) {
+            throw new APIError("FORBIDDEN", {
+              message:
+                "Public sign-up is disabled — ask an admin to create your account.",
+            });
+          }
           return { data: { ...user, role: "user" } };
         },
         after: async (user, ctx) => {

@@ -12,9 +12,11 @@ import { OidcButton } from "./oidc-button";
 interface SignInFormProps {
   /** Label of the OIDC provider button, or null when OIDC is not configured. */
   oidcLabel: string | null;
+  /** Whether self-registration is currently open (Admin → Settings). */
+  showSignUpLink: boolean;
 }
 
-export function SignInForm({ oidcLabel }: SignInFormProps) {
+export function SignInForm({ oidcLabel, showSignUpLink }: SignInFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string>();
 
@@ -93,15 +95,17 @@ export function SignInForm({ oidcLabel }: SignInFormProps) {
         </>
       ) : null}
 
-      <p className="text-center text-sm text-muted-foreground">
-        No account yet?{" "}
-        <Link
-          href="/sign-up"
-          className="font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Sign up
-        </Link>
-      </p>
+      {showSignUpLink ? (
+        <p className="text-center text-sm text-muted-foreground">
+          No account yet?{" "}
+          <Link
+            href="/sign-up"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
+      ) : null}
     </div>
   );
 }

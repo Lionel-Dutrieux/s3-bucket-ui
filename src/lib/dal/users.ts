@@ -45,6 +45,10 @@ export interface UserOption {
   label: string;
 }
 
+export async function hasAnyUser(): Promise<boolean> {
+  return (await prisma.user.count()) > 0;
+}
+
 export async function listUserOptions(): Promise<UserOption[]> {
   const rows = await prisma.user.findMany({
     orderBy: { email: "asc" },

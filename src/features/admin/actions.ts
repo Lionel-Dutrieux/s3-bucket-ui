@@ -20,8 +20,26 @@ import {
   renameGroup as dalRenameGroup,
 } from "@/lib/dal/groups";
 import { deleteGrant, upsertGrant } from "@/lib/dal/permissions";
+import { setPublicSignUpEnabled } from "@/lib/dal/settings";
 
 const NOT_AUTHORIZED = "You are not allowed to administrate this app.";
+
+// --- settings ---
+
+export async function setSignUpEnabled(
+  enabled: boolean,
+): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+
+  try {
+    await setPublicSignUpEnabled(enabled === true);
+  } catch (error) {
+    console.error("[admin] toggle sign-up failed:", error);
+    return actionError("Could not update this setting.");
+  }
+  revalidatePath("/", "layout");
+  return actionOk();
+}
 
 // Every action re-checks the admin role server-side — the /admin layout guard
 // protects pages only, never these POST endpoints.
