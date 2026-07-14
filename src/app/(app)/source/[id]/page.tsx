@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, CircleAlert, ListFilter } from "lucide-react";
+import { ChevronRight, CircleAlert, ListFilter } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -16,7 +16,6 @@ import {
   listFolder,
 } from "@/features/browser/server/service";
 import { requireSourceAccess } from "@/lib/auth/access";
-import { parentPrefix as parentPrefixOf } from "@/lib/paths";
 
 interface SourcePageProps {
   params: Promise<{ id: string }>;
@@ -65,7 +64,6 @@ export default async function SourcePage({
     <>
       <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
         <SidebarTrigger className="-ml-1" />
-        {prefix ? <UpButton sourceId={source.id} prefix={prefix} /> : null}
         <SourceBreadcrumb
           sourceId={source.id}
           sourceName={source.name}
@@ -130,26 +128,6 @@ export default async function SourcePage({
         )}
       </main>
     </>
-  );
-}
-
-function UpButton({ sourceId, prefix }: { sourceId: string; prefix: string }) {
-  // Only rendered inside a folder, so the parent is never null.
-  const parentPrefix = parentPrefixOf(prefix) ?? "";
-
-  return (
-    <Button variant="ghost" size="icon" className="size-7 shrink-0" asChild>
-      <Link
-        href={{
-          pathname: `/source/${sourceId}`,
-          query: parentPrefix ? { prefix: parentPrefix } : undefined,
-        }}
-        aria-label="Up one level"
-        title="Up one level"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-      </Link>
-    </Button>
   );
 }
 

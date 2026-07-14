@@ -9,9 +9,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { buildCrumbs } from "@/features/browser/lib/listing";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { buildCrumbs, type Crumb } from "@/features/browser/lib/listing";
 
-// Desktop: full path. Mobile: source / … / current folder, truncated.
+// The Drive pattern: the path IS the title — no back arrow. Every parent
+// segment is a link; deep paths collapse their middle into a "…" menu.
+// Desktop keeps the last two segments visible, mobile only the current one.
+const VISIBLE_TAIL = 2;
+
 export function SourceBreadcrumb({
   sourceId,
   sourceName,
@@ -22,56 +32,74 @@ export function SourceBreadcrumb({
   prefix: string;
 }) {
   const crumbs = buildCrumbs(prefix);
-  const hasHiddenCrumbs = crumbs.length > 1;
+  const collapsed =
+    crumbs.length > VISIBLE_TAIL ? crumbs.slice(0, -VISIBLE_TAIL) : [];
+  const tail = crumbs.slice(collapsed.length);
+
+  const folderHref = (crumb: Crumb) => ({
+    pathname: `/source/${sourceId}`,
+    query: { prefix: crumb.prefix },
+  });
 
   return (
     <Breadcrumb className="min-w-0">
-      <BreadcrumbList className="flex-nowrap">
+      <BreadcrumbList className="flex-nowrap text-base">
         <BreadcrumbItem className="min-w-0">
           {crumbs.length === 0 ? (
-            <BreadcrumbPage className="truncate text-sm font-medium">
+            <BreadcrumbPage className="truncate font-semibold">
               {sourceName}
             </BreadcrumbPage>
           ) : (
             <BreadcrumbLink asChild className="min-w-0">
-              <Link href={`/source/${sourceId}`} className="truncate max-w-40">
+              <Link
+                href={`/source/${sourceId}`}
+                className="max-w-40 truncate max-sm:hidden"
+              >
                 {sourceName}
               </Link>
             </BreadcrumbLink>
           )}
         </BreadcrumbItem>
 
-        {/* Mobile: collapse everything between the source and the current folder. */}
-        {hasHiddenCrumbs ? (
+        {collapsed.length > 0 ? (
           <>
-            <BreadcrumbSeparator className="sm:hidden" />
-            <BreadcrumbItem className="sm:hidden">
-              <BreadcrumbEllipsis className="size-4" />
+            <BreadcrumbSeparator className="max-sm:hidden" />
+            <BreadcrumbItem className="max-sm:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="flex items-center rounded-md px-0.5 hover:text-foreground"
+                  aria-label="Show hidden folders"
+                >
+                  <BreadcrumbEllipsis className="size-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {collapsed.map((crumb) => (
+                    <DropdownMenuItem key={crumb.prefix} asChild>
+                      <Link href={folderHref(crumb)}>{crumb.label}</Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </BreadcrumbItem>
           </>
         ) : null}
 
-        {crumbs.map((crumb, index) => {
-          const isLast = index === crumbs.length - 1;
+        {tail.map((crumb, index) => {
+          const isLast = index === tail.length - 1;
           const hiddenOnMobile = !isLast ? "max-sm:hidden" : undefined;
           return (
             <Fragment key={crumb.prefix}>
               <BreadcrumbSeparator className={hiddenOnMobile} />
-              <BreadcrumbItem
-                className={`min-w-0 font-mono text-xs ${hiddenOnMobile ?? ""}`}
-              >
+              <BreadcrumbItem className={`min-w-0 ${hiddenOnMobile ?? ""}`}>
                 {isLast ? (
-                  <BreadcrumbPage className="truncate font-mono text-xs">
+                  <BreadcrumbPage className="truncate font-semibold">
                     {crumb.label}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild className="min-w-0">
                     <Link
-                      href={{
-                        pathname: `/source/${sourceId}`,
-                        query: { prefix: crumb.prefix },
-                      }}
-                      className="truncate max-w-32"
+                      href={folderHref(crumb)}
+                      className="max-w-40 truncate"
                     >
                       {crumb.label}
                     </Link>
