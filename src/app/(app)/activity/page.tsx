@@ -1,5 +1,6 @@
 import { History } from "lucide-react";
 import type { Metadata } from "next";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -50,8 +51,10 @@ export default async function ActivityPage({
 
       <main className="flex-1 bg-muted/20">
         <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 md:px-6">
+          {/* "Recent writes", not "Activity": the sticky header above already
+              carries the nav label — stacking the same word twice reads odd. */}
           <PageHeader
-            title="Activity"
+            title="Recent writes"
             description="Every upload, deletion, rename and move across all sources, attributed to the signed-in user. Read actions aren't recorded."
           >
             {operations.length > 0 ? (
@@ -71,9 +74,17 @@ export default async function ActivityPage({
 
           {operations.length === 0 ? (
             hasFilters ? (
-              <NoMatchState />
+              <EmptyState
+                icon={History}
+                title="No matching activity"
+                description="Nothing in the log matches these filters — clear them to see everything."
+              />
             ) : (
-              <EmptyState />
+              <EmptyState
+                icon={History}
+                title="No activity yet"
+                description="Uploads, deletions, renames and moves will show up here as they happen."
+              />
             )
           ) : (
             <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -147,33 +158,5 @@ export default async function ActivityPage({
         </div>
       </main>
     </>
-  );
-}
-
-function NoMatchState() {
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-10 text-center">
-      <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-        <History className="size-5" aria-hidden />
-      </div>
-      <h2 className="text-base font-semibold">No matching activity</h2>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        Nothing in the log matches these filters — clear them to see everything.
-      </p>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-10 text-center">
-      <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-        <History className="size-5" aria-hidden />
-      </div>
-      <h2 className="text-base font-semibold">No activity yet</h2>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        Uploads, deletions, renames and moves will show up here as they happen.
-      </p>
-    </div>
   );
 }

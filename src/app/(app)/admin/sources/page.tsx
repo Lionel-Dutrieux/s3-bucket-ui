@@ -1,5 +1,6 @@
-import { Plus } from "lucide-react";
+import { Cylinder, Plus } from "lucide-react";
 import type { Metadata } from "next";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { SourceAccess } from "@/features/admin/components/source-access";
@@ -41,13 +42,11 @@ export default async function AdminSourcesPage() {
       </PageHeader>
 
       {sources.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed p-10 text-center">
-          <p className="text-sm font-medium">No sources yet</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            Add a bucket to start granting access — it stays invisible to
-            everyone but admins until you do.
-          </p>
-        </div>
+        <EmptyState
+          icon={Cylinder}
+          title="No sources yet"
+          description="Add a bucket to start granting access — it stays invisible to everyone but admins until you do."
+        />
       ) : (
         <div className="space-y-4">
           {sources.map((source, index) => {

@@ -48,25 +48,28 @@ export default async function AccountPage() {
 
       <main className="flex-1 bg-muted/20">
         <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 md:px-6">
+          {/* "Your account", not "Account": the sticky header above already
+              carries the nav label — stacking the same word twice reads odd.
+              Sections are h3, one level under this h2. */}
           <PageHeader
-            title="Account"
+            title="Your account"
             description={`Signed in as ${session.user.email}.`}
           />
 
           <section className="rounded-xl border bg-card p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold">Profile</h2>
+            <h3 className="mb-3 text-sm font-semibold">Profile</h3>
             <ProfileForm name={session.user.name} />
           </section>
 
           {hasPassword && !oidcOnly ? (
             <section className="rounded-xl border bg-card p-4 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold">Password</h2>
+              <h3 className="mb-3 text-sm font-semibold">Password</h3>
               <ChangePasswordForm />
             </section>
           ) : null}
 
           <section className="rounded-xl border bg-card p-4 shadow-sm">
-            <h2 className="text-sm font-semibold">Sessions</h2>
+            <h3 className="text-sm font-semibold">Sessions</h3>
             <p className="mt-0.5 mb-1 text-xs text-muted-foreground">
               Everywhere this account is signed in. Revoking a session signs
               that device out immediately.

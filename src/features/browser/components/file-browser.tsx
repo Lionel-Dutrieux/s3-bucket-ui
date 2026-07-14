@@ -29,6 +29,7 @@ import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import {
   deleteEntries,
@@ -390,19 +391,22 @@ export function FileBrowser({
       )}
 
       {noMatches ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <SearchX className="size-6 text-muted-foreground" aria-hidden />
-          <p className="text-sm text-muted-foreground">
-            Nothing in this folder matches “{query}”.
-          </p>
+        <EmptyState
+          icon={SearchX}
+          title="No matches"
+          description={
+            <>Nothing in this folder matches &ldquo;{query}&rdquo;.</>
+          }
+        >
           <Button
             variant="outline"
             size="sm"
+            className="mt-1"
             onClick={() => table.setGlobalFilter("")}
           >
             Clear filter
           </Button>
-        </div>
+        </EmptyState>
       ) : entries.length === 0 ? (
         <EmptyFolder
           sourceId={sourceId}
@@ -557,16 +561,15 @@ function EmptyFolder({
   const parent = prefix ? (parentPrefixOf(prefix) ?? "") : null;
 
   return (
-    <div className="flex flex-col items-center gap-3 py-16 text-center">
-      <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-        <FolderOpen className="size-5" aria-hidden />
-      </div>
-      <h2 className="text-base font-semibold">This folder is empty</h2>
-      <p className="text-sm text-muted-foreground">
-        {canUpload
+    <EmptyState
+      icon={FolderOpen}
+      title="This folder is empty"
+      description={
+        canUpload
           ? "Drop files here, or use Upload to add some."
-          : "Files uploaded to this location will show up here."}
-      </p>
+          : "Files uploaded to this location will show up here."
+      }
+    >
       {parent !== null ? (
         <Button variant="outline" size="sm" className="mt-1" asChild>
           <Link
@@ -580,6 +583,6 @@ function EmptyFolder({
           </Link>
         </Button>
       ) : null}
-    </div>
+    </EmptyState>
   );
 }

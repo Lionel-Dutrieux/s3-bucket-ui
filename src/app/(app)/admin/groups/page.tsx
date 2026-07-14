@@ -1,5 +1,6 @@
-import { Plus } from "lucide-react";
+import { Plus, UsersRound } from "lucide-react";
 import type { Metadata } from "next";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { CreateGroupDialog } from "@/features/admin/components/create-group-dialog";
@@ -29,13 +30,11 @@ export default async function AdminGroupsPage() {
       </PageHeader>
 
       {groups.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed p-10 text-center">
-          <p className="text-sm font-medium">No groups yet</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            Create one to grant several people the same sources at once — name
-            it after an identity provider group to fill it automatically.
-          </p>
-        </div>
+        <EmptyState
+          icon={UsersRound}
+          title="No groups yet"
+          description="Create one to grant several people the same sources at once — name it after an identity provider group to fill it automatically."
+        />
       ) : (
         <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <GroupsTable groups={groups} users={users} />
