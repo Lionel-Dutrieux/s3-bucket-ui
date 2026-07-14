@@ -1,4 +1,4 @@
-// Client-side access to the source config endpoint (app/source/[id]/config).
+// Client-side access to the source config endpoint (/api/sources/[id]/config).
 // Reads never go through server actions; the edit dialog fetches the full
 // record (minus the secret) on demand, through TanStack Query. The fetcher
 // throws on failure so query error states carry the message.

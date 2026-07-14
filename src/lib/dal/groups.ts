@@ -1,4 +1,5 @@
 import "server-only";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export interface GroupMemberRow {
@@ -50,12 +51,22 @@ export async function listGroupOptions(): Promise<
   return rows.map((row) => ({ id: row.id, label: row.name }));
 }
 
-export async function createGroup(name: string): Promise<void> {
-  await prisma.group.create({ data: { name } });
-}
-
-export async function renameGroup(id: string, name: string): Promise<void> {
-  await prisma.group.update({ where: { id }, data: { name } });
+/** Creates a group; reports a name collision as a value, not an exception. */
+export async function createGroup(
+  name: string,
+): Promise<"created" | "name-taken"> {
+  try {
+    await prisma.group.create({ data: { name } });
+    return "created";
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return "name-taken";
+    }
+    throw error;
+  }
 }
 
 export async function deleteGroup(id: string): Promise<void> {

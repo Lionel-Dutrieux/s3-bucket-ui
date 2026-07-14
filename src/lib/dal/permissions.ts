@@ -3,8 +3,9 @@ import { cache } from "react";
 import { mergeGrants, type SourceGrant } from "@/lib/authz/permissions";
 import { prisma } from "@/lib/prisma";
 
-/** Grants that apply to a user on a source: direct + via group memberships. */
-const grantsForUser = (userId: string) => ({
+/** Grants that apply to a user on a source: direct + via group memberships.
+ * Shared with `listSourcesFor` so the membership model changes in one place. */
+export const grantsForUser = (userId: string) => ({
   OR: [{ userId }, { group: { members: { some: { userId } } } }],
 });
 

@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { decrypt, encrypt } from "@/lib/crypto";
+import { grantsForUser } from "@/lib/dal/permissions";
 import { prisma } from "@/lib/prisma";
 
 export interface SourceSummary {
@@ -46,16 +47,7 @@ export const listSourcesFor = cache(
   }): Promise<SourceSummary[]> => {
     if (viewer.role === "admin") return listSources();
     return prisma.source.findMany({
-      where: {
-        grants: {
-          some: {
-            OR: [
-              { userId: viewer.id },
-              { group: { members: { some: { userId: viewer.id } } } },
-            ],
-          },
-        },
-      },
+      where: { grants: { some: grantsForUser(viewer.id) } },
       select: { id: true, name: true, bucket: true, provider: true },
       orderBy: { name: "asc" },
     });

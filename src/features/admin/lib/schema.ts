@@ -6,6 +6,11 @@ export const groupNameSchema = z
   .min(1, "Group name is required.")
   .max(64, "Group name is too long.");
 
+// Shape of the create-group form — one named field so the form kit can
+// validate it like every other form.
+export const createGroupSchema = z.object({ name: groupNameSchema });
+export type CreateGroupValues = z.infer<typeof createGroupSchema>;
+
 export const roleSchema = z.enum(["user", "admin"]);
 export type Role = z.infer<typeof roleSchema>;
 

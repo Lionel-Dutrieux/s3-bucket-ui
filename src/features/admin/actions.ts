@@ -17,7 +17,6 @@ import {
   createGroup as dalCreateGroup,
   deleteGroup as dalDeleteGroup,
   removeGroupMember as dalRemoveGroupMember,
-  renameGroup as dalRenameGroup,
 } from "@/lib/dal/groups";
 import { deleteGrant, upsertGrant } from "@/lib/dal/permissions";
 import { setOidcOnly, setPublicSignUpEnabled } from "@/lib/dal/settings";
@@ -176,28 +175,12 @@ export async function createGroup(name: string): Promise<ActionResult> {
   }
 
   try {
-    await dalCreateGroup(parsed.data);
-  } catch {
-    return actionError("A group with that name already exists.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
-}
-
-export async function renameGroup(
-  groupId: string,
-  name: string,
-): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-  const parsed = groupNameSchema.safeParse(name);
-  if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
-  }
-
-  try {
-    await dalRenameGroup(groupId, parsed.data);
-  } catch {
-    return actionError("A group with that name already exists.");
+    if ((await dalCreateGroup(parsed.data)) === "name-taken") {
+      return actionError("A group with that name already exists.");
+    }
+  } catch (error) {
+    console.error(`[admin] create group failed (${parsed.data}):`, error);
+    return actionError("Could not create this group.");
   }
   revalidatePath("/", "layout");
   return actionOk();
