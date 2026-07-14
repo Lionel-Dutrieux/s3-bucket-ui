@@ -4,8 +4,8 @@ import {
   type FolderListing,
   partitionListing,
 } from "@/features/browser/lib/listing";
-import { getFilesClient } from "@/features/sources/server/storage";
 import type { Source } from "@/lib/dal/sources";
+import { getFilesClient } from "@/lib/storage/client";
 
 export type ListErrorReason =
   | "credentials"

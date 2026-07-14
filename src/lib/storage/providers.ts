@@ -1,9 +1,9 @@
 // Registry of supported storage providers. An S3-compatible provider is one
 // entry here — adapter, signing region and addressing style are all config.
 // A provider with its own protocol (like Azure) also needs a case in
-// features/sources/server/storage.ts.
+// lib/storage/client.ts.
 // Kept free of UI concerns so server-only modules can import it; the
-// provider → icon mapping lives in components/provider-icons.ts.
+// provider → icon mapping lives in features/sources/components/provider-icons.ts.
 export interface ProviderDefinition {
   id: string;
   label: string;

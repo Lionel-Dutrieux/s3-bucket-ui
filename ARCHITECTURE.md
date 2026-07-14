@@ -31,11 +31,9 @@ src/features/     One folder per domain. Features may import from lib/,
                   import (schemas, limits, listing/move planning…).
     server/       server-only modules: storage access, service functions,
                   write guards, I/O helpers used by actions and routes.
-  sources/        Source management: provider registry (lib/providers.ts,
-                  pure — icons live in components/provider-icons.ts), storage
-                  client factory (server/storage.ts), zod schema, actions,
-                  add/edit/remove UI. Per-source write permissions
-                  (allowUpload, allowDelete).
+  sources/        Source management: zod schema, actions, add/edit/remove UI,
+                  provider icon mapping (components/provider-icons.ts).
+                  Per-source write permissions (allowUpload, allowDelete).
   browser/        File browsing and writing: listing service, pure helpers,
                   table/grid/preview/upload components, write actions that
                   record to the audit log.
@@ -46,6 +44,10 @@ src/lib/dal/      Data access layer — the only place that touches Prisma.
                   sources.ts (encrypted credentials), operations.ts (audit
                   log). Runs server-only, returns domain types, never raw
                   Prisma records to the client.
+src/lib/storage/  Shared storage infrastructure: provider registry
+                  (providers.ts, pure data), region resolution, and the
+                  files-sdk client factory (client.ts, server-only) — used by
+                  both features and the API routes.
 src/lib/          Shared low-level modules: prisma client, crypto, env,
                   formatting, ActionResult, apiError, path helpers.
 src/components/   App shell (layout/), providers (providers/), shared widgets
@@ -56,6 +58,11 @@ prisma/           Schema + versioned SQL migrations (migrations/).
 
 Dependency direction: `app → features → (forms | components | lib) →
 generated`. No barrel files — import files directly.
+
+These boundaries are **enforced by Biome** (`noRestrictedImports` in
+`biome.json`): no cross-feature imports, no imports from `app/`, and Prisma
+(`@/lib/prisma`, `@/generated/prisma/*`) only inside `src/lib/dal/`. A
+violation is a lint error, not a review comment.
 
 ## Conventions
 
@@ -78,12 +85,13 @@ generated`. No barrel files — import files directly.
 
 ## Key decisions
 
-- **Providers are declarative**: `features/sources/lib/providers.ts`
+- **Providers are declarative**: `src/lib/storage/providers.ts`
   describes label, endpoint placeholder, field vocabulary, signing region and
-  addressing style — kept free of UI so `server/storage.ts` can import it;
-  the icon mapping lives in `components/provider-icons.ts`. An S3-compatible
+  addressing style — kept free of UI so server-only modules can import it;
+  the icon mapping lives in
+  `src/features/sources/components/provider-icons.ts`. An S3-compatible
   provider is one registry entry; a provider with its own protocol (Azure)
-  adds a case in `features/sources/server/storage.ts`.
+  adds a case in `src/lib/storage/client.ts`.
 - **Secrets are encrypted at rest** (AES-256-GCM, `src/lib/crypto.ts`) with
   `ENCRYPTION_KEY`; encryption/decryption only happens inside
   `src/lib/dal/sources.ts`. Only the DAL and `src/lib/env.ts` read secrets.
@@ -138,7 +146,7 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
 ## How do I…
 
 - **Add an S3-compatible provider?** One entry in
-  `features/sources/lib/providers.ts` + its icon in
+  `src/lib/storage/providers.ts` + its icon in
   `features/sources/components/provider-icons.ts`.
 - **Add a server action?** In the feature's `actions.ts`: zod-parse the
   input (schema in `lib/`), delegate to a `server/` module or the DAL, return

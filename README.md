@@ -106,11 +106,11 @@ write permissions):
 
 Use **Test connection** to check the credentials; the connection is verified
 again when the source is saved. Providers live in
-`src/features/sources/lib/providers.ts` — an S3-compatible provider is one
+`src/lib/storage/providers.ts` — an S3-compatible provider is one
 declarative registry entry (label, endpoint placeholder, signing region,
 addressing style; its icon goes in
 `src/features/sources/components/provider-icons.ts`); a provider with its own
-protocol also needs a case in `src/features/sources/server/storage.ts`.
+protocol also needs a case in `src/lib/storage/client.ts`.
 
 ## Production
 

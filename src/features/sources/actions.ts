@@ -6,7 +6,6 @@ import {
   sourceInputSchema,
   sourceUpdateSchema,
 } from "@/features/sources/lib/schema";
-import { getFilesClient } from "@/features/sources/server/storage";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import {
   createSource as dalCreateSource,
@@ -15,6 +14,7 @@ import {
   updateSource as dalUpdateSource,
   type SourceInput,
 } from "@/lib/dal/sources";
+import { getFilesClient } from "@/lib/storage/client";
 
 async function checkConnection(data: SourceInput): Promise<string | null> {
   try {

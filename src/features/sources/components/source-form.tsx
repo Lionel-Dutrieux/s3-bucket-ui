@@ -10,7 +10,6 @@ import {
   testSourceConnection,
   updateSource,
 } from "@/features/sources/actions";
-import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
 import {
   type SourceFormValues,
   sourceInputSchema,
@@ -18,6 +17,7 @@ import {
 } from "@/features/sources/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
+import { getProvider, PROVIDERS } from "@/lib/storage/providers";
 
 type TestStatus =
   | { state: "idle" }

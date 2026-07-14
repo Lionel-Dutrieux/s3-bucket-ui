@@ -2,8 +2,8 @@ import "server-only";
 import { Files } from "files-sdk";
 import { azure } from "files-sdk/azure";
 import { s3 } from "files-sdk/s3";
-import { getProvider } from "@/features/sources/lib/providers";
-import { regionFromEndpoint } from "@/features/sources/lib/region";
+import { getProvider } from "@/lib/storage/providers";
+import { regionFromEndpoint } from "@/lib/storage/region";
 
 export interface StorageCredentials {
   provider: string;

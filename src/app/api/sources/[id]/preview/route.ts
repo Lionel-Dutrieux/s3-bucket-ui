@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { PREVIEW_TTL_SECONDS } from "@/features/browser/lib/limits";
-import { getFilesClient } from "@/features/sources/server/storage";
 import { apiError } from "@/lib/api-error";
 import { getSource } from "@/lib/dal/sources";
+import { getFilesClient } from "@/lib/storage/client";
 
 /** Categories rendered from a presigned URL (img/iframe/video/audio tags). */
 const URL_PREVIEW_CATEGORIES = new Set(["image", "pdf", "video", "audio"]);

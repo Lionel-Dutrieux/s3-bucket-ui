@@ -20,8 +20,8 @@ import {
 import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { SourceMenu } from "@/features/sources/components/source-menu";
-import { getProvider, PROVIDERS } from "@/features/sources/lib/providers";
 import type { SourceSummary } from "@/lib/dal/sources";
+import { getProvider, PROVIDERS } from "@/lib/storage/providers";
 
 export function AppSidebar({ sources }: { sources: SourceSummary[] }) {
   const pathname = usePathname();

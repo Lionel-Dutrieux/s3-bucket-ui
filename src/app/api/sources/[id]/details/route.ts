@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { FileDetailsResult } from "@/features/browser/api/client";
-import { getFilesClient } from "@/features/sources/server/storage";
 import { apiError } from "@/lib/api-error";
 import { getSource } from "@/lib/dal/sources";
+import { getFilesClient } from "@/lib/storage/client";
 
 /** Object metadata for the details dialog — a HEAD request, no body. */
 export async function GET(

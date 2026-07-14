@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { UrlResult } from "@/features/browser/api/client";
 import { SHARE_TTL_SECONDS } from "@/features/browser/lib/limits";
-import { getFilesClient } from "@/features/sources/server/storage";
 import { apiError } from "@/lib/api-error";
 import { getSource } from "@/lib/dal/sources";
+import { getFilesClient } from "@/lib/storage/client";
 
 /**
  * Presigned URL for sharing: forces a download so stored HTML/SVG can never

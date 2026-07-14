@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getFilesClient } from "@/features/sources/server/storage";
 import { apiError } from "@/lib/api-error";
 import { getSource } from "@/lib/dal/sources";
+import { getFilesClient } from "@/lib/storage/client";
 
 export async function GET(
   request: NextRequest,

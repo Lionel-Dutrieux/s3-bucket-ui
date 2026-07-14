@@ -11,7 +11,9 @@ the conventions. The short version:
 
 - Code lives under `src/`; features are split into
   `actions.ts / api/ / components/ / hooks/ / lib/ / server/`. No cross-feature
-  imports, no barrel files.
+  imports, no barrel files — boundaries are enforced by Biome
+  (`noRestrictedImports`); shared infra goes in `src/lib/` (e.g.
+  `lib/storage/`).
 - Reads: RSC first, else GET route under `app/api/` + TanStack Query
   (`queryOptions` factories in `features/*/api/queries.ts`). Never a server
   action for a read.

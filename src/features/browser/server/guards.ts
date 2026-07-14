@@ -1,8 +1,8 @@
 import "server-only";
 import type { Files } from "files-sdk";
-import { getFilesClient } from "@/features/sources/server/storage";
 import { type ActionResult, actionError } from "@/lib/action-result";
 import { getSource, type Source } from "@/lib/dal/sources";
+import { getFilesClient } from "@/lib/storage/client";
 
 export interface WriteContext {
   source: Source;
