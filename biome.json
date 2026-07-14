@@ -15,7 +15,28 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": ["@/generated/prisma/**"],
+                "message": "The generated Prisma client is an implementation detail — go through the DAL (src/lib/dal/) and its domain types."
+              },
+              {
+                "group": ["@/lib/prisma"],
+                "message": "Only the DAL (src/lib/dal/) touches the Prisma client."
+              },
+              {
+                "group": ["@/app/**"],
+                "message": "app/ is the routing layer — nothing imports from it. Shared code belongs in lib/, components/ or the feature."
+              }
+            ]
+          }
+        }
+      }
     },
     "domains": {
       "react": "recommended",
@@ -39,6 +60,72 @@
       "includes": ["src/components/ui/**"],
       "linter": {
         "enabled": false
+      }
+    },
+    {
+      "includes": ["src/features/browser/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/generated/prisma/**", "@/lib/prisma"],
+                    "message": "Only the DAL (src/lib/dal/) touches Prisma."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "app/ is the routing layer — nothing imports from it."
+                  },
+                  {
+                    "group": ["@/features/sources/**"],
+                    "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/storage/) or src/components/."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/sources/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/generated/prisma/**", "@/lib/prisma"],
+                    "message": "Only the DAL (src/lib/dal/) touches Prisma."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "app/ is the routing layer — nothing imports from it."
+                  },
+                  {
+                    "group": ["@/features/browser/**"],
+                    "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/storage/) or src/components/."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/dal/**", "src/lib/prisma.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          }
+        }
       }
     }
   ]
