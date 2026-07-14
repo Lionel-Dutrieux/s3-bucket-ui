@@ -119,7 +119,7 @@
       }
     },
     {
-      "includes": ["src/lib/dal/**", "src/lib/prisma.ts"],
+      "includes": ["src/lib/dal/**", "src/lib/prisma.ts", "src/lib/auth/**"],
       "linter": {
         "rules": {
           "style": {

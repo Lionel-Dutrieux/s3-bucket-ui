@@ -22,11 +22,14 @@ model Source {
   allowDelete     Boolean  @default(false) @map("allow_delete")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  grants SourcePermission[]
+
   @@map("sources")
 }
 
 /// Audit trail of write operations (upload, delete, rename, folder create).
-/// Source name is denormalized so history survives a source being removed.
+/// Source name is denormalized so history survives a source being removed;
+/// userId has no FK for the same reason (history survives account deletion).
 model Operation {
   id         String   @id @default(uuid()) @db.Uuid
   action     String
@@ -35,8 +38,139 @@ model Operation {
   target     String
   detail     String?
   actor      String?
+  userId     String?  @map("user_id")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([createdAt])
   @@map("operations")
+}
+
+// --- better-auth models (managed by better-auth; ids are text, not uuid) ---
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  // admin plugin
+  role          String?
+  banned        Boolean?
+  banReason     String?   @map("ban_reason")
+  banExpires    DateTime? @map("ban_expires") @db.Timestamptz(3)
+  /// Snapshot of the IdP `groups` claim at the last OIDC sign-in — drives the
+  /// name-matching sync into GroupMember (via = "oidc").
+  oidcGroups    String[]  @default([]) @map("oidc_groups")
+
+  sessions    Session[]
+  accounts    Account[]
+  memberships GroupMember[]
+  grants      SourcePermission[]
+
+  @@map("users")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+  token          String   @unique
+  ipAddress      String?  @map("ip_address")
+  userAgent     String?   @map("user_agent")
+  userId         String   @map("user_id")
+  impersonatedBy String?  @map("impersonated_by")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at") @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at") @db.Timestamptz(3)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("verifications")
+}
+
+// --- authorization models (ours) ---
+
+/// App-side group. `name` is the key OIDC group claims are matched against
+/// (exact match, à la Homarr).
+model Group {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  members GroupMember[]
+  grants  SourcePermission[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  groupId   String   @map("group_id") @db.Uuid
+  userId    String   @map("user_id")
+  /// "manual" (added by an admin) or "oidc" (added by the claim sync — only
+  /// these are removed when the claim no longer lists the group).
+  via       String   @default("manual")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+/// A grant gives its subject read access to a source; canEdit (upload, rename,
+/// new folder) and canDelete add to it. The subject is exactly one of
+/// userId/groupId — enforced by a CHECK constraint in the migration SQL.
+model SourcePermission {
+  id        String   @id @default(uuid()) @db.Uuid
+  sourceId  String   @map("source_id") @db.Uuid
+  userId    String?  @map("user_id")
+  groupId   String?  @map("group_id") @db.Uuid
+  canEdit   Boolean  @default(false) @map("can_edit")
+  canDelete Boolean  @default(false) @map("can_delete")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group  Group? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, userId])
+  @@unique([sourceId, groupId])
+  @@index([userId])
+  @@index([groupId])
+  @@map("source_permissions")
 }
