@@ -1,20 +1,21 @@
 # Dokploy-ready compose file.
 #
-# ⚠ Bucket UI has NO built-in authentication. Before exposing a domain, add
-# an auth layer: in Dokploy, attach a basicAuth middleware to the domain
-# (Advanced → Traefik), or front the app with Authelia/authentik.
-#
 # Domain: add it in the Dokploy UI (service → Domains tab, container port 3000).
-# Secrets: set ENCRYPTION_KEY (openssl rand -hex 32) and DATABASE_URL in the
-# Dokploy Environment tab.
+# Secrets: set ENCRYPTION_KEY (openssl rand -hex 32), BETTER_AUTH_SECRET
+# (openssl rand -base64 32), BETTER_AUTH_URL (the public https URL) and
+# DATABASE_URL in the Dokploy Environment tab. Optional: the OIDC_* variables
+# to enable an SSO provider (e.g. Pocket ID) on the sign-in page.
 #
 # Database: bring your own PostgreSQL — a Dokploy-managed database, or any
 # reachable instance. Point DATABASE_URL at it; the container applies pending
 # migrations on boot. (For local dev, see the README for a one-line
 # `docker run postgres`.)
 #
+# First run: sign up — the very first account created becomes the admin.
+#
 # Local usage without Dokploy:
-#   ENCRYPTION_KEY=... DATABASE_URL=... docker compose up --build
+#   ENCRYPTION_KEY=... BETTER_AUTH_SECRET=... BETTER_AUTH_URL=... \
+#   DATABASE_URL=... docker compose up --build
 
 services:
   bucket-ui:
@@ -23,6 +24,14 @@ services:
     environment:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      OIDC_DISCOVERY_URL: ${OIDC_DISCOVERY_URL:-}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      OIDC_PROVIDER_LABEL: ${OIDC_PROVIDER_LABEL:-}
+      OIDC_SCOPES: ${OIDC_SCOPES:-}
+      OIDC_GROUPS_CLAIM: ${OIDC_GROUPS_CLAIM:-}
     networks:
       - dokploy-network
 

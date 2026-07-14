@@ -19,8 +19,13 @@ the conventions. The short version:
   action for a read.
 - Mutations: server actions returning `ActionResult`
   (`src/lib/action-result.ts`), input validated with zod, permissions
-  re-checked server-side (`withWriteAccess` for browser writes).
+  re-checked server-side (`withWriteAccess` for browser writes,
+  `currentAdmin()` for admin/source actions).
+- Auth: every server entry point re-validates — `requireSession`/
+  `requireAdmin` for pages, `requireSourceAccess` for anything
+  source-scoped (uniform 404). `proxy.ts` is optimistic UX, never a guard.
 - Forms: always the TanStack Form kit (`src/forms/`, `useAppForm`).
-- Prisma only inside `src/lib/dal/`; route-handler errors via `apiError`.
+- Prisma only inside `src/lib/dal/` (and `src/lib/auth/` for the better-auth
+  instance); route-handler errors via `apiError`.
 - Verify with `pnpm typecheck && pnpm lint && pnpm test && pnpm build`; the
   user tests the UI manually — don't run E2E.

@@ -8,6 +8,10 @@ config) come from GET route handlers under `app/api/sources/[id]/`, consumed
 with TanStack Query through the typed fetchers in each feature's
 `api/client.ts`.
 
+Authentication is built in (better-auth): sessions live in the database,
+sign-in/sign-up pages are public, everything else requires an account, and
+source visibility is governed by **grants** (see Authorization below).
+
 ## Layers
 
 All application code lives under `src/`; the repo root holds configuration
@@ -31,19 +35,34 @@ src/features/     One folder per domain. Features may import from lib/,
                   import (schemas, limits, listing/move planning…).
     server/       server-only modules: storage access, service functions,
                   write guards, I/O helpers used by actions and routes.
-  sources/        Source management: zod schema, actions, add/edit/remove UI,
-                  provider icon mapping (components/provider-icons.ts).
-                  Per-source write permissions (allowUpload, allowDelete).
+  sources/        Source management (admin-only): zod schema, actions,
+                  add/edit/remove UI, provider icon mapping
+                  (components/provider-icons.ts).
   browser/        File browsing and writing: listing service, pure helpers,
                   table/grid/preview/upload components, write actions that
                   record to the audit log.
+  auth/           Sign-in/sign-up forms (TanStack Form + authClient), OIDC
+                  button, user menu.
+  admin/          Admin area UI: users table, groups manager, per-source
+                  grant editor, and the admin server actions.
 src/forms/        TanStack Form infrastructure (createFormHook): reusable
                   field components (fields/), form components (SubmitButton,
                   FormAlert) and error helpers. No domain knowledge.
 src/lib/dal/      Data access layer — the only place that touches Prisma.
-                  sources.ts (encrypted credentials), operations.ts (audit
-                  log). Runs server-only, returns domain types, never raw
-                  Prisma records to the client.
+                  sources.ts (encrypted credentials, grant-filtered
+                  listSourcesFor), permissions.ts (grants), groups.ts,
+                  users.ts, operations.ts (audit log). Runs server-only,
+                  returns domain types, never raw Prisma records to the
+                  client.
+src/lib/auth/     better-auth: instance (auth.ts — plugins admin +
+                  genericOAuth + nextCookies), browser client (client.ts),
+                  session helpers (session.ts — getSession/requireSession/
+                  requireAdmin/currentUser/currentAdmin), OIDC provider from
+                  env (oidc.ts) and requireSourceAccess (access.ts), the
+                  single read gate for a source.
+src/lib/authz/    Pure permission logic — no I/O, unit-tested: mergeGrants,
+                  resolveAccess (role + grant → capabilities), groups-claim
+                  normalization.
 src/lib/storage/  Shared storage infrastructure: provider registry
                   (providers.ts, pure data), region resolution, and the
                   files-sdk client factory (client.ts, server-only) — used by
@@ -61,8 +80,39 @@ generated`. No barrel files — import files directly.
 
 These boundaries are **enforced by Biome** (`noRestrictedImports` in
 `biome.json`): no cross-feature imports, no imports from `app/`, and Prisma
-(`@/lib/prisma`, `@/generated/prisma/*`) only inside `src/lib/dal/`. A
-violation is a lint error, not a review comment.
+(`@/lib/prisma`, `@/generated/prisma/*`) only inside `src/lib/dal/` and
+`src/lib/auth/` (the better-auth instance needs the client for its adapter
+and hooks). A violation is a lint error, not a review comment.
+
+## Authorization
+
+Two roles (`user`, `admin` — the **first account ever created becomes
+admin**) and one grant table (`SourcePermission`): a grant gives its subject
+(a user **or** a group, exactly one — CHECK constraint) read access to one
+source; `canEdit` (upload, rename, new folder) and `canDelete` add to it.
+Renaming/moving needs both. Admins implicitly hold every capability and see
+every source. Groups can be synced from an OIDC `groups` claim: names that
+exactly match an app group are assigned at sign-in (`via: "oidc"`), and only
+those are removed when the claim stops listing them — admin-added memberships
+(`via: "manual"`) are never touched.
+
+Every server entry point re-validates (a layout check protects nothing else):
+
+| Entry | Guard |
+|---|---|
+| `(app)` layout, `/` | `requireSession` + `listSourcesFor` |
+| `/source/[id]` | `requireSourceAccess` → `notFound()` |
+| `/activity`, `/admin/*`, route `config`, source actions, admin actions | admin only |
+| 7 browser write actions | `withWriteAccess` (session + grant edit/delete) |
+| Routes `details/download/preview/share/text/thumbnail` | `requireSourceAccess` → 404 |
+| Route `upload` (POST) | `requireSourceAccess` + `canEdit` → 403 |
+| `/api/health`, `/api/auth/*`, `/sign-in`, `/sign-up` | public |
+| `proxy.ts` | optimistic cookie check only — **never** a security boundary |
+
+`requireSourceAccess(sourceId)` (`src/lib/auth/access.ts`) is the single read
+gate: session + source + merged grant, resolved to capabilities. It answers
+`null` uniformly for "no session", "no such source" and "no grant", so
+callers return 404/notFound() and never reveal that a source exists.
 
 ## Conventions
 
@@ -70,7 +120,8 @@ violation is a lint error, not a review comment.
   a discriminated union — callers narrow on `result.ok`. Actions zod-parse
   their input first, stay thin, and return only what the UI needs (never a
   raw DB record). Auth/permission checks happen inside the action path
-  (`withWriteAccess`), not in the page.
+  (`withWriteAccess` for browser writes, `currentAdmin()` for sources/admin
+  actions), not in the page.
 - **Route handlers all fail with `apiError(status, message)`**
   (`{ error: string }` JSON) — the fetchers in `api/client.ts` rely on it.
 - **Query keys live only in `api/queries.ts`** as `queryOptions` factories
@@ -103,15 +154,19 @@ violation is a lint error, not a review comment.
   hand-written bootstrap DDL. No repository layer on top of Prisma either —
   the DAL is named functions per model; PrismaClient is already a typed
   repository.
-- **Writes are opt-in and gated server-side**: sources are read-only unless
-  `allowUpload` / `allowDelete` are set. Every write action re-checks the
-  permission on the server via `withWriteAccess` — hiding a control is only
-  cosmetic. Renaming (move = copy + delete) needs both.
-- **No built-in auth**: the app is deployed behind an authenticating reverse
-  proxy. Do not add auth logic without revisiting this decision. Write
-  operations are audited (`operations` table) and attributed to the proxy's
-  forwarded identity when present — that's the accountability layer, not app
-  auth.
+- **Writes are grant-gated server-side**: every write action re-checks the
+  session and the grant's capabilities via `withWriteAccess` — hiding a
+  control is only cosmetic. Renaming (move = copy + delete) needs edit +
+  delete.
+- **Auth is better-auth, sessions in the database**: revocable sessions,
+  httpOnly cookies, `nextCookies()` last in the plugin list so server actions
+  can set cookies. Public sign-up; the first account becomes admin
+  (`databaseHooks.user.create.before`); `role` is not client-assignable
+  (admin plugin `input: false` + the hook forces it). The optional OIDC
+  provider is pure configuration (`OIDC_*` env, genericOAuth plugin) — no
+  code change to swap IdPs. Write operations are audited (`operations`
+  table), attributed to the session user (email + userId, denormalized so
+  history survives account deletion).
 - **Navigation state lives in the URL** (`?prefix=`, `?cursor=`, `?q=`,
   `?sort=` via nuqs) and the view preference in a cookie read server-side —
   no client data fetching, no flash.
@@ -150,7 +205,12 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
   `features/sources/components/provider-icons.ts`.
 - **Add a server action?** In the feature's `actions.ts`: zod-parse the
   input (schema in `lib/`), delegate to a `server/` module or the DAL, return
-  `ActionResult`. Wrap browser writes in `withWriteAccess`.
+  `ActionResult`. Wrap browser writes in `withWriteAccess`; gate
+  admin-only actions with `currentAdmin()`.
+- **Guard a new page or route?** Pages: `requireSession()` /
+  `requireAdmin()` (`src/lib/auth/session.ts`); anything source-scoped:
+  `requireSourceAccess(id)` (`src/lib/auth/access.ts`) and answer 404 on
+  null. Never rely on the proxy or a layout.
 - **Add an on-demand read?** GET route under `app/api/sources/[id]/…`
   (errors via `apiError`), typed fetcher in the feature's `api/client.ts`,
   `queryOptions` entry in `api/queries.ts`.

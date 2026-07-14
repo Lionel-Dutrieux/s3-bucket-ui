@@ -3,9 +3,10 @@
 [![CI](https://github.com/Lionel-Dutrieux/s3-bucket-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/Lionel-Dutrieux/s3-bucket-ui/actions/workflows/ci.yml)
 
 A file manager for your storage buckets, with a Google-Drive-style UI. Add as
-many sources as you want, browse folders, and — on sources where you enable
-it — upload, delete and rename. Read-only by default; every write is opt-in
-per source and enforced server-side.
+many sources as you want, browse folders, and — where a grant allows it —
+upload, delete and rename. Access is per user and per group: a source is
+invisible until an admin grants it, and every permission is enforced
+server-side.
 
 Features:
 
@@ -16,22 +17,29 @@ Features:
   text/code/Markdown (first 1 MB), without leaving the app.
 - **Share & inspect** — presigned download links (1 h), per-file details
   (Content-Type, ETag, user metadata, copyable key).
-- **Write, if you allow it** — two per-source permissions unlock uploads
-  (button or drag & drop of files and whole folders, with a progress tray,
-  plus folder creation) and deletions (single, multi-select, or a whole
-  folder, with confirmation). With both on, files and folders can be renamed.
-- **Activity log** — every write across all sources (who, what, when) on the
-  Activity page. Read actions aren't recorded.
+- **Write, if you're allowed to** — grants unlock uploads (button or drag &
+  drop of files and whole folders, with a progress tray, plus folder
+  creation) and deletions (single, multi-select, or a whole folder, with
+  confirmation). With both, files and folders can be renamed and moved.
+- **Built-in authentication** — email/password sign-up plus an optional
+  generic OIDC provider (Pocket ID, Authentik, Keycloak…) configured entirely
+  through environment variables. The very first account created becomes the
+  admin.
+- **Users, groups & per-source access** — admins manage accounts (roles,
+  ban, remove), groups, and who can read/edit/delete on each source. At OIDC
+  sign-in, the identity provider's `groups` claim is matched by name against
+  app groups and memberships are synced automatically (à la Homarr).
+- **Activity log** — every write across all sources, attributed to the
+  signed-in user, on the admin-only Activity page. Read actions aren't
+  recorded.
 
 Supported providers: Cloudflare R2, Amazon S3, Google Cloud Storage (HMAC),
 Azure Blob Storage, MinIO, DigitalOcean Spaces.
 
-> **Authentication is not built in.** Deploy Bucket UI behind an authenticating
-> reverse proxy (nginx `auth_basic`, Traefik `basicAuth` middleware, Authelia,
-> …). Anyone who can reach the app can browse every source — and can upload to
-> or delete from any source whose write permissions you enabled. The activity
-> log attributes actions to the identity the proxy forwards
-> (`X-Forwarded-User` / `Remote-User`), when it sets one.
+> **Security model.** Every server entry point (page, server action, API
+> route) re-validates the session and the grant — non-admins only ever see
+> sources they were granted, and a source they can't read answers 404. Bucket
+> credentials are encrypted at rest and never sent to the browser.
 
 ## Stack
 
@@ -40,16 +48,21 @@ Azure Blob Storage, MinIO, DigitalOcean Spaces.
 - Tailwind CSS v4 + shadcn/ui, TanStack Form + Table + Query, nuqs (URL state)
 - [files-sdk](https://files-sdk.dev) (S3 + Azure adapters) for bucket access
 - Prisma 7 + PostgreSQL (via the `@prisma/adapter-pg` driver adapter)
+- [better-auth](https://better-auth.com) (sessions, admin plugin, generic
+  OIDC) for authentication
 - Bucket secrets encrypted at rest (AES-256-GCM)
 
 ## Architecture
 
 ```
 src/app/          routes only (thin pages, layouts, API route handlers)
-src/features/     feature modules: sources/, browser/ — each split into
-                  actions.ts, api/, components/, hooks/, lib/, server/
+src/features/     feature modules: sources/, browser/, auth/, admin/ — each
+                  split into actions.ts, api/, components/, hooks/, lib/, server/
 src/forms/        TanStack Form infrastructure: reusable fields, form components
-src/lib/dal/      data access layer (Prisma queries): sources, operations (audit log)
+src/lib/dal/      data access layer (Prisma queries): sources, permissions,
+                  groups, users, operations (audit log)
+src/lib/auth/     better-auth instance, session helpers, requireSourceAccess
+src/lib/authz/    pure permission resolution (unit-tested, no I/O)
 src/lib/          shared: prisma client, crypto, env, formatting, ActionResult
 src/components/   app shell (layout/), providers/, shared widgets, shadcn (ui/)
 prisma/           schema (client generated into src/generated/, gitignored)
@@ -87,12 +100,43 @@ pnpm dev
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string, e.g. `postgresql://postgres:postgres@localhost:5432/bucket_ui`. |
 | `ENCRYPTION_KEY` | Encrypts stored bucket credentials — `openssl rand -hex 32`. Changing it makes saved sources unreadable (delete and re-add them). |
+| `BETTER_AUTH_SECRET` | Signs sessions and tokens (min 32 chars) — `openssl rand -base64 32`. |
+| `BETTER_AUTH_URL` | Public URL of the app, scheme included (`http://localhost:3000` in dev). Cookie security and OAuth callbacks derive from it. |
+| `OIDC_DISCOVERY_URL` | *(optional)* OIDC discovery document of your identity provider, e.g. `https://id.example.com/.well-known/openid-configuration`. Set together with the two below to enable SSO. |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | *(optional)* OAuth client credentials registered with your IdP. Callback URL to register: `<BETTER_AUTH_URL>/api/auth/oauth2/callback/oidc`. |
+| `OIDC_PROVIDER_LABEL` | *(optional)* Button label on the sign-in page (default `SSO`). |
+| `OIDC_SCOPES` | *(optional)* Requested scopes (default `openid profile email groups`). |
+| `OIDC_GROUPS_CLAIM` | *(optional)* Claim carrying group names (default `groups`). |
+
+Once running, **sign up — the very first account becomes the admin**; later
+accounts start with no access until an admin grants them sources (Admin →
+Sources), directly or through a group (Admin → Groups). With OIDC enabled,
+groups from the IdP's claim that exactly match an app group name are assigned
+automatically at sign-in.
+
+<details>
+<summary>Example: Pocket ID</summary>
+
+In Pocket ID, create an OIDC client with callback URL
+`https://buckets.example.com/api/auth/oauth2/callback/oidc`, then set:
+
+```bash
+OIDC_DISCOVERY_URL=https://id.example.com/.well-known/openid-configuration
+OIDC_CLIENT_ID=<client id>
+OIDC_CLIENT_SECRET=<client secret>
+OIDC_PROVIDER_LABEL=Pocket ID
+```
+
+Pocket ID exposes user groups through the `groups` claim (the default) — an
+app group named exactly like a Pocket ID group picks its members up
+automatically at sign-in.
+</details>
 
 ## Adding a source
 
-Every source is endpoint + bucket/container + a key pair (read-only
-credentials recommended — grant write scopes only if you enable the source's
-write permissions):
+Only admins add sources. Every source is endpoint + bucket/container + a key
+pair (read-only credentials recommended — grant write scopes only if you plan
+to hand out edit/delete grants on the source):
 
 - **Cloudflare R2**: R2 API token (**Object Read only**) —
   `https://<account-id>.r2.cloudflarestorage.com`.
@@ -130,7 +174,8 @@ docker compose up --build -d
 The image is a multi-stage standalone build (non-root, healthcheck on
 `/api/health`). On boot the container applies any pending migrations
 (`prisma migrate deploy`) before serving, so the schema is always up to date.
-**Remember to attach an auth middleware (basicAuth) to the domain.**
+Authentication is built in — after the first deploy, sign up to claim the
+admin account.
 
 ### Bare Node.js
 
@@ -140,8 +185,8 @@ pnpm db:deploy   # apply migrations (prisma migrate deploy)
 pnpm start
 ```
 
-Point `DATABASE_URL` at your PostgreSQL instance, persist that database across
-deploys, and put the app behind your reverse proxy's authentication.
+Point `DATABASE_URL` at your PostgreSQL instance and persist that database
+across deploys.
 
 ### Monitoring
 
