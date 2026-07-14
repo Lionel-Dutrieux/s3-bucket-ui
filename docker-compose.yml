@@ -32,6 +32,12 @@ services:
       OIDC_PROVIDER_LABEL: ${OIDC_PROVIDER_LABEL:-}
       OIDC_SCOPES: ${OIDC_SCOPES:-}
       OIDC_GROUPS_CLAIM: ${OIDC_GROUPS_CLAIM:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
     networks:
       - dokploy-network
 

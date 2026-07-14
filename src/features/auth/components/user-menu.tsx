@@ -1,6 +1,12 @@
 "use client";
 
-import { ChevronsUpDown, LogOut, ShieldCheck } from "lucide-react";
+import {
+  ChevronsUpDown,
+  LogOut,
+  ShieldCheck,
+  UserRoundCog,
+} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
@@ -65,6 +71,12 @@ export function UserMenu({ user }: { user: SidebarUser }) {
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/account">
+            <UserRoundCog aria-hidden />
+            Account
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={handleSignOut}>
           <LogOut aria-hidden />
           Sign out

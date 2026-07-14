@@ -14,9 +14,18 @@ interface SignInFormProps {
   oidcLabel: string | null;
   /** Whether self-registration is currently open (Admin → Settings). */
   showSignUpLink: boolean;
+  /** Whether an SMTP relay is configured (enables "Forgot password?"). */
+  showForgotLink: boolean;
+  /** OIDC-only mode: the email/password form is not rendered at all. */
+  oidcOnly: boolean;
 }
 
-export function SignInForm({ oidcLabel, showSignUpLink }: SignInFormProps) {
+export function SignInForm({
+  oidcLabel,
+  showSignUpLink,
+  showForgotLink,
+  oidcOnly,
+}: SignInFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string>();
 
@@ -37,6 +46,21 @@ export function SignInForm({ oidcLabel, showSignUpLink }: SignInFormProps) {
       router.refresh();
     },
   });
+
+  // OIDC-only instances: no password form, no secondary links — one button.
+  if (oidcOnly && oidcLabel) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+          <p className="text-sm text-muted-foreground">
+            This instance signs in through {oidcLabel}.
+          </p>
+        </div>
+        <OidcButton label={oidcLabel} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -74,6 +98,17 @@ export function SignInForm({ oidcLabel, showSignUpLink }: SignInFormProps) {
             />
           )}
         </form.AppField>
+
+        {showForgotLink ? (
+          <p className="text-right text-sm">
+            <Link
+              href="/forgot-password"
+              className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </p>
+        ) : null}
 
         <FormAlert error={serverError} />
 

@@ -108,6 +108,8 @@ pnpm dev
 | `OIDC_PROVIDER_LABEL` | *(optional)* Button label on the sign-in page (default `SSO`). |
 | `OIDC_SCOPES` | *(optional)* Requested scopes (default `openid profile email groups`). |
 | `OIDC_GROUPS_CLAIM` | *(optional)* Claim carrying group names (default `groups`). |
+| `SMTP_HOST` / `SMTP_FROM` | *(optional, set together)* SMTP relay and sender — enables "Forgot password?" reset emails. |
+| `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASSWORD` | *(optional)* Relay port (default 587), implicit TLS, and credentials if the relay requires auth. |
 
 Once running, **sign up — the very first account becomes the admin**, and
 sign-up closes right after (create accounts from Admin → Users, or re-open

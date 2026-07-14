@@ -1,15 +1,18 @@
 import { UserRoundX } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
-import { isPublicSignUpEnabled } from "@/lib/dal/settings";
+import { isOidcOnly, isPublicSignUpEnabled } from "@/lib/dal/settings";
 import { hasAnyUser } from "@/lib/dal/users";
 import { env, oidcEnabled } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Sign up" };
 
 export default async function SignUpPage() {
+  if (await isOidcOnly()) redirect("/sign-in");
+
   // Sign-up stays open for the very first account (the admin), then closes
   // unless re-enabled in Admin → Settings. The server hook enforces the same
   // rule — this page is just the honest UI for it.

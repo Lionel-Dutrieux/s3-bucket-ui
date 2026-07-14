@@ -1,13 +1,14 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { admin, genericOAuth } from "better-auth/plugins";
 import { normalizeGroupsClaim } from "@/lib/authz/oidc-groups";
 import { syncOidcMemberships } from "@/lib/dal/groups";
-import { isPublicSignUpEnabled } from "@/lib/dal/settings";
-import { env } from "@/lib/env";
+import { isOidcOnly, isPublicSignUpEnabled } from "@/lib/dal/settings";
+import { env, smtpEnabled } from "@/lib/env";
+import { sendPasswordResetEmail } from "@/lib/mail";
 import { prisma } from "@/lib/prisma";
 import { buildOidcProvider } from "./oidc";
 
@@ -22,12 +23,79 @@ async function syncGroupsFromOidcCallback(
   await syncOidcMemberships(user.id, normalizeGroupsClaim(user.oidcGroups));
 }
 
+/** Email/password endpoints refused when the instance runs OIDC-only. */
+const PASSWORD_ENDPOINTS = new Set([
+  "/sign-in/email",
+  "/sign-up/email",
+  "/request-password-reset",
+  "/reset-password",
+  "/change-password",
+]);
+
+/**
+ * Failed sign-in → audit trail. Written with Prisma directly: the DAL's
+ * recordOperation reads the session, which would import this module back.
+ * Never throws — auditing must not break the auth pipeline.
+ */
+async function recordFailedSignIn(email: unknown): Promise<void> {
+  try {
+    await prisma.operation.create({
+      data: {
+        action: "sign-in-failed",
+        sourceName: "Authentication",
+        target: typeof email === "string" ? email : "unknown",
+      },
+    });
+  } catch (error) {
+    console.error("[auth] failed to audit sign-in failure:", error);
+  }
+}
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins: env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : [],
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true,
+    // Reset emails only when an SMTP relay is configured — without it the
+    // "Forgot password?" flow is hidden client-side and this stays unset.
+    ...(smtpEnabled()
+      ? {
+          sendResetPassword: async ({
+            user,
+            url,
+          }: {
+            user: { email: string };
+            url: string;
+          }) => {
+            await sendPasswordResetEmail(user.email, url);
+          },
+        }
+      : {}),
+  },
+  hooks: {
+    // OIDC-only mode: the switch lives in Admin → Settings and can only be
+    // enabled while OIDC is configured. Blocking here (not in the UI) is the
+    // real gate; /admin/create-user stays available to admins.
+    before: createAuthMiddleware(async (ctx) => {
+      if (PASSWORD_ENDPOINTS.has(ctx.path) && (await isOidcOnly())) {
+        throw new APIError("FORBIDDEN", {
+          message: "Password sign-in is disabled — use the SSO provider.",
+        });
+      }
+    }),
+    after: createAuthMiddleware(async (ctx) => {
+      if (
+        ctx.path === "/sign-in/email" &&
+        ctx.context.returned instanceof APIError
+      ) {
+        await recordFailedSignIn(
+          (ctx.body as { email?: unknown } | undefined)?.email,
+        );
+      }
+    }),
+  },
   user: {
     additionalFields: {
       // `input: false` — never settable from the client (no mass assignment);

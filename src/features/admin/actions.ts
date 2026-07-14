@@ -20,7 +20,8 @@ import {
   renameGroup as dalRenameGroup,
 } from "@/lib/dal/groups";
 import { deleteGrant, upsertGrant } from "@/lib/dal/permissions";
-import { setPublicSignUpEnabled } from "@/lib/dal/settings";
+import { setOidcOnly, setPublicSignUpEnabled } from "@/lib/dal/settings";
+import { oidcEnabled } from "@/lib/env";
 
 const NOT_AUTHORIZED = "You are not allowed to administrate this app.";
 
@@ -35,6 +36,27 @@ export async function setSignUpEnabled(
     await setPublicSignUpEnabled(enabled === true);
   } catch (error) {
     console.error("[admin] toggle sign-up failed:", error);
+    return actionError("Could not update this setting.");
+  }
+  revalidatePath("/", "layout");
+  return actionOk();
+}
+
+export async function setOidcOnlyEnabled(
+  enabled: boolean,
+): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+  // Refuse to lock the door when there is no other way in.
+  if (enabled === true && !oidcEnabled()) {
+    return actionError(
+      "Configure an OIDC provider first — enabling this now would lock everyone out.",
+    );
+  }
+
+  try {
+    await setOidcOnly(enabled === true);
+  } catch (error) {
+    console.error("[admin] toggle oidc-only failed:", error);
     return actionError("Could not update this setting.");
   }
   revalidatePath("/", "layout");

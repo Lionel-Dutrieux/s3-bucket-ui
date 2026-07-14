@@ -19,6 +19,6 @@ export const config = {
   // Everything except the public endpoints (auth flow, health probe), the
   // auth pages themselves, and static assets.
   matcher: [
-    "/((?!api/auth|api/health|sign-in|sign-up|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|api/health|sign-in|sign-up|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)",
   ],
 };

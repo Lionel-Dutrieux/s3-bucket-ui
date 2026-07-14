@@ -3,6 +3,7 @@ import {
   FolderPlus,
   type LucideIcon,
   Pencil,
+  ShieldAlert,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -24,6 +25,11 @@ const LABELS: Record<string, OperationLabel> = {
   rename: { label: "Renamed", icon: Pencil },
   "rename-folder": { label: "Renamed folder", icon: Pencil },
   move: { label: "Moved", icon: FolderInput },
+  "sign-in-failed": {
+    label: "Sign-in failed",
+    icon: ShieldAlert,
+    destructive: true,
+  },
 };
 
 export function operationLabel(action: string): OperationLabel {

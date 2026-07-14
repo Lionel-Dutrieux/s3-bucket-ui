@@ -38,6 +38,18 @@ export const env = createEnv({
     OIDC_SCOPES: z.string().default("openid profile email groups"),
     /** Token/userinfo claim holding the user's group names. */
     OIDC_GROUPS_CLAIM: z.string().default("groups"),
+    // Optional SMTP relay — enables password-reset emails. SMTP_HOST and
+    // SMTP_FROM go together (enforced at boot, assertSmtpEnv).
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+    SMTP_SECURE: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((value) => value === "true"),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASSWORD: z.string().optional(),
+    /** Sender, e.g. "Bucket UI <bucket-ui@example.com>". */
+    SMTP_FROM: z.string().optional(),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -50,6 +62,12 @@ export const env = createEnv({
     OIDC_PROVIDER_LABEL: process.env.OIDC_PROVIDER_LABEL,
     OIDC_SCOPES: process.env.OIDC_SCOPES,
     OIDC_GROUPS_CLAIM: process.env.OIDC_GROUPS_CLAIM,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_SECURE: process.env.SMTP_SECURE,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+    SMTP_FROM: process.env.SMTP_FROM,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
@@ -60,6 +78,23 @@ export function oidcEnabled(): boolean {
   return Boolean(
     env.OIDC_DISCOVERY_URL && env.OIDC_CLIENT_ID && env.OIDC_CLIENT_SECRET,
   );
+}
+
+/** Password-reset emails are available only when an SMTP relay is set. */
+export function smtpEnabled(): boolean {
+  return Boolean(env.SMTP_HOST && env.SMTP_FROM);
+}
+
+/** Boot-time check: SMTP_HOST and SMTP_FROM come as a pair. */
+export function assertSmtpEnv(): void {
+  const set = [env.SMTP_HOST, env.SMTP_FROM].filter(
+    (value) => value !== undefined,
+  ).length;
+  if (set === 1) {
+    throw new Error(
+      "SMTP is partially configured — set both SMTP_HOST and SMTP_FROM, or neither.",
+    );
+  }
 }
 
 /** Boot-time check: a partially configured OIDC trio is a deployment mistake. */
