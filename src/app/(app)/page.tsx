@@ -2,7 +2,6 @@ import { ChevronRight, Cylinder, Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { requireSession } from "@/lib/auth/session";
 import { listSourcesFor } from "@/lib/dal/sources";
@@ -41,12 +40,12 @@ export default async function HomePage() {
                 : "An admin needs to grant you access to a source first."}
             </p>
             {session.user.role === "admin" ? (
-              <AddSourceDialog>
-                <Button className="mt-2">
+              <Button className="mt-2" asChild>
+                <Link href="/admin/sources">
                   <Plus aria-hidden />
                   Add source
-                </Button>
-              </AddSourceDialog>
+                </Link>
+              </Button>
             ) : null}
           </div>
         </main>

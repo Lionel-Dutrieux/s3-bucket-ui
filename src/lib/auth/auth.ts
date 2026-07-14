@@ -41,14 +41,19 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        // The very first account becomes admin (self-hosted bootstrap); every
-        // other creation is forced to "user" — defence in depth on top of the
-        // admin plugin already marking `role` as non-inputable. The race of
-        // two simultaneous first signups on an empty database is accepted
+        // The very first account becomes admin (self-hosted bootstrap).
+        // Accounts created by an admin (admin plugin endpoint) keep the role
+        // the admin chose; every other creation (public sign-up, OIDC) is
+        // forced to "user" — defence in depth on top of the admin plugin
+        // already marking `role` as non-inputable. The race of two
+        // simultaneous first signups on an empty database is accepted
         // (single-instance bootstrap).
-        before: async (user) => {
-          const isFirst = (await prisma.user.count()) === 0;
-          return { data: { ...user, role: isFirst ? "admin" : "user" } };
+        before: async (user, ctx) => {
+          if ((await prisma.user.count()) === 0) {
+            return { data: { ...user, role: "admin" } };
+          }
+          if (ctx?.path === "/admin/create-user") return;
+          return { data: { ...user, role: "user" } };
         },
         after: async (user, ctx) => {
           await syncGroupsFromOidcCallback(user, ctx?.path);

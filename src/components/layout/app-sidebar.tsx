@@ -1,10 +1,9 @@
 "use client";
 
-import { Cylinder, HardDrive, History, Plus, Settings2 } from "lucide-react";
+import { Cylinder, HardDrive, History, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -21,7 +20,6 @@ import {
   type SidebarUser,
   UserMenu,
 } from "@/features/auth/components/user-menu";
-import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import type { SourceSummary } from "@/lib/dal/sources";
@@ -65,18 +63,6 @@ export function AppSidebar({
             <span className="text-xs text-muted-foreground">File manager</span>
           </div>
         </Link>
-        {admin ? (
-          <AddSourceDialog>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-center"
-            >
-              <Plus aria-hidden />
-              Add source
-            </Button>
-          </AddSourceDialog>
-        ) : null}
       </SidebarHeader>
 
       <SidebarContent>
@@ -124,11 +110,22 @@ export function AppSidebar({
           <SidebarGroup>
             <SidebarGroupLabel>Sources</SidebarGroupLabel>
             <SidebarGroupContent>
-              <p className="px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                {admin
-                  ? "No sources yet. Connect a storage bucket to start browsing."
-                  : "No sources available yet. An admin needs to grant you access."}
-              </p>
+              {admin ? (
+                <p className="px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                  No sources yet — add one from{" "}
+                  <Link
+                    href="/admin/sources"
+                    className="font-medium text-foreground underline-offset-4 hover:underline"
+                  >
+                    Admin → Sources
+                  </Link>
+                  .
+                </p>
+              ) : (
+                <p className="px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                  No sources available yet. An admin needs to grant you access.
+                </p>
+              )}
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}

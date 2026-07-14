@@ -18,7 +18,11 @@ export default async function AdminLayout({
         <h1 className="text-sm font-medium">Administration</h1>
       </header>
       <AdminNav />
-      <main className="flex-1 p-4">{children}</main>
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-5xl space-y-6 p-4 py-6 md:px-6">
+          {children}
+        </div>
+      </main>
     </>
   );
 }

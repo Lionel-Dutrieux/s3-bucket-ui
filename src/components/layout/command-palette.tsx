@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Settings2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -13,11 +13,10 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import type { SourceSummary } from "@/lib/dal/sources";
 
-/** Ctrl/Cmd+K palette: jump to a source, or add one (admins). */
+/** Ctrl/Cmd+K palette: jump to a source, or to the admin area (admins). */
 export function CommandPalette({
   sources,
   canManage,
@@ -26,8 +25,12 @@ export function CommandPalette({
   canManage: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
   const router = useRouter();
+
+  const go = (path: string) => {
+    setOpen(false);
+    router.push(path);
+  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -79,15 +82,14 @@ export function CommandPalette({
             {canManage ? (
               <>
                 <CommandSeparator />
-                <CommandGroup heading="Actions">
-                  <CommandItem
-                    onSelect={() => {
-                      setOpen(false);
-                      setAddOpen(true);
-                    }}
-                  >
+                <CommandGroup heading="Administration">
+                  <CommandItem onSelect={() => go("/admin/sources")}>
                     <Plus aria-hidden />
                     Add source
+                  </CommandItem>
+                  <CommandItem onSelect={() => go("/admin/users")}>
+                    <Settings2 aria-hidden />
+                    Open admin
                   </CommandItem>
                 </CommandGroup>
               </>
@@ -95,10 +97,6 @@ export function CommandPalette({
           </CommandList>
         </Command>
       </CommandDialog>
-
-      {canManage ? (
-        <AddSourceDialog open={addOpen} onOpenChange={setAddOpen} />
-      ) : null}
     </>
   );
 }

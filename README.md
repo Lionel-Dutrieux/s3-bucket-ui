@@ -25,8 +25,8 @@ Features:
   generic OIDC provider (Pocket ID, Authentik, Keycloak…) configured entirely
   through environment variables. The very first account created becomes the
   admin.
-- **Users, groups & per-source access** — admins manage accounts (roles,
-  ban, remove), groups, and who can read/edit/delete on each source. At OIDC
+- **Users, groups & per-source access** — admins manage accounts (create,
+  roles, ban, remove), groups, and who can read/edit/delete on each source. At OIDC
   sign-in, the identity provider's `groups` claim is matched by name against
   app groups and memberships are synced automatically (à la Homarr).
 - **Activity log** — every write across all sources, attributed to the

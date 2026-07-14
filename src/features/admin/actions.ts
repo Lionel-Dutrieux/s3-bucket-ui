@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import {
+  type CreateUserValues,
+  createUserSchema,
   grantInputSchema,
   groupNameSchema,
   roleSchema,
@@ -26,6 +28,35 @@ const NOT_AUTHORIZED = "You are not allowed to administrate this app.";
 
 // --- users (delegated to the better-auth admin plugin, which also handles
 // session revocation on ban/removal) ---
+
+export async function createUser(
+  input: CreateUserValues,
+): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+  const parsed = createUserSchema.safeParse(input);
+  if (!parsed.success) {
+    return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
+  }
+
+  try {
+    await auth.api.createUser({
+      body: {
+        name: parsed.data.name,
+        email: parsed.data.email,
+        password: parsed.data.password,
+        role: parsed.data.role,
+      },
+      headers: await headers(),
+    });
+  } catch (error) {
+    console.error(`[admin] create user failed (${parsed.data.email}):`, error);
+    return actionError(
+      "Could not create this account — the email may already be in use.",
+    );
+  }
+  revalidatePath("/", "layout");
+  return actionOk();
+}
 
 export async function setUserRole(
   userId: string,
