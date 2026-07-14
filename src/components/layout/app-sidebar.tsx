@@ -1,6 +1,6 @@
 "use client";
 
-import { Cylinder, HardDrive, History, Plus } from "lucide-react";
+import { Cylinder, HardDrive, History, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -35,6 +35,7 @@ export function AppSidebar({
   user: SidebarUser;
 }) {
   const pathname = usePathname();
+  const admin = user.role === "admin";
 
   // One sidebar group per provider type, in registry order; sources whose
   // provider is no longer registered fall back to a generic group.
@@ -64,12 +65,18 @@ export function AppSidebar({
             <span className="text-xs text-muted-foreground">File manager</span>
           </div>
         </Link>
-        <AddSourceDialog>
-          <Button variant="outline" size="sm" className="w-full justify-center">
-            <Plus aria-hidden />
-            Add source
-          </Button>
-        </AddSourceDialog>
+        {admin ? (
+          <AddSourceDialog>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-center"
+            >
+              <Plus aria-hidden />
+              Add source
+            </Button>
+          </AddSourceDialog>
+        ) : null}
       </SidebarHeader>
 
       <SidebarContent>
@@ -103,7 +110,9 @@ export function AppSidebar({
                           </div>
                         </Link>
                       </SidebarMenuButton>
-                      <SourceMenu source={source} isActive={isActive} />
+                      {admin ? (
+                        <SourceMenu source={source} isActive={isActive} />
+                      ) : null}
                     </SidebarMenuItem>
                   );
                 })}
@@ -116,7 +125,9 @@ export function AppSidebar({
             <SidebarGroupLabel>Sources</SidebarGroupLabel>
             <SidebarGroupContent>
               <p className="px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                No sources yet. Connect a storage bucket to start browsing.
+                {admin
+                  ? "No sources yet. Connect a storage bucket to start browsing."
+                  : "No sources available yet. An admin needs to grant you access."}
               </p>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -124,16 +135,29 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter className="gap-3 p-3">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname === "/activity"}>
-              <Link href="/activity">
-                <History className="size-4" aria-hidden />
-                Activity
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {admin ? (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === "/activity"}>
+                <Link href="/activity">
+                  <History className="size-4" aria-hidden />
+                  Activity
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith("/admin")}
+              >
+                <Link href="/admin/users">
+                  <Settings2 className="size-4" aria-hidden />
+                  Admin
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        ) : null}
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Theme</span>
           <ThemeToggle />

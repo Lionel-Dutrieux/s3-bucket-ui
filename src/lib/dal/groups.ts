@@ -1,6 +1,86 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 
+export interface GroupMemberRow {
+  userId: string;
+  name: string;
+  email: string;
+  /** "manual" (added by an admin) or "oidc" (assigned by the claim sync). */
+  via: string;
+}
+
+export interface GroupRow {
+  id: string;
+  name: string;
+  createdAt: Date;
+  members: GroupMemberRow[];
+}
+
+export async function listGroups(): Promise<GroupRow[]> {
+  const rows = await prisma.group.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      members: {
+        include: { user: { select: { name: true, email: true } } },
+        orderBy: { user: { email: "asc" } },
+      },
+    },
+  });
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    createdAt: row.createdAt,
+    members: row.members.map((member) => ({
+      userId: member.userId,
+      name: member.user.name,
+      email: member.user.email,
+      via: member.via,
+    })),
+  }));
+}
+
+/** Option list for grant subject pickers. */
+export async function listGroupOptions(): Promise<
+  { id: string; label: string }[]
+> {
+  const rows = await prisma.group.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+  return rows.map((row) => ({ id: row.id, label: row.name }));
+}
+
+export async function createGroup(name: string): Promise<void> {
+  await prisma.group.create({ data: { name } });
+}
+
+export async function renameGroup(id: string, name: string): Promise<void> {
+  await prisma.group.update({ where: { id }, data: { name } });
+}
+
+export async function deleteGroup(id: string): Promise<void> {
+  await prisma.group.deleteMany({ where: { id } });
+}
+
+/** Admin-added membership — marked manual so the OIDC sync never removes it. */
+export async function addGroupMember(
+  groupId: string,
+  userId: string,
+): Promise<void> {
+  await prisma.groupMember.upsert({
+    where: { groupId_userId: { groupId, userId } },
+    create: { groupId, userId, via: "manual" },
+    update: { via: "manual" },
+  });
+}
+
+export async function removeGroupMember(
+  groupId: string,
+  userId: string,
+): Promise<void> {
+  await prisma.groupMember.deleteMany({ where: { groupId, userId } });
+}
+
 /**
  * Reconciles a user's group memberships with the IdP `groups` claim (à la
  * Homarr): claim names are matched exactly against app group names; matched

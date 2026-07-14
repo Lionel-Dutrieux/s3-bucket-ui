@@ -25,7 +25,10 @@ export default async function AppLayout({
         }}
       />
       <SidebarInset>{children}</SidebarInset>
-      <CommandPalette sources={sources} />
+      <CommandPalette
+        sources={sources}
+        canManage={session.user.role === "admin"}
+      />
     </SidebarProvider>
   );
 }

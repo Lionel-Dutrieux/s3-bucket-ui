@@ -119,6 +119,70 @@
       }
     },
     {
+      "includes": ["src/features/admin/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/generated/prisma/**", "@/lib/prisma"],
+                    "message": "Only the DAL (src/lib/dal/) touches Prisma."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "app/ is the routing layer — nothing imports from it."
+                  },
+                  {
+                    "group": [
+                      "@/features/browser/**",
+                      "@/features/sources/**",
+                      "@/features/auth/**"
+                    ],
+                    "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/auth/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/generated/prisma/**", "@/lib/prisma"],
+                    "message": "Only the DAL (src/lib/dal/) touches Prisma."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "app/ is the routing layer — nothing imports from it."
+                  },
+                  {
+                    "group": [
+                      "@/features/browser/**",
+                      "@/features/sources/**",
+                      "@/features/admin/**"
+                    ],
+                    "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/lib/dal/**", "src/lib/prisma.ts", "src/lib/auth/**"],
       "linter": {
         "rules": {

@@ -17,8 +17,14 @@ import { AddSourceDialog } from "@/features/sources/components/add-source-dialog
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import type { SourceSummary } from "@/lib/dal/sources";
 
-/** Ctrl/Cmd+K palette: jump to a source or add a new one. */
-export function CommandPalette({ sources }: { sources: SourceSummary[] }) {
+/** Ctrl/Cmd+K palette: jump to a source, or add one (admins). */
+export function CommandPalette({
+  sources,
+  canManage,
+}: {
+  sources: SourceSummary[];
+  canManage: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const router = useRouter();
@@ -70,23 +76,29 @@ export function CommandPalette({ sources }: { sources: SourceSummary[] }) {
                 })}
               </CommandGroup>
             ) : null}
-            <CommandSeparator />
-            <CommandGroup heading="Actions">
-              <CommandItem
-                onSelect={() => {
-                  setOpen(false);
-                  setAddOpen(true);
-                }}
-              >
-                <Plus aria-hidden />
-                Add source
-              </CommandItem>
-            </CommandGroup>
+            {canManage ? (
+              <>
+                <CommandSeparator />
+                <CommandGroup heading="Actions">
+                  <CommandItem
+                    onSelect={() => {
+                      setOpen(false);
+                      setAddOpen(true);
+                    }}
+                  >
+                    <Plus aria-hidden />
+                    Add source
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            ) : null}
           </CommandList>
         </Command>
       </CommandDialog>
 
-      <AddSourceDialog open={addOpen} onOpenChange={setAddOpen} />
+      {canManage ? (
+        <AddSourceDialog open={addOpen} onOpenChange={setAddOpen} />
+      ) : null}
     </>
   );
 }

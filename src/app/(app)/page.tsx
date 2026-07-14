@@ -31,17 +31,23 @@ export default async function HomePage() {
               <Cylinder className="size-6" aria-hidden />
             </div>
             <h1 className="text-lg font-semibold tracking-tight">
-              No sources yet
+              {session.user.role === "admin"
+                ? "No sources yet"
+                : "No sources available"}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Connect a storage bucket to start browsing your files.
+              {session.user.role === "admin"
+                ? "Connect a storage bucket to start browsing your files."
+                : "An admin needs to grant you access to a source first."}
             </p>
-            <AddSourceDialog>
-              <Button className="mt-2">
-                <Plus aria-hidden />
-                Add source
-              </Button>
-            </AddSourceDialog>
+            {session.user.role === "admin" ? (
+              <AddSourceDialog>
+                <Button className="mt-2">
+                  <Plus aria-hidden />
+                  Add source
+                </Button>
+              </AddSourceDialog>
+            ) : null}
           </div>
         </main>
       ) : (
