@@ -69,7 +69,12 @@ export default async function AdminSourcesPage() {
                       {source.bucket}
                     </p>
                   </div>
-                  <SourceCardActions source={source} />
+                  <SourceCardActions
+                    source={source}
+                    otherSources={sources.filter(
+                      (other) => other.id !== source.id,
+                    )}
+                  />
                 </header>
                 <div className="p-4">
                   <SourceAccess

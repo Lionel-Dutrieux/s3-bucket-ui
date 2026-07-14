@@ -1,6 +1,8 @@
 "use server";
 
+import { transfer } from "files-sdk";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import {
   type SourceFormValues,
   sourceInputSchema,
@@ -8,6 +10,7 @@ import {
 } from "@/features/sources/lib/schema";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { currentAdmin } from "@/lib/auth/session";
+import { recordOperation } from "@/lib/dal/operations";
 import {
   createSource as dalCreateSource,
   deleteSource as dalDeleteSource,
@@ -115,6 +118,75 @@ export async function updateSource(
   await dalUpdateSource(sourceId, resolved.data);
   revalidatePath("/", "layout");
   return actionOk();
+}
+
+export interface MigrationSummary {
+  transferred: number;
+  skipped: number;
+  failed: number;
+}
+
+const migrationInputSchema = z.object({
+  sourceId: z.uuid(),
+  destId: z.uuid(),
+});
+
+/**
+ * Copies every object of one source into another — files-sdk's transfer()
+ * streams each body download-to-upload, so this works across providers
+ * (S3 → Azure, R2 → S3, …) without buffering. Existing destination keys are
+ * skipped, the source is never modified, and per-key failures don't abort
+ * the run: the summary reports transferred / skipped / failed counts.
+ */
+export async function copySourceContents(
+  sourceId: string,
+  destId: string,
+): Promise<ActionResult<MigrationSummary>> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+  const parsed = migrationInputSchema.safeParse({ sourceId, destId });
+  if (!parsed.success) return actionError("Invalid source.");
+  if (sourceId === destId) {
+    return actionError("Pick a different source as the destination.");
+  }
+
+  const [from, to] = await Promise.all([
+    dalGetSource(sourceId),
+    dalGetSource(destId),
+  ]);
+  if (!from || !to) return actionError("Source not found.");
+
+  try {
+    const result = await transfer(getFilesClient(from), getFilesClient(to), {
+      overwrite: false, // never clobber what the destination already holds
+    });
+    const summary: MigrationSummary = {
+      transferred: result.transferred.length,
+      skipped: result.skipped?.length ?? 0,
+      failed: result.errors?.length ?? 0,
+    };
+    if (result.errors?.length) {
+      console.error(
+        `[sources] migration ${from.name} → ${to.name}: ${result.errors.length} failed`,
+        result.errors.slice(0, 5),
+      );
+    }
+    await recordOperation({
+      action: "migrate",
+      sourceId: from.id,
+      sourceName: from.name,
+      target: `→ ${to.name}`,
+      detail: `${summary.transferred} copied, ${summary.skipped} skipped${summary.failed ? `, ${summary.failed} failed` : ""}`,
+    });
+    return actionOk(summary);
+  } catch (error) {
+    console.error(
+      `[sources] migration failed (${from.name} → ${to.name}):`,
+      error,
+    );
+    return actionError(
+      "Migration failed — check both sources' connectivity and try again.",
+    );
+  }
 }
 
 export async function removeSource(id: string): Promise<ActionResult> {

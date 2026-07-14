@@ -1,14 +1,24 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { ArrowRightLeft, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { MigrateSourceDialog } from "@/features/sources/components/migrate-source-dialog";
 import { useSourceActions } from "@/features/sources/hooks/use-source-actions";
 import type { SourceSummary } from "@/lib/dal/sources";
 
-/** Edit/Remove buttons for a source card in the admin area. */
-export function SourceCardActions({ source }: { source: SourceSummary }) {
+/** Edit/Migrate/Remove buttons for a source card in the admin area. */
+export function SourceCardActions({
+  source,
+  otherSources,
+}: {
+  source: SourceSummary;
+  /** Migration destinations — every source except this one. */
+  otherSources: SourceSummary[];
+}) {
   const { openEdit, requestRemove, pending, dialogs } =
     useSourceActions(source);
+  const [migrateOpen, setMigrateOpen] = useState(false);
 
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -16,6 +26,19 @@ export function SourceCardActions({ source }: { source: SourceSummary }) {
         <Pencil aria-hidden />
         Edit
       </Button>
+      {otherSources.length > 0 ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 text-muted-foreground"
+          disabled={pending}
+          onClick={() => setMigrateOpen(true)}
+          aria-label={`Copy the contents of ${source.name} to another source`}
+          title="Copy contents to another source"
+        >
+          <ArrowRightLeft className="size-4" aria-hidden />
+        </Button>
+      ) : null}
       <Button
         variant="ghost"
         size="icon"
@@ -27,6 +50,12 @@ export function SourceCardActions({ source }: { source: SourceSummary }) {
         <Trash2 className="size-4" aria-hidden />
       </Button>
       {dialogs}
+      <MigrateSourceDialog
+        source={source}
+        destinations={otherSources}
+        open={migrateOpen}
+        onOpenChange={setMigrateOpen}
+      />
     </div>
   );
 }
