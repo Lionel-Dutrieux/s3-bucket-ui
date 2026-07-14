@@ -1,21 +1,13 @@
 "use client";
 
-import { Plus, UserRound, UsersRound, X } from "lucide-react";
+import { UserRound, UsersRound, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { removeSourceGrant, upsertSourceGrant } from "@/features/admin/actions";
+import { SearchCombobox } from "@/features/admin/components/search-combobox";
 import type { ActionResult } from "@/lib/action-result";
 import type { GrantRow } from "@/lib/dal/permissions";
 
@@ -26,7 +18,8 @@ export interface SubjectOption {
 
 /**
  * Grant editor for one source: who can read it (a row = read access), with
- * per-row Edit/Delete switches. Subjects are users or groups.
+ * per-row Edit/Delete switches. Subjects are users or groups, added through
+ * a type-to-search picker.
  */
 export function SourceAccess({
   sourceId,
@@ -39,19 +32,16 @@ export function SourceAccess({
   users: SubjectOption[];
   groups: SubjectOption[];
 }) {
-  // Encoded as "user:<id>" / "group:<id>" so one Select covers both kinds.
-  const [selected, setSelected] = useState("");
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  const run = (work: () => Promise<ActionResult>, done?: () => void) => {
+  const run = (work: () => Promise<ActionResult>) => {
     startTransition(async () => {
       const result = await work();
       if (!result.ok) {
         toast.error(result.error);
         return;
       }
-      done?.();
       router.refresh();
     });
   };
@@ -59,22 +49,31 @@ export function SourceAccess({
   const granted = new Set(
     grants.map((grant) => `${grant.subject.type}:${grant.subject.id}`),
   );
-  const userOptions = users.filter((user) => !granted.has(`user:${user.id}`));
-  const groupOptions = groups.filter(
-    (group) => !granted.has(`group:${group.id}`),
-  );
+  const pickerGroups = [
+    {
+      heading: "Groups",
+      options: groups
+        .filter((group) => !granted.has(`group:${group.id}`))
+        .map((group) => ({ value: `group:${group.id}`, label: group.label })),
+    },
+    {
+      heading: "Users",
+      options: users
+        .filter((user) => !granted.has(`user:${user.id}`))
+        .map((user) => ({ value: `user:${user.id}`, label: user.label })),
+    },
+  ];
 
-  const addGrant = () => {
-    const [type, id] = selected.split(":", 2) as ["user" | "group", string];
-    run(
-      () =>
-        upsertSourceGrant({
-          sourceId,
-          subject: { type, id },
-          canEdit: false,
-          canDelete: false,
-        }),
-      () => setSelected(""),
+  // Values are encoded "user:<id>" / "group:<id>" — one picker, both kinds.
+  const addGrant = (value: string) => {
+    const [type, id] = value.split(":", 2) as ["user" | "group", string];
+    run(() =>
+      upsertSourceGrant({
+        sourceId,
+        subject: { type, id },
+        canEdit: false,
+        canDelete: false,
+      }),
     );
   };
 
@@ -82,8 +81,7 @@ export function SourceAccess({
     <div className="space-y-3">
       {grants.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Nobody has access yet — only admins can see this source. Grant a user
-          or a group read access below.
+          Nobody has access yet — only admins can see this source.
         </p>
       ) : (
         <ul className="divide-y rounded-md border">
@@ -154,43 +152,14 @@ export function SourceAccess({
         </ul>
       )}
 
-      <div className="flex gap-2">
-        <Select value={selected} onValueChange={setSelected}>
-          <SelectTrigger className="flex-1" aria-label="Subject to grant">
-            <SelectValue placeholder="Grant access to…" />
-          </SelectTrigger>
-          <SelectContent>
-            {groupOptions.length > 0 ? (
-              <SelectGroup>
-                <SelectLabel>Groups</SelectLabel>
-                {groupOptions.map((group) => (
-                  <SelectItem key={group.id} value={`group:${group.id}`}>
-                    {group.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ) : null}
-            {userOptions.length > 0 ? (
-              <SelectGroup>
-                <SelectLabel>Users</SelectLabel>
-                {userOptions.map((user) => (
-                  <SelectItem key={user.id} value={`user:${user.id}`}>
-                    {user.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ) : null}
-          </SelectContent>
-        </Select>
-        <Button
-          variant="outline"
-          disabled={pending || !selected}
-          onClick={addGrant}
-        >
-          <Plus aria-hidden />
-          Grant read
-        </Button>
-      </div>
+      <SearchCombobox
+        label="Grant access"
+        searchPlaceholder="Search users and groups…"
+        emptyMessage="No matching user or group."
+        groups={pickerGroups}
+        onSelect={addGrant}
+        disabled={pending}
+      />
     </div>
   );
 }
