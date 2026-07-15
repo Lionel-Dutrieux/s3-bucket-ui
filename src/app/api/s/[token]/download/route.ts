@@ -49,10 +49,11 @@ export async function GET(
       // The presigned response carries the STORED Content-Type — an object
       // named photo.png but stored as text/html must never render inline at
       // the bucket origin for anonymous visitors (the streaming branch gets
-      // the same guarantee from streamObject's INLINE_BLOCKED).
+      // the same guarantee from streamObject's INLINE_BLOCKED). SVG is excluded
+      // for parity with INLINE_BLOCKED, which blocks svg to prevent script execution.
       const safeInline =
         inline &&
-        /^(?:image\/|video\/|audio\/|application\/pdf$)/i.test(
+        /^(?:image\/(?!svg)|video\/|audio\/|application\/pdf$)/i.test(
           (await files.head(share.key)).type || "",
         );
       const signedDisposition = safeInline ? "inline" : "attachment";
