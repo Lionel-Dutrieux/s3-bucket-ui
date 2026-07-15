@@ -1,9 +1,10 @@
 "use client";
 
-import { Copy, Link2Off } from "lucide-react";
+import { Copy, Link2, Link2Off } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +38,15 @@ function statusOf(share: ShareRow): "active" | "expired" | "revoked" {
   return "active";
 }
 
+// A live link reads green, a lapsed one grey, a killed one red — the status
+// is scannable without reading the words.
+const STATUS_BADGE: Record<ReturnType<typeof statusOf>, string> = {
+  active:
+    "border-transparent bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+  expired: "border-transparent bg-muted text-muted-foreground",
+  revoked: "",
+};
+
 export function SharesTable({ shares }: { shares: ShareRow[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -63,9 +73,11 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
 
   if (shares.length === 0) {
     return (
-      <p className="rounded-xl border bg-card p-6 text-sm text-muted-foreground shadow-sm">
-        No share links yet — create one from a file's Share action.
-      </p>
+      <EmptyState
+        icon={Link2}
+        title="No shared links yet"
+        description="Share a file from the browser and the link will show up here."
+      />
     );
   }
 
@@ -128,9 +140,10 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={status === "active" ? "secondary" : "outline"}
+                    variant={status === "revoked" ? "destructive" : "outline"}
+                    className={STATUS_BADGE[status]}
                   >
-                    {status}
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
                   </Badge>
                 </TableCell>
                 <TableCell>

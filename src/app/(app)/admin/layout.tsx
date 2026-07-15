@@ -1,4 +1,4 @@
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { AdminNav } from "@/features/admin/components/admin-nav";
 import { requireAdmin } from "@/lib/auth/session";
 
@@ -13,20 +13,13 @@ export default async function AdminLayout({
 
   return (
     <>
-      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
-        <SidebarTrigger className="-ml-1" />
-        <h1 className="text-sm font-medium">Administration</h1>
-      </header>
+      <AppHeader title="Administration" />
       <div className="border-b bg-background">
         <div className="mx-auto w-full max-w-5xl px-4 md:px-6">
           <AdminNav />
         </div>
       </div>
-      <main className="flex-1 bg-muted/20">
-        <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 md:px-6">
-          {children}
-        </div>
-      </main>
+      <PageContainer>{children}</PageContainer>
     </>
   );
 }

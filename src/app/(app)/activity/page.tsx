@@ -1,8 +1,8 @@
 import { History } from "lucide-react";
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/empty-state";
+import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { PageHeader } from "@/components/page-header";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Table,
   TableBody,
@@ -44,121 +44,115 @@ export default async function ActivityPage({
 
   return (
     <>
-      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
-        <SidebarTrigger className="-ml-1" />
-        <h1 className="text-sm font-medium">Activity</h1>
-      </header>
+      <AppHeader title="Activity" />
 
-      <main className="flex-1 bg-muted/20">
-        <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 md:px-6">
-          {/* "Recent writes", not "Activity": the sticky header above already
-              carries the nav label — stacking the same word twice reads odd. */}
-          <PageHeader
-            title="Recent writes"
-            description="Every upload, deletion, rename and move across all sources, attributed to the signed-in user. Read actions aren't recorded."
-          >
-            {operations.length > 0 ? (
-              <span className="text-xs text-muted-foreground tabular-nums">
-                last {operations.length} write
-                {operations.length === 1 ? "" : "s"}
-              </span>
-            ) : null}
-          </PageHeader>
+      <PageContainer>
+        {/* "Activity log", not "Activity": the sticky header above already
+            carries the nav label — stacking the same word twice reads odd. */}
+        <PageHeader
+          title="Activity log"
+          description="Every write across all sources — uploads, deletions, renames, moves and shares. Reads aren't recorded."
+        >
+          {operations.length > 0 ? (
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {operations.length} entr{operations.length === 1 ? "y" : "ies"}
+            </span>
+          ) : null}
+        </PageHeader>
 
-          <ActivityFilters
-            action={action}
-            sourceName={sourceName}
-            q={q}
-            sourceNames={sourceNames}
-          />
+        <ActivityFilters
+          action={action}
+          sourceName={sourceName}
+          q={q}
+          sourceNames={sourceNames}
+        />
 
-          {operations.length === 0 ? (
-            hasFilters ? (
-              <EmptyState
-                icon={History}
-                title="No matching activity"
-                description="Nothing in the log matches these filters — clear them to see everything."
-              />
-            ) : (
-              <EmptyState
-                icon={History}
-                title="No activity yet"
-                description="Uploads, deletions, renames and moves will show up here as they happen."
-              />
-            )
+        {operations.length === 0 ? (
+          hasFilters ? (
+            <EmptyState
+              icon={History}
+              title="No matching activity"
+              description="Nothing in the log matches these filters — clear them to see everything."
+            />
           ) : (
-            <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-              {/* Fixed layout so long object keys truncate instead of
+            <EmptyState
+              icon={History}
+              title="No activity yet"
+              description="Uploads, deletions, renames and moves will show up here as they happen."
+            />
+          )
+        ) : (
+          <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+            {/* Fixed layout so long object keys truncate instead of
                   stretching the table into a horizontal scroll. */}
-              <Table className="table-fixed">
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-40">Action</TableHead>
-                    <TableHead className="w-36 max-lg:hidden">Source</TableHead>
-                    <TableHead>Target</TableHead>
-                    <TableHead className="w-40 max-md:hidden">When</TableHead>
-                    <TableHead className="w-40 max-md:hidden">By</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {operations.map((operation) => {
-                    const {
-                      label,
-                      icon: Icon,
-                      destructive,
-                    } = operationLabel(operation.action);
-                    return (
-                      <TableRow key={operation.id}>
-                        <TableCell>
-                          <span className="flex items-center gap-2">
-                            <Icon
-                              className={cn(
-                                "size-4 shrink-0",
-                                destructive
-                                  ? "text-destructive"
-                                  : "text-muted-foreground",
-                              )}
-                              aria-hidden
-                            />
-                            <span className="font-medium">{label}</span>
-                          </span>
-                        </TableCell>
-                        <TableCell className="truncate text-muted-foreground max-lg:hidden">
-                          {operation.sourceName}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">
+            <Table className="table-fixed">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-40">Action</TableHead>
+                  <TableHead className="w-36 max-lg:hidden">Source</TableHead>
+                  <TableHead>Target</TableHead>
+                  <TableHead className="w-40 max-md:hidden">When</TableHead>
+                  <TableHead className="w-40 max-md:hidden">By</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {operations.map((operation) => {
+                  const {
+                    label,
+                    icon: Icon,
+                    destructive,
+                  } = operationLabel(operation.action);
+                  return (
+                    <TableRow key={operation.id}>
+                      <TableCell>
+                        <span className="flex items-center gap-2">
+                          <Icon
+                            className={cn(
+                              "size-4 shrink-0",
+                              destructive
+                                ? "text-destructive"
+                                : "text-muted-foreground",
+                            )}
+                            aria-hidden
+                          />
+                          <span className="font-medium">{label}</span>
+                        </span>
+                      </TableCell>
+                      <TableCell className="truncate text-muted-foreground max-lg:hidden">
+                        {operation.sourceName}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        <span
+                          className="block truncate"
+                          title={operation.target}
+                        >
+                          {operation.target}
+                        </span>
+                        {operation.detail ? (
                           <span
-                            className="block truncate"
-                            title={operation.target}
+                            className="block truncate text-muted-foreground"
+                            title={operation.detail}
                           >
-                            {operation.target}
+                            {operation.detail}
                           </span>
-                          {operation.detail ? (
-                            <span
-                              className="block truncate text-muted-foreground"
-                              title={operation.detail}
-                            >
-                              {operation.detail}
-                            </span>
-                          ) : null}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
-                          <span title={formatDateTime(operation.createdAt)}>
-                            {formatRelative(operation.createdAt)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="truncate text-xs text-muted-foreground max-md:hidden">
-                          {operation.actor ?? "—"}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </div>
-      </main>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
+                        <span title={formatDateTime(operation.createdAt)}>
+                          {formatRelative(operation.createdAt)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="truncate text-xs text-muted-foreground max-md:hidden">
+                        {operation.actor ?? "—"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </PageContainer>
     </>
   );
 }
