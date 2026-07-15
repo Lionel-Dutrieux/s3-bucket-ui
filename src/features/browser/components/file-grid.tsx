@@ -19,10 +19,10 @@ import {
 } from "@/features/browser/api/client";
 import { useEntryDnd } from "@/features/browser/components/dnd";
 import { FileIcon } from "@/features/browser/components/file-icon";
-import { isPreviewable } from "@/features/browser/components/preview-dialog";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
+import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { formatBytes } from "@/lib/format";
 import { cn } from "@/lib/utils";
 

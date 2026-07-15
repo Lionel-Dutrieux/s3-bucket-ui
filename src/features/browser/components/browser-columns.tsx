@@ -15,7 +15,6 @@ import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { downloadUrl, zipUrl } from "@/features/browser/api/client";
 import { FileIcon } from "@/features/browser/components/file-icon";
-import { isPreviewable } from "@/features/browser/components/preview-dialog";
 import {
   type BrowserEntry,
   compareByModified,
@@ -23,6 +22,7 @@ import {
   compareBySize,
 } from "@/features/browser/lib/entries";
 import type { FileEntry } from "@/features/browser/lib/listing";
+import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { formatBytes, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 

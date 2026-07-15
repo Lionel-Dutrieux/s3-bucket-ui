@@ -58,10 +58,7 @@ import {
   type MoveRequest,
 } from "@/features/browser/components/move-dialog";
 import { NewFolderDialog } from "@/features/browser/components/new-folder-dialog";
-import {
-  isPreviewable,
-  PreviewDialog,
-} from "@/features/browser/components/preview-dialog";
+import { PreviewDialog } from "@/features/browser/components/preview-dialog";
 import { RenameDialog } from "@/features/browser/components/rename-dialog";
 import { SearchDialog } from "@/features/browser/components/search-dialog";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
@@ -80,6 +77,7 @@ import {
   folderName,
   planMove,
 } from "@/features/browser/lib/move";
+import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
@@ -129,7 +127,23 @@ export function FileBrowser({
     "sort",
     sortParser.withDefault([]),
   );
-  const [preview, setPreview] = useState<FileEntry | null>(null);
+  // The previewed file lives in the URL: refresh restores it, Back closes it,
+  // and the address bar is a deep link to "look at this file".
+  const [previewKey, setPreviewKey] = useQueryState(
+    "preview",
+    parseAsString.withOptions({ history: "push" }),
+  );
+  const preview = useMemo(
+    () =>
+      previewKey === null
+        ? null
+        : (files.find((file) => file.key === previewKey) ?? null),
+    [files, previewKey],
+  );
+  const openPreview = useCallback(
+    (file: FileEntry) => setPreviewKey(file.key),
+    [setPreviewKey],
+  );
   const [details, setDetails] = useState<FileEntry | null>(null);
   const [shareTarget, setShareTarget] = useState<FileEntry | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BrowserEntry | null>(null);
@@ -229,7 +243,7 @@ export function FileBrowser({
     enableMultiSort: false,
     meta: {
       sourceId,
-      onPreview: setPreview,
+      onPreview: openPreview,
       onShare: canShare ? setShareTarget : undefined,
       onDetails: setDetails,
       onDelete: permissions.delete ? setDeleteTarget : undefined,
@@ -442,7 +456,7 @@ export function FileBrowser({
               files={rows
                 .map((row) => row.original)
                 .filter((entry) => entry.kind === "file")}
-              onPreview={setPreview}
+              onPreview={openPreview}
               onShare={canShare ? setShareTarget : undefined}
               onDetails={setDetails}
               onDelete={permissions.delete ? setDeleteTarget : undefined}
@@ -472,9 +486,9 @@ export function FileBrowser({
         sourceId={sourceId}
         file={preview}
         files={previewFiles}
-        onFileChange={setPreview}
+        onFileChange={openPreview}
         onOpenChange={(open) => {
-          if (!open) setPreview(null);
+          if (!open) setPreviewKey(null);
         }}
         onShare={canShare ? setShareTarget : undefined}
       />
