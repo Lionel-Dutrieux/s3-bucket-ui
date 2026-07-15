@@ -32,8 +32,9 @@ export function CodeViewer({ sourceId, file }: ViewerProps) {
         themes: { light: "github-light", dark: "github-dark" },
       });
       if (!cancelled) setHtml(rendered);
-    })().catch(() => {
+    })().catch((error) => {
       // Unknown lang / oversized input — the plain fallback below renders.
+      console.warn("[code-viewer] highlighting failed:", error);
     });
     return () => {
       cancelled = true;

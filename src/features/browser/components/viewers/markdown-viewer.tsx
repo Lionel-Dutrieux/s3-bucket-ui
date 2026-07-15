@@ -53,22 +53,24 @@ export function MarkdownViewer(props: ViewerProps) {
   }
 
   return (
-    <div className="relative h-full w-full self-stretch overflow-auto">
+    <div className="relative h-full w-full">
       <ModeToggle mode={mode} onChange={setMode} />
-      {query.data?.truncated ? <TruncatedBanner /> : null}
-      <div className="prose prose-sm dark:prose-invert max-w-3xl px-6 py-4">
-        <Markdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            a: ({ children, href }) => (
-              <a href={href} target="_blank" rel="noopener noreferrer">
-                {children}
-              </a>
-            ),
-          }}
-        >
-          {query.data?.text ?? ""}
-        </Markdown>
+      <div className="h-full w-full self-stretch overflow-auto">
+        {query.data?.truncated ? <TruncatedBanner /> : null}
+        <div className="prose prose-sm dark:prose-invert max-w-3xl px-6 py-4">
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a: ({ children, href }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+            }}
+          >
+            {query.data?.text ?? ""}
+          </Markdown>
+        </div>
       </div>
     </div>
   );
