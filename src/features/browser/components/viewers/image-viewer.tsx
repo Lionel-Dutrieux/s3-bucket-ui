@@ -68,9 +68,9 @@ export function ImageViewer({ file, src, onError }: ViewerProps) {
   };
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: mouse-only enhancements over plain image
     <div
       ref={containerRef}
-      role="application"
       className="flex h-full w-full items-center justify-center overflow-hidden"
       onWheel={handleWheel}
       onDoubleClick={handleDoubleClick}
