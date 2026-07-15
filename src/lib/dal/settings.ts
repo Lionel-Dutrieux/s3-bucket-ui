@@ -46,3 +46,23 @@ export async function isOidcOnly(): Promise<boolean> {
 export async function setOidcOnly(enabled: boolean): Promise<void> {
   await setBoolSetting(OIDC_ONLY_KEY, enabled);
 }
+
+const SHARING_KEY = "publicSharing";
+
+/**
+ * Whether signed-in users may mint public share links. Defaults to true —
+ * an admin can switch it off from Admin → Settings to keep the instance
+ * strictly private. Existing links stop resolving while it's off is NOT
+ * implied: only creation is gated (revoke links individually).
+ */
+export async function isPublicSharingEnabled(): Promise<boolean> {
+  const row = await prisma.setting.findUnique({
+    where: { key: SHARING_KEY },
+    select: { value: true },
+  });
+  return row?.value !== "false";
+}
+
+export async function setPublicSharingEnabled(enabled: boolean): Promise<void> {
+  await setBoolSetting(SHARING_KEY, enabled);
+}

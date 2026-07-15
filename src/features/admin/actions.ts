@@ -19,7 +19,11 @@ import {
   removeGroupMember as dalRemoveGroupMember,
 } from "@/lib/dal/groups";
 import { deleteGrant, upsertGrant } from "@/lib/dal/permissions";
-import { setOidcOnly, setPublicSignUpEnabled } from "@/lib/dal/settings";
+import {
+  setOidcOnly,
+  setPublicSharingEnabled,
+  setPublicSignUpEnabled,
+} from "@/lib/dal/settings";
 import { oidcEnabled } from "@/lib/env";
 
 const NOT_AUTHORIZED = "You are not allowed to administrate this app.";
@@ -38,6 +42,20 @@ export async function setSignUpEnabled(
     return actionError("Could not update this setting.");
   }
   revalidatePath("/", "layout");
+  return actionOk();
+}
+
+export async function setPublicSharing(
+  enabled: boolean,
+): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+
+  try {
+    await setPublicSharingEnabled(enabled === true);
+  } catch (error) {
+    console.error("[admin] toggle public sharing failed:", error);
+    return actionError("Could not update this setting.");
+  }
   return actionOk();
 }
 
