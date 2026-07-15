@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Bucket UI</title>
+  <defs>
+    <linearGradient id="tile" x1="96" y1="32" x2="416" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+  <!-- Amber tile -->
+  <rect width="512" height="512" rx="128" fill="url(#tile)"/>
+  <!-- Bucket (cylinder) mark -->
+  <g stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <ellipse cx="256" cy="150" rx="122" ry="46"/>
+    <path d="M134 150v212a122 46 0 0 0 244 0V150"/>
+    <path d="M134 256a122 46 0 0 0 244 0" opacity="0.55"/>
+  </g>
+</svg>
