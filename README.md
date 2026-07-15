@@ -13,8 +13,6 @@
 
 [Quick start](#-quick-start) · [Features](#-features) · [Configuration](#-configuration) · [Providers](docs/providers.md) · [Contributing](CONTRIBUTING.md)
 
-<img src="docs/assets/screenshot-grid.png" alt="Bucket UI — grid view with the details panel open" width="920" />
-
 </div>
 
 ## Why Bucket UI?
@@ -60,12 +58,6 @@ SeaweedFS, Ceph RGW, …)
 same UI, downloads and previews stream through the app.
 
 → Endpoints and credentials per provider: **[docs/providers.md](docs/providers.md)**
-
-## 📸 Screenshots
-
-| List view | Admin |
-|---|---|
-| ![List view with sortable columns](docs/assets/screenshot-list.png) | ![Admin — sources and per-user grants](docs/assets/screenshot-admin.png) |
 
 ## 🚀 Quick start
 
