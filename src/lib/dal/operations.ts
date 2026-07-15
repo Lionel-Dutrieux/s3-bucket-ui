@@ -13,7 +13,9 @@ export type OperationAction =
   | "move"
   | "copy"
   | "copy-to"
-  | "migrate";
+  | "migrate"
+  | "share-create"
+  | "share-revoke";
 
 export interface OperationRecord {
   id: string;
