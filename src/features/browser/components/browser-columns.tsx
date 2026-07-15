@@ -41,6 +41,8 @@ declare module "@tanstack/react-table" {
     renamingId?: string | null;
     /** Ends the inline rename; true when a rename actually happened. */
     onRenameEnd?: (renamed: boolean) => void;
+    /** Selection toggle that understands shift-click ranges. */
+    onToggleSelect?: (id: string, shift: boolean) => void;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -91,19 +93,36 @@ export const selectColumn: ColumnDef<BrowserEntry> = {
       />
     );
   },
-  cell: ({ row, table }) => (
-    <Checkbox
-      checked={row.getIsSelected()}
-      onCheckedChange={(value) => row.toggleSelected(value === true)}
-      aria-label={`Select ${row.original.name}`}
-      className={cn(
-        "transition-opacity",
-        !row.getIsSelected() &&
-          table.getSelectedRowModel().rows.length === 0 &&
-          "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100",
-      )}
-    />
-  ),
+  cell: ({ row, table }) => {
+    const onToggleSelect = table.options.meta?.onToggleSelect;
+    return (
+      <Checkbox
+        checked={row.getIsSelected()}
+        // preventDefault keeps Radix from toggling on its own; the handler
+        // owns the state so shift-click can select the whole range.
+        onClick={
+          onToggleSelect
+            ? (event) => {
+                event.preventDefault();
+                onToggleSelect(row.id, event.shiftKey);
+              }
+            : undefined
+        }
+        onCheckedChange={
+          onToggleSelect
+            ? undefined
+            : (value) => row.toggleSelected(value === true)
+        }
+        aria-label={`Select ${row.original.name}`}
+        className={cn(
+          "transition-opacity",
+          !row.getIsSelected() &&
+            table.getSelectedRowModel().rows.length === 0 &&
+            "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100",
+        )}
+      />
+    );
+  },
 };
 
 export const browserColumns: ColumnDef<BrowserEntry>[] = [

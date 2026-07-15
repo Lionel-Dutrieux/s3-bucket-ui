@@ -25,7 +25,7 @@ import { ArrowLeft, FolderOpen, SearchX } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
@@ -150,6 +150,7 @@ export function FileBrowser({
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const lastToggledId = useRef<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [copyTargets, setCopyTargets] = useState<EntryTarget[] | null>(null);
   const [moveToTargets, setMoveToTargets] = useState<EntryTarget[] | null>(
@@ -266,6 +267,7 @@ export function FileBrowser({
           : renameTarget.key
         : null,
       onRenameEnd: handleRenameEnd,
+      onToggleSelect: toggleSelect,
     },
   });
 
@@ -273,6 +275,42 @@ export function FileBrowser({
   const noMatches = query !== "" && rows.length === 0;
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedCount = selectedRows.length;
+
+  // Shift-click selects the whole visible range since the last toggled row.
+  // Ranges follow the DISPLAYED order (folders first), not the row model.
+  // Hoisted declaration: the table meta references it, but it only runs on
+  // events, once `rows` exists.
+  function toggleSelect(id: string, shift: boolean) {
+    const displayedIds = [
+      ...rows.filter((row) => row.original.kind === "folder"),
+      ...rows.filter((row) => row.original.kind === "file"),
+    ].map((row) => row.id);
+    setRowSelection((prev) => {
+      const next = { ...prev };
+      const anchor = lastToggledId.current;
+      if (shift && anchor && anchor !== id) {
+        const from = displayedIds.indexOf(anchor);
+        const to = displayedIds.indexOf(id);
+        if (from !== -1 && to !== -1) {
+          for (const rangeId of displayedIds.slice(
+            Math.min(from, to),
+            Math.max(from, to) + 1,
+          )) {
+            next[rangeId] = true;
+          }
+          lastToggledId.current = id;
+          return next;
+        }
+      }
+      if (next[id]) {
+        delete next[id];
+      } else {
+        next[id] = true;
+      }
+      lastToggledId.current = id;
+      return next;
+    });
+  }
   // Acts on the visible (filtered) rows, so it never selects rows a name
   // filter is hiding — same rule as the list header checkbox.
   const allVisibleSelected =
@@ -287,18 +325,52 @@ export function FileBrowser({
   // The "move to parent folder" drop zone's destination — null at the root.
   const parentPrefix = parentPrefixOf(prefix);
 
+  // Keyboard verbs on the current selection: Enter opens, F2 renames,
+  // Delete deletes. Skipped while typing or while an overlay is up.
+  // No dependency array: re-subscribing keeps the handler's closure fresh.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target?.isContentEditable ||
+        target?.closest(
+          '[data-slot="dialog-content"], [data-slot="sheet-content"]',
+        )
+      ) {
+        return;
+      }
+      if (selectedRows.length === 0) return;
+      const single =
+        selectedRows.length === 1 ? selectedRows[0].original : null;
+
+      if (event.key === "Enter" && single) {
+        event.preventDefault();
+        if (single.kind === "folder") {
+          router.push(
+            `/source/${sourceId}?prefix=${encodeURIComponent(single.prefix)}`,
+          );
+        } else if (isPreviewable(single.name)) {
+          openPreview(single);
+        } else {
+          setDetails(single);
+        }
+      } else if (event.key === "F2" && single && canRename) {
+        event.preventDefault();
+        setRenameTarget(single);
+      } else if (event.key === "Delete" && permissions.delete) {
+        event.preventDefault();
+        setBulkConfirmOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
   const gridSelection = {
     isSelected: (id: string) => rowSelection[id] === true,
-    toggle: (id: string) =>
-      setRowSelection((prev) => {
-        const next = { ...prev };
-        if (next[id]) {
-          delete next[id];
-        } else {
-          next[id] = true;
-        }
-        return next;
-      }),
+    toggle: toggleSelect,
     active: selectedCount > 0,
   };
 
