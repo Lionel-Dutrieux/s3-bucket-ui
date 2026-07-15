@@ -43,7 +43,7 @@ import {
 } from "@/features/browser/components/browser-columns";
 import { BrowserToolbar } from "@/features/browser/components/browser-toolbar";
 import { CopyToDialog } from "@/features/browser/components/copy-to-dialog";
-import { DetailsDialog } from "@/features/browser/components/details-dialog";
+import { DetailsPanel } from "@/features/browser/components/details-panel";
 import {
   type DragData,
   DragPreview,
@@ -377,108 +377,119 @@ export function FileBrowser({
   };
 
   return (
-    <div
-      className="relative min-h-[calc(100dvh-6rem)] space-y-3"
-      {...dropZoneProps}
-    >
-      {selectedCount > 0 ? (
-        <SelectionToolbar
-          selectedCount={selectedCount}
-          allVisibleSelected={allVisibleSelected}
-          onClear={() => setRowSelection({})}
-          onToggleSelectAll={toggleSelectAll}
-          onBulkDownload={handleBulkDownload}
-          bulkDownloadDisabled={selectedFiles.length === 0}
-          onCopyTo={() =>
-            setCopyTargets(selectedRows.map((row) => toTarget(row.original)))
-          }
-          canDelete={permissions.delete}
-          onBulkDelete={() => setBulkConfirmOpen(true)}
-        />
-      ) : (
-        <BrowserToolbar
-          hasEntries={entries.length > 0}
-          query={query}
-          matchCount={rows.length}
-          onQueryChange={(value) => table.setGlobalFilter(value)}
-          view={view}
-          sorting={sorting}
-          onSortingChange={handleSortingChange}
-          canUpload={permissions.upload}
-          onNewFolder={() => setNewFolderOpen(true)}
-          onUploadFiles={uploads.addFiles}
-          onSearchSource={() => setSearchOpen(true)}
-        />
-      )}
-
-      {noMatches ? (
-        <EmptyState
-          icon={SearchX}
-          title="No matches"
-          description={
-            <>Nothing in this folder matches &ldquo;{query}&rdquo;.</>
-          }
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-1"
-            onClick={() => table.setGlobalFilter("")}
-          >
-            Clear filter
-          </Button>
-        </EmptyState>
-      ) : entries.length === 0 ? (
-        <EmptyFolder
-          sourceId={sourceId}
-          prefix={prefix}
-          canUpload={permissions.upload}
-        />
-      ) : (
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={() => setActiveDrag(null)}
-          // The parent drop zone only mounts mid-drag, so re-measure droppables
-          // continuously to register it.
-          measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
-        >
-          {canMove && parentPrefix !== null && activeDrag ? (
-            <ParentDropZone parentPrefix={parentPrefix} />
-          ) : null}
-          {view === "grid" ? (
-            <FileGrid
-              sourceId={sourceId}
-              folders={rows
-                .map((row) => row.original)
-                .filter((entry) => entry.kind === "folder")}
-              files={rows
-                .map((row) => row.original)
-                .filter((entry) => entry.kind === "file")}
-              onPreview={openPreview}
-              onShare={canShare ? setShareTarget : undefined}
-              onDetails={setDetails}
-              onDelete={permissions.delete ? setDeleteTarget : undefined}
-              onRename={canRename ? setRenameTarget : undefined}
-              onDuplicate={permissions.upload ? handleDuplicate : undefined}
-              selection={gridSelection}
-              canMove={canMove}
+    <div className="relative min-h-[calc(100dvh-6rem)]" {...dropZoneProps}>
+      <div className="flex items-start gap-4">
+        <div className="min-w-0 flex-1 space-y-3">
+          {selectedCount > 0 ? (
+            <SelectionToolbar
+              selectedCount={selectedCount}
+              allVisibleSelected={allVisibleSelected}
+              onClear={() => setRowSelection({})}
+              onToggleSelectAll={toggleSelectAll}
+              onBulkDownload={handleBulkDownload}
+              bulkDownloadDisabled={selectedFiles.length === 0}
+              onCopyTo={() =>
+                setCopyTargets(
+                  selectedRows.map((row) => toTarget(row.original)),
+                )
+              }
+              canDelete={permissions.delete}
+              onBulkDelete={() => setBulkConfirmOpen(true)}
             />
           ) : (
-            <FileTable table={table} canMove={canMove} />
+            <BrowserToolbar
+              hasEntries={entries.length > 0}
+              query={query}
+              matchCount={rows.length}
+              onQueryChange={(value) => table.setGlobalFilter(value)}
+              view={view}
+              sorting={sorting}
+              onSortingChange={handleSortingChange}
+              canUpload={permissions.upload}
+              onNewFolder={() => setNewFolderOpen(true)}
+              onUploadFiles={uploads.addFiles}
+              onSearchSource={() => setSearchOpen(true)}
+            />
           )}
-          <DragOverlay modifiers={[snapCenterToCursor]}>
-            {activeDrag ? (
-              <DragPreview
-                label={activeDrag.label}
-                count={activeDrag.count}
-                kind={activeDrag.kind}
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      )}
+
+          {noMatches ? (
+            <EmptyState
+              icon={SearchX}
+              title="No matches"
+              description={
+                <>Nothing in this folder matches &ldquo;{query}&rdquo;.</>
+              }
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-1"
+                onClick={() => table.setGlobalFilter("")}
+              >
+                Clear filter
+              </Button>
+            </EmptyState>
+          ) : entries.length === 0 ? (
+            <EmptyFolder
+              sourceId={sourceId}
+              prefix={prefix}
+              canUpload={permissions.upload}
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={() => setActiveDrag(null)}
+              // The parent drop zone only mounts mid-drag, so re-measure droppables
+              // continuously to register it.
+              measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+            >
+              {canMove && parentPrefix !== null && activeDrag ? (
+                <ParentDropZone parentPrefix={parentPrefix} />
+              ) : null}
+              {view === "grid" ? (
+                <FileGrid
+                  sourceId={sourceId}
+                  folders={rows
+                    .map((row) => row.original)
+                    .filter((entry) => entry.kind === "folder")}
+                  files={rows
+                    .map((row) => row.original)
+                    .filter((entry) => entry.kind === "file")}
+                  onPreview={openPreview}
+                  onShare={canShare ? setShareTarget : undefined}
+                  onDetails={setDetails}
+                  onDelete={permissions.delete ? setDeleteTarget : undefined}
+                  onRename={canRename ? setRenameTarget : undefined}
+                  onDuplicate={permissions.upload ? handleDuplicate : undefined}
+                  selection={gridSelection}
+                  canMove={canMove}
+                />
+              ) : (
+                <FileTable table={table} canMove={canMove} />
+              )}
+              <DragOverlay modifiers={[snapCenterToCursor]}>
+                {activeDrag ? (
+                  <DragPreview
+                    label={activeDrag.label}
+                    count={activeDrag.count}
+                    kind={activeDrag.kind}
+                  />
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          )}
+        </div>
+
+        {details ? (
+          <DetailsPanel
+            sourceId={sourceId}
+            file={details}
+            onClose={() => setDetails(null)}
+          />
+        ) : null}
+      </div>
 
       {dragging ? <DropOverlay /> : null}
 
@@ -491,13 +502,6 @@ export function FileBrowser({
           if (!open) setPreviewKey(null);
         }}
         onShare={canShare ? setShareTarget : undefined}
-      />
-      <DetailsDialog
-        sourceId={sourceId}
-        file={details}
-        onOpenChange={(open) => {
-          if (!open) setDetails(null);
-        }}
       />
       <ShareDialog
         sourceId={sourceId}
