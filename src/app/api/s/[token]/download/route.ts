@@ -46,9 +46,19 @@ export async function GET(
   const files = getFilesClient(source);
   try {
     if (files.capabilities.signedUrl.supported) {
+      // The presigned response carries the STORED Content-Type — an object
+      // named photo.png but stored as text/html must never render inline at
+      // the bucket origin for anonymous visitors (the streaming branch gets
+      // the same guarantee from streamObject's INLINE_BLOCKED).
+      const safeInline =
+        inline &&
+        /^(?:image\/|video\/|audio\/|application\/pdf$)/i.test(
+          (await files.head(share.key)).type || "",
+        );
+      const signedDisposition = safeInline ? "inline" : "attachment";
       const url = await files.url(share.key, {
         expiresIn: REDIRECT_TTL_SECONDS,
-        responseContentDisposition: `${disposition}; filename*=UTF-8''${encodeURIComponent(filename)}`,
+        responseContentDisposition: `${signedDisposition}; filename*=UTF-8''${encodeURIComponent(filename)}`,
       });
       return NextResponse.redirect(url);
     }

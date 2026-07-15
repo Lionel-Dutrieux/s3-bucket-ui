@@ -504,6 +504,8 @@ export async function createShareLink(
 ): Promise<ActionResult<{ token: string }>> {
   const parsed = shareOptionsSchema.safeParse(options);
   if (!parsed.success) return actionError("Invalid share options.");
+  if (!key || key.endsWith("/"))
+    return actionError("Only files can be shared.");
 
   if (!(await isPublicSharingEnabled())) {
     return actionError("Public share links are disabled on this instance.");
