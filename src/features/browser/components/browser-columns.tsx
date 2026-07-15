@@ -1,20 +1,13 @@
 "use client";
 
 import type { ColumnDef, Row, RowData } from "@tanstack/react-table";
-import {
-  Copy,
-  Download,
-  Folder,
-  FolderDown,
-  Info,
-  Pencil,
-  Share2,
-  Trash2,
-} from "lucide-react";
+import { Download, Folder, FolderDown } from "lucide-react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { downloadUrl, zipUrl } from "@/features/browser/api/client";
+import { EntryActionsMenu } from "@/features/browser/components/entry-actions";
 import { FileIcon } from "@/features/browser/components/file-icon";
+import { InlineRenameInput } from "@/features/browser/components/inline-rename";
 import {
   type BrowserEntry,
   compareByModified,
@@ -42,6 +35,12 @@ declare module "@tanstack/react-table" {
     /** Only set when the viewer holds the edit capability (a duplicate
      * creates content). Files only. */
     onDuplicate?: (file: FileEntry) => void;
+    /** Only set when the viewer can move entries (edit capability). */
+    onMove?: (entry: BrowserEntry) => void;
+    /** Row id (folder prefix / file key) currently renaming inline. */
+    renamingId?: string | null;
+    /** Ends the inline rename; true when a rename actually happened. */
+    onRenameEnd?: (renamed: boolean) => void;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -115,7 +114,27 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     meta: { cellClassName: "p-0" },
     cell: ({ row, table }) => {
       const entry = row.original;
-      const { sourceId, onPreview, onDetails } = table.options.meta ?? {};
+      const { sourceId, onPreview, onDetails, renamingId, onRenameEnd } =
+        table.options.meta ?? {};
+      if (renamingId === row.id && sourceId && onRenameEnd) {
+        return (
+          <div className={NAME_CELL_CLASS}>
+            {entry.kind === "folder" ? (
+              <Folder
+                className="size-4 shrink-0 fill-amber-400/80 text-primary"
+                aria-hidden
+              />
+            ) : (
+              <FileIcon name={entry.name} className="size-4 shrink-0" />
+            )}
+            <InlineRenameInput
+              sourceId={sourceId}
+              entry={entry}
+              onEnd={onRenameEnd}
+            />
+          </div>
+        );
+      }
       if (entry.kind === "folder") {
         return (
           <Link
@@ -190,95 +209,42 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     header: "",
     enableSorting: false,
     meta: {
-      headClassName: "w-44",
+      headClassName: "w-20",
       cellClassName: "p-0 pr-2 text-right",
     },
+    // One quick action (download) + a kebab holding everything else —
+    // the same menu the right-click opens.
     cell: ({ row, table }) => {
       const entry = row.original;
-      const { sourceId, onShare, onDetails, onDelete, onRename, onDuplicate } =
-        table.options.meta ?? {};
-      const renameButton = onRename ? (
-        <button
-          type="button"
-          onClick={() => onRename(entry)}
-          className={ROW_ACTION_CLASS}
-          aria-label={`Rename ${entry.name}`}
-          title="Rename"
-        >
-          <Pencil className="size-4" aria-hidden />
-        </button>
-      ) : null;
-      const deleteButton = onDelete ? (
-        <button
-          type="button"
-          onClick={() => onDelete(entry)}
-          className={cn(ROW_ACTION_CLASS, "hover:text-destructive")}
-          aria-label={`Delete ${entry.name}`}
-          title={entry.kind === "folder" ? "Delete folder" : "Delete"}
-        >
-          <Trash2 className="size-4" aria-hidden />
-        </button>
-      ) : null;
+      const meta = table.options.meta;
+      if (!meta) return null;
 
-      if (entry.kind === "folder") {
-        return (
-          <>
+      return (
+        <>
+          {entry.kind === "folder" ? (
             <a
-              href={zipUrl(sourceId ?? "", entry.prefix)}
+              href={zipUrl(meta.sourceId, entry.prefix)}
               className={ROW_ACTION_CLASS}
               aria-label={`Download ${entry.name} as ZIP`}
               title="Download as ZIP"
             >
               <FolderDown className="size-4" aria-hidden />
             </a>
-            {renameButton}
-            {deleteButton}
-          </>
-        );
-      }
-      return (
-        <>
-          <button
-            type="button"
-            onClick={() => onDetails?.(entry)}
-            className={ROW_ACTION_CLASS}
-            aria-label={`Details of ${entry.name}`}
-            title="Details"
-          >
-            <Info className="size-4" aria-hidden />
-          </button>
-          {onShare ? (
-            <button
-              type="button"
-              onClick={() => onShare(entry)}
+          ) : (
+            <a
+              href={downloadUrl(meta.sourceId, entry.key)}
               className={ROW_ACTION_CLASS}
-              aria-label={`Share ${entry.name}`}
-              title="Share"
+              aria-label={`Download ${entry.name}`}
+              title="Download"
             >
-              <Share2 className="size-4" aria-hidden />
-            </button>
-          ) : null}
-          <a
-            href={downloadUrl(sourceId ?? "", entry.key)}
-            className={ROW_ACTION_CLASS}
-            aria-label={`Download ${entry.name}`}
-            title="Download"
-          >
-            <Download className="size-4" aria-hidden />
-          </a>
-          {onDuplicate ? (
-            <button
-              type="button"
-              onClick={() => onDuplicate(entry)}
-              className={ROW_ACTION_CLASS}
-              aria-label={`Duplicate ${entry.name}`}
-              title="Duplicate"
-            >
-              <Copy className="size-4" aria-hidden />
-            </button>
-          ) : null}
-          {renameButton}
-          {deleteButton}
+              <Download className="size-4" aria-hidden />
+            </a>
+          )}
+          <EntryActionsMenu
+            entry={entry}
+            handlers={meta}
+            className={cn(ROW_ACTION_CLASS, "data-open:opacity-100")}
+          />
         </>
       );
     },

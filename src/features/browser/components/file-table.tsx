@@ -16,6 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEntryDnd } from "@/features/browser/components/dnd";
+import {
+  type EntryActionHandlers,
+  EntryContextMenu,
+} from "@/features/browser/components/entry-actions";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +61,12 @@ export function FileTable({
       </TableHeader>
       <TableBody>
         {ordered.map((row) => (
-          <BrowserRow key={row.id} row={row} canMove={canMove} />
+          <BrowserRow
+            key={row.id}
+            row={row}
+            canMove={canMove}
+            handlers={table.options.meta}
+          />
         ))}
       </TableBody>
     </Table>
@@ -67,9 +76,11 @@ export function FileTable({
 function BrowserRow({
   row,
   canMove,
+  handlers,
 }: {
   row: Row<BrowserEntry>;
   canMove: boolean;
+  handlers?: EntryActionHandlers;
 }) {
   const entry = row.original;
   const dnd = useEntryDnd({
@@ -86,7 +97,7 @@ function BrowserRow({
     disabled: !canMove,
   });
 
-  return (
+  const tableRow = (
     <TableRow
       ref={canMove ? dnd.setNodeRef : undefined}
       className={cn(
@@ -107,6 +118,13 @@ function BrowserRow({
         </TableCell>
       ))}
     </TableRow>
+  );
+
+  if (!handlers) return tableRow;
+  return (
+    <EntryContextMenu entry={entry} handlers={handlers}>
+      {tableRow}
+    </EntryContextMenu>
   );
 }
 

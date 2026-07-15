@@ -1,35 +1,33 @@
 "use client";
 
 import { useStore } from "@tanstack/react-form";
+import { FolderPlus } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { createFolder } from "@/features/browser/actions";
 import { folderNameSchema } from "@/features/browser/lib/schemas";
 import { useAppForm } from "@/forms/form";
 
 const newFolderSchema = z.object({ name: folderNameSchema });
 
-export function NewFolderDialog({
+/** One field, one button — a popover anchored on the trigger, not a modal. */
+export function NewFolderPopover({
   sourceId,
   prefix,
-  open,
-  onOpenChange,
   onCreated,
 }: {
   sourceId: string;
   prefix: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   onCreated: () => void;
 }) {
+  const [open, setOpen] = useState(false);
   const form = useAppForm({
     defaultValues: { name: "" },
     validators: {
@@ -44,57 +42,60 @@ export function NewFolderDialog({
       }
       toast.success(`Created ${value.name.trim()}`);
       form.reset();
-      onOpenChange(false);
+      setOpen(false);
       onCreated();
     },
   });
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   return (
-    <Dialog
+    <Popover
       open={open}
       onOpenChange={(next) => {
         if (!isSubmitting) {
           if (!next) form.reset();
-          onOpenChange(next);
+          setOpen(next);
         }
       }}
     >
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>New folder</DialogTitle>
-          <DialogDescription>
-            Created inside the current folder.
-          </DialogDescription>
-        </DialogHeader>
+      <PopoverTrigger asChild>
+        <Button size="sm" variant="outline" className="h-8">
+          <FolderPlus aria-hidden />
+          New folder
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72">
         <form
           onSubmit={(event) => {
             event.preventDefault();
             form.handleSubmit();
           }}
-          className="space-y-4"
+          className="space-y-3"
         >
           <form.AppField name="name">
             {(field) => (
-              <field.TextField label="Name" placeholder="Invoices" autoFocus />
+              <field.TextField
+                label="New folder"
+                placeholder="Invoices"
+                autoFocus
+              />
             )}
           </form.AppField>
-          <DialogFooter>
-            <form.Subscribe selector={(state) => state.values.name}>
-              {(name) => (
-                <form.AppForm>
-                  <form.SubmitButton
-                    pendingLabel="Creating…"
-                    disabled={name.trim() === ""}
-                  >
-                    Create folder
-                  </form.SubmitButton>
-                </form.AppForm>
-              )}
-            </form.Subscribe>
-          </DialogFooter>
+          <form.Subscribe selector={(state) => state.values.name}>
+            {(name) => (
+              <form.AppForm>
+                <form.SubmitButton
+                  pendingLabel="Creating…"
+                  disabled={name.trim() === ""}
+                  className="w-full"
+                >
+                  Create folder
+                </form.SubmitButton>
+              </form.AppForm>
+            )}
+          </form.Subscribe>
         </form>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }

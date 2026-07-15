@@ -1,10 +1,10 @@
 import { Cylinder, Plus } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { SourceAccess } from "@/features/admin/components/source-access";
-import { AddSourceDialog } from "@/features/sources/components/add-source-dialog";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { SourceCardActions } from "@/features/sources/components/source-card-actions";
 import { requireAdmin } from "@/lib/auth/session";
@@ -33,12 +33,12 @@ export default async function AdminSourcesPage() {
         title="Sources"
         description="Connect buckets and decide who can use them. A grant row gives read access; the switches add edit (upload, rename, move, new folder) and delete."
       >
-        <AddSourceDialog>
-          <Button size="sm">
+        <Button size="sm" asChild>
+          <Link href="/admin/sources/new">
             <Plus aria-hidden />
             Add source
-          </Button>
-        </AddSourceDialog>
+          </Link>
+        </Button>
       </PageHeader>
 
       {sources.length === 0 ? (
