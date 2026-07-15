@@ -7,8 +7,8 @@ import {
   Folder,
   FolderDown,
   Info,
-  Link2,
   Pencil,
+  Share2,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
@@ -30,8 +30,8 @@ declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     sourceId: string;
     onPreview: (file: FileEntry) => void;
-    /** Absent when the provider can't mint share links — hides the action. */
-    onCopyLink?: (file: FileEntry) => void;
+    /** Absent when sharing is off (instance-wide setting) — hides the action. */
+    onShare?: (file: FileEntry) => void;
     onDetails: (file: FileEntry) => void;
     /** Only set when the source allows deletions — absent hides the action.
      * Folders delete recursively (every object under the prefix). */
@@ -195,14 +195,8 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     },
     cell: ({ row, table }) => {
       const entry = row.original;
-      const {
-        sourceId,
-        onCopyLink,
-        onDetails,
-        onDelete,
-        onRename,
-        onDuplicate,
-      } = table.options.meta ?? {};
+      const { sourceId, onShare, onDetails, onDelete, onRename, onDuplicate } =
+        table.options.meta ?? {};
       const renameButton = onRename ? (
         <button
           type="button"
@@ -253,15 +247,15 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
           >
             <Info className="size-4" aria-hidden />
           </button>
-          {onCopyLink ? (
+          {onShare ? (
             <button
               type="button"
-              onClick={() => onCopyLink(entry)}
+              onClick={() => onShare(entry)}
               className={ROW_ACTION_CLASS}
-              aria-label={`Copy link to ${entry.name}`}
-              title="Copy link"
+              aria-label={`Share ${entry.name}`}
+              title="Share"
             >
-              <Link2 className="size-4" aria-hidden />
+              <Share2 className="size-4" aria-hidden />
             </button>
           ) : null}
           <a

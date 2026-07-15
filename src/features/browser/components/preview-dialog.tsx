@@ -5,8 +5,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  Link2,
   Loader2,
+  Share2,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,7 @@ export function PreviewDialog({
   files,
   onFileChange,
   onOpenChange,
-  onCopyLink,
+  onShare,
 }: {
   sourceId: string;
   file: FileEntry | null;
@@ -62,8 +62,8 @@ export function PreviewDialog({
   files: FileEntry[];
   onFileChange: (file: FileEntry) => void;
   onOpenChange: (open: boolean) => void;
-  /** Absent when the provider can't mint share links — hides the action. */
-  onCopyLink?: (file: FileEntry) => void;
+  /** Absent when sharing is off (instance-wide setting) — hides the action. */
+  onShare?: (file: FileEntry) => void;
 }) {
   // Key of the media file whose element failed to load — cleared implicitly
   // when the dialog moves to another file.
@@ -209,14 +209,14 @@ export function PreviewDialog({
             </div>
 
             <DialogFooter>
-              {onCopyLink ? (
+              {onShare ? (
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => onCopyLink(file)}
+                  onClick={() => onShare(file)}
                 >
-                  <Link2 aria-hidden />
-                  Copy link
+                  <Share2 aria-hidden />
+                  Share
                 </Button>
               ) : null}
               <Button asChild>

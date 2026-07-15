@@ -16,7 +16,7 @@ import {
   listFolder,
 } from "@/features/browser/server/service";
 import { requireSourceAccess } from "@/lib/auth/access";
-import { getFilesClient } from "@/lib/storage/client";
+import { isPublicSharingEnabled } from "@/lib/dal/settings";
 
 interface SourcePageProps {
   params: Promise<{ id: string }>;
@@ -50,9 +50,9 @@ export default async function SourcePage({
   const view: ViewMode =
     (await cookies()).get(VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
 
-  // Providers with no signing primitive (SFTP, FTP, WebDAV) can't mint share
-  // links — the UI hides the action. Reading capabilities does no I/O.
-  const canShare = getFilesClient(source).capabilities.signedUrl.supported;
+  // Sharing is app-minted now (streaming fallback covers unsigned providers),
+  // so the only gate is the instance-wide switch in Admin → Settings.
+  const canShare = await isPublicSharingEnabled();
 
   const listing = await listFolder(source, prefix, cursor);
   // An active type filter hides folders and keeps only matching files.

@@ -6,11 +6,6 @@
 // directly by the browser (src/href attributes, XHR upload) live here too so
 // endpoint paths have a single home.
 
-export interface UrlResult {
-  url?: string;
-  error?: string;
-}
-
 export interface TextPreview {
   text: string;
   /** True when the file is larger than the preview window (first 1 MiB). */
@@ -106,18 +101,6 @@ export async function getJson<T extends { error?: string }>(
   }
   if (body?.error) throw new Error(body.error);
   return body;
-}
-
-export async function fetchShareUrl(
-  sourceId: string,
-  key: string,
-): Promise<string> {
-  const result = await getJson<UrlResult>(
-    `/api/sources/${sourceId}/share?key=${encodeURIComponent(key)}`,
-    "Could not create a link for this file.",
-  );
-  if (!result.url) throw new Error("Could not create a link for this file.");
-  return result.url;
 }
 
 export async function fetchTextPreview(

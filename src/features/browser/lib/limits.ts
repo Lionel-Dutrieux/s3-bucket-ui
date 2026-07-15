@@ -6,8 +6,6 @@
 /** Listing page size for one folder level (`service.listFolder`). */
 export const PAGE_SIZE = 200;
 
-/** Presigned share-link lifetime (forced download) — 1 hour. */
-export const SHARE_TTL_SECONDS = 3600;
 /** Presigned preview-link lifetime (inline) — 10 minutes. */
 export const PREVIEW_TTL_SECONDS = 600;
 /** Presigned grid-thumbnail lifetime (inline) — 10 minutes. */
