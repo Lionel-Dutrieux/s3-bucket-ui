@@ -63,3 +63,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Redeploy the Dokploy canary instance now that the fresh :canary image
+      # is on GHCR. Only on master pushes — tag builds ship :latest, which the
+      # canary instance doesn't track. Calling this on git-push instead (a
+      # plain GitHub webhook) would race the build and redeploy the OLD image;
+      # here the image is guaranteed pushed first. Set DOKPLOY_CANARY_WEBHOOK
+      # to the compose deploy webhook (Dokploy → service → Deployments).
+      - name: Trigger Dokploy canary redeploy
+        if: github.ref == 'refs/heads/master'
+        run: curl -fsS -X POST "${{ secrets.DOKPLOY_CANARY_WEBHOOK }}"
