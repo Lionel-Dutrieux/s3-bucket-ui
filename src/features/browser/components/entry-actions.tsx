@@ -5,6 +5,7 @@ import {
   Download,
   Eye,
   FolderDown,
+  FolderInput,
   Info,
   type LucideIcon,
   MoreVertical,
@@ -41,6 +42,7 @@ export interface EntryActionHandlers {
   onDelete?: (entry: BrowserEntry) => void;
   onRename?: (entry: BrowserEntry) => void;
   onDuplicate?: (file: FileEntry) => void;
+  onMove?: (entry: BrowserEntry) => void;
 }
 
 interface EntryAction {
@@ -67,6 +69,7 @@ function entryActions(
     onDelete,
     onRename,
     onDuplicate,
+    onMove,
   } = handlers;
 
   if (entry.kind === "folder") {
@@ -78,6 +81,14 @@ function entryActions(
         href: zipUrl(sourceId, entry.prefix),
       },
     ];
+    if (onMove) {
+      actions.push({
+        key: "move",
+        label: "Move to…",
+        icon: FolderInput,
+        run: () => onMove(entry),
+      });
+    }
     if (onRename) {
       actions.push({
         key: "rename",
@@ -136,6 +147,14 @@ function entryActions(
       label: "Duplicate",
       icon: Copy,
       run: () => onDuplicate(entry),
+    });
+  }
+  if (onMove) {
+    actions.push({
+      key: "move",
+      label: "Move to…",
+      icon: FolderInput,
+      run: () => onMove(entry),
     });
   }
   if (onRename) {

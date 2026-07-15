@@ -35,6 +35,8 @@ declare module "@tanstack/react-table" {
     /** Only set when the viewer holds the edit capability (a duplicate
      * creates content). Files only. */
     onDuplicate?: (file: FileEntry) => void;
+    /** Only set when the viewer can move entries (edit capability). */
+    onMove?: (entry: BrowserEntry) => void;
     /** Row id (folder prefix / file key) currently renaming inline. */
     renamingId?: string | null;
     /** Ends the inline rename; true when a rename actually happened. */

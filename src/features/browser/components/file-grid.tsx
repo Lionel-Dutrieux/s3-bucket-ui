@@ -48,6 +48,7 @@ export function FileGrid({
   onDelete,
   onRename,
   onDuplicate,
+  onMove,
   selection,
   canMove = false,
   renamingId,
@@ -67,6 +68,8 @@ export function FileGrid({
   onRename?: (entry: BrowserEntry) => void;
   /** Only set when the viewer holds the edit capability. Files only. */
   onDuplicate?: (file: FileEntry) => void;
+  /** Only set when the viewer can move entries (edit capability). */
+  onMove?: (entry: BrowserEntry) => void;
   selection?: GridSelection;
   canMove?: boolean;
   /** Card id (folder prefix / file key) currently renaming inline. */
@@ -91,6 +94,7 @@ export function FileGrid({
                 selection={selection}
                 onRename={onRename}
                 onDelete={onDelete}
+                onMove={onMove}
                 renaming={renamingId === folder.prefix}
                 onRenameEnd={onRenameEnd}
               />
@@ -118,6 +122,7 @@ export function FileGrid({
                 onRename={onRename}
                 onDuplicate={onDuplicate}
                 onDelete={onDelete}
+                onMove={onMove}
                 renaming={renamingId === file.key}
                 onRenameEnd={onRenameEnd}
               />
@@ -136,6 +141,7 @@ function FolderCard({
   selection,
   onRename,
   onDelete,
+  onMove,
   renaming = false,
   onRenameEnd,
 }: {
@@ -145,6 +151,7 @@ function FolderCard({
   selection?: GridSelection;
   onRename?: (entry: BrowserEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
+  onMove?: (entry: BrowserEntry) => void;
   renaming?: boolean;
   onRenameEnd?: (renamed: boolean) => void;
 }) {
@@ -159,7 +166,7 @@ function FolderCard({
     disabled: !canMove,
   });
   const entry = { kind: "folder" as const, ...folder };
-  const handlers = { sourceId, onRename, onDelete };
+  const handlers = { sourceId, onRename, onDelete, onMove };
 
   return (
     <EntryContextMenu entry={entry} handlers={handlers}>
@@ -253,6 +260,7 @@ function FileCard({
   onRename,
   onDuplicate,
   onDelete,
+  onMove,
   renaming = false,
   onRenameEnd,
 }: {
@@ -266,6 +274,7 @@ function FileCard({
   onRename?: (entry: BrowserEntry) => void;
   onDuplicate?: (file: FileEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
+  onMove?: (entry: BrowserEntry) => void;
   renaming?: boolean;
   onRenameEnd?: (renamed: boolean) => void;
 }) {
@@ -287,6 +296,7 @@ function FileCard({
     onRename,
     onDuplicate,
     onDelete,
+    onMove,
   };
 
   return (

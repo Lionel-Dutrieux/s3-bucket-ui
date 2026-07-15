@@ -57,6 +57,7 @@ import {
   MoveDialog,
   type MoveRequest,
 } from "@/features/browser/components/move-dialog";
+import { MoveToDialog } from "@/features/browser/components/move-to-dialog";
 import { PreviewDialog } from "@/features/browser/components/preview-dialog";
 import { SearchDialog } from "@/features/browser/components/search-dialog";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
@@ -151,6 +152,9 @@ export function FileBrowser({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [searchOpen, setSearchOpen] = useState(false);
   const [copyTargets, setCopyTargets] = useState<EntryTarget[] | null>(null);
+  const [moveToTargets, setMoveToTargets] = useState<EntryTarget[] | null>(
+    null,
+  );
 
   // A selection belongs to one folder — navigating away discards it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is intentionally keyed on the folder change
@@ -253,6 +257,9 @@ export function FileBrowser({
       onRename: canRename ? setRenameTarget : undefined,
       // Duplicating creates content — an edit, like uploading.
       onDuplicate: permissions.upload ? handleDuplicate : undefined,
+      onMove: canMove
+        ? (entry) => setMoveToTargets([toTarget(entry)])
+        : undefined,
       renamingId: renameTarget
         ? renameTarget.kind === "folder"
           ? renameTarget.prefix
@@ -401,6 +408,12 @@ export function FileBrowser({
                   selectedRows.map((row) => toTarget(row.original)),
                 )
               }
+              canMove={canMove}
+              onMoveTo={() =>
+                setMoveToTargets(
+                  selectedRows.map((row) => toTarget(row.original)),
+                )
+              }
               canDelete={permissions.delete}
               onBulkDelete={() => setBulkConfirmOpen(true)}
             />
@@ -473,6 +486,11 @@ export function FileBrowser({
                   onDelete={permissions.delete ? setDeleteTarget : undefined}
                   onRename={canRename ? setRenameTarget : undefined}
                   onDuplicate={permissions.upload ? handleDuplicate : undefined}
+                  onMove={
+                    canMove
+                      ? (entry) => setMoveToTargets([toTarget(entry)])
+                      : undefined
+                  }
                   selection={gridSelection}
                   canMove={canMove}
                   renamingId={
@@ -578,6 +596,19 @@ export function FileBrowser({
         open={searchOpen}
         onOpenChange={setSearchOpen}
         initialQuery={query}
+      />
+
+      <MoveToDialog
+        sourceId={sourceId}
+        targets={moveToTargets}
+        onOpenChange={(open) => {
+          if (!open) setMoveToTargets(null);
+        }}
+        onMoved={() => {
+          setMoveToTargets(null);
+          setRowSelection({});
+          router.refresh();
+        }}
       />
 
       <CopyToDialog
