@@ -523,6 +523,7 @@ export function FileBrowser({
             sourceId={sourceId}
             file={details}
             onClose={() => setDetails(null)}
+            onShare={canShare ? setShareTarget : undefined}
           />
         ) : null}
       </div>
