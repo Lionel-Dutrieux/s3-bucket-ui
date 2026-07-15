@@ -33,6 +33,5 @@ export const VIEWERS: Record<PreviewKind, ComponentType<ViewerProps>> = {
   text: lazy(() => import("./text-viewer"), "TextViewer"),
   code: lazy(() => import("./code-viewer"), "CodeViewer"),
   markdown: lazy(() => import("./markdown-viewer"), "MarkdownViewer"),
-  // Placeholder until its dedicated viewer lands (Task 7):
-  csv: lazy(() => import("./text-viewer"), "TextViewer"),
+  csv: lazy(() => import("./csv-viewer"), "CsvViewer"),
 };
