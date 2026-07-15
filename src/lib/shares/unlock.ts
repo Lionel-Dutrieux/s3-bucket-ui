@@ -1,5 +1,5 @@
 import "server-only";
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 // Proof-of-password cookie: value = HMAC(token) under ENCRYPTION_KEY, so it
@@ -42,5 +42,8 @@ export async function grantUnlock(token: string): Promise<void> {
 
 export async function isUnlocked(token: string): Promise<boolean> {
   const value = (await cookies()).get(cookieName(token))?.value;
-  return value === unlockValue(token);
+  if (!value) return false;
+  const actual = Buffer.from(value, "base64url");
+  const expected = Buffer.from(unlockValue(token), "base64url");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
