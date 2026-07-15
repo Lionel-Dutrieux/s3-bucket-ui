@@ -1,0 +1,67 @@
+name: Release
+
+# One-click stable release, run from the Actions tab: pick a bump, and this
+# bumps package.json, tags vX.Y.Z, publishes a GitHub Release whose notes are
+# the commits since the previous tag, then dispatches the Docker workflow on
+# the new tag (a tag pushed with GITHUB_TOKEN can't trigger it by itself) —
+# which ships :latest and the semver image tags.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump"
+        required: true
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write # to dispatch the Docker workflow on the new tag
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history — the changelog diffs against the previous tag
+
+      - name: Bump version
+        id: bump
+        run: |
+          NEW=$(npm version "${{ inputs.bump }}" --no-git-tag-version)
+          echo "version=$NEW" >> "$GITHUB_OUTPUT"
+          echo "Releasing $NEW"
+
+      - name: Commit, tag and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "release: ${{ steps.bump.outputs.version }}"
+          git tag "${{ steps.bump.outputs.version }}"
+          git push origin master --tags
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PREV=$(git describe --tags --abbrev=0 "${{ steps.bump.outputs.version }}^" 2>/dev/null || true)
+          if [ -n "$PREV" ]; then
+            NOTES=$(git log --pretty=format:"- %s" "$PREV..${{ steps.bump.outputs.version }}^")
+          else
+            NOTES=$(git log --pretty=format:"- %s" "${{ steps.bump.outputs.version }}^")
+          fi
+          gh release create "${{ steps.bump.outputs.version }}" \
+            --title "${{ steps.bump.outputs.version }}" \
+            --notes "$NOTES"
+
+      - name: Build the release image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run docker.yml --ref "${{ steps.bump.outputs.version }}"

@@ -19,9 +19,9 @@
 
 services:
   bucket-ui:
-    # Prebuilt image published by .github/workflows/docker.yml on every push
-    # to master (:latest) and every v* tag (:1.2.3). Swap for `build: .` to
-    # build from source instead.
+    # Prebuilt image published by .github/workflows/docker.yml.
+    # :latest = stable releases; :canary = every master commit; :1.2.3 to pin.
+    # Swap for `build: .` to build from source instead.
     image: ghcr.io/lionel-dutrieux/s3-bucket-ui:latest
     restart: unless-stopped
     environment:

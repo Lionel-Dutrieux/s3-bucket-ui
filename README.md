@@ -214,14 +214,21 @@ protocol also needs a case in `src/lib/storage/client.ts`.
 
 ### Prebuilt image (GHCR)
 
-Every push to `master` publishes
-`ghcr.io/lionel-dutrieux/s3-bucket-ui:latest` to the repo's Packages, and
-every `v*` tag (or Release) publishes the matching semver tags (`1.2.3`,
-`1.2`, `1`):
+Two channels are published to the repo's Packages:
+
+| Tag | Channel |
+|---|---|
+| `latest`, `1.2.3`, `1.2`, `1` | **Stable** — cut by the Release workflow (GitHub Releases) |
+| `canary`, `sha-xxxxxxx` | **Canary** — every commit on `master` |
 
 ```bash
-docker pull ghcr.io/lionel-dutrieux/s3-bucket-ui:latest
+docker pull ghcr.io/lionel-dutrieux/s3-bucket-ui:latest   # stable
+docker pull ghcr.io/lionel-dutrieux/s3-bucket-ui:canary   # bleeding edge
 ```
+
+Releases are one click: Actions → **Release** → pick patch/minor/major. It
+bumps `package.json`, tags `vX.Y.Z`, publishes a GitHub Release with the
+commits since the previous one, and ships the `latest` + semver images.
 
 ### Docker Compose (recommended)
 
