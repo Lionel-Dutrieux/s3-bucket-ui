@@ -137,7 +137,7 @@ export function SearchCommand({
                         {folder || "/"}
                       </span>
                     </span>
-                    <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                       {formatBytes(hit.size)}
                     </span>
                   </CommandItem>

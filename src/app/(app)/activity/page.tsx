@@ -15,7 +15,7 @@ import { ActivityFilters } from "@/features/activity/components/activity-filters
 import { operationLabel } from "@/features/activity/lib/operation-labels";
 import { requireAdmin } from "@/lib/auth/session";
 import { listOperationSourceNames, listOperations } from "@/lib/dal/operations";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Activity" };
@@ -143,7 +143,9 @@ export default async function ActivityPage({
                           ) : null}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
-                          {formatDateTime(operation.createdAt)}
+                          <span title={formatDateTime(operation.createdAt)}>
+                            {formatRelative(operation.createdAt)}
+                          </span>
                         </TableCell>
                         <TableCell className="truncate text-xs text-muted-foreground max-md:hidden">
                           {operation.actor ?? "—"}

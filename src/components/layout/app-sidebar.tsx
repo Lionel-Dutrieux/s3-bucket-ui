@@ -56,12 +56,9 @@ export function AppSidebar({
           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <Cylinder className="size-4" aria-hidden />
           </div>
-          <div className="grid leading-tight">
-            <span className="text-sm font-semibold tracking-tight">
-              Bucket UI
-            </span>
-            <span className="text-xs text-muted-foreground">File manager</span>
-          </div>
+          <span className="text-sm font-semibold tracking-tight">
+            Bucket UI
+          </span>
         </Link>
       </SidebarHeader>
 
@@ -90,9 +87,13 @@ export function AppSidebar({
                             <span className="truncate text-sm font-medium">
                               {source.name}
                             </span>
-                            <span className="truncate font-mono text-xs text-muted-foreground">
-                              {source.bucket}
-                            </span>
+                            {/* The bucket only helps when it differs from
+                                the display name. */}
+                            {source.bucket !== source.name ? (
+                              <span className="truncate text-xs text-muted-foreground">
+                                {source.bucket}
+                              </span>
+                            ) : null}
                           </div>
                         </Link>
                       </SidebarMenuButton>

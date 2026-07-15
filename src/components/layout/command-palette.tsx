@@ -71,7 +71,7 @@ export function CommandPalette({
                     >
                       <Icon aria-hidden />
                       <span className="truncate">{source.name}</span>
-                      <span className="ml-auto truncate font-mono text-xs text-muted-foreground">
+                      <span className="ml-auto truncate text-xs text-muted-foreground">
                         {source.bucket}
                       </span>
                     </CommandItem>

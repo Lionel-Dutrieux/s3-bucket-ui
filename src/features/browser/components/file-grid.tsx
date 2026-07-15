@@ -342,7 +342,7 @@ function FileCard({
           ) : (
             <p className="truncate text-sm font-medium">{file.name}</p>
           )}
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground tabular-nums">
             {formatBytes(file.size)}
           </p>
         </div>

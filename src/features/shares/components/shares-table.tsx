@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { revokeShareLink } from "@/features/shares/actions";
 import { copyText } from "@/lib/clipboard";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatRelative } from "@/lib/format";
 
 export interface ShareRow {
   id: string;
@@ -103,11 +103,25 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                   ) : null}
                 </TableCell>
                 <TableCell>{share.sourceName}</TableCell>
-                <TableCell>{formatDate(share.createdAt)}</TableCell>
-                <TableCell>
-                  {share.expiresAt === null
-                    ? "Never"
-                    : formatDate(share.expiresAt)}
+                <TableCell className="text-muted-foreground">
+                  <span
+                    title={formatDate(share.createdAt)}
+                    suppressHydrationWarning
+                  >
+                    {formatRelative(share.createdAt)}
+                  </span>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {share.expiresAt === null ? (
+                    "Never"
+                  ) : (
+                    <span
+                      title={formatDate(share.expiresAt)}
+                      suppressHydrationWarning
+                    >
+                      {formatRelative(share.expiresAt)}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {share.downloads}

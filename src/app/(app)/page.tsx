@@ -74,7 +74,7 @@ export default async function HomePage() {
                       <p className="truncate text-sm font-medium">
                         {source.name}
                       </p>
-                      <p className="truncate font-mono text-xs text-muted-foreground">
+                      <p className="truncate text-xs text-muted-foreground">
                         {getProvider(source.provider)?.label ?? source.provider}{" "}
                         · {source.bucket}
                       </p>
