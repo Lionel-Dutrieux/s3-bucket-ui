@@ -29,7 +29,8 @@ function parseRange(header: string | null, size: number): ByteRange | null {
  * Streams one object through the app — the fallback for providers with no
  * presigned-URL primitive (SFTP, FTP, WebDAV). Honors `Range` requests when
  * the adapter can seek (video scrubbing, resumed downloads), forces unsafe
- * types to an attachment, and sandboxes any inline document context.
+ * types to an attachment, and sandboxes any inline document context except
+ * PDFs (Chrome blocks its PDF viewer inside a sandbox).
  * The caller has already authorized access; a missing key throws a
  * FilesError with code "NotFound" for the route to map.
  */
@@ -40,10 +41,13 @@ export async function streamObject(
     filename: string;
     disposition: "inline" | "attachment";
     rangeHeader?: string | null;
+    /** Overrides the provider-reported type (e.g. force application/pdf so
+     * browsers preview a .pdf a provider stored as octet-stream). */
+    contentType?: string;
   },
 ): Promise<Response> {
   const stat = await files.head(key);
-  const type = stat.type || "application/octet-stream";
+  const type = options.contentType || stat.type || "application/octet-stream";
   const disposition =
     options.disposition === "inline" && INLINE_BLOCKED.test(type)
       ? "attachment"
@@ -54,10 +58,14 @@ export async function streamObject(
     "Content-Disposition": `${disposition}; filename*=UTF-8''${encodeURIComponent(options.filename)}`,
     "X-Content-Type-Options": "nosniff",
     "Cache-Control": "private, no-store",
-    // A scriptless sandbox for anything that does render as a document
-    // (e.g. the PDF viewer); ignored by <img>/<video>/<audio> loads.
-    "Content-Security-Policy": "sandbox",
   });
+  // A scriptless sandbox for anything that renders as a document; ignored by
+  // <img>/<video>/<audio> loads. PDFs are exempt: Chrome refuses to run its
+  // PDF viewer in a sandboxed context ("This page has been blocked"), and
+  // nosniff + the enforced type already keep smuggled HTML from executing.
+  if (type !== "application/pdf") {
+    headers.set("Content-Security-Policy", "sandbox");
+  }
   if (files.capabilities.rangeRead) {
     headers.set("Accept-Ranges", "bytes");
   }

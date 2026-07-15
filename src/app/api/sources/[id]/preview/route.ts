@@ -15,7 +15,7 @@ const URL_PREVIEW_CATEGORIES = new Set(["image", "pdf", "video", "audio"]);
  * URL (no bytes through the app); the rest (SFTP, FTP, WebDAV) stream the
  * body with Range support so video scrubbing works. Only categories the
  * dialog renders safely (<img>/<video>/<audio> never execute scripts; PDFs
- * go into a sandboxed iframe) are served inline.
+ * are forced to application/pdf + nosniff when streamed) are served inline.
  */
 export async function GET(
   request: NextRequest,
@@ -53,6 +53,9 @@ export async function GET(
       filename,
       disposition: "inline",
       rangeHeader: request.headers.get("range"),
+      // Providers often store PDFs as octet-stream; the browser only previews
+      // (rather than downloads) when the response says application/pdf.
+      contentType: category === "pdf" ? "application/pdf" : undefined,
     });
   } catch (error) {
     if ((error as { code?: string }).code === "NotFound") {

@@ -45,10 +45,12 @@ export function PublicShareCard({
             // biome-ignore lint/a11y/useMediaCaption: arbitrary bucket objects carry no caption tracks
             <audio src={inlineSrc} controls className="w-full px-6 py-10" />
           ) : (
-            // Empty sandbox: renders the PDF, blocks any smuggled scripts.
+            // No sandbox: Chrome blocks its PDF viewer in sandboxed frames.
+            // The download route only serves inline what is safe to render
+            // (presigned = bucket origin; streamed = forced application/pdf
+            // + nosniff).
             <iframe
               src={inlineSrc}
-              sandbox=""
               title={filename}
               className="h-[60vh] w-full"
             />

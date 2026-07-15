@@ -32,9 +32,10 @@ export async function GET(
   if (!source) return apiError(404, "Not found.");
 
   const filename = share.key.split("/").pop() || "file";
+  const category = categoryOf(filename);
   const inline =
     request.nextUrl.searchParams.get("inline") === "1" &&
-    sharePreviewKind(categoryOf(filename)) !== null;
+    sharePreviewKind(category) !== null;
   const disposition = inline ? "inline" : "attachment";
 
   // Count real downloads once — not the landing page's inline preview, and
@@ -67,6 +68,9 @@ export async function GET(
       filename,
       disposition,
       rangeHeader: request.headers.get("range"),
+      // Providers often store PDFs as octet-stream; the browser only previews
+      // (rather than downloads) when the response says application/pdf.
+      contentType: inline && category === "pdf" ? "application/pdf" : undefined,
     });
   } catch (error) {
     if ((error as { code?: string }).code === "NotFound") {

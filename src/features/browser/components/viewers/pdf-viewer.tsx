@@ -4,8 +4,10 @@ import type { ViewerProps } from "./types";
 
 export function PdfViewer({ file, src }: ViewerProps) {
   return (
-    // Empty sandbox: renders the PDF but blocks any scripts a mislabeled
-    // object could smuggle in.
-    <iframe src={src} sandbox="" title={file.name} className="h-full w-full" />
+    // No sandbox: Chrome refuses to run its PDF viewer in a sandboxed frame
+    // ("This page has been blocked"). Safe regardless: presigned URLs render
+    // on the bucket origin, and the streaming route forces application/pdf
+    // + nosniff so a mislabeled object can't execute as HTML.
+    <iframe src={src} title={file.name} className="h-full w-full" />
   );
 }
