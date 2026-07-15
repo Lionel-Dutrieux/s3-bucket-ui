@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { createShareLink } from "@/features/browser/actions";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { useAppForm } from "@/forms/form";
+import { copyText } from "@/lib/clipboard";
 import { SHARE_EXPIRY_OPTIONS, type ShareExpiry } from "@/lib/shares/expiry";
 
 const shareSchema = z.object({
@@ -68,9 +69,12 @@ export function ShareDialog({
 
   const copy = async () => {
     if (!createdUrl) return;
-    await navigator.clipboard.writeText(createdUrl);
-    setCopied(true);
-    toast.success("Link copied");
+    if (await copyText(createdUrl)) {
+      setCopied(true);
+      toast.success("Link copied");
+    } else {
+      toast.error("Copy failed — select the link and copy it manually.");
+    }
   };
 
   return (

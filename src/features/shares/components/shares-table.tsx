@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { revokeShareLink } from "@/features/shares/actions";
+import { copyText } from "@/lib/clipboard";
 import { formatDate } from "@/lib/format";
 
 export interface ShareRow {
@@ -41,8 +42,11 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
   const [pending, startTransition] = useTransition();
 
   const copy = async (id: string) => {
-    await navigator.clipboard.writeText(`${window.location.origin}/s/${id}`);
-    toast.success("Link copied");
+    if (await copyText(`${window.location.origin}/s/${id}`)) {
+      toast.success("Link copied");
+    } else {
+      toast.error("Copy failed — open the link and copy the address bar.");
+    }
   };
 
   const revoke = (id: string) => {

@@ -15,6 +15,7 @@ import {
 import { downloadUrl } from "@/features/browser/api/client";
 import { browserQueries } from "@/features/browser/api/queries";
 import type { FileEntry } from "@/features/browser/lib/listing";
+import { copyText } from "@/lib/clipboard";
 import { formatBytes, formatDate } from "@/lib/format";
 
 /** Object metadata (HEAD request) with a copy-the-key shortcut. */
@@ -38,8 +39,11 @@ export function DetailsDialog({
   });
 
   const handleCopyKey = async (key: string) => {
-    await navigator.clipboard.writeText(key);
-    toast.success("Key copied");
+    if (await copyText(key)) {
+      toast.success("Key copied");
+    } else {
+      toast.error("Copy failed — your browser blocked clipboard access.");
+    }
   };
 
   return (
