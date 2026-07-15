@@ -1,14 +1,13 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Download, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Share2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { downloadUrl, previewSrc } from "@/features/browser/api/client";
@@ -81,29 +80,65 @@ export function PreviewDialog({
 
   return (
     <Dialog open={file !== null} onOpenChange={onOpenChange}>
+      {/* Immersive full-screen viewer (Drive-style): a slim translucent
+          topbar carries the title and actions, the media gets the rest. */}
       <DialogContent
-        className="flex h-[94dvh] w-[96vw] max-w-none flex-col gap-3 p-4 sm:max-w-none"
+        showCloseButton={false}
+        className="inset-0 top-0 left-0 flex h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none p-0 ring-0 sm:max-w-none"
         onKeyDown={handleKeyDown}
       >
         {file ? (
           <>
-            <DialogHeader>
-              <DialogTitle className="truncate pr-6">{file.name}</DialogTitle>
-              <DialogDescription>
-                {formatBytes(file.size)}
-                {file.lastModified ? (
-                  <> · {formatDate(file.lastModified)}</>
-                ) : null}
-                {index >= 0 && files.length > 1 ? (
-                  <>
-                    {" "}
-                    · {index + 1} of {files.length}
-                  </>
-                ) : null}
-              </DialogDescription>
-            </DialogHeader>
+            <div className="flex h-12 shrink-0 items-center gap-2 border-b bg-background/90 px-2 backdrop-blur sm:px-3">
+              <DialogClose asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Close preview"
+                >
+                  <X aria-hidden />
+                </Button>
+              </DialogClose>
+              <div className="flex min-w-0 flex-1 flex-col justify-center">
+                <DialogTitle className="truncate text-sm">
+                  {file.name}
+                </DialogTitle>
+                <DialogDescription className="truncate text-xs">
+                  {formatBytes(file.size)}
+                  {file.lastModified ? (
+                    <> · {formatDate(file.lastModified)}</>
+                  ) : null}
+                  {index >= 0 && files.length > 1 ? (
+                    <>
+                      {" "}
+                      · {index + 1} of {files.length}
+                    </>
+                  ) : null}
+                </DialogDescription>
+              </div>
+              {onShare ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => onShare(file)}
+                  aria-label={`Share ${file.name}`}
+                  title="Share"
+                >
+                  <Share2 aria-hidden />
+                </Button>
+              ) : null}
+              <Button variant="ghost" size="icon-sm" asChild title="Download">
+                <a
+                  href={downloadUrl(sourceId, file.key)}
+                  aria-label={`Download ${file.name}`}
+                >
+                  <Download aria-hidden />
+                </a>
+              </Button>
+            </div>
 
-            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-md border bg-muted/40">
+            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-muted/40">
               {mediaError || !Viewer ? (
                 <p className="p-6 text-sm text-muted-foreground">
                   Could not load a preview for this file.
@@ -140,25 +175,6 @@ export function PreviewDialog({
                 </button>
               ) : null}
             </div>
-
-            <DialogFooter>
-              {onShare ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onShare(file)}
-                >
-                  <Share2 aria-hidden />
-                  Share
-                </Button>
-              ) : null}
-              <Button asChild>
-                <a href={downloadUrl(sourceId, file.key)}>
-                  <Download aria-hidden />
-                  Download
-                </a>
-              </Button>
-            </DialogFooter>
           </>
         ) : null}
       </DialogContent>
