@@ -57,9 +57,7 @@ import {
   MoveDialog,
   type MoveRequest,
 } from "@/features/browser/components/move-dialog";
-import { NewFolderDialog } from "@/features/browser/components/new-folder-dialog";
 import { PreviewDialog } from "@/features/browser/components/preview-dialog";
-import { RenameDialog } from "@/features/browser/components/rename-dialog";
 import { SearchDialog } from "@/features/browser/components/search-dialog";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
 import { ShareDialog } from "@/features/browser/components/share-dialog";
@@ -151,7 +149,6 @@ export function FileBrowser({
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [newFolderOpen, setNewFolderOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [copyTargets, setCopyTargets] = useState<EntryTarget[] | null>(null);
 
@@ -205,6 +202,11 @@ export function FileBrowser({
     router.refresh();
   };
 
+  const handleRenameEnd = (renamed: boolean) => {
+    setRenameTarget(null);
+    if (renamed) refresh();
+  };
+
   const handleDuplicate = async (file: FileEntry) => {
     const result = await duplicateObject(sourceId, file.key);
     if (!result.ok) {
@@ -251,6 +253,12 @@ export function FileBrowser({
       onRename: canRename ? setRenameTarget : undefined,
       // Duplicating creates content — an edit, like uploading.
       onDuplicate: permissions.upload ? handleDuplicate : undefined,
+      renamingId: renameTarget
+        ? renameTarget.kind === "folder"
+          ? renameTarget.prefix
+          : renameTarget.key
+        : null,
+      onRenameEnd: handleRenameEnd,
     },
   });
 
@@ -406,7 +414,9 @@ export function FileBrowser({
               sorting={sorting}
               onSortingChange={handleSortingChange}
               canUpload={permissions.upload}
-              onNewFolder={() => setNewFolderOpen(true)}
+              sourceId={sourceId}
+              prefix={prefix}
+              onFolderCreated={refresh}
               onUploadFiles={uploads.addFiles}
               onSearchSource={() => setSearchOpen(true)}
             />
@@ -465,6 +475,14 @@ export function FileBrowser({
                   onDuplicate={permissions.upload ? handleDuplicate : undefined}
                   selection={gridSelection}
                   canMove={canMove}
+                  renamingId={
+                    renameTarget
+                      ? renameTarget.kind === "folder"
+                        ? renameTarget.prefix
+                        : renameTarget.key
+                      : null
+                  }
+                  onRenameEnd={handleRenameEnd}
                 />
               ) : (
                 <FileTable table={table} canMove={canMove} />
@@ -542,15 +560,6 @@ export function FileBrowser({
         onConfirm={handleBulkDelete}
       />
 
-      <RenameDialog
-        sourceId={sourceId}
-        entry={renameTarget}
-        onOpenChange={(open) => {
-          if (!open) setRenameTarget(null);
-        }}
-        onRenamed={refresh}
-      />
-
       <MoveDialog
         sourceId={sourceId}
         request={moveRequest}
@@ -562,14 +571,6 @@ export function FileBrowser({
           setRowSelection({});
           router.refresh();
         }}
-      />
-
-      <NewFolderDialog
-        sourceId={sourceId}
-        prefix={prefix}
-        open={newFolderOpen}
-        onOpenChange={setNewFolderOpen}
-        onCreated={refresh}
       />
 
       <SearchDialog

@@ -1,11 +1,12 @@
 "use client";
 
 import type { OnChangeFn, SortingState } from "@tanstack/react-table";
-import { FileSearch, FolderPlus, Search, Upload } from "lucide-react";
+import { FileSearch, Search, Upload } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GridSortMenu } from "@/features/browser/components/grid-sort-menu";
+import { NewFolderPopover } from "@/features/browser/components/new-folder-popover";
 import type { ViewMode } from "@/features/browser/lib/view";
 
 /** Default toolbar (no selection active): name filter, grid sort menu, and
@@ -20,7 +21,9 @@ export function BrowserToolbar({
   sorting,
   onSortingChange,
   canUpload,
-  onNewFolder,
+  sourceId,
+  prefix,
+  onFolderCreated,
   onUploadFiles,
   onSearchSource,
 }: {
@@ -32,7 +35,9 @@ export function BrowserToolbar({
   sorting: SortingState;
   onSortingChange: OnChangeFn<SortingState>;
   canUpload: boolean;
-  onNewFolder: () => void;
+  sourceId: string;
+  prefix: string;
+  onFolderCreated: () => void;
   onUploadFiles: (files: FileList) => void;
   /** Opens the source-wide search dialog (the input filters this folder only). */
   onSearchSource: () => void;
@@ -78,15 +83,11 @@ export function BrowserToolbar({
         ) : null}
         {canUpload ? (
           <>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8"
-              onClick={onNewFolder}
-            >
-              <FolderPlus aria-hidden />
-              New folder
-            </Button>
+            <NewFolderPopover
+              sourceId={sourceId}
+              prefix={prefix}
+              onCreated={onFolderCreated}
+            />
             <input
               ref={fileInput}
               type="file"

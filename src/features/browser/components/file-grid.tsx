@@ -10,6 +10,7 @@ import {
   EntryContextMenu,
 } from "@/features/browser/components/entry-actions";
 import { FileIcon } from "@/features/browser/components/file-icon";
+import { InlineRenameInput } from "@/features/browser/components/inline-rename";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
@@ -49,6 +50,8 @@ export function FileGrid({
   onDuplicate,
   selection,
   canMove = false,
+  renamingId,
+  onRenameEnd,
 }: {
   sourceId: string;
   folders: FolderEntry[];
@@ -66,6 +69,10 @@ export function FileGrid({
   onDuplicate?: (file: FileEntry) => void;
   selection?: GridSelection;
   canMove?: boolean;
+  /** Card id (folder prefix / file key) currently renaming inline. */
+  renamingId?: string | null;
+  /** Ends the inline rename; true when a rename actually happened. */
+  onRenameEnd?: (renamed: boolean) => void;
 }) {
   return (
     <div className="space-y-6">
@@ -84,6 +91,8 @@ export function FileGrid({
                 selection={selection}
                 onRename={onRename}
                 onDelete={onDelete}
+                renaming={renamingId === folder.prefix}
+                onRenameEnd={onRenameEnd}
               />
             ))}
           </div>
@@ -109,6 +118,8 @@ export function FileGrid({
                 onRename={onRename}
                 onDuplicate={onDuplicate}
                 onDelete={onDelete}
+                renaming={renamingId === file.key}
+                onRenameEnd={onRenameEnd}
               />
             ))}
           </div>
@@ -125,6 +136,8 @@ function FolderCard({
   selection,
   onRename,
   onDelete,
+  renaming = false,
+  onRenameEnd,
 }: {
   sourceId: string;
   folder: FolderEntry;
@@ -132,6 +145,8 @@ function FolderCard({
   selection?: GridSelection;
   onRename?: (entry: BrowserEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
+  renaming?: boolean;
+  onRenameEnd?: (renamed: boolean) => void;
 }) {
   const dnd = useEntryDnd({
     rowId: folder.prefix,
@@ -193,7 +208,16 @@ function FolderCard({
           )}
         </div>
         <div className="min-w-0 flex-1 space-y-0.5">
-          <p className="truncate text-sm font-medium">{folder.name}</p>
+          {renaming && onRenameEnd ? (
+            <InlineRenameInput
+              sourceId={sourceId}
+              entry={entry}
+              onEnd={onRenameEnd}
+              className="relative z-10"
+            />
+          ) : (
+            <p className="truncate text-sm font-medium">{folder.name}</p>
+          )}
           <p className="text-xs text-muted-foreground">Folder</p>
         </div>
         {/* Overlay link keeps the whole card clickable without
@@ -229,6 +253,8 @@ function FileCard({
   onRename,
   onDuplicate,
   onDelete,
+  renaming = false,
+  onRenameEnd,
 }: {
   sourceId: string;
   file: FileEntry;
@@ -240,6 +266,8 @@ function FileCard({
   onRename?: (entry: BrowserEntry) => void;
   onDuplicate?: (file: FileEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
+  renaming?: boolean;
+  onRenameEnd?: (renamed: boolean) => void;
 }) {
   const dnd = useEntryDnd({
     rowId: file.key,
@@ -294,7 +322,16 @@ function FileCard({
           )}
         </div>
         <div className="space-y-0.5 border-t px-3 py-2">
-          <p className="truncate text-sm font-medium">{file.name}</p>
+          {renaming && onRenameEnd ? (
+            <InlineRenameInput
+              sourceId={sourceId}
+              entry={entry}
+              onEnd={onRenameEnd}
+              className="relative z-10"
+            />
+          ) : (
+            <p className="truncate text-sm font-medium">{file.name}</p>
+          )}
           <p className="font-mono text-xs text-muted-foreground">
             {formatBytes(file.size)}
           </p>

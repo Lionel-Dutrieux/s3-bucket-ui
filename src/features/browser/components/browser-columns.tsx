@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { downloadUrl, zipUrl } from "@/features/browser/api/client";
 import { EntryActionsMenu } from "@/features/browser/components/entry-actions";
 import { FileIcon } from "@/features/browser/components/file-icon";
+import { InlineRenameInput } from "@/features/browser/components/inline-rename";
 import {
   type BrowserEntry,
   compareByModified,
@@ -34,6 +35,10 @@ declare module "@tanstack/react-table" {
     /** Only set when the viewer holds the edit capability (a duplicate
      * creates content). Files only. */
     onDuplicate?: (file: FileEntry) => void;
+    /** Row id (folder prefix / file key) currently renaming inline. */
+    renamingId?: string | null;
+    /** Ends the inline rename; true when a rename actually happened. */
+    onRenameEnd?: (renamed: boolean) => void;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -107,7 +112,27 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
     meta: { cellClassName: "p-0" },
     cell: ({ row, table }) => {
       const entry = row.original;
-      const { sourceId, onPreview, onDetails } = table.options.meta ?? {};
+      const { sourceId, onPreview, onDetails, renamingId, onRenameEnd } =
+        table.options.meta ?? {};
+      if (renamingId === row.id && sourceId && onRenameEnd) {
+        return (
+          <div className={NAME_CELL_CLASS}>
+            {entry.kind === "folder" ? (
+              <Folder
+                className="size-4 shrink-0 fill-amber-400/80 text-primary"
+                aria-hidden
+              />
+            ) : (
+              <FileIcon name={entry.name} className="size-4 shrink-0" />
+            )}
+            <InlineRenameInput
+              sourceId={sourceId}
+              entry={entry}
+              onEnd={onRenameEnd}
+            />
+          </div>
+        );
+      }
       if (entry.kind === "folder") {
         return (
           <Link
