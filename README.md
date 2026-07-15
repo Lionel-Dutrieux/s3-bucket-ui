@@ -212,17 +212,28 @@ protocol also needs a case in `src/lib/storage/client.ts`.
 
 ## Production
 
+### Prebuilt image (GHCR)
+
+Every push to `master` publishes
+`ghcr.io/lionel-dutrieux/s3-bucket-ui:latest` to the repo's Packages, and
+every `v*` tag (or Release) publishes the matching semver tags (`1.2.3`,
+`1.2`, `1`):
+
+```bash
+docker pull ghcr.io/lionel-dutrieux/s3-bucket-ui:latest
+```
+
 ### Docker Compose (recommended)
 
-`docker-compose.yml` runs the app, ready for [Dokploy](https://dokploy.com)
-(external `dokploy-network`, domain and secrets configured in the UI). Bring
-your own PostgreSQL — a Dokploy-managed database or any reachable instance — and
-point `DATABASE_URL` at it:
+`docker-compose.yml` runs the prebuilt image, ready for
+[Dokploy](https://dokploy.com) (external `dokploy-network`, domain and
+secrets configured in the UI). Bring your own PostgreSQL — a Dokploy-managed
+database or any reachable instance — and point `DATABASE_URL` at it:
 
 ```bash
 ENCRYPTION_KEY=$(openssl rand -hex 32) \
 DATABASE_URL=postgresql://user:password@host:5432/bucket_ui \
-docker compose up --build -d
+docker compose up -d
 ```
 
 The image is a multi-stage standalone build (non-root, healthcheck on

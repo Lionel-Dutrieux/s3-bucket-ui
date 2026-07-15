@@ -19,7 +19,10 @@
 
 services:
   bucket-ui:
-    build: .
+    # Prebuilt image published by .github/workflows/docker.yml on every push
+    # to master (:latest) and every v* tag (:1.2.3). Swap for `build: .` to
+    # build from source instead.
+    image: ghcr.io/lionel-dutrieux/s3-bucket-ui:latest
     restart: unless-stopped
     environment:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}

@@ -67,6 +67,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Integration tests (MinIO)
-        run: pnpm vitest run features/browser/integration.test.ts
+        run: pnpm vitest run src/features/browser/server/integration.test.ts
         env:
           S3_TEST_ENDPOINT: http://localhost:9000
