@@ -20,6 +20,7 @@ model Source {
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   grants SourcePermission[]
+  shares Share[]
 
   @@map("sources")
 }
@@ -180,4 +181,26 @@ model SourcePermission {
   @@index([userId])
   @@index([groupId])
   @@map("source_permissions")
+}
+
+/// Public share link — the app-minted token (the row id) is the capability:
+/// anyone holding the URL passes, and expiry/revocation/password on the row
+/// gate it. Deleting a source cascades and kills its links; createdById has
+/// no FK so links survive account deletion (mirrors Operation.userId).
+model Share {
+  id           String    @id
+  sourceId     String    @map("source_id") @db.Uuid
+  key          String
+  createdById  String    @map("created_by_id")
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz(3)
+  passwordHash String?   @map("password_hash")
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
+  downloads    Int       @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+  @@index([createdById])
+  @@map("shares")
 }
