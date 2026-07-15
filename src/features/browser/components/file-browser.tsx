@@ -59,7 +59,7 @@ import {
 } from "@/features/browser/components/move-dialog";
 import { MoveToDialog } from "@/features/browser/components/move-to-dialog";
 import { PreviewDialog } from "@/features/browser/components/preview-dialog";
-import { SearchDialog } from "@/features/browser/components/search-dialog";
+import { SearchCommand } from "@/features/browser/components/search-command";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
 import { ShareDialog } from "@/features/browser/components/share-dialog";
 import { UploadTray } from "@/features/browser/components/upload-tray";
@@ -591,7 +591,7 @@ export function FileBrowser({
         }}
       />
 
-      <SearchDialog
+      <SearchCommand
         sourceId={sourceId}
         open={searchOpen}
         onOpenChange={setSearchOpen}
