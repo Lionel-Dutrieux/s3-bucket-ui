@@ -20,30 +20,9 @@ import {
 } from "@/components/ui/dialog";
 import { downloadUrl, previewSrc } from "@/features/browser/api/client";
 import { browserQueries } from "@/features/browser/api/queries";
-import { categoryOf, isTextFile } from "@/features/browser/lib/file-types";
 import type { FileEntry } from "@/features/browser/lib/listing";
+import { previewKindOf } from "@/features/browser/lib/preview-kind";
 import { formatBytes, formatDate } from "@/lib/format";
-
-type PreviewKind = "image" | "pdf" | "video" | "audio" | "text";
-
-/** How the dialog renders a file, or undefined when it can't. */
-export function previewKindOf(name: string): PreviewKind | undefined {
-  const category = categoryOf(name);
-  if (
-    category === "image" ||
-    category === "pdf" ||
-    category === "video" ||
-    category === "audio"
-  ) {
-    return category;
-  }
-  return isTextFile(name) ? "text" : undefined;
-}
-
-/** Kinds the dialog can render without executing bucket content. */
-export function isPreviewable(name: string): boolean {
-  return previewKindOf(name) !== undefined;
-}
 
 const NAV_BUTTON_CLASS =
   "absolute top-1/2 z-10 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full border bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:text-foreground";
@@ -70,6 +49,8 @@ export function PreviewDialog({
   const [failedKey, setFailedKey] = useState<string | null>(null);
 
   const kind = file ? previewKindOf(file.name) : undefined;
+  const isTextual =
+    kind === "text" || kind === "code" || kind === "markdown" || kind === "csv";
 
   // Media kinds point their src straight at /source/[id]/preview (which
   // redirects to a presigned URL) — only text needs a fetch, because bucket
@@ -77,7 +58,7 @@ export function PreviewDialog({
   const key = file?.key;
   const textQuery = useQuery({
     ...browserQueries.textPreview(sourceId, key ?? ""),
-    enabled: file !== null && kind === "text" && file.size > 0,
+    enabled: file !== null && isTextual && file.size > 0,
   });
 
   const src = file ? previewSrc(sourceId, file.key) : "";
@@ -128,7 +109,7 @@ export function PreviewDialog({
             </DialogHeader>
 
             <div className="relative flex min-h-48 items-center justify-center overflow-hidden rounded-md border bg-muted/40">
-              {kind === "text" ? (
+              {isTextual ? (
                 file.size === 0 ? (
                   <TextPreview text="" />
                 ) : textQuery.isPending ? (

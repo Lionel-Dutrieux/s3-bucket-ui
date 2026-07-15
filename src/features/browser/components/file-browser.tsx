@@ -58,10 +58,7 @@ import {
   type MoveRequest,
 } from "@/features/browser/components/move-dialog";
 import { NewFolderDialog } from "@/features/browser/components/new-folder-dialog";
-import {
-  isPreviewable,
-  PreviewDialog,
-} from "@/features/browser/components/preview-dialog";
+import { PreviewDialog } from "@/features/browser/components/preview-dialog";
 import { RenameDialog } from "@/features/browser/components/rename-dialog";
 import { SearchDialog } from "@/features/browser/components/search-dialog";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
@@ -80,6 +77,7 @@ import {
   folderName,
   planMove,
 } from "@/features/browser/lib/move";
+import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
