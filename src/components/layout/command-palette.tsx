@@ -16,6 +16,9 @@ import {
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import type { SourceSummary } from "@/lib/dal/sources";
 
+/** Window event that opens the palette from anywhere (sidebar button). */
+export const OPEN_COMMAND_PALETTE_EVENT = "bucket-ui:command-palette";
+
 /** Ctrl/Cmd+K palette: jump to a source, or to the admin area (admins). */
 export function CommandPalette({
   sources,
@@ -39,8 +42,15 @@ export function CommandPalette({
         setOpen((current) => !current);
       }
     };
+    // The sidebar search button lives in another tree — it asks for the
+    // palette through this event instead of threading state up the layout.
+    const onOpenRequest = () => setOpen(true);
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, onOpenRequest);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, onOpenRequest);
+    };
   }, []);
 
   return (
@@ -71,7 +81,7 @@ export function CommandPalette({
                     >
                       <Icon aria-hidden />
                       <span className="truncate">{source.name}</span>
-                      <span className="ml-auto truncate font-mono text-xs text-muted-foreground">
+                      <span className="ml-auto truncate text-xs text-muted-foreground">
                         {source.bucket}
                       </span>
                     </CommandItem>

@@ -1,14 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Download, Loader2, X } from "lucide-react";
+import { Copy, Download, Loader2, Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { downloadUrl } from "@/features/browser/api/client";
+import { downloadUrl, thumbnailSrc } from "@/features/browser/api/client";
 import { browserQueries } from "@/features/browser/api/queries";
+import { FileIcon } from "@/features/browser/components/file-icon";
+import { categoryOf } from "@/features/browser/lib/file-types";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { copyText } from "@/lib/clipboard";
-import { formatBytes, formatDate } from "@/lib/format";
+import { formatBytes, formatDate, formatRelative } from "@/lib/format";
 
 /**
  * Object metadata (HEAD request) in a non-blocking side panel: an inline
@@ -19,10 +21,13 @@ export function DetailsPanel({
   sourceId,
   file,
   onClose,
+  onShare,
 }: {
   sourceId: string;
   file: FileEntry;
   onClose: () => void;
+  /** Absent when sharing is off (instance-wide setting) — hides the action. */
+  onShare?: (file: FileEntry) => void;
 }) {
   const {
     data: details,
@@ -41,15 +46,12 @@ export function DetailsPanel({
   return (
     <aside
       aria-label="File details"
-      className="fixed inset-y-0 right-0 z-40 flex w-[85vw] max-w-sm flex-col gap-3 overflow-y-auto border-l bg-background p-4 shadow-lg md:sticky md:top-[4.25rem] md:z-auto md:max-h-[calc(100dvh-5.5rem)] md:w-72 md:shrink-0 md:rounded-lg md:border md:shadow-none"
+      className="fixed inset-y-0 right-0 z-40 flex w-[85vw] max-w-sm flex-col gap-3 overflow-y-auto border-l bg-background p-4 shadow-lg md:sticky md:top-[4.25rem] md:z-auto md:max-h-[calc(100dvh-5.5rem)] md:w-72 md:shrink-0 md:rounded-lg md:border md:bg-card md:shadow-none"
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h2 className="truncate font-heading text-base font-medium">
-            {file.name}
-          </h2>
-          <p className="text-sm text-muted-foreground">File details</p>
-        </div>
+        <h2 className="min-w-0 truncate pt-1 font-heading text-base font-medium">
+          {file.name}
+        </h2>
         <Button
           type="button"
           variant="ghost"
@@ -60,6 +62,22 @@ export function DetailsPanel({
         >
           <X aria-hidden />
         </Button>
+      </div>
+
+      {/* Visual anchor: the image itself when there is one, the type icon
+          otherwise — the Drive panel pattern. */}
+      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md border bg-muted/40">
+        {categoryOf(file.name) === "image" ? (
+          // biome-ignore lint/performance/noImgElement: redirects to a presigned bucket URL, not optimizable
+          <img
+            src={thumbnailSrc(sourceId, file.key)}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <FileIcon name={file.name} className="size-14" />
+        )}
       </div>
 
       <div className="flex items-start gap-2 rounded-md border bg-muted/40 p-3">
@@ -92,24 +110,54 @@ export function DetailsPanel({
         </p>
       ) : (
         <dl className="grid gap-y-3 text-sm">
-          <DetailRow label="Size">{formatBytes(details.size)}</DetailRow>
-          <DetailRow label="Content-Type">
-            {details.contentType ?? "—"}
+          <DetailRow label="Size">
+            <span className="tabular-nums">{formatBytes(details.size)}</span>
           </DetailRow>
-          <DetailRow label="ETag">{details.etag ?? "—"}</DetailRow>
           <DetailRow label="Modified">
-            {details.lastModified ? formatDate(details.lastModified) : "—"}
+            {details.lastModified ? (
+              <span
+                title={formatDate(details.lastModified)}
+                suppressHydrationWarning
+              >
+                {formatRelative(details.lastModified)}
+              </span>
+            ) : (
+              "—"
+            )}
           </DetailRow>
+          <DetailRow label="Content-Type">
+            <span className="font-mono text-xs">
+              {details.contentType ?? "—"}
+            </span>
+          </DetailRow>
+          {details.etag ? (
+            <DetailRow label="ETag">
+              <span className="break-all font-mono text-xs text-muted-foreground">
+                {details.etag}
+              </span>
+            </DetailRow>
+          ) : null}
           {Object.entries(details.metadata ?? {}).map(([name, value]) => (
             <DetailRow key={name} label={name}>
-              {value}
+              <span className="break-all font-mono text-xs">{value}</span>
             </DetailRow>
           ))}
         </dl>
       )}
 
-      <div className="mt-auto pt-2">
-        <Button asChild className="w-full">
+      <div className="mt-auto flex gap-2 pt-2">
+        {onShare ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onShare(file)}
+          >
+            <Share2 aria-hidden />
+            Share
+          </Button>
+        ) : null}
+        <Button asChild className="flex-1">
           <a href={downloadUrl(sourceId, file.key)}>
             <Download aria-hidden />
             Download
@@ -130,7 +178,7 @@ function DetailRow({
   return (
     <div className="min-w-0">
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="break-all font-mono text-xs leading-5">{children}</dd>
+      <dd className="leading-5">{children}</dd>
     </div>
   );
 }

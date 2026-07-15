@@ -36,3 +36,30 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en", {
 export function formatDateTime(value: Date): string {
   return Number.isNaN(value.getTime()) ? "—" : dateTimeFormatter.format(value);
 }
+
+const relativeFormatter = new Intl.RelativeTimeFormat("en", {
+  numeric: "auto",
+});
+
+/**
+ * "2 hours ago" / "yesterday" for anything under a week, the plain date
+ * beyond that — pair it with the exact date in a title/tooltip.
+ */
+export function formatRelative(input?: number | Date): string {
+  if (input === undefined) return "—";
+  const time = input instanceof Date ? input.getTime() : input;
+  if (Number.isNaN(time)) return "—";
+  const seconds = Math.round((time - Date.now()) / 1000);
+  const elapsed = Math.abs(seconds);
+  if (elapsed < 60) return "just now";
+  if (elapsed < 3600) {
+    return relativeFormatter.format(Math.trunc(seconds / 60), "minute");
+  }
+  if (elapsed < 86400) {
+    return relativeFormatter.format(Math.trunc(seconds / 3600), "hour");
+  }
+  if (elapsed < 7 * 86400) {
+    return relativeFormatter.format(Math.trunc(seconds / 86400), "day");
+  }
+  return dateFormatter.format(new Date(time));
+}

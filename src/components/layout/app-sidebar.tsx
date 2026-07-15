@@ -1,8 +1,16 @@
 "use client";
 
-import { Cylinder, HardDrive, History, Link2, Settings2 } from "lucide-react";
+import {
+  Cylinder,
+  HardDrive,
+  History,
+  Link2,
+  Search,
+  Settings2,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { OPEN_COMMAND_PALETTE_EVENT } from "@/components/layout/command-palette";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import {
   Sidebar,
@@ -56,13 +64,25 @@ export function AppSidebar({
           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <Cylinder className="size-4" aria-hidden />
           </div>
-          <div className="grid leading-tight">
-            <span className="text-sm font-semibold tracking-tight">
-              Bucket UI
-            </span>
-            <span className="text-xs text-muted-foreground">File manager</span>
-          </div>
+          <span className="text-sm font-semibold tracking-tight">
+            Bucket UI
+          </span>
         </Link>
+        {/* Visible doorway to the Ctrl/Cmd+K palette — the shortcut alone
+            is undiscoverable. */}
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT))
+          }
+          className="flex h-8 w-full items-center gap-2 rounded-lg border bg-background px-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <Search className="size-3.5" aria-hidden />
+          <span className="flex-1 text-left">Search…</span>
+          <kbd className="rounded border bg-muted px-1 font-mono text-[10px]">
+            ⌘K
+          </kbd>
+        </button>
       </SidebarHeader>
 
       <SidebarContent>
@@ -90,9 +110,13 @@ export function AppSidebar({
                             <span className="truncate text-sm font-medium">
                               {source.name}
                             </span>
-                            <span className="truncate font-mono text-xs text-muted-foreground">
-                              {source.bucket}
-                            </span>
+                            {/* The bucket only helps when it differs from
+                                the display name. */}
+                            {source.bucket !== source.name ? (
+                              <span className="truncate text-xs text-muted-foreground">
+                                {source.bucket}
+                              </span>
+                            ) : null}
                           </div>
                         </Link>
                       </SidebarMenuButton>

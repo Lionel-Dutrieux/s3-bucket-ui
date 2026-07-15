@@ -33,7 +33,8 @@ function extensionOf(name: string): string | null {
  * Ids are the row ids the table uses: folder prefix or file key. */
 export interface GridSelection {
   isSelected: (id: string) => boolean;
-  toggle: (id: string) => void;
+  /** Shift-clicks extend the selection to the whole visible range. */
+  toggle: (id: string, shift: boolean) => void;
   /** True while anything is selected — keeps every checkbox visible. */
   active: boolean;
 }
@@ -197,7 +198,10 @@ function FolderCard({
               />
               <Checkbox
                 checked={selection.isSelected(folder.prefix)}
-                onCheckedChange={() => selection.toggle(folder.prefix)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  selection.toggle(folder.prefix, event.shiftKey);
+                }}
                 aria-label={`Select ${folder.name}`}
                 className={cn(
                   "bg-background",
@@ -342,7 +346,7 @@ function FileCard({
           ) : (
             <p className="truncate text-sm font-medium">{file.name}</p>
           )}
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground tabular-nums">
             {formatBytes(file.size)}
           </p>
         </div>
@@ -373,7 +377,10 @@ function FileCard({
         {selection ? (
           <Checkbox
             checked={selection.isSelected(file.key)}
-            onCheckedChange={() => selection.toggle(file.key)}
+            onClick={(event) => {
+              event.preventDefault();
+              selection.toggle(file.key, event.shiftKey);
+            }}
             aria-label={`Select ${file.name}`}
             className={cn(
               "absolute left-2 top-2 z-10 bg-background/90 shadow-sm backdrop-blur transition-opacity",

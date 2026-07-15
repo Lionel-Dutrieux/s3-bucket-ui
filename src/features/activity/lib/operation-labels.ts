@@ -3,6 +3,8 @@ import {
   Copy,
   FolderInput,
   FolderPlus,
+  Link2,
+  Link2Off,
   type LucideIcon,
   Pencil,
   ShieldAlert,
@@ -30,6 +32,8 @@ const LABELS: Record<string, OperationLabel> = {
   copy: { label: "Duplicated", icon: Copy },
   "copy-to": { label: "Copied", icon: Copy },
   migrate: { label: "Copied source", icon: ArrowRightLeft },
+  "share-create": { label: "Shared link created", icon: Link2 },
+  "share-revoke": { label: "Shared link revoked", icon: Link2Off },
   "sign-in-failed": {
     label: "Sign-in failed",
     icon: ShieldAlert,

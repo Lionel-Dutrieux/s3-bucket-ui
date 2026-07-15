@@ -94,7 +94,7 @@ export function MigrateSourceDialog({
                 <SelectItem key={candidate.id} value={candidate.id}>
                   <Icon className="size-4 text-muted-foreground" aria-hidden />
                   {candidate.name}
-                  <span className="font-mono text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {candidate.bucket}
                   </span>
                 </SelectItem>

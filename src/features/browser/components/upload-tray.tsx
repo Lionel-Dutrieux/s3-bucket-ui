@@ -83,7 +83,7 @@ export function UploadTray({
                 <p className="min-w-0 flex-1 truncate text-sm">{item.name}</p>
                 {item.status === "uploading" ? (
                   <>
-                    <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       {Math.round(item.progress * 100)}%
                     </span>
                     <button
@@ -98,7 +98,7 @@ export function UploadTray({
                   </>
                 ) : item.status === "done" ? (
                   <>
-                    <span className="font-mono text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       {formatBytes(item.size)}
                     </span>
                     <Check

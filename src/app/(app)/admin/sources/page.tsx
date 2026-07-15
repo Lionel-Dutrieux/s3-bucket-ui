@@ -64,7 +64,7 @@ export default async function AdminSourcesPage() {
                     <h3 className="truncate text-sm font-semibold">
                       {source.name}
                     </h3>
-                    <p className="truncate font-mono text-xs text-muted-foreground">
+                    <p className="truncate text-xs text-muted-foreground">
                       {getProvider(source.provider)?.label ?? source.provider} ·{" "}
                       {source.bucket}
                     </p>

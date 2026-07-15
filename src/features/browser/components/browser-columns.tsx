@@ -16,7 +16,7 @@ import {
 } from "@/features/browser/lib/entries";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
-import { formatBytes, formatDate } from "@/lib/format";
+import { formatBytes, formatDate, formatRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 declare module "@tanstack/react-table" {
@@ -41,6 +41,8 @@ declare module "@tanstack/react-table" {
     renamingId?: string | null;
     /** Ends the inline rename; true when a rename actually happened. */
     onRenameEnd?: (renamed: boolean) => void;
+    /** Selection toggle that understands shift-click ranges. */
+    onToggleSelect?: (id: string, shift: boolean) => void;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -53,7 +55,8 @@ const NAME_CELL_CLASS = "flex h-12 w-full items-center gap-3 px-2 text-left";
 // where nothing ever hovers.
 const ROW_ACTION_CLASS =
   "inline-flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100";
-const NUMERIC_CELL_CLASS = "text-right font-mono text-xs text-muted-foreground";
+const NUMERIC_CELL_CLASS =
+  "text-right text-xs text-muted-foreground tabular-nums";
 
 // Sorting is delegated to pure comparators; TanStack inverts them for the
 // descending direction, and the table re-groups folders first afterwards.
@@ -90,19 +93,36 @@ export const selectColumn: ColumnDef<BrowserEntry> = {
       />
     );
   },
-  cell: ({ row, table }) => (
-    <Checkbox
-      checked={row.getIsSelected()}
-      onCheckedChange={(value) => row.toggleSelected(value === true)}
-      aria-label={`Select ${row.original.name}`}
-      className={cn(
-        "transition-opacity",
-        !row.getIsSelected() &&
-          table.getSelectedRowModel().rows.length === 0 &&
-          "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100",
-      )}
-    />
-  ),
+  cell: ({ row, table }) => {
+    const onToggleSelect = table.options.meta?.onToggleSelect;
+    return (
+      <Checkbox
+        checked={row.getIsSelected()}
+        // preventDefault keeps Radix from toggling on its own; the handler
+        // owns the state so shift-click can select the whole range.
+        onClick={
+          onToggleSelect
+            ? (event) => {
+                event.preventDefault();
+                onToggleSelect(row.id, event.shiftKey);
+              }
+            : undefined
+        }
+        onCheckedChange={
+          onToggleSelect
+            ? undefined
+            : (value) => row.toggleSelected(value === true)
+        }
+        aria-label={`Select ${row.original.name}`}
+        className={cn(
+          "transition-opacity",
+          !row.getIsSelected() &&
+            table.getSelectedRowModel().rows.length === 0 &&
+            "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100",
+        )}
+      />
+    );
+  },
 };
 
 export const browserColumns: ColumnDef<BrowserEntry>[] = [
@@ -200,9 +220,19 @@ export const browserColumns: ColumnDef<BrowserEntry>[] = [
       cellClassName: NUMERIC_CELL_CLASS,
     },
     cell: ({ row }) =>
-      row.original.kind === "file"
-        ? formatDate(row.original.lastModified)
-        : "—",
+      row.original.kind === "file" && row.original.lastModified ? (
+        // Relative reads faster; the exact date lives in the tooltip. The
+        // wall clock shifts between server render and hydration — suppress
+        // the (harmless) mismatch.
+        <span
+          title={formatDate(row.original.lastModified)}
+          suppressHydrationWarning
+        >
+          {formatRelative(row.original.lastModified)}
+        </span>
+      ) : (
+        "—"
+      ),
   },
   {
     id: "actions",
