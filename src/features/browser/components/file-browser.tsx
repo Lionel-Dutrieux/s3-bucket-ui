@@ -127,7 +127,23 @@ export function FileBrowser({
     "sort",
     sortParser.withDefault([]),
   );
-  const [preview, setPreview] = useState<FileEntry | null>(null);
+  // The previewed file lives in the URL: refresh restores it, Back closes it,
+  // and the address bar is a deep link to "look at this file".
+  const [previewKey, setPreviewKey] = useQueryState(
+    "preview",
+    parseAsString.withOptions({ history: "push" }),
+  );
+  const preview = useMemo(
+    () =>
+      previewKey === null
+        ? null
+        : (files.find((file) => file.key === previewKey) ?? null),
+    [files, previewKey],
+  );
+  const openPreview = useCallback(
+    (file: FileEntry) => setPreviewKey(file.key),
+    [setPreviewKey],
+  );
   const [details, setDetails] = useState<FileEntry | null>(null);
   const [shareTarget, setShareTarget] = useState<FileEntry | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BrowserEntry | null>(null);
@@ -227,7 +243,7 @@ export function FileBrowser({
     enableMultiSort: false,
     meta: {
       sourceId,
-      onPreview: setPreview,
+      onPreview: openPreview,
       onShare: canShare ? setShareTarget : undefined,
       onDetails: setDetails,
       onDelete: permissions.delete ? setDeleteTarget : undefined,
@@ -440,7 +456,7 @@ export function FileBrowser({
               files={rows
                 .map((row) => row.original)
                 .filter((entry) => entry.kind === "file")}
-              onPreview={setPreview}
+              onPreview={openPreview}
               onShare={canShare ? setShareTarget : undefined}
               onDetails={setDetails}
               onDelete={permissions.delete ? setDeleteTarget : undefined}
@@ -470,9 +486,9 @@ export function FileBrowser({
         sourceId={sourceId}
         file={preview}
         files={previewFiles}
-        onFileChange={setPreview}
+        onFileChange={openPreview}
         onOpenChange={(open) => {
-          if (!open) setPreview(null);
+          if (!open) setPreviewKey(null);
         }}
         onShare={canShare ? setShareTarget : undefined}
       />
