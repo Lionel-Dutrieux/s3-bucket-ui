@@ -6,8 +6,8 @@ import {
   Folder,
   FolderDown,
   Info,
-  Link2,
   Pencil,
+  Share2,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
@@ -49,7 +49,7 @@ export function FileGrid({
   folders,
   files,
   onPreview,
-  onCopyLink,
+  onShare,
   onDetails,
   onDelete,
   onRename,
@@ -61,8 +61,8 @@ export function FileGrid({
   folders: FolderEntry[];
   files: FileEntry[];
   onPreview: (file: FileEntry) => void;
-  /** Absent when the provider can't mint share links — hides the action. */
-  onCopyLink?: (file: FileEntry) => void;
+  /** Absent when sharing is off (instance-wide setting) — hides the action. */
+  onShare?: (file: FileEntry) => void;
   onDetails: (file: FileEntry) => void;
   /** Only set when the source allows deletions — absent hides the action.
    * Folders delete recursively (every object under the prefix). */
@@ -111,7 +111,7 @@ export function FileGrid({
                 canMove={canMove}
                 selection={selection}
                 onPreview={onPreview}
-                onCopyLink={onCopyLink}
+                onShare={onShare}
                 onDetails={onDetails}
                 onRename={onRename}
                 onDuplicate={onDuplicate}
@@ -252,7 +252,7 @@ function FileCard({
   canMove,
   selection,
   onPreview,
-  onCopyLink,
+  onShare,
   onDetails,
   onRename,
   onDuplicate,
@@ -263,7 +263,7 @@ function FileCard({
   canMove: boolean;
   selection?: GridSelection;
   onPreview: (file: FileEntry) => void;
-  onCopyLink?: (file: FileEntry) => void;
+  onShare?: (file: FileEntry) => void;
   onDetails: (file: FileEntry) => void;
   onRename?: (entry: BrowserEntry) => void;
   onDuplicate?: (file: FileEntry) => void;
@@ -363,15 +363,15 @@ function FileCard({
         >
           <Info className="size-3.5" aria-hidden />
         </button>
-        {onCopyLink ? (
+        {onShare ? (
           <button
             type="button"
-            onClick={() => onCopyLink(file)}
+            onClick={() => onShare(file)}
             className={GRID_ACTION_CLASS}
-            aria-label={`Copy link to ${file.name}`}
-            title="Copy link"
+            aria-label={`Share ${file.name}`}
+            title="Share"
           >
-            <Link2 className="size-3.5" aria-hidden />
+            <Share2 className="size-3.5" aria-hidden />
           </button>
         ) : null}
         <a

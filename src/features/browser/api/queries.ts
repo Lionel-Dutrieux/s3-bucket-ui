@@ -3,7 +3,6 @@ import {
   fetchFileDetails,
   fetchFolders,
   fetchSearchResults,
-  fetchShareUrl,
   fetchTextPreview,
   fetchWritableSources,
 } from "@/features/browser/api/client";
@@ -47,13 +46,5 @@ export const browserQueries = {
       queryKey: [...browserQueries.all(sourceId), "folders", prefix],
       queryFn: () => fetchFolders(sourceId, prefix),
       staleTime: 30_000,
-    }),
-  /** Fetched imperatively (fetchQuery) on copy-link: the default staleTime
-   *  of 0 dedupes rapid double-clicks yet mints a fresh link on each later
-   *  copy. */
-  shareUrl: (sourceId: string, key: string) =>
-    queryOptions({
-      queryKey: [...browserQueries.all(sourceId), "share", key],
-      queryFn: () => fetchShareUrl(sourceId, key),
     }),
 };

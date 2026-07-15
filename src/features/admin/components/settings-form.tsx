@@ -4,17 +4,23 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import { setOidcOnlyEnabled, setSignUpEnabled } from "@/features/admin/actions";
+import {
+  setOidcOnlyEnabled,
+  setPublicSharing,
+  setSignUpEnabled,
+} from "@/features/admin/actions";
 import type { ActionResult } from "@/lib/action-result";
 
 export function SettingsForm({
   signUpEnabled,
   oidcOnly,
   oidcConfigured,
+  sharingEnabled,
 }: {
   signUpEnabled: boolean;
   oidcOnly: boolean;
   oidcConfigured: boolean;
+  sharingEnabled: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -58,6 +64,20 @@ export function SettingsForm({
           run(
             () => setOidcOnlyEnabled(enabled),
             enabled ? "OIDC-only mode enabled" : "OIDC-only mode disabled",
+          )
+        }
+      />
+      <SettingRow
+        title="Public share links"
+        description="Let users with access to a source create public links to its files (revocable, expirable, optionally password-protected). Turning this off blocks creating new links — existing ones keep working until revoked or expired."
+        checked={sharingEnabled}
+        disabled={pending}
+        onChange={(enabled) =>
+          run(
+            () => setPublicSharing(enabled),
+            enabled
+              ? "Public share links enabled"
+              : "Public share links disabled",
           )
         }
       />

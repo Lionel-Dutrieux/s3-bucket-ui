@@ -1,6 +1,6 @@
 "use client";
 
-import { Cylinder, HardDrive, History, Settings2 } from "lucide-react";
+import { Cylinder, HardDrive, History, Link2, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -132,29 +132,39 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter className="gap-3 p-3">
-        {admin ? (
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname === "/activity"}>
-                <Link href="/activity">
-                  <History className="size-4" aria-hidden />
-                  Activity
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith("/admin")}
-              >
-                <Link href="/admin/users">
-                  <Settings2 className="size-4" aria-hidden />
-                  Admin
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        ) : null}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname === "/shares"}>
+              <Link href="/shares">
+                <Link2 className="size-4" aria-hidden />
+                Shared links
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          {admin ? (
+            <>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === "/activity"}>
+                  <Link href="/activity">
+                    <History className="size-4" aria-hidden />
+                    Activity
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/admin")}
+                >
+                  <Link href="/admin/users">
+                    <Settings2 className="size-4" aria-hidden />
+                    Admin
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          ) : null}
+        </SidebarMenu>
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Theme</span>
           <ThemeToggle />

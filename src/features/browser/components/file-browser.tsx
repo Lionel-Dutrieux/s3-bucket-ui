@@ -12,7 +12,6 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -38,7 +37,6 @@ import {
   duplicateObject,
 } from "@/features/browser/actions";
 import { downloadUrl } from "@/features/browser/api/client";
-import { browserQueries } from "@/features/browser/api/queries";
 import {
   browserColumns,
   selectColumn,
@@ -67,6 +65,7 @@ import {
 import { RenameDialog } from "@/features/browser/components/rename-dialog";
 import { SearchDialog } from "@/features/browser/components/search-dialog";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
+import { ShareDialog } from "@/features/browser/components/share-dialog";
 import { UploadTray } from "@/features/browser/components/upload-tray";
 import { useDropUpload } from "@/features/browser/hooks/use-drop-upload";
 import { useUploads } from "@/features/browser/hooks/use-uploads";
@@ -121,11 +120,10 @@ export function FileBrowser({
   files: FileEntry[];
   view: ViewMode;
   permissions: BrowserPermissions;
-  /** False when the provider can't mint share links (SFTP, FTP, WebDAV). */
+  /** False when the admin switched public share links off. */
   canShare?: boolean;
 }) {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
   const [sorting, setSorting] = useQueryState(
     "sort",
@@ -133,6 +131,7 @@ export function FileBrowser({
   );
   const [preview, setPreview] = useState<FileEntry | null>(null);
   const [details, setDetails] = useState<FileEntry | null>(null);
+  const [shareTarget, setShareTarget] = useState<FileEntry | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BrowserEntry | null>(null);
   const [renameTarget, setRenameTarget] = useState<BrowserEntry | null>(null);
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
@@ -173,22 +172,6 @@ export function FileBrowser({
     setSorting((prev) =>
       typeof updater === "function" ? updater(prev) : updater,
     );
-  };
-
-  const handleCopyLink = async (file: FileEntry) => {
-    try {
-      // fetchQuery (not a bare fetch) dedupes rapid double-clicks; the default
-      // staleTime of 0 still mints a fresh link on each later copy.
-      const url = await queryClient.fetchQuery(
-        browserQueries.shareUrl(sourceId, file.key),
-      );
-      await navigator.clipboard.writeText(url);
-      toast.success("Link copied — valid for 1 hour");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Could not create a link.",
-      );
-    }
   };
 
   const handleDelete = async () => {
@@ -247,7 +230,7 @@ export function FileBrowser({
     meta: {
       sourceId,
       onPreview: setPreview,
-      onCopyLink: canShare ? handleCopyLink : undefined,
+      onShare: canShare ? setShareTarget : undefined,
       onDetails: setDetails,
       onDelete: permissions.delete ? setDeleteTarget : undefined,
       // Rename moves the object (write + delete), so it needs both.
@@ -460,7 +443,7 @@ export function FileBrowser({
                 .map((row) => row.original)
                 .filter((entry) => entry.kind === "file")}
               onPreview={setPreview}
-              onCopyLink={canShare ? handleCopyLink : undefined}
+              onShare={canShare ? setShareTarget : undefined}
               onDetails={setDetails}
               onDelete={permissions.delete ? setDeleteTarget : undefined}
               onRename={canRename ? setRenameTarget : undefined}
@@ -493,13 +476,20 @@ export function FileBrowser({
         onOpenChange={(open) => {
           if (!open) setPreview(null);
         }}
-        onCopyLink={canShare ? handleCopyLink : undefined}
+        onShare={canShare ? setShareTarget : undefined}
       />
       <DetailsDialog
         sourceId={sourceId}
         file={details}
         onOpenChange={(open) => {
           if (!open) setDetails(null);
+        }}
+      />
+      <ShareDialog
+        sourceId={sourceId}
+        file={shareTarget}
+        onOpenChange={(open) => {
+          if (!open) setShareTarget(null);
         }}
       />
 
