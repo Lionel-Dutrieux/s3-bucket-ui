@@ -1,0 +1,41 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+      placeholder: Steps to reproduce, expected behaviour, actual behaviour.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release tag or Docker image tag (e.g. `1.2.3`, `canary`).
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Storage provider involved
+      options:
+        - Not provider-related
+        - Cloudflare R2
+        - Amazon S3
+        - Google Cloud Storage
+        - Azure Blob Storage
+        - MinIO
+        - Other S3-compatible
+        - SFTP
+        - FTP / FTPS
+        - WebDAV / Nextcloud
+        - Other
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Server logs or browser console output, if any. Redact credentials.
+      render: shell
