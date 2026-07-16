@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/logo.svg" width="110" alt="Bucket UI logo" />
+<img src="public/logo.svg" width="110" alt="Bucket UI logo" />
 
 # Bucket UI
 
