@@ -700,6 +700,7 @@ export function FileBrowser({
       <UploadTray
         items={uploads.items}
         onCancel={uploads.cancel}
+        onRetry={uploads.retry}
         onDismiss={uploads.dismiss}
       />
     </div>

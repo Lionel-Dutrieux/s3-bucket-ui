@@ -32,6 +32,13 @@ export const SEARCH_TIMEOUT_MS = 15_000;
  * this keeps a single request's runtime sane well before that). */
 export const ZIP_MAX_ENTRIES = 5000;
 
+/** Browser uploads running at once — the rest wait in the client queue so a
+ * dropped folder of thousands of files can't open thousands of requests. */
+export const UPLOAD_CONCURRENCY = 4;
+/** Attempts per file before an upload is surfaced as failed (network errors
+ * and 5xx re-queue; 4xx fail immediately — retrying won't change the verdict). */
+export const UPLOAD_MAX_ATTEMPTS = 3;
+
 /** Objects deleted per bulk call (S3 caps bulk delete at 1000 keys). */
 export const DELETE_FOLDER_BATCH = 1000;
 /** Re-list/delete rounds before giving up on a colossal prefix. */

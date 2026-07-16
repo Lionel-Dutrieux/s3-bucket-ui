@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, CircleAlert, X } from "lucide-react";
+import { Check, ChevronDown, CircleAlert, RotateCw, X } from "lucide-react";
 import { useState } from "react";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import type { UploadItem } from "@/features/browser/hooks/use-uploads";
@@ -15,21 +15,25 @@ import { cn } from "@/lib/utils";
 export function UploadTray({
   items,
   onCancel,
+  onRetry,
   onDismiss,
 }: {
   items: UploadItem[];
   onCancel: (id: string) => void;
+  onRetry: (id: string) => void;
   onDismiss: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
   if (items.length === 0) return null;
 
-  const uploading = items.filter((item) => item.status === "uploading").length;
+  const inFlight = items.filter(
+    (item) => item.status === "uploading" || item.status === "queued",
+  ).length;
   const failed = items.filter((item) => item.status === "error").length;
   const title =
-    uploading > 0
-      ? `Uploading ${uploading} file${uploading === 1 ? "" : "s"}…`
+    inFlight > 0
+      ? `Uploading ${inFlight} file${inFlight === 1 ? "" : "s"}…`
       : failed > 0
         ? `${failed} upload${failed === 1 ? "" : "s"} failed`
         : `${items.length} upload${items.length === 1 ? "" : "s"} complete`;
@@ -62,7 +66,7 @@ export function UploadTray({
             aria-hidden
           />
         </button>
-        {uploading === 0 ? (
+        {inFlight === 0 ? (
           <button
             type="button"
             onClick={onDismiss}
@@ -81,10 +85,12 @@ export function UploadTray({
               <div className="flex items-center gap-2.5">
                 <FileIcon name={item.name} className="size-4 shrink-0" />
                 <p className="min-w-0 flex-1 truncate text-sm">{item.name}</p>
-                {item.status === "uploading" ? (
+                {item.status === "uploading" || item.status === "queued" ? (
                   <>
                     <span className="text-xs text-muted-foreground tabular-nums">
-                      {Math.round(item.progress * 100)}%
+                      {item.status === "queued"
+                        ? "Queued"
+                        : `${Math.round(item.progress * 100)}%`}
                     </span>
                     <button
                       type="button"
@@ -107,10 +113,21 @@ export function UploadTray({
                     />
                   </>
                 ) : (
-                  <CircleAlert
-                    className="size-4 shrink-0 text-destructive"
-                    aria-hidden
-                  />
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onRetry(item.id)}
+                      className="inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                      aria-label={`Retry upload of ${item.name}`}
+                      title="Retry"
+                    >
+                      <RotateCw className="size-3.5" aria-hidden />
+                    </button>
+                    <CircleAlert
+                      className="size-4 shrink-0 text-destructive"
+                      aria-hidden
+                    />
+                  </>
                 )}
               </div>
               {item.status === "uploading" ? (
