@@ -1,16 +1,15 @@
-import { Cylinder, Plus } from "lucide-react";
+import { Cylinder } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { SourceAccess } from "@/features/admin/components/source-access";
-import { providerIcon } from "@/features/sources/components/provider-icons";
+import { AddSourceButton } from "@/features/sources/components/add-source-button";
+import { ProviderPlate } from "@/features/sources/components/provider-logos";
 import { SourceCardActions } from "@/features/sources/components/source-card-actions";
 import { requireAdmin } from "@/lib/auth/session";
 import { listGroupOptions } from "@/lib/dal/groups";
 import { listGrantsForSource } from "@/lib/dal/permissions";
-import { listSources } from "@/lib/dal/sources";
+import { getSource, listSources } from "@/lib/dal/sources";
 import { listUserOptions } from "@/lib/dal/users";
 import { getProvider } from "@/lib/storage/providers";
 
@@ -23,9 +22,10 @@ export default async function AdminSourcesPage() {
     listUserOptions(),
     listGroupOptions(),
   ]);
-  const grantsBySource = await Promise.all(
-    sources.map((source) => listGrantsForSource(source.id)),
-  );
+  const [grantsBySource, details] = await Promise.all([
+    Promise.all(sources.map((source) => listGrantsForSource(source.id))),
+    Promise.all(sources.map((source) => getSource(source.id))),
+  ]);
 
   return (
     <>
@@ -33,12 +33,7 @@ export default async function AdminSourcesPage() {
         title="Sources"
         description="Connect buckets and decide who can use them. A grant row gives read access; the switches add edit (upload, rename, move, new folder) and delete."
       >
-        <Button size="sm" asChild>
-          <Link href="/admin/sources/new">
-            <Plus aria-hidden />
-            Add source
-          </Link>
-        </Button>
+        <AddSourceButton />
       </PageHeader>
 
       {sources.length === 0 ? (
@@ -50,16 +45,17 @@ export default async function AdminSourcesPage() {
       ) : (
         <div className="space-y-4">
           {sources.map((source, index) => {
-            const Icon = providerIcon(source.provider);
+            const detail = details[index];
             return (
               <section
                 key={source.id}
                 className="rounded-xl border bg-card shadow-sm"
               >
                 <header className="flex items-center gap-3 border-b px-4 py-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-                    <Icon className="size-4.5" aria-hidden />
-                  </div>
+                  <ProviderPlate
+                    providerId={source.provider}
+                    className="size-9"
+                  />
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-semibold">
                       {source.name}
@@ -71,6 +67,15 @@ export default async function AdminSourcesPage() {
                   </div>
                   <SourceCardActions
                     source={source}
+                    editValues={{
+                      name: source.name,
+                      provider: source.provider,
+                      bucket: source.bucket,
+                      endpoint: detail?.endpoint ?? "",
+                      accessKeyId: detail?.accessKeyId ?? "",
+                      // The secret never reaches the client — blank keeps it.
+                      secretAccessKey: "",
+                    }}
                     otherSources={sources.filter(
                       (other) => other.id !== source.id,
                     )}

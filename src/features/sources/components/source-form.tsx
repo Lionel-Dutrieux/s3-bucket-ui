@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2Icon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -10,6 +10,8 @@ import {
   testSourceConnection,
   updateSource,
 } from "@/features/sources/actions";
+import { providerHint } from "@/features/sources/components/provider-catalog";
+import { ProviderPlate } from "@/features/sources/components/provider-logos";
 import {
   type SourceFormValues,
   sourceInputSchema,
@@ -26,19 +28,28 @@ type TestStatus =
   | { state: "failed"; message: string };
 
 interface SourceFormProps {
+  /** Chosen in the provider picker — the form has no provider select. */
+  provider: string;
+  /** Sends the user back to the provider picker; typed values survive. */
+  onChangeProvider: () => void;
   onSuccess: () => void;
   /** When set, the form edits an existing source instead of creating one. */
   edit?: { sourceId: string; initialValues: SourceFormValues };
 }
 
-export function SourceForm({ onSuccess, edit }: SourceFormProps) {
+export function SourceForm({
+  provider,
+  onChangeProvider,
+  onSuccess,
+  edit,
+}: SourceFormProps) {
   const [serverError, setServerError] = useState<string>();
   const [test, setTest] = useState<TestStatus>({ state: "idle" });
 
   const form = useAppForm({
     defaultValues: edit?.initialValues ?? {
       name: "",
-      provider: PROVIDERS[0].id,
+      provider,
       endpoint: "",
       bucket: "",
       accessKeyId: "",
@@ -66,6 +77,14 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
     },
   });
 
+  // The picker owns the provider; mirror it into the (hidden) form value so
+  // validation and submission see the current choice.
+  useEffect(() => {
+    if (form.state.values.provider !== provider) {
+      form.setFieldValue("provider", provider);
+    }
+  }, [provider, form]);
+
   const handleTest = async () => {
     setServerError(undefined);
     setTest({ state: "testing" });
@@ -78,6 +97,9 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
     );
   };
 
+  const definition = getProvider(provider) ?? PROVIDERS[0];
+  const { bucket, accessKeyId, secretAccessKey } = definition.fieldLabels;
+
   return (
     <form
       onSubmit={(event) => {
@@ -86,15 +108,23 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
       }}
       className="space-y-4"
     >
-      <form.AppField name="provider">
-        {(field) => (
-          <field.SelectField
-            label="Provider"
-            options={PROVIDERS.map(({ id, label }) => ({ value: id, label }))}
-            placeholder="Select a provider"
-          />
-        )}
-      </form.AppField>
+      <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+        <ProviderPlate providerId={definition.id} className="size-10" />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium">{definition.label}</div>
+          <p className="truncate text-xs text-muted-foreground">
+            {providerHint(definition.id)}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onChangeProvider}
+        >
+          Change
+        </Button>
+      </div>
 
       <form.AppField name="name">
         {(field) => (
@@ -106,47 +136,40 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
         )}
       </form.AppField>
 
+      <form.AppField name="endpoint">
+        {(field) => (
+          <field.TextField
+            label="Endpoint"
+            placeholder={definition.endpointPlaceholder}
+            mono
+          />
+        )}
+      </form.AppField>
+
       {/* Credential fields use the selected provider's vocabulary. */}
-      <form.Subscribe selector={(state) => state.values.provider}>
-        {(providerId) => {
-          const provider = getProvider(providerId) ?? PROVIDERS[0];
-          const { bucket, accessKeyId, secretAccessKey } = provider.fieldLabels;
-          return (
-            <>
-              <form.AppField name="endpoint">
-                {(field) => (
-                  <field.TextField
-                    label="Endpoint"
-                    placeholder={provider.endpointPlaceholder}
-                    mono
-                  />
-                )}
-              </form.AppField>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <form.AppField name="bucket">
+          {(field) => <field.TextField label={bucket} mono />}
+        </form.AppField>
 
-              <form.AppField name="bucket">
-                {(field) => <field.TextField label={bucket} mono />}
-              </form.AppField>
+        <form.AppField name="accessKeyId">
+          {(field) => <field.TextField label={accessKeyId} mono />}
+        </form.AppField>
+      </div>
 
-              <form.AppField name="accessKeyId">
-                {(field) => <field.TextField label={accessKeyId} mono />}
-              </form.AppField>
-
-              <form.AppField name="secretAccessKey">
-                {(field) => (
-                  <field.TextField
-                    label={secretAccessKey}
-                    type="password"
-                    placeholder={
-                      edit ? "Leave blank to keep the current one" : undefined
-                    }
-                    mono
-                  />
-                )}
-              </form.AppField>
-            </>
-          );
-        }}
-      </form.Subscribe>
+      <form.AppField name="secretAccessKey">
+        {(field) => (
+          <field.TextField
+            label={secretAccessKey}
+            type="password"
+            autoComplete="new-password"
+            placeholder={
+              edit ? "Leave blank to keep the current one" : undefined
+            }
+            mono
+          />
+        )}
+      </form.AppField>
 
       <p className="text-xs text-muted-foreground">
         Who can browse, edit or delete on this source is managed per user and
@@ -164,6 +187,7 @@ export function SourceForm({ onSuccess, edit }: SourceFormProps) {
             <Button
               type="button"
               variant="outline"
+              className="sm:mr-auto"
               onClick={handleTest}
               disabled={isSubmitting || test.state === "testing"}
             >

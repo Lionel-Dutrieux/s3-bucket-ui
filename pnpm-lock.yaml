@@ -113,6 +113,9 @@ importers:
       shiki:
         specifier: ^4.3.1
         version: 4.3.1
+      simple-icons:
+        specifier: ^16.26.0
+        version: 16.26.0
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -4476,6 +4479,10 @@ packages:
 
   simple-get@4.0.1:
     resolution: {integrity: sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==}
+
+  simple-icons@16.26.0:
+    resolution: {integrity: sha512-T9rNJtyOshULM8heLlvrZY346g9zOgZILQ3vxP+FWcX13RhaOLez7YM/hNCEx3b5gJckSCNDoNsjZuDncSMYSQ==}
+    engines: {node: '>=0.12.18'}
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -9455,6 +9462,8 @@ snapshots:
       once: 1.4.0
       simple-concat: 1.0.1
     optional: true
+
+  simple-icons@16.26.0: {}
 
   sisteransi@1.0.5: {}
 
