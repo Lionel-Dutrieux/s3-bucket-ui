@@ -66,3 +66,76 @@ export async function isPublicSharingEnabled(): Promise<boolean> {
 export async function setPublicSharingEnabled(enabled: boolean): Promise<void> {
   await setBoolSetting(SHARING_KEY, enabled);
 }
+
+// --- branding (white labelling) ---
+
+const BRANDING_APP_NAME_KEY = "brandingAppName";
+const BRANDING_LOGO_KEY = "brandingLogo";
+const BRANDING_LOGO_VERSION_KEY = "brandingLogoVersion";
+const BRANDING_COLOR_KEY = "brandingPrimaryColor";
+const BRANDING_KEYS = [
+  BRANDING_APP_NAME_KEY,
+  BRANDING_LOGO_KEY,
+  BRANDING_LOGO_VERSION_KEY,
+  BRANDING_COLOR_KEY,
+];
+
+export interface BrandingSettings {
+  appName: string | null;
+  /** Custom logo as a data-URL (SVG/PNG/WebP), or null when unset. */
+  logo: string | null;
+  /** Bumped on every logo upload — cache-busts the logo route URL. */
+  logoVersion: string | null;
+  /** #RRGGBB, or null for the stock amber theme. */
+  primaryColor: string | null;
+}
+
+export async function getBrandingSettings(): Promise<BrandingSettings> {
+  const rows = await prisma.setting.findMany({
+    where: { key: { in: BRANDING_KEYS } },
+    select: { key: true, value: true },
+  });
+  const map = new Map(rows.map((row) => [row.key, row.value]));
+  return {
+    appName: map.get(BRANDING_APP_NAME_KEY) ?? null,
+    logo: map.get(BRANDING_LOGO_KEY) ?? null,
+    logoVersion: map.get(BRANDING_LOGO_VERSION_KEY) ?? null,
+    primaryColor: map.get(BRANDING_COLOR_KEY) ?? null,
+  };
+}
+
+async function setStringSetting(key: string, value: string): Promise<void> {
+  await prisma.setting.upsert({
+    where: { key },
+    create: { key, value },
+    update: { value },
+  });
+}
+
+async function deleteSettings(keys: string[]): Promise<void> {
+  await prisma.setting.deleteMany({ where: { key: { in: keys } } });
+}
+
+export async function updateBrandingSettings(input: {
+  appName: string;
+  primaryColor: string | null;
+  /** undefined → keep the current logo, null → remove it, string → replace it. */
+  logo?: string | null;
+}): Promise<void> {
+  await setStringSetting(BRANDING_APP_NAME_KEY, input.appName);
+  if (input.primaryColor) {
+    await setStringSetting(BRANDING_COLOR_KEY, input.primaryColor);
+  } else {
+    await deleteSettings([BRANDING_COLOR_KEY]);
+  }
+  if (input.logo === null) {
+    await deleteSettings([BRANDING_LOGO_KEY, BRANDING_LOGO_VERSION_KEY]);
+  } else if (typeof input.logo === "string") {
+    await setStringSetting(BRANDING_LOGO_KEY, input.logo);
+    await setStringSetting(BRANDING_LOGO_VERSION_KEY, String(Date.now()));
+  }
+}
+
+export async function clearBrandingSettings(): Promise<void> {
+  await deleteSettings(BRANDING_KEYS);
+}
