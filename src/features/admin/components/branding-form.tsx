@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { resetBranding, updateBranding } from "@/features/admin/actions";
 import { BRANDING_LOGO_MAX_BYTES } from "@/features/admin/lib/schema";
 import { useAppForm } from "@/forms/form";
+import { DEFAULT_APP_NAME } from "@/lib/branding/constants";
 
 const ACCEPTED_TYPES = ["image/svg+xml", "image/png", "image/webp"];
 
@@ -54,7 +55,11 @@ export function BrandingForm({
         toast.error(result.error);
         return;
       }
-      form.reset({ appName: "Bucket UI", primaryColor: "", logo: undefined });
+      form.reset({
+        appName: DEFAULT_APP_NAME,
+        primaryColor: "",
+        logo: undefined,
+      });
       toast.success("Branding reset to defaults");
       router.refresh();
     });
@@ -153,7 +158,10 @@ export function BrandingForm({
                     const reader = new FileReader();
                     reader.onload = () =>
                       field.handleChange(reader.result as string);
+                    reader.onerror = () =>
+                      toast.error("Could not read this file.");
                     reader.readAsDataURL(file);
+                    event.target.value = "";
                   }}
                 />
                 {preview ? (

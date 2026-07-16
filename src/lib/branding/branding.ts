@@ -1,8 +1,9 @@
 import "server-only";
 import { cache } from "react";
+import { DEFAULT_APP_NAME } from "@/lib/branding/constants";
 import { getBrandingSettings } from "@/lib/dal/settings";
 
-export const DEFAULT_APP_NAME = "Bucket UI";
+export { DEFAULT_APP_NAME } from "@/lib/branding/constants";
 
 export interface Branding {
   appName: string;
