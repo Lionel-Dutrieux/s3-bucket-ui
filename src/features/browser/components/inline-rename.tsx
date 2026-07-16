@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { renameFolder, renameObject } from "@/features/browser/actions";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
+import { splitFileName } from "@/features/browser/lib/file-name";
 import { entryNameSchema } from "@/features/browser/lib/schemas";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,10 @@ import { cn } from "@/lib/utils";
  * In-place rename (Drive-style): Enter commits, Escape or clicking away
  * cancels. Replaces the name text right where it sits, so there is no
  * dialog to open for a one-field edit.
+ *
+ * For files the extension is a fixed suffix outside the editable field —
+ * whatever is typed or selected, the rename keeps it. Extensionless names,
+ * dotfiles and folders edit as one piece.
  */
 export function InlineRenameInput({
   sourceId,
@@ -25,12 +30,16 @@ export function InlineRenameInput({
   onEnd: (renamed: boolean) => void;
   className?: string;
 }) {
-  const [name, setName] = useState(entry.name);
+  const { stem, ext } =
+    entry.kind === "file"
+      ? splitFileName(entry.name)
+      : { stem: entry.name, ext: "" };
+  const [name, setName] = useState(stem);
   const [pending, setPending] = useState(false);
 
   const submit = async () => {
     if (pending) return;
-    const trimmed = name.trim();
+    const trimmed = name.trim() === "" ? "" : `${name.trim()}${ext}`;
     if (trimmed === "" || trimmed === entry.name) {
       onEnd(false);
       return;
@@ -56,38 +65,53 @@ export function InlineRenameInput({
 
   return (
     <div className={cn("flex min-w-0 flex-1 items-center gap-2", className)}>
-      <input
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        onKeyDown={(event) => {
-          // The row/table must not react to keys typed into the field.
-          event.stopPropagation();
-          if (event.key === "Enter") {
-            event.preventDefault();
-            submit();
-          } else if (event.key === "Escape") {
-            event.preventDefault();
-            onEnd(false);
+      <div className="flex h-7 w-full min-w-0 flex-1 items-center rounded-md border bg-background focus-within:ring-2 focus-within:ring-ring">
+        <input
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          onKeyDown={(event) => {
+            // The row/table must not react to keys typed into the field.
+            event.stopPropagation();
+            if (event.key === "Enter") {
+              event.preventDefault();
+              submit();
+            } else if (event.key === "Escape") {
+              event.preventDefault();
+              onEnd(false);
+            }
+          }}
+          onBlur={() => {
+            if (!pending) onEnd(false);
+          }}
+          // The overlay link / drag sensor sit under the input.
+          onClick={(event) => event.stopPropagation()}
+          onPointerDown={(event) => event.stopPropagation()}
+          ref={(input) => {
+            if (!input || document.activeElement === input) return;
+            input.focus();
+            input.select();
+          }}
+          disabled={pending}
+          aria-label={
+            ext
+              ? `New name for ${entry.name} (keeps ${ext})`
+              : `New name for ${entry.name}`
           }
-        }}
-        onBlur={() => {
-          if (!pending) onEnd(false);
-        }}
-        // The overlay link / drag sensor sit under the input.
-        onClick={(event) => event.stopPropagation()}
-        onPointerDown={(event) => event.stopPropagation()}
-        // Preselect the base name so typing replaces it but the
-        // extension survives — the Drive behaviour.
-        ref={(input) => {
-          if (!input || document.activeElement === input) return;
-          input.focus();
-          const dot = entry.kind === "file" ? entry.name.lastIndexOf(".") : -1;
-          input.setSelectionRange(0, dot > 0 ? dot : entry.name.length);
-        }}
-        disabled={pending}
-        aria-label={`New name for ${entry.name}`}
-        className="h-7 w-full min-w-0 flex-1 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      />
+          className="h-full w-full min-w-0 flex-1 bg-transparent px-2 text-sm outline-none"
+        />
+        {ext ? (
+          <span
+            className="pr-2 text-sm text-muted-foreground select-none"
+            // Clicking the suffix must not blur the input (blur cancels).
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
+            {ext}
+          </span>
+        ) : null}
+      </div>
       {pending ? (
         <Loader2
           className="size-4 shrink-0 animate-spin text-muted-foreground"
