@@ -38,9 +38,9 @@ export async function sendPasswordResetEmail(
 ): Promise<void> {
   await sendMail({
     to,
-    subject: "Reset your Bucket UI password",
+    subject: "Reset your password",
     text: [
-      "Someone asked to reset the password of your Bucket UI account.",
+      "Someone asked to reset the password of your account.",
       "",
       `Reset it here (the link expires in 1 hour): ${url}`,
       "",

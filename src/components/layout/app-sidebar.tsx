@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  Cylinder,
-  HardDrive,
-  History,
-  Link2,
-  Search,
-  Settings2,
-} from "lucide-react";
+import { HardDrive, History, Link2, Search, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { type BrandingInfo, BrandMark } from "@/components/layout/brand-mark";
 import { OPEN_COMMAND_PALETTE_EVENT } from "@/components/layout/command-palette";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import {
@@ -35,9 +29,11 @@ import type { SourceSummary } from "@/lib/dal/sources";
 import { getProvider, PROVIDERS } from "@/lib/storage/providers";
 
 export function AppSidebar({
+  branding,
   sources,
   user,
 }: {
+  branding: BrandingInfo;
   sources: SourceSummary[];
   user: SidebarUser;
 }) {
@@ -61,13 +57,8 @@ export function AppSidebar({
   return (
     <Sidebar>
       <SidebarHeader className="gap-3 p-3">
-        <Link href="/" className="flex items-center gap-2.5 px-1 pt-1">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-            <Cylinder className="size-4" aria-hidden />
-          </div>
-          <span className="text-sm font-semibold tracking-tight">
-            Bucket UI
-          </span>
+        <Link href="/" className="flex items-center px-1 pt-1">
+          <BrandMark branding={branding} />
         </Link>
         {/* Visible doorway to the Ctrl/Cmd+K palette — the shortcut alone
             is undiscoverable. */}

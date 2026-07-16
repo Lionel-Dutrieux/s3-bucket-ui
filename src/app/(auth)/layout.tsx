@@ -1,6 +1,8 @@
 import { Cylinder } from "lucide-react";
 import { redirect } from "next/navigation";
+import { BrandMark } from "@/components/layout/brand-mark";
 import { getSession } from "@/lib/auth/session";
+import { getBranding } from "@/lib/branding/branding";
 
 export default async function AuthLayout({
   children,
@@ -8,6 +10,7 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }>) {
   if (await getSession()) redirect("/");
+  const branding = await getBranding();
 
   return (
     <main className="grid min-h-svh flex-1 lg:grid-cols-[1.1fr_1fr]">
@@ -34,27 +37,15 @@ export default async function AuthLayout({
           className="pointer-events-none absolute -right-24 -bottom-28 size-[26rem] -rotate-12 text-primary/10"
         />
 
-        <div className="relative flex items-center gap-2.5 p-10">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-            <Cylinder className="size-4.5" aria-hidden />
-          </div>
-          <div className="grid leading-tight">
-            <span className="font-semibold tracking-tight">Bucket UI</span>
-            <span className="text-xs text-muted-foreground">File manager</span>
-          </div>
+        <div className="relative p-10">
+          <BrandMark branding={branding} subtitle="File manager" />
         </div>
       </section>
 
       {/* Form panel. */}
       <section className="flex flex-col items-center justify-center gap-8 p-6">
-        <div className="flex items-center gap-2.5 lg:hidden">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-            <Cylinder className="size-4.5" aria-hidden />
-          </div>
-          <div className="grid leading-tight">
-            <span className="font-semibold tracking-tight">Bucket UI</span>
-            <span className="text-xs text-muted-foreground">File manager</span>
-          </div>
+        <div className="lg:hidden">
+          <BrandMark branding={branding} subtitle="File manager" />
         </div>
         <div className="w-full max-w-sm">{children}</div>
       </section>

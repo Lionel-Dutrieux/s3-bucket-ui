@@ -1,10 +1,11 @@
-import { Cylinder } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { type BrandingInfo, BrandMark } from "@/components/layout/brand-mark";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { PublicShareCard } from "@/features/shares/components/public-share-card";
 import { SharePasswordForm } from "@/features/shares/components/share-password-form";
 import { sharePreviewKind } from "@/features/shares/lib/preview";
+import { getBranding } from "@/lib/branding/branding";
 import { getActiveShare } from "@/lib/dal/shares";
 import { getSource } from "@/lib/dal/sources";
 import { isUnlocked } from "@/lib/shares/unlock";
@@ -18,13 +19,14 @@ export default async function SharePage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
+  const branding = await getBranding();
   // Uniform notFound() for unknown, revoked and expired alike.
   const share = await getActiveShare(token);
   if (!share) notFound();
 
   if (share.passwordHash && !(await isUnlocked(token))) {
     return (
-      <ShareShell>
+      <ShareShell branding={branding}>
         <SharePasswordForm token={token} />
       </ShareShell>
     );
@@ -43,7 +45,7 @@ export default async function SharePage({
   }
 
   return (
-    <ShareShell>
+    <ShareShell branding={branding}>
       <PublicShareCard
         token={token}
         filename={filename}
@@ -54,17 +56,18 @@ export default async function SharePage({
   );
 }
 
-function ShareShell({ children }: { children: React.ReactNode }) {
+function ShareShell({
+  branding,
+  children,
+}: {
+  branding: BrandingInfo;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-muted/20 p-4">
       <div className="w-full max-w-lg space-y-6">
-        <div className="flex items-center justify-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
-            <Cylinder className="size-4" aria-hidden />
-          </div>
-          <span className="text-sm font-semibold tracking-tight">
-            Bucket UI
-          </span>
+        <div className="flex justify-center">
+          <BrandMark branding={branding} />
         </div>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           {children}

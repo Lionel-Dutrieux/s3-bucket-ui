@@ -44,7 +44,7 @@ export function useSourceActions(
       open={confirmOpen}
       onOpenChange={setConfirmOpen}
       title={`Remove ${source.name}?`}
-      description="This only removes the source from Bucket UI — nothing in your bucket is touched."
+      description="This only removes the source here — nothing in your bucket is touched."
       confirmLabel="Remove"
       pendingLabel="Removing…"
       pending={pending}
