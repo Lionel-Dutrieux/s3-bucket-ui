@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/page-header";
+import { BrandingForm } from "@/features/admin/components/branding-form";
 import { SettingsForm } from "@/features/admin/components/settings-form";
 import { requireAdmin } from "@/lib/auth/session";
+import { getBranding } from "@/lib/branding/branding";
 import {
   isOidcOnly,
   isPublicSharingEnabled,
@@ -13,11 +15,14 @@ export const metadata: Metadata = { title: "Settings" };
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
-  const [signUpEnabled, oidcOnly, sharingEnabled] = await Promise.all([
-    isPublicSignUpEnabled(),
-    isOidcOnly(),
-    isPublicSharingEnabled(),
-  ]);
+  const [signUpEnabled, oidcOnly, sharingEnabled, branding] = await Promise.all(
+    [
+      isPublicSignUpEnabled(),
+      isOidcOnly(),
+      isPublicSharingEnabled(),
+      getBranding(),
+    ],
+  );
 
   return (
     <>
@@ -25,12 +30,19 @@ export default async function AdminSettingsPage() {
         title="Settings"
         description="Instance-wide options. They apply immediately."
       />
-      <SettingsForm
-        signUpEnabled={signUpEnabled}
-        oidcOnly={oidcOnly}
-        oidcConfigured={oidcEnabled()}
-        sharingEnabled={sharingEnabled}
-      />
+      <div className="space-y-6">
+        <SettingsForm
+          signUpEnabled={signUpEnabled}
+          oidcOnly={oidcOnly}
+          oidcConfigured={oidcEnabled()}
+          sharingEnabled={sharingEnabled}
+        />
+        <BrandingForm
+          appName={branding.appName}
+          primaryColor={branding.primaryColor}
+          logoUrl={branding.hasCustomLogo ? branding.logoUrl : null}
+        />
+      </div>
     </>
   );
 }
