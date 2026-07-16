@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
-import { streamObject } from "@/features/browser/server/stream";
 import { sharePreviewKind } from "@/features/shares/lib/preview";
 import { apiError } from "@/lib/api-error";
 import { countShareDownload, getActiveShare } from "@/lib/dal/shares";
 import { getSource } from "@/lib/dal/sources";
 import { isUnlocked } from "@/lib/shares/unlock";
 import { getFilesClient } from "@/lib/storage/client";
+import { streamObject } from "@/lib/storage/stream";
 
 /** Presigned lifetime behind the stable /s/ URL — just long enough for the
  * browser to follow the redirect; the app URL is what people share. */

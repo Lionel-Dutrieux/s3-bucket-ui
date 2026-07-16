@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { THUMBNAIL_TTL_SECONDS } from "@/features/browser/lib/limits";
-import { streamObject } from "@/features/browser/server/stream";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
+import { streamObject } from "@/lib/storage/stream";
 
 /**
  * Grid thumbnail source. Providers that can sign get a redirect to a

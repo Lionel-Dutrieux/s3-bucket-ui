@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { streamObject } from "@/features/browser/server/stream";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
+import { streamObject } from "@/lib/storage/stream";
 
 /**
  * Download: redirects to a presigned attachment URL where the provider can
