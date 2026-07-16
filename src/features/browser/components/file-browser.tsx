@@ -25,7 +25,7 @@ import {
   deleteObject,
   duplicateObject,
 } from "@/features/browser/actions";
-import { downloadUrl } from "@/features/browser/api/client";
+import { downloadUrl, zipSelectionUrl } from "@/features/browser/api/client";
 import {
   browserColumns,
   selectColumn,
@@ -63,6 +63,7 @@ import type { EntryTarget } from "@/features/browser/lib/move";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
+import { submitZipDownload } from "@/features/browser/lib/zip-download";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
 
 export interface BrowserPermissions {
@@ -322,25 +323,26 @@ export function FileBrowser({
     .map((row) => row.original)
     .filter((entry) => entry.kind === "file");
 
-  // One browser download per selected file, staggered so none get dropped
-  // (Chrome asks once to allow multiple downloads). Folders would need a
-  // server-side zip — out of scope, they're skipped with a note.
+  // A single file downloads through its plain link (presigned when the
+  // provider supports it); anything more — several files, any folder —
+  // streams as one ZIP of the selection.
   const handleBulkDownload = () => {
-    const skippedFolders = selectedCount - selectedFiles.length;
-    selectedFiles.forEach((file, index) => {
-      setTimeout(() => {
-        const anchor = document.createElement("a");
-        anchor.href = downloadUrl(sourceId, file.key);
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-      }, index * 300);
-    });
-    if (skippedFolders > 0) {
-      toast.info(
-        `${skippedFolders} folder${skippedFolders === 1 ? "" : "s"} skipped — only files can be downloaded.`,
-      );
+    const selectedFolders = selectedRows
+      .map((row) => row.original)
+      .filter((entry) => entry.kind === "folder");
+    if (selectedFiles.length === 1 && selectedFolders.length === 0) {
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl(sourceId, selectedFiles[0].key);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      return;
     }
+    submitZipDownload(zipSelectionUrl(sourceId), {
+      base: prefix,
+      keys: selectedFiles.map((file) => file.key),
+      prefixes: selectedFolders.map((folder) => folder.prefix),
+    });
   };
 
   const handleBulkDelete = async () => {
@@ -391,7 +393,7 @@ export function FileBrowser({
               onClear={selection.clear}
               onToggleSelectAll={toggleSelectAll}
               onBulkDownload={handleBulkDownload}
-              bulkDownloadDisabled={selectedFiles.length === 0}
+              bulkDownloadDisabled={selectedCount === 0}
               onCopyTo={() =>
                 dialogs.openCopyTo(
                   selectedRows.map((row) => toTarget(row.original)),
