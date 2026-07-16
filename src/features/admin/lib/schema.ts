@@ -38,3 +38,40 @@ export const grantInputSchema = z.object({
   canDelete: z.boolean(),
 });
 export type GrantInputValues = z.infer<typeof grantInputSchema>;
+
+// --- branding (white labelling) ---
+
+export const BRANDING_LOGO_MAX_BYTES = 512 * 1024;
+
+const LOGO_DATA_URL =
+  /^data:image\/(svg\+xml|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+/** Decoded size of a base64 data-URL payload, in bytes. */
+function dataUrlBytes(dataUrl: string): number {
+  const payload = dataUrl.slice(dataUrl.indexOf(",") + 1);
+  const padding = payload.endsWith("==") ? 2 : payload.endsWith("=") ? 1 : 0;
+  return (payload.length * 3) / 4 - padding;
+}
+
+export const brandingSchema = z.object({
+  appName: z
+    .string()
+    .trim()
+    .min(1, "App name is required.")
+    .max(64, "Keep the app name under 64 characters."),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Use a #RRGGBB hex color.")
+    .nullable(),
+  // undefined → keep the current logo, null → remove it, string → replace it.
+  logo: z
+    .string()
+    .regex(LOGO_DATA_URL, "The logo must be an SVG, PNG or WebP image.")
+    .refine(
+      (value) => dataUrlBytes(value) <= BRANDING_LOGO_MAX_BYTES,
+      "The logo must be 512 KB or smaller.",
+    )
+    .nullish(),
+});
+
+export type BrandingValues = z.infer<typeof brandingSchema>;

@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import {
+  type BrandingValues,
+  brandingSchema,
   type CreateUserValues,
   createUserSchema,
   grantInputSchema,
@@ -20,9 +22,11 @@ import {
 } from "@/lib/dal/groups";
 import { deleteGrant, upsertGrant } from "@/lib/dal/permissions";
 import {
+  clearBrandingSettings,
   setOidcOnly,
   setPublicSharingEnabled,
   setPublicSignUpEnabled,
+  updateBrandingSettings,
 } from "@/lib/dal/settings";
 import { oidcEnabled } from "@/lib/env";
 
@@ -75,6 +79,38 @@ export async function setOidcOnlyEnabled(
   } catch (error) {
     console.error("[admin] toggle oidc-only failed:", error);
     return actionError("Could not update this setting.");
+  }
+  revalidatePath("/", "layout");
+  return actionOk();
+}
+
+export async function updateBranding(
+  input: BrandingValues,
+): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+  const parsed = brandingSchema.safeParse(input);
+  if (!parsed.success) {
+    return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
+  }
+
+  try {
+    await updateBrandingSettings(parsed.data);
+  } catch (error) {
+    console.error("[admin] update branding failed:", error);
+    return actionError("Could not save the branding settings.");
+  }
+  revalidatePath("/", "layout");
+  return actionOk();
+}
+
+export async function resetBranding(): Promise<ActionResult> {
+  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
+
+  try {
+    await clearBrandingSettings();
+  } catch (error) {
+    console.error("[admin] reset branding failed:", error);
+    return actionError("Could not reset the branding settings.");
   }
   revalidatePath("/", "layout");
   return actionOk();
