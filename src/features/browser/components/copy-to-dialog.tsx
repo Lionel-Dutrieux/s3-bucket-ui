@@ -1,18 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Loader2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -22,7 +12,9 @@ import {
 } from "@/components/ui/select";
 import { copyEntriesToSource } from "@/features/browser/actions";
 import { browserQueries } from "@/features/browser/api/queries";
+import { DestinationDialog } from "@/features/browser/components/destination-dialog";
 import { FolderPicker } from "@/features/browser/components/folder-picker";
+import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
 import type { EntryTarget } from "@/features/browser/lib/move";
 
 /**
@@ -46,7 +38,7 @@ export function CopyToDialog({
   const open = targets !== null;
   const [destSourceId, setDestSourceId] = useState<string>("");
   const [destPrefix, setDestPrefix] = useState("");
-  const [pending, setPending] = useState(false);
+  const { pending, track } = usePendingAction();
 
   // Fresh start each time the dialog opens.
   useEffect(() => {
@@ -66,14 +58,9 @@ export function CopyToDialog({
 
   const run = async () => {
     if (!targets || !dest) return;
-    setPending(true);
-    const result = await copyEntriesToSource(
-      sourceId,
-      dest.id,
-      targets,
-      destPrefix,
+    const result = await track(() =>
+      copyEntriesToSource(sourceId, dest.id, targets, destPrefix),
     );
-    setPending(false);
     if (!result.ok) {
       toast.error(result.error);
       return;
@@ -91,88 +78,66 @@ export function CopyToDialog({
   };
 
   return (
-    <Dialog
+    <DestinationDialog
       open={open}
-      onOpenChange={(next) => {
-        if (!pending) onOpenChange(next);
-      }}
+      onOpenChange={onOpenChange}
+      pending={pending}
+      title={`Copy ${count} item${count === 1 ? "" : "s"} to…`}
+      description="Pick a source and a folder. Objects already present in the destination are skipped; nothing is removed from here."
+      destinationLabel={dest ? `→ ${dest.name}:/${destPrefix}` : ""}
+      submitLabel="Copy here"
+      pendingLabel="Copying…"
+      submitDisabled={!dest}
+      onSubmit={run}
     >
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            Copy {count} item{count === 1 ? "" : "s"} to…
-          </DialogTitle>
-          <DialogDescription>
-            Pick a source and a folder. Objects already present in the
-            destination are skipped; nothing is removed from here.
-          </DialogDescription>
-        </DialogHeader>
-
-        <Select
-          value={destSourceId}
-          onValueChange={(value) => {
-            setDestSourceId(value);
-            setDestPrefix("");
-          }}
-          disabled={pending || sources.isPending}
-        >
-          <SelectTrigger className="w-full" aria-label="Destination source">
-            <SelectValue
-              placeholder={
-                sources.isPending ? "Loading sources…" : "Choose a source…"
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {sources.data?.map((source) => (
-              <SelectItem key={source.id} value={source.id}>
-                {source.name}
-                {source.id === sourceId ? (
-                  <span className="text-xs text-muted-foreground">
-                    this source
-                  </span>
-                ) : (
-                  <span className="text-xs text-muted-foreground">
-                    {source.bucket}
-                  </span>
-                )}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {sources.data?.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            You don&rsquo;t have edit access on any source.
-          </p>
-        ) : null}
-
-        {destSourceId ? (
-          <FolderPicker
-            sourceId={destSourceId}
-            rootLabel={dest?.name ?? "Root"}
-            prefix={destPrefix}
-            onPrefixChange={setDestPrefix}
-            disabled={pending}
+      <Select
+        value={destSourceId}
+        onValueChange={(value) => {
+          setDestSourceId(value);
+          setDestPrefix("");
+        }}
+        disabled={pending || sources.isPending}
+      >
+        <SelectTrigger className="w-full" aria-label="Destination source">
+          <SelectValue
+            placeholder={
+              sources.isPending ? "Loading sources…" : "Choose a source…"
+            }
           />
-        ) : null}
+        </SelectTrigger>
+        <SelectContent>
+          {sources.data?.map((source) => (
+            <SelectItem key={source.id} value={source.id}>
+              {source.name}
+              {source.id === sourceId ? (
+                <span className="text-xs text-muted-foreground">
+                  this source
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  {source.bucket}
+                </span>
+              )}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-        <DialogFooter className="items-center gap-2 sm:justify-between">
-          <span className="min-w-0 truncate font-mono text-xs text-muted-foreground">
-            {dest ? `→ ${dest.name}:/${destPrefix}` : ""}
-          </span>
-          <Button onClick={run} disabled={pending || !dest}>
-            {pending ? (
-              <>
-                <Loader2Icon className="animate-spin" aria-hidden />
-                Copying…
-              </>
-            ) : (
-              "Copy here"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {sources.data?.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          You don&rsquo;t have edit access on any source.
+        </p>
+      ) : null}
+
+      {destSourceId ? (
+        <FolderPicker
+          sourceId={destSourceId}
+          rootLabel={dest?.name ?? "Root"}
+          prefix={destPrefix}
+          onPrefixChange={setDestPrefix}
+          disabled={pending}
+        />
+      ) : null}
+    </DestinationDialog>
   );
 }

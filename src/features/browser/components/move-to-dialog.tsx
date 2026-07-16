@@ -1,19 +1,11 @@
 "use client";
 
-import { Loader2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { moveEntries } from "@/features/browser/actions";
+import { DestinationDialog } from "@/features/browser/components/destination-dialog";
 import { FolderPicker } from "@/features/browser/components/folder-picker";
+import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
 import { type EntryTarget, planMove } from "@/features/browser/lib/move";
 
 /**
@@ -34,7 +26,7 @@ export function MoveToDialog({
 }) {
   const open = targets !== null;
   const [destPrefix, setDestPrefix] = useState("");
-  const [pending, setPending] = useState(false);
+  const { pending, track } = usePendingAction();
 
   // Fresh start each time the dialog opens.
   useEffect(() => {
@@ -48,9 +40,9 @@ export function MoveToDialog({
 
   const run = async () => {
     if (!targets || !plan || plan.error || moveCount === 0) return;
-    setPending(true);
-    const result = await moveEntries(sourceId, targets, destPrefix);
-    setPending(false);
+    const result = await track(() =>
+      moveEntries(sourceId, targets, destPrefix),
+    );
     if (!result.ok) {
       toast.error(result.error);
       return;
@@ -60,56 +52,31 @@ export function MoveToDialog({
   };
 
   return (
-    <Dialog
+    <DestinationDialog
       open={open}
-      onOpenChange={(next) => {
-        if (!pending) onOpenChange(next);
-      }}
+      onOpenChange={onOpenChange}
+      pending={pending}
+      title={`Move ${count} item${count === 1 ? "" : "s"} to…`}
+      description="Moving copies each object to the destination and deletes the original. Folders move everything inside them."
+      destinationLabel={`→ /${destPrefix}`}
+      submitLabel="Move here"
+      pendingLabel="Moving…"
+      submitDisabled={!plan || !!plan.error || moveCount === 0}
+      onSubmit={run}
     >
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            Move {count} item{count === 1 ? "" : "s"} to…
-          </DialogTitle>
-          <DialogDescription>
-            Moving copies each object to the destination and deletes the
-            original. Folders move everything inside them.
-          </DialogDescription>
-        </DialogHeader>
+      <FolderPicker
+        sourceId={sourceId}
+        rootLabel="Root"
+        prefix={destPrefix}
+        onPrefixChange={setDestPrefix}
+        disabled={pending}
+      />
 
-        <FolderPicker
-          sourceId={sourceId}
-          rootLabel="Root"
-          prefix={destPrefix}
-          onPrefixChange={setDestPrefix}
-          disabled={pending}
-        />
-
-        {plan?.error ? (
-          <p role="alert" className="text-sm text-destructive">
-            {plan.error}
-          </p>
-        ) : null}
-
-        <DialogFooter className="items-center gap-2 sm:justify-between">
-          <span className="min-w-0 truncate font-mono text-xs text-muted-foreground">
-            → /{destPrefix}
-          </span>
-          <Button
-            onClick={run}
-            disabled={pending || !plan || !!plan.error || moveCount === 0}
-          >
-            {pending ? (
-              <>
-                <Loader2Icon className="animate-spin" aria-hidden />
-                Moving…
-              </>
-            ) : (
-              "Move here"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {plan?.error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {plan.error}
+        </p>
+      ) : null}
+    </DestinationDialog>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -13,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { moveEntries } from "@/features/browser/actions";
+import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
 import type { EntryTarget } from "@/features/browser/lib/move";
 
 export interface MoveRequest {
@@ -35,17 +35,13 @@ export function MoveDialog({
   onOpenChange: (open: boolean) => void;
   onMoved: () => void;
 }) {
-  const [pending, setPending] = useState(false);
+  const { pending, track } = usePendingAction();
 
   const handleMove = async () => {
     if (!request) return;
-    setPending(true);
-    const result = await moveEntries(
-      sourceId,
-      request.targets,
-      request.destPrefix,
+    const result = await track(() =>
+      moveEntries(sourceId, request.targets, request.destPrefix),
     );
-    setPending(false);
     if (!result.ok) {
       toast.error(result.error);
       return;

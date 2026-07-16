@@ -178,6 +178,47 @@ function entryActions(
   return actions;
 }
 
+interface MenuItemProps {
+  asChild?: boolean;
+  variant?: "destructive" | "default";
+  onSelect?: (event: Event) => void;
+  children?: React.ReactNode;
+}
+
+/** Renders the action list with either menu's primitives — the kebab and the
+ * context menu share everything but the Item/Separator components. */
+function ActionItems({
+  actions,
+  Item,
+  Separator,
+}: {
+  actions: EntryAction[];
+  Item: React.ComponentType<MenuItemProps>;
+  Separator: React.ComponentType;
+}) {
+  return actions.map((action) => (
+    <div key={action.key} className="contents">
+      {action.separatorBefore ? <Separator /> : null}
+      {action.href ? (
+        <Item asChild>
+          <a href={action.href}>
+            <action.icon aria-hidden />
+            {action.label}
+          </a>
+        </Item>
+      ) : (
+        <Item
+          variant={action.destructive ? "destructive" : "default"}
+          onSelect={action.run}
+        >
+          <action.icon aria-hidden />
+          {action.label}
+        </Item>
+      )}
+    </div>
+  ));
+}
+
 /** Kebab (⋮) menu holding every action available on the entry. */
 export function EntryActionsMenu({
   entry,
@@ -205,27 +246,11 @@ export function EntryActionsMenu({
         <MoreVertical className="size-4" aria-hidden />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        {actions.map((action) => (
-          <div key={action.key} className="contents">
-            {action.separatorBefore ? <DropdownMenuSeparator /> : null}
-            {action.href ? (
-              <DropdownMenuItem asChild>
-                <a href={action.href}>
-                  <action.icon aria-hidden />
-                  {action.label}
-                </a>
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem
-                variant={action.destructive ? "destructive" : "default"}
-                onSelect={action.run}
-              >
-                <action.icon aria-hidden />
-                {action.label}
-              </DropdownMenuItem>
-            )}
-          </div>
-        ))}
+        <ActionItems
+          actions={actions}
+          Item={DropdownMenuItem}
+          Separator={DropdownMenuSeparator}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -247,27 +272,11 @@ export function EntryContextMenu({
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-44">
-        {actions.map((action) => (
-          <div key={action.key} className="contents">
-            {action.separatorBefore ? <ContextMenuSeparator /> : null}
-            {action.href ? (
-              <ContextMenuItem asChild>
-                <a href={action.href}>
-                  <action.icon aria-hidden />
-                  {action.label}
-                </a>
-              </ContextMenuItem>
-            ) : (
-              <ContextMenuItem
-                variant={action.destructive ? "destructive" : "default"}
-                onSelect={action.run}
-              >
-                <action.icon aria-hidden />
-                {action.label}
-              </ContextMenuItem>
-            )}
-          </div>
-        ))}
+        <ActionItems
+          actions={actions}
+          Item={ContextMenuItem}
+          Separator={ContextMenuSeparator}
+        />
       </ContextMenuContent>
     </ContextMenu>
   );
