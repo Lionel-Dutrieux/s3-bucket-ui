@@ -43,6 +43,9 @@ export function BrandingForm({
         toast.error(result.error);
         return;
       }
+      // Clear the pending upload so an unrelated later save doesn't
+      // re-send the data-URL and needlessly bump the logo version.
+      form.setFieldValue("logo", undefined);
       toast.success("Branding updated");
       router.refresh();
     },
@@ -82,7 +85,10 @@ export function BrandingForm({
 
       <form.AppField name="appName">
         {(field) => (
-          <field.TextField label="Application name" placeholder="Bucket UI" />
+          <field.TextField
+            label="Application name"
+            placeholder={DEFAULT_APP_NAME}
+          />
         )}
       </form.AppField>
 

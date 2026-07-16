@@ -3,7 +3,8 @@
  * admin-picked color we derive the light/dark pair the default amber theme
  * uses: the dark variant is the same hue/chroma lifted in lightness (the
  * stock theme pairs L 0.666 light with 0.769 dark), and each mode's ring
- * borrows the other mode's primary — mirroring globals.css.
+ * borrows the other mode's primary — mirroring globals.css. The lift is
+ * clamped so it never lowers lightness for brands already near-white.
  */
 
 export interface Oklch {
@@ -54,7 +55,10 @@ function foregroundFor(color: Oklch): Oklch {
 export function brandThemeCss(hex: string): string | null {
   const base = hexToOklch(hex);
   if (!base) return null;
-  const lifted: Oklch = { ...base, l: Math.min(base.l + 0.1, 0.92) };
+  const lifted: Oklch = {
+    ...base,
+    l: Math.max(base.l, Math.min(base.l + 0.1, 0.92)),
+  };
   const lightFg = foregroundFor(base);
   const darkFg = foregroundFor(lifted);
   return [

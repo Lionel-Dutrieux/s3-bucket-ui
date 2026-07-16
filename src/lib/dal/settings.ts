@@ -1,4 +1,5 @@
 import "server-only";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 const SIGN_UP_KEY = "allowPublicSignUp";
@@ -104,16 +105,22 @@ export async function getBrandingSettings(): Promise<BrandingSettings> {
   };
 }
 
-async function setStringSetting(key: string, value: string): Promise<void> {
-  await prisma.setting.upsert({
+// Unawaited query builders — passed straight into prisma.$transaction([...])
+// so a batch of writes commits or rolls back as one unit. (Standalone use
+// still works: `await setStringSetting(...)` awaits the returned promise.)
+function setStringSetting(
+  key: string,
+  value: string,
+): Prisma.PrismaPromise<unknown> {
+  return prisma.setting.upsert({
     where: { key },
     create: { key, value },
     update: { value },
   });
 }
 
-async function deleteSettings(keys: string[]): Promise<void> {
-  await prisma.setting.deleteMany({ where: { key: { in: keys } } });
+function deleteSettings(keys: string[]): Prisma.PrismaPromise<unknown> {
+  return prisma.setting.deleteMany({ where: { key: { in: keys } } });
 }
 
 export async function updateBrandingSettings(input: {
@@ -122,18 +129,25 @@ export async function updateBrandingSettings(input: {
   /** undefined → keep the current logo, null → remove it, string → replace it. */
   logo?: string | null;
 }): Promise<void> {
-  await setStringSetting(BRANDING_APP_NAME_KEY, input.appName);
+  const operations: Prisma.PrismaPromise<unknown>[] = [
+    setStringSetting(BRANDING_APP_NAME_KEY, input.appName),
+  ];
   if (input.primaryColor) {
-    await setStringSetting(BRANDING_COLOR_KEY, input.primaryColor);
+    operations.push(setStringSetting(BRANDING_COLOR_KEY, input.primaryColor));
   } else {
-    await deleteSettings([BRANDING_COLOR_KEY]);
+    operations.push(deleteSettings([BRANDING_COLOR_KEY]));
   }
   if (input.logo === null) {
-    await deleteSettings([BRANDING_LOGO_KEY, BRANDING_LOGO_VERSION_KEY]);
+    operations.push(
+      deleteSettings([BRANDING_LOGO_KEY, BRANDING_LOGO_VERSION_KEY]),
+    );
   } else if (typeof input.logo === "string") {
-    await setStringSetting(BRANDING_LOGO_KEY, input.logo);
-    await setStringSetting(BRANDING_LOGO_VERSION_KEY, String(Date.now()));
+    operations.push(setStringSetting(BRANDING_LOGO_KEY, input.logo));
+    operations.push(
+      setStringSetting(BRANDING_LOGO_VERSION_KEY, String(Date.now())),
+    );
   }
+  await prisma.$transaction(operations);
 }
 
 export async function clearBrandingSettings(): Promise<void> {

@@ -44,7 +44,7 @@ export type GrantInputValues = z.infer<typeof grantInputSchema>;
 export const BRANDING_LOGO_MAX_BYTES = 512 * 1024;
 
 const LOGO_DATA_URL =
-  /^data:image\/(svg\+xml|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+  /^data:image\/(svg\+xml|png|webp);base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/;
 
 /** Decoded size of a base64 data-URL payload, in bytes. */
 function dataUrlBytes(dataUrl: string): number {
