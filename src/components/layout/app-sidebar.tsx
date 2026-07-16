@@ -29,6 +29,7 @@ import {
   UserMenu,
 } from "@/features/auth/components/user-menu";
 import { providerIcon } from "@/features/sources/components/provider-icons";
+import { ProviderPlate } from "@/features/sources/components/provider-logos";
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { getProvider, PROVIDERS } from "@/lib/storage/providers";
@@ -103,9 +104,10 @@ export function AppSidebar({
                           href={`/source/${source.id}`}
                           title={`${source.name} — ${source.bucket}`}
                         >
-                          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-background text-primary">
-                            <group.icon className="size-4" aria-hidden />
-                          </div>
+                          <ProviderPlate
+                            providerId={source.provider}
+                            className="size-8"
+                          />
                           <div className="grid min-w-0 flex-1 leading-tight">
                             <span className="truncate text-sm font-medium">
                               {source.name}
