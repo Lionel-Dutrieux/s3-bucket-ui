@@ -1,23 +1,12 @@
 "use client";
 
-import {
-  DndContext,
-  type DragEndEvent,
-  DragOverlay,
-  type DragStartEvent,
-  KeyboardSensor,
-  MeasuringStrategy,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { DndContext, DragOverlay, MeasuringStrategy } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import {
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
   type OnChangeFn,
-  type RowSelectionState,
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -25,7 +14,7 @@ import { ArrowLeft, FolderOpen, SearchX } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
@@ -47,23 +36,22 @@ import { DetailsPanel } from "@/features/browser/components/details-panel";
 import {
   type DragData,
   DragPreview,
-  type DropData,
   ParentDropZone,
 } from "@/features/browser/components/dnd";
 import { DropOverlay } from "@/features/browser/components/drop-overlay";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
-import {
-  MoveDialog,
-  type MoveRequest,
-} from "@/features/browser/components/move-dialog";
+import { MoveDialog } from "@/features/browser/components/move-dialog";
 import { MoveToDialog } from "@/features/browser/components/move-to-dialog";
 import { PreviewDialog } from "@/features/browser/components/preview-dialog";
 import { SearchCommand } from "@/features/browser/components/search-command";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
 import { ShareDialog } from "@/features/browser/components/share-dialog";
 import { UploadTray } from "@/features/browser/components/upload-tray";
+import { useBrowserDialogs } from "@/features/browser/hooks/use-browser-dialogs";
 import { useDropUpload } from "@/features/browser/hooks/use-drop-upload";
+import { useEntryDrag } from "@/features/browser/hooks/use-entry-drag";
+import { useEntrySelection } from "@/features/browser/hooks/use-entry-selection";
 import { useUploads } from "@/features/browser/hooks/use-uploads";
 import {
   type BrowserEntry,
@@ -71,11 +59,7 @@ import {
   entryMatches,
 } from "@/features/browser/lib/entries";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
-import {
-  type EntryTarget,
-  folderName,
-  planMove,
-} from "@/features/browser/lib/move";
+import type { EntryTarget } from "@/features/browser/lib/move";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
@@ -98,8 +82,9 @@ function toTarget(entry: BrowserEntry): EntryTarget {
  * sorts the entries the server already loaded (this page only). The list view
  * renders the table; the grid view consumes the same row model, so search and
  * sort apply to both. Filter and sort live in the URL (?q=, ?sort=) so a
- * refresh or a shared link keeps them. Also owns the preview, details and
- * delete dialogs plus the upload queue — write controls only render when the
+ * refresh or a shared link keeps them. Selection, drag-and-drop and the
+ * mutually-exclusive dialogs live in their own hooks (use-entry-selection,
+ * use-entry-drag, use-browser-dialogs); write controls only render when the
  * source's permissions allow them (the server re-checks every call).
  */
 export function FileBrowser({
@@ -144,23 +129,16 @@ export function FileBrowser({
     [setPreviewKey],
   );
   const [details, setDetails] = useState<FileEntry | null>(null);
-  const [shareTarget, setShareTarget] = useState<FileEntry | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<BrowserEntry | null>(null);
   const [renameTarget, setRenameTarget] = useState<BrowserEntry | null>(null);
-  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const lastToggledId = useRef<string | null>(null);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [copyTargets, setCopyTargets] = useState<EntryTarget[] | null>(null);
-  const [moveToTargets, setMoveToTargets] = useState<EntryTarget[] | null>(
-    null,
-  );
+  const dialogs = useBrowserDialogs();
+  const selection = useEntrySelection();
+  const { rowSelection, setRowSelection } = selection;
 
   // A selection belongs to one folder — navigating away discards it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is intentionally keyed on the folder change
   useEffect(() => {
-    setRowSelection({});
+    selection.clear();
   }, [prefix]);
 
   const refresh = useCallback(() => router.refresh(), [router]);
@@ -173,16 +151,6 @@ export function FileBrowser({
   // the hood) — they're edits, gated on the edit capability alone.
   const canRename = permissions.upload;
   const canMove = permissions.upload;
-  const [activeDrag, setActiveDrag] = useState<{
-    label: string;
-    count: number;
-    kind: "file" | "folder";
-  } | null>(null);
-  const [moveRequest, setMoveRequest] = useState<MoveRequest | null>(null);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor),
-  );
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((prev) =>
@@ -190,6 +158,8 @@ export function FileBrowser({
     );
   };
 
+  const deleteTarget =
+    dialogs.dialog?.kind === "delete" ? dialogs.dialog.entry : null;
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -203,7 +173,7 @@ export function FileBrowser({
       return;
     }
     toast.success(`Deleted ${deleteTarget.name}`);
-    setDeleteTarget(null);
+    dialogs.close();
     router.refresh();
   };
 
@@ -251,15 +221,15 @@ export function FileBrowser({
     meta: {
       sourceId,
       onPreview: openPreview,
-      onShare: canShare ? setShareTarget : undefined,
+      onShare: canShare ? dialogs.openShare : undefined,
       onDetails: setDetails,
-      onDelete: permissions.delete ? setDeleteTarget : undefined,
+      onDelete: permissions.delete ? dialogs.openDelete : undefined,
       // Rename moves the object (write + delete), so it needs both.
       onRename: canRename ? setRenameTarget : undefined,
       // Duplicating creates content — an edit, like uploading.
       onDuplicate: permissions.upload ? handleDuplicate : undefined,
       onMove: canMove
-        ? (entry) => setMoveToTargets([toTarget(entry)])
+        ? (entry) => dialogs.openMoveTo([toTarget(entry)])
         : undefined,
       renamingId: renameTarget
         ? renameTarget.kind === "folder"
@@ -267,7 +237,7 @@ export function FileBrowser({
           : renameTarget.key
         : null,
       onRenameEnd: handleRenameEnd,
-      onToggleSelect: toggleSelect,
+      onToggleSelect: selection.toggleSelect,
     },
   });
 
@@ -276,41 +246,15 @@ export function FileBrowser({
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedCount = selectedRows.length;
 
-  // Shift-click selects the whole visible range since the last toggled row.
-  // Ranges follow the DISPLAYED order (folders first), not the row model.
-  // Hoisted declaration: the table meta references it, but it only runs on
-  // events, once `rows` exists.
-  function toggleSelect(id: string, shift: boolean) {
-    const displayedIds = [
+  // Shift-click ranges follow the DISPLAYED order (folders first), not the
+  // row model — hand the hook the ids in that order.
+  selection.bindDisplayedIds(
+    [
       ...rows.filter((row) => row.original.kind === "folder"),
       ...rows.filter((row) => row.original.kind === "file"),
-    ].map((row) => row.id);
-    setRowSelection((prev) => {
-      const next = { ...prev };
-      const anchor = lastToggledId.current;
-      if (shift && anchor && anchor !== id) {
-        const from = displayedIds.indexOf(anchor);
-        const to = displayedIds.indexOf(id);
-        if (from !== -1 && to !== -1) {
-          for (const rangeId of displayedIds.slice(
-            Math.min(from, to),
-            Math.max(from, to) + 1,
-          )) {
-            next[rangeId] = true;
-          }
-          lastToggledId.current = id;
-          return next;
-        }
-      }
-      if (next[id]) {
-        delete next[id];
-      } else {
-        next[id] = true;
-      }
-      lastToggledId.current = id;
-      return next;
-    });
-  }
+    ].map((row) => row.id),
+  );
+
   // Acts on the visible (filtered) rows, so it never selects rows a name
   // filter is hiding — same rule as the list header checkbox.
   const allVisibleSelected =
@@ -361,7 +305,7 @@ export function FileBrowser({
         setRenameTarget(single);
       } else if (event.key === "Delete" && permissions.delete) {
         event.preventDefault();
-        setBulkConfirmOpen(true);
+        dialogs.openBulkDelete();
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -370,7 +314,7 @@ export function FileBrowser({
 
   const gridSelection = {
     isSelected: (id: string) => rowSelection[id] === true,
-    toggle: toggleSelect,
+    toggle: selection.toggleSelect,
     active: selectedCount > 0,
   };
 
@@ -404,8 +348,8 @@ export function FileBrowser({
     setDeleting(true);
     const result = await deleteEntries(sourceId, targets);
     setDeleting(false);
-    setBulkConfirmOpen(false);
-    setRowSelection({});
+    dialogs.close();
+    selection.clear();
     // Partial failures still deleted some objects — refresh either way.
     router.refresh();
     if (!result.ok) {
@@ -434,34 +378,7 @@ export function FileBrowser({
     return [dragged.target];
   };
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const data = event.active.data.current as DragData | undefined;
-    if (!data) return;
-    const count = movingTargets(data).length;
-    setActiveDrag({ label: data.label, count, kind: data.target.kind });
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActiveDrag(null);
-    const data = event.active.data.current as DragData | undefined;
-    const over = event.over?.data.current as DropData | undefined;
-    if (!data || !over) return;
-    const targets = movingTargets(data);
-    const plan = planMove(targets, over.prefix);
-    if (plan.error) {
-      toast.error(plan.error);
-      return;
-    }
-    if (plan.moves.length === 0) return; // no-op drop (already there / self)
-    const destLabel =
-      over.prefix === "" ? "the parent folder" : folderName(over.prefix);
-    setMoveRequest({
-      targets,
-      destPrefix: over.prefix,
-      destLabel,
-      count: plan.moves.length,
-    });
-  };
+  const drag = useEntryDrag({ movingTargets, onMoveRequest: dialogs.openMove });
 
   return (
     <div className="relative min-h-[calc(100dvh-6rem)]" {...dropZoneProps}>
@@ -471,23 +388,23 @@ export function FileBrowser({
             <SelectionToolbar
               selectedCount={selectedCount}
               allVisibleSelected={allVisibleSelected}
-              onClear={() => setRowSelection({})}
+              onClear={selection.clear}
               onToggleSelectAll={toggleSelectAll}
               onBulkDownload={handleBulkDownload}
               bulkDownloadDisabled={selectedFiles.length === 0}
               onCopyTo={() =>
-                setCopyTargets(
+                dialogs.openCopyTo(
                   selectedRows.map((row) => toTarget(row.original)),
                 )
               }
               canMove={canMove}
               onMoveTo={() =>
-                setMoveToTargets(
+                dialogs.openMoveTo(
                   selectedRows.map((row) => toTarget(row.original)),
                 )
               }
               canDelete={permissions.delete}
-              onBulkDelete={() => setBulkConfirmOpen(true)}
+              onBulkDelete={dialogs.openBulkDelete}
             />
           ) : (
             <BrowserToolbar
@@ -503,7 +420,7 @@ export function FileBrowser({
               prefix={prefix}
               onFolderCreated={refresh}
               onUploadFiles={uploads.addFiles}
-              onSearchSource={() => setSearchOpen(true)}
+              onSearchSource={dialogs.openSearch}
             />
           )}
 
@@ -532,15 +449,15 @@ export function FileBrowser({
             />
           ) : (
             <DndContext
-              sensors={sensors}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDragCancel={() => setActiveDrag(null)}
+              sensors={drag.sensors}
+              onDragStart={drag.handleDragStart}
+              onDragEnd={drag.handleDragEnd}
+              onDragCancel={drag.handleDragCancel}
               // The parent drop zone only mounts mid-drag, so re-measure droppables
               // continuously to register it.
               measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
             >
-              {canMove && parentPrefix !== null && activeDrag ? (
+              {canMove && parentPrefix !== null && drag.activeDrag ? (
                 <ParentDropZone parentPrefix={parentPrefix} />
               ) : null}
               {view === "grid" ? (
@@ -553,14 +470,14 @@ export function FileBrowser({
                     .map((row) => row.original)
                     .filter((entry) => entry.kind === "file")}
                   onPreview={openPreview}
-                  onShare={canShare ? setShareTarget : undefined}
+                  onShare={canShare ? dialogs.openShare : undefined}
                   onDetails={setDetails}
-                  onDelete={permissions.delete ? setDeleteTarget : undefined}
+                  onDelete={permissions.delete ? dialogs.openDelete : undefined}
                   onRename={canRename ? setRenameTarget : undefined}
                   onDuplicate={permissions.upload ? handleDuplicate : undefined}
                   onMove={
                     canMove
-                      ? (entry) => setMoveToTargets([toTarget(entry)])
+                      ? (entry) => dialogs.openMoveTo([toTarget(entry)])
                       : undefined
                   }
                   selection={gridSelection}
@@ -578,11 +495,11 @@ export function FileBrowser({
                 <FileTable table={table} canMove={canMove} />
               )}
               <DragOverlay modifiers={[snapCenterToCursor]}>
-                {activeDrag ? (
+                {drag.activeDrag ? (
                   <DragPreview
-                    label={activeDrag.label}
-                    count={activeDrag.count}
-                    kind={activeDrag.kind}
+                    label={drag.activeDrag.label}
+                    count={drag.activeDrag.count}
+                    kind={drag.activeDrag.kind}
                   />
                 ) : null}
               </DragOverlay>
@@ -595,7 +512,7 @@ export function FileBrowser({
             sourceId={sourceId}
             file={details}
             onClose={() => setDetails(null)}
-            onShare={canShare ? setShareTarget : undefined}
+            onShare={canShare ? dialogs.openShare : undefined}
           />
         ) : null}
       </div>
@@ -610,20 +527,20 @@ export function FileBrowser({
         onOpenChange={(open) => {
           if (!open) setPreviewKey(null);
         }}
-        onShare={canShare ? setShareTarget : undefined}
+        onShare={canShare ? dialogs.openShare : undefined}
       />
       <ShareDialog
         sourceId={sourceId}
-        file={shareTarget}
+        file={dialogs.dialog?.kind === "share" ? dialogs.dialog.file : null}
         onOpenChange={(open) => {
-          if (!open) setShareTarget(null);
+          if (!open) dialogs.close();
         }}
       />
 
       <ConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => {
-          if (!open && !deleting) setDeleteTarget(null);
+          if (!open && !deleting) dialogs.close();
         }}
         title={`Delete ${deleteTarget?.name}?`}
         titleClassName="break-all"
@@ -639,9 +556,9 @@ export function FileBrowser({
       />
 
       <ConfirmDialog
-        open={bulkConfirmOpen}
+        open={dialogs.dialog?.kind === "bulk-delete"}
         onOpenChange={(open) => {
-          if (!deleting) setBulkConfirmOpen(open);
+          if (!open && !deleting) dialogs.close();
         }}
         title={`Delete ${selectedCount} item${selectedCount === 1 ? "" : "s"}?`}
         description="This permanently deletes the selection from the bucket — folders with everything inside them. There is no undo."
@@ -653,46 +570,54 @@ export function FileBrowser({
 
       <MoveDialog
         sourceId={sourceId}
-        request={moveRequest}
+        request={
+          dialogs.dialog?.kind === "move" ? dialogs.dialog.request : null
+        }
         onOpenChange={(open) => {
-          if (!open) setMoveRequest(null);
+          if (!open) dialogs.close();
         }}
         onMoved={() => {
-          setMoveRequest(null);
-          setRowSelection({});
+          dialogs.close();
+          selection.clear();
           router.refresh();
         }}
       />
 
       <SearchCommand
         sourceId={sourceId}
-        open={searchOpen}
-        onOpenChange={setSearchOpen}
+        open={dialogs.dialog?.kind === "search"}
+        onOpenChange={(open) => {
+          if (!open) dialogs.close();
+        }}
         initialQuery={query}
       />
 
       <MoveToDialog
         sourceId={sourceId}
-        targets={moveToTargets}
+        targets={
+          dialogs.dialog?.kind === "move-to" ? dialogs.dialog.targets : null
+        }
         onOpenChange={(open) => {
-          if (!open) setMoveToTargets(null);
+          if (!open) dialogs.close();
         }}
         onMoved={() => {
-          setMoveToTargets(null);
-          setRowSelection({});
+          dialogs.close();
+          selection.clear();
           router.refresh();
         }}
       />
 
       <CopyToDialog
         sourceId={sourceId}
-        targets={copyTargets}
+        targets={
+          dialogs.dialog?.kind === "copy-to" ? dialogs.dialog.targets : null
+        }
         onOpenChange={(open) => {
-          if (!open) setCopyTargets(null);
+          if (!open) dialogs.close();
         }}
         onCopied={() => {
-          setCopyTargets(null);
-          setRowSelection({});
+          dialogs.close();
+          selection.clear();
           router.refresh();
         }}
       />
