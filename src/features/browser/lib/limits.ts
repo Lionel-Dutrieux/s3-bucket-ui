@@ -47,6 +47,9 @@ export const DELETE_FOLDER_MAX_ROUNDS = 50;
 export const DELETE_ENTRIES_MAX = 500;
 /** Maximum items in one drag-and-drop move. */
 export const MOVE_ENTRIES_MAX = 500;
+/** Maximum items in one cross-source copy selection (folders count as one
+ * item here; their expansion is bounded by CROSS_COPY_MAX_OBJECTS below). */
+export const COPY_ENTRIES_MAX = 500;
 
 /** Ceiling on duplicating one object where the provider has no server-side
  * copy (SFTP, FTP buffer the whole body through this process). */

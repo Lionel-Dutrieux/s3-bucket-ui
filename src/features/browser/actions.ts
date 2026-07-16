@@ -4,6 +4,7 @@ import { z } from "zod";
 import { duplicateKeyCandidate } from "@/features/browser/lib/duplicate";
 import {
   BUFFERED_COPY_MAX_BYTES,
+  COPY_ENTRIES_MAX,
   DELETE_ENTRIES_MAX,
   MOVE_ENTRIES_MAX,
 } from "@/features/browser/lib/limits";
@@ -359,6 +360,9 @@ export async function copyEntriesToSource(
     return actionError("Invalid destination.");
   }
   if (targets.length === 0) return actionError("Nothing selected.");
+  if (targets.length > COPY_ENTRIES_MAX) {
+    return actionError(`Copy at most ${COPY_ENTRIES_MAX} items at a time.`);
+  }
   if (
     targets.some(
       (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
