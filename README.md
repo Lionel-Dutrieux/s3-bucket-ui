@@ -63,23 +63,28 @@ same UI, downloads and previews stream through the app.
 
 ### Docker Compose (recommended)
 
-Bring your own PostgreSQL and run the prebuilt image:
+The demo stack bundles the app and its PostgreSQL — nothing else to provide:
 
 ```bash
 git clone https://github.com/Lionel-Dutrieux/s3-bucket-ui.git && cd s3-bucket-ui
 
 ENCRYPTION_KEY=$(openssl rand -hex 32) \
-DATABASE_URL=postgresql://user:password@host:5432/bucket_ui \
-docker compose up -d
+BETTER_AUTH_SECRET=$(openssl rand -base64 32) \
+docker compose -f docker-compose.demo.yml up -d
 ```
 
-Open the app and **sign up — the first account becomes the admin** (sign-up
-closes right after). Then add a source in Admin → Sources and grant access.
+Open http://localhost:3000 and **sign up — the first account becomes the
+admin** (sign-up closes right after). Then add a source in Admin → Sources
+and grant access. Keep `ENCRYPTION_KEY` safe: source credentials are
+encrypted with it and cannot be recovered without it.
 
-The bundled `docker-compose.yml` is [Dokploy](https://dokploy.com)-ready
-(external `dokploy-network`, domain and secrets configured in the UI). The
-image is a multi-stage standalone build (non-root, healthcheck on
-`/api/health`) and applies pending migrations on boot.
+For production, bring your own PostgreSQL with the main `docker-compose.yml`
+([Dokploy](https://dokploy.com)-ready — external `dokploy-network`, domain
+and secrets configured in the UI) and read
+**[docs/operations.md](docs/operations.md)** (HTTPS reverse proxy,
+backup/restore, upgrades). The image is a multi-stage standalone build
+(non-root, healthcheck on `/api/health`, `linux/amd64` + `linux/arm64`) and
+applies pending migrations on boot.
 
 > [!WARNING]
 > The first-account rule also applies to OIDC: on a fresh instance, whoever
@@ -162,7 +167,8 @@ assigned automatically at sign-in.
 Every server entry point (page, server action, API route) re-validates the
 session and the grant — non-admins only ever see sources they were granted,
 and a source they can't read answers **404**, not 403. Bucket credentials are
-encrypted at rest (AES-256-GCM) and never sent to the browser.
+encrypted at rest (AES-256-GCM) and never sent to the browser. Credential
+endpoints (sign-in, sign-up, password reset) are rate-limited in production.
 
 ## 🧱 Tech stack
 
@@ -176,6 +182,8 @@ Architecture, layers and the "how do I…" guide live in
 
 ## 🩺 Production notes
 
+- **[docs/operations.md](docs/operations.md)** — HTTPS reverse proxy
+  examples (Caddy/Traefik/nginx), backup & restore, upgrade path.
 - `GET /api/health` returns `200 {"status":"ok"}` when the app and its
   database respond, `503` otherwise.
 - Bare Node.js instead of Docker: `pnpm build && pnpm db:deploy && pnpm start`.
@@ -188,6 +196,8 @@ Architecture, layers and the "how do I…" guide live in
 Contributions are welcome! Read **[CONTRIBUTING.md](CONTRIBUTING.md)** for the
 workflow — `pnpm typecheck && pnpm lint && pnpm test && pnpm build` must pass
 (CI runs the same, plus an integration job against a real MinIO container).
+This project follows the
+[Contributor Covenant](CODE_OF_CONDUCT.md) code of conduct.
 
 ## 📄 License
 
