@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ChevronDown, CircleAlert, RotateCw, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import type { UploadItem } from "@/features/browser/hooks/use-uploads";
@@ -23,6 +24,7 @@ export function UploadTray({
   onRetry: (id: string) => void;
   onDismiss: () => void;
 }) {
+  const t = useTranslations("browser.uploadTray");
   const [collapsed, setCollapsed] = useState(false);
 
   if (items.length === 0) return null;
@@ -33,15 +35,15 @@ export function UploadTray({
   const failed = items.filter((item) => item.status === "error").length;
   const title =
     inFlight > 0
-      ? `Uploading ${inFlight} file${inFlight === 1 ? "" : "s"}…`
+      ? t("uploadingCount", { count: inFlight })
       : failed > 0
-        ? `${failed} upload${failed === 1 ? "" : "s"} failed`
-        : `${items.length} upload${items.length === 1 ? "" : "s"} complete`;
+        ? t("failedCount", { count: failed })
+        : t("completeCount", { count: items.length });
 
   return (
     <section
       className="fixed bottom-4 right-4 z-50 w-80 overflow-hidden rounded-lg border bg-card shadow-lg"
-      aria-label="Uploads"
+      aria-label={t("ariaLabel")}
     >
       <header className="flex h-10 items-center gap-2 border-b bg-muted/40 pl-3 pr-1.5">
         {/* Live region: completion/failure is announced without moving focus. */}
@@ -56,7 +58,7 @@ export function UploadTray({
           type="button"
           onClick={() => setCollapsed((value) => !value)}
           className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-          aria-label={collapsed ? "Expand uploads" : "Collapse uploads"}
+          aria-label={collapsed ? t("expand") : t("collapse")}
         >
           <ChevronDown
             className={cn(
@@ -71,7 +73,7 @@ export function UploadTray({
             type="button"
             onClick={onDismiss}
             className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-            aria-label="Dismiss uploads"
+            aria-label={t("dismissAria")}
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -89,15 +91,15 @@ export function UploadTray({
                   <>
                     <span className="text-xs text-muted-foreground tabular-nums">
                       {item.status === "queued"
-                        ? "Queued"
+                        ? t("queued")
                         : `${Math.round(item.progress * 100)}%`}
                     </span>
                     <button
                       type="button"
                       onClick={() => onCancel(item.id)}
                       className="inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-                      aria-label={`Cancel upload of ${item.name}`}
-                      title="Cancel"
+                      aria-label={t("cancelAria", { name: item.name })}
+                      title={t("cancelTitle")}
                     >
                       <X className="size-3.5" aria-hidden />
                     </button>
@@ -118,8 +120,8 @@ export function UploadTray({
                       type="button"
                       onClick={() => onRetry(item.id)}
                       className="inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-                      aria-label={`Retry upload of ${item.name}`}
-                      title="Retry"
+                      aria-label={t("retryAria", { name: item.name })}
+                      title={t("retryTitle")}
                     >
                       <RotateCw className="size-3.5" aria-hidden />
                     </button>
@@ -137,7 +139,7 @@ export function UploadTray({
                   aria-valuenow={Math.round(item.progress * 100)}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={`Upload progress for ${item.name}`}
+                  aria-label={t("progressAria", { name: item.name })}
                 >
                   <div
                     className="h-full rounded-full bg-primary transition-[width] duration-200"

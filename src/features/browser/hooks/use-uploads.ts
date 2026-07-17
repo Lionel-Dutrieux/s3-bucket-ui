@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
 import { uploadUrl } from "@/features/browser/api/client";
 import {
@@ -49,6 +50,7 @@ export function useUploads(
   prefix: string,
   onQueueSettled: () => void,
 ) {
+  const t = useTranslations("browser.uploadTray");
   const [items, setItems] = useState<UploadItem[]>([]);
   const requests = useRef(new Map<string, XMLHttpRequest>());
   const pending = useRef(new Map<string, PendingFile>());
@@ -105,16 +107,16 @@ export function useUploads(
           patch(id, { status: "done", progress: 1 });
           settle();
         } else if (isTransient(xhr.status)) {
-          fail(xhr.responseText || `Upload failed (${xhr.status}).`);
+          fail(xhr.responseText || t("uploadFailed", { status: xhr.status }));
         } else {
           // Definitive verdict — retrying an oversized or forbidden upload
           // would only fail again, so don't burn the remaining attempts.
           entry.attempts = UPLOAD_MAX_ATTEMPTS;
-          fail(xhr.responseText || `Upload failed (${xhr.status}).`);
+          fail(xhr.responseText || t("uploadFailed", { status: xhr.status }));
         }
       };
       xhr.onerror = () => {
-        fail("Network error.");
+        fail(t("networkError"));
       };
       xhr.onabort = () => {
         pending.current.delete(id);
@@ -125,7 +127,7 @@ export function useUploads(
       xhr.open("POST", uploadUrl(sourceId, prefix + entry.path));
       xhr.send(entry.file);
     }
-  }, [sourceId, prefix, onQueueSettled, patch]);
+  }, [sourceId, prefix, onQueueSettled, patch, t]);
 
   const addFiles = useCallback(
     (inputs: Iterable<UploadInput>) => {

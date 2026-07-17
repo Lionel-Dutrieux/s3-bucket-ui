@@ -14,7 +14,8 @@ export interface MoveOp {
 
 export interface MovePlan {
   moves: MoveOp[];
-  error?: string;
+  /** Key into `browser.errors` — resolved at the render/server boundary. */
+  error?: "selfMove";
 }
 
 /** "a/b/c.txt" → "c.txt" */
@@ -72,7 +73,7 @@ export function planMove(targets: EntryTarget[], destPrefix: string): MovePlan {
       target.kind === "folder" &&
       isIntoSelfOrDescendant(target.prefix, destPrefix)
     ) {
-      return { moves: [], error: "You can't move a folder into itself." };
+      return { moves: [], error: "selfMove" };
     }
     moves.push({
       kind: target.kind,

@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { DragData, DropData } from "@/features/browser/components/dnd";
@@ -37,6 +38,8 @@ export function useEntryDrag({
   movingTargets: (dragged: DragData) => EntryTarget[];
   onMoveRequest: (request: MoveRequest) => void;
 }) {
+  const t = useTranslations("browser.errors");
+  const tMoveDialog = useTranslations("browser.moveDialog");
   const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -58,12 +61,14 @@ export function useEntryDrag({
     const targets = movingTargets(data);
     const plan = planMove(targets, over.prefix);
     if (plan.error) {
-      toast.error(plan.error);
+      toast.error(t(plan.error));
       return;
     }
     if (plan.moves.length === 0) return; // no-op drop (already there / self)
     const destLabel =
-      over.prefix === "" ? "the parent folder" : folderName(over.prefix);
+      over.prefix === ""
+        ? tMoveDialog("parentFolderLabel")
+        : folderName(over.prefix);
     onMoveRequest({
       targets,
       destPrefix: over.prefix,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -35,6 +36,8 @@ export function CopyToDialog({
   onOpenChange: (open: boolean) => void;
   onCopied: () => void;
 }) {
+  const t = useTranslations("browser.copyToDialog");
+  const tFolder = useTranslations("browser.folderPicker");
   const open = targets !== null;
   const [destSourceId, setDestSourceId] = useState<string>("");
   const [destPrefix, setDestPrefix] = useState("");
@@ -66,13 +69,10 @@ export function CopyToDialog({
       return;
     }
     const { copied, skipped, failed } = result.data;
-    const summary = `${copied} object${copied === 1 ? "" : "s"} copied${
-      skipped ? `, ${skipped} skipped` : ""
-    }`;
     if (failed > 0) {
-      toast.warning(`${summary}, ${failed} failed — run it again to retry.`);
+      toast.warning(t("copyPartialFailedToast", { copied, skipped, failed }));
     } else {
-      toast.success(`${summary} to ${dest.name}`);
+      toast.success(t("copiedToast", { copied, skipped, name: dest.name }));
     }
     onCopied();
   };
@@ -82,11 +82,11 @@ export function CopyToDialog({
       open={open}
       onOpenChange={onOpenChange}
       pending={pending}
-      title={`Copy ${count} item${count === 1 ? "" : "s"} to…`}
-      description="Pick a source and a folder. Objects already present in the destination are skipped; nothing is removed from here."
+      title={t("title", { count })}
+      description={t("description")}
       destinationLabel={dest ? `→ ${dest.name}:/${destPrefix}` : ""}
-      submitLabel="Copy here"
-      pendingLabel="Copying…"
+      submitLabel={t("copyHere")}
+      pendingLabel={t("copying")}
       submitDisabled={!dest}
       onSubmit={run}
     >
@@ -98,10 +98,13 @@ export function CopyToDialog({
         }}
         disabled={pending || sources.isPending}
       >
-        <SelectTrigger className="w-full" aria-label="Destination source">
+        <SelectTrigger
+          className="w-full"
+          aria-label={t("destinationSourceAria")}
+        >
           <SelectValue
             placeholder={
-              sources.isPending ? "Loading sources…" : "Choose a source…"
+              sources.isPending ? t("loadingSources") : t("chooseSource")
             }
           />
         </SelectTrigger>
@@ -111,7 +114,7 @@ export function CopyToDialog({
               {source.name}
               {source.id === sourceId ? (
                 <span className="text-xs text-muted-foreground">
-                  this source
+                  {t("thisSource")}
                 </span>
               ) : (
                 <span className="text-xs text-muted-foreground">
@@ -125,14 +128,14 @@ export function CopyToDialog({
 
       {sources.data?.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          You don&rsquo;t have edit access on any source.
+          {t("noWritableSources")}
         </p>
       ) : null}
 
       {destSourceId ? (
         <FolderPicker
           sourceId={destSourceId}
-          rootLabel={dest?.name ?? "Root"}
+          rootLabel={dest?.name ?? tFolder("root")}
           prefix={destPrefix}
           onPrefixChange={setDestPrefix}
           disabled={pending}

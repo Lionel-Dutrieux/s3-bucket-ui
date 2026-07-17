@@ -2,16 +2,20 @@
 
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import type { ComponentType } from "react";
 import type { PreviewKind } from "@/features/browser/lib/preview-kind";
 import type { ViewerProps } from "./types";
 
-const loading = () => (
-  <Loader2
-    className="size-6 animate-spin text-muted-foreground"
-    aria-label="Loading preview"
-  />
-);
+function Loading() {
+  const t = useTranslations("browser.viewers");
+  return (
+    <Loader2
+      className="size-6 animate-spin text-muted-foreground"
+      aria-label={t("loadingPreview")}
+    />
+  );
+}
 
 // One lazy chunk per viewer: opening an image never downloads shiki, and
 // vice-versa. ssr:false — the dialog only exists client-side anyway.
@@ -21,7 +25,7 @@ function lazy<T extends ComponentType<ViewerProps>>(
 ) {
   return dynamic(() => load().then((m) => m[name] as T), {
     ssr: false,
-    loading,
+    loading: Loading,
   });
 }
 

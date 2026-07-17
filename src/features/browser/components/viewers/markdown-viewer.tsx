@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -18,6 +19,7 @@ import type { ViewerProps } from "./types";
  */
 export function MarkdownViewer(props: ViewerProps) {
   const { sourceId, file } = props;
+  const t = useTranslations("browser.viewers");
   const [mode, setMode] = useState<"rendered" | "source">("rendered");
   const query = useQuery({
     ...browserQueries.textPreview(sourceId, file.key),
@@ -35,14 +37,14 @@ export function MarkdownViewer(props: ViewerProps) {
 
   if (file.size === 0) {
     return (
-      <p className="p-6 text-sm text-muted-foreground">This file is empty.</p>
+      <p className="p-6 text-sm text-muted-foreground">{t("emptyFile")}</p>
     );
   }
   if (query.isPending) {
     return (
       <Loader2
         className="size-6 animate-spin text-muted-foreground"
-        aria-label="Loading preview"
+        aria-label={t("loadingPreview")}
       />
     );
   }
@@ -83,6 +85,7 @@ function ModeToggle({
   mode: "rendered" | "source";
   onChange: (mode: "rendered" | "source") => void;
 }) {
+  const t = useTranslations("browser.viewers");
   return (
     <Button
       type="button"
@@ -91,7 +94,7 @@ function ModeToggle({
       className="absolute top-2 right-2 z-10 bg-background/90 backdrop-blur"
       onClick={() => onChange(mode === "rendered" ? "source" : "rendered")}
     >
-      {mode === "rendered" ? "Source" : "Rendered"}
+      {mode === "rendered" ? t("source") : t("rendered")}
     </Button>
   );
 }

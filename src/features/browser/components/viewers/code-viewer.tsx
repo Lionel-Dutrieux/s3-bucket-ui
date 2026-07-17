@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { browserQueries } from "@/features/browser/api/queries";
 import { languageOf } from "@/features/browser/lib/language-of";
@@ -14,6 +15,7 @@ import type { ViewerProps } from "./types";
  * Highlighting failures fall back to the plain <pre>, never to an error.
  */
 export function CodeViewer({ sourceId, file }: ViewerProps) {
+  const t = useTranslations("browser.viewers");
   const query = useQuery({
     ...browserQueries.textPreview(sourceId, file.key),
     enabled: file.size > 0,
@@ -43,14 +45,14 @@ export function CodeViewer({ sourceId, file }: ViewerProps) {
 
   if (file.size === 0) {
     return (
-      <p className="p-6 text-sm text-muted-foreground">This file is empty.</p>
+      <p className="p-6 text-sm text-muted-foreground">{t("emptyFile")}</p>
     );
   }
   if (query.isPending) {
     return (
       <Loader2
         className="size-6 animate-spin text-muted-foreground"
-        aria-label="Loading preview"
+        aria-label={t("loadingPreview")}
       />
     );
   }

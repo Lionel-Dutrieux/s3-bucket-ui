@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { duplicateKeyCandidate } from "@/features/browser/lib/duplicate";
 import {
@@ -36,8 +37,6 @@ import { hashSharePassword } from "@/lib/shares/password";
 import { generateShareToken } from "@/lib/shares/token";
 import { getFilesClient } from "@/lib/storage/client";
 
-const RENAME_DENIED = "You are not allowed to edit this source.";
-
 /**
  * Creates a folder by writing the zero-byte `prefix/` marker object — the
  * same convention the provider dashboards use, and what makes an otherwise
@@ -48,9 +47,10 @@ export async function createFolder(
   prefix: string,
   name: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("browser.errors");
   const parsed = folderNameSchema.safeParse(name);
   if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
+    return actionError(parsed.error.issues[0]?.message ?? t("invalidName"));
   }
   const trimmed = parsed.data;
 
@@ -58,7 +58,7 @@ export async function createFolder(
     sourceId,
     {
       need: { edit: true },
-      denied: "You are not allowed to add files to this source.",
+      denied: t("addDenied"),
       action: "create the folder",
     },
     async ({ source, files }) => {
@@ -84,9 +84,10 @@ export async function renameObject(
   key: string,
   newName: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("browser.errors");
   const parsed = entryNameSchema.safeParse(newName);
   if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
+    return actionError(parsed.error.issues[0]?.message ?? t("invalidName"));
   }
   const trimmed = parsed.data;
 
@@ -94,14 +95,14 @@ export async function renameObject(
     sourceId,
     {
       need: { edit: true },
-      denied: RENAME_DENIED,
+      denied: t("editDenied"),
       action: "rename this file",
     },
     async ({ source, files }) => {
       const newKey = key.slice(0, key.lastIndexOf("/") + 1) + trimmed;
       if (newKey === key) return actionOk();
       if (await files.exists(newKey)) {
-        return actionError("Something with that name already exists here.");
+        return actionError(t("nameExists"));
       }
       await files.move(key, newKey);
       await recordOperation({
@@ -123,10 +124,11 @@ export async function renameFolder(
   prefix: string,
   newName: string,
 ): Promise<ActionResult> {
-  if (!prefix.endsWith("/")) return actionError("Invalid folder.");
+  const t = await getTranslations("browser.errors");
+  if (!prefix.endsWith("/")) return actionError(t("invalidFolder"));
   const parsed = folderNameSchema.safeParse(newName);
   if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
+    return actionError(parsed.error.issues[0]?.message ?? t("invalidName"));
   }
   const trimmed = parsed.data;
 
@@ -134,10 +136,9 @@ export async function renameFolder(
     sourceId,
     {
       need: { edit: true },
-      denied: RENAME_DENIED,
+      denied: t("editDenied"),
       action: "rename this folder",
-      failureMessage:
-        "Could not rename this folder — some objects may have moved already, refresh to check.",
+      failureMessage: t("renameFolderFailure"),
     },
     async ({ source, files }) => {
       const parent = prefix.slice(
@@ -149,7 +150,7 @@ export async function renameFolder(
 
       const conflict = await files.list({ prefix: newPrefix, limit: 1 });
       if (conflict.items.length > 0) {
-        return actionError("A folder with that name already exists here.");
+        return actionError(t("folderNameExists"));
       }
 
       const result = await movePrefix(files, prefix, newPrefix);
@@ -178,13 +179,14 @@ export async function duplicateObject(
   sourceId: string,
   key: string,
 ): Promise<ActionResult> {
-  if (!key || key.endsWith("/")) return actionError("Invalid file.");
+  const t = await getTranslations("browser.errors");
+  if (!key || key.endsWith("/")) return actionError(t("invalidFile"));
 
   return withWriteAccess(
     sourceId,
     {
       need: { edit: true },
-      denied: "You are not allowed to edit this source.",
+      denied: t("editDenied"),
       action: "duplicate this file",
     },
     async ({ source, files }) => {
@@ -193,9 +195,7 @@ export async function duplicateObject(
       if (!files.capabilities.serverSideCopy) {
         const stat = await files.head(key);
         if (stat.size > BUFFERED_COPY_MAX_BYTES) {
-          return actionError(
-            "This file is too large to duplicate on this provider (512 MB max).",
-          );
+          return actionError(t("duplicateTooLarge"));
         }
       }
       for (let attempt = 1; attempt <= DUPLICATE_MAX_ATTEMPTS; attempt++) {
@@ -211,9 +211,7 @@ export async function duplicateObject(
         });
         return actionOk();
       }
-      return actionError(
-        "Too many copies of this file already exist here — rename one first.",
-      );
+      return actionError(t("tooManyDuplicates"));
     },
   );
 }
@@ -226,11 +224,12 @@ export async function deleteObject(
   sourceId: string,
   key: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("browser.errors");
   return withWriteAccess(
     sourceId,
     {
       need: { delete: true },
-      denied: "You are not allowed to delete from this source.",
+      denied: t("deleteDenied"),
       action: "delete this file",
     },
     async ({ source, files }) => {
@@ -251,15 +250,16 @@ export async function deleteFolder(
   sourceId: string,
   prefix: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("browser.errors");
   // A folder prefix is never empty — refuse anything that could sweep the
   // whole bucket.
-  if (!prefix.endsWith("/")) return actionError("Invalid folder.");
+  if (!prefix.endsWith("/")) return actionError(t("invalidFolder"));
 
   return withWriteAccess(
     sourceId,
     {
       need: { delete: true },
-      denied: "You are not allowed to delete from this source.",
+      denied: t("deleteDenied"),
       action: "delete this folder",
     },
     async ({ source, files }) => {
@@ -284,23 +284,24 @@ export async function deleteEntries(
   sourceId: string,
   targets: EntryTarget[],
 ): Promise<ActionResult> {
+  const t = await getTranslations("browser.errors");
   if (targets.length === 0) return actionOk();
   if (targets.length > DELETE_ENTRIES_MAX) {
-    return actionError(`Select at most ${DELETE_ENTRIES_MAX} items at a time.`);
+    return actionError(t("selectAtMost", { max: DELETE_ENTRIES_MAX }));
   }
   if (
     targets.some(
       (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
     )
   ) {
-    return actionError("Invalid folder.");
+    return actionError(t("invalidFolder"));
   }
 
   return withWriteAccess(
     sourceId,
     {
       need: { delete: true },
-      denied: "You are not allowed to delete from this source.",
+      denied: t("deleteDenied"),
       action: "delete the selection",
     },
     async ({ source, files }) => {
@@ -335,9 +336,7 @@ export async function deleteEntries(
         });
       }
       return failures.length > 0
-        ? actionError(
-            `${failures.length} item${failures.length === 1 ? "" : "s"} could not be deleted.`,
-          )
+        ? actionError(t("someItemsFailedToDelete", { count: failures.length }))
         : actionOk();
     },
   );
@@ -356,27 +355,28 @@ export async function copyEntriesToSource(
   targets: EntryTarget[],
   destPrefix: string,
 ): Promise<ActionResult<CrossCopySummary>> {
+  const t = await getTranslations("browser.errors");
   if (destPrefix !== "" && !destPrefix.endsWith("/")) {
-    return actionError("Invalid destination.");
+    return actionError(t("invalidDestination"));
   }
-  if (targets.length === 0) return actionError("Nothing selected.");
+  if (targets.length === 0) return actionError(t("nothingSelected"));
   if (targets.length > COPY_ENTRIES_MAX) {
-    return actionError(`Copy at most ${COPY_ENTRIES_MAX} items at a time.`);
+    return actionError(t("copyAtMost", { max: COPY_ENTRIES_MAX }));
   }
   if (
     targets.some(
       (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
     )
   ) {
-    return actionError("Invalid folder.");
+    return actionError(t("invalidFolder"));
   }
 
   const origin = await requireSourceAccess(sourceId);
-  if (!origin) return actionError("Source not found.");
+  if (!origin) return actionError(t("sourceNotFound"));
   const dest = await requireSourceAccess(destSourceId);
-  if (!dest) return actionError("Destination not found.");
+  if (!dest) return actionError(t("destinationNotFound"));
   if (!dest.access.canEdit) {
-    return actionError("You are not allowed to add files to that source.");
+    return actionError(t("addDeniedOther"));
   }
 
   try {
@@ -406,7 +406,7 @@ export async function copyEntriesToSource(
       `[browser] cross-copy failed (source=${sourceId} → ${destSourceId}):`,
       error,
     );
-    return actionError("Could not copy the selection — try again.");
+    return actionError(t("copySelectionFailed"));
   }
 }
 
@@ -420,33 +420,33 @@ export async function moveEntries(
   targets: EntryTarget[],
   destPrefix: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("browser.errors");
   if (destPrefix !== "" && !destPrefix.endsWith("/")) {
-    return actionError("Invalid destination.");
+    return actionError(t("invalidDestination"));
   }
   if (targets.length === 0) return actionOk();
   if (targets.length > MOVE_ENTRIES_MAX) {
-    return actionError(`Move at most ${MOVE_ENTRIES_MAX} items at a time.`);
+    return actionError(t("moveAtMost", { max: MOVE_ENTRIES_MAX }));
   }
   if (
     targets.some(
       (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
     )
   ) {
-    return actionError("Invalid folder.");
+    return actionError(t("invalidFolder"));
   }
 
   const plan = planMove(targets, destPrefix);
-  if (plan.error) return actionError(plan.error);
+  if (plan.error) return actionError(t(plan.error));
   if (plan.moves.length === 0) return actionOk();
 
   return withWriteAccess(
     sourceId,
     {
       need: { edit: true },
-      denied: "You are not allowed to edit this source.",
+      denied: t("editDenied"),
       action: "move the selection",
-      failureMessage:
-        "Could not move everything — some items may have moved already, refresh to check.",
+      failureMessage: t("moveFailure"),
     },
     async ({ source, files }) => {
       // Conflict pre-check: refuse the whole move if any destination exists.
@@ -461,7 +461,7 @@ export async function moveEntries(
       }
       if (conflicts.length > 0) {
         return actionError(
-          `Already exists in the destination: ${conflicts.join(", ")}.`,
+          t("destinationConflict", { names: conflicts.join(", ") }),
         );
       }
 
@@ -506,27 +506,27 @@ export async function createShareLink(
   key: string,
   options: { expiresIn: ShareExpiry; password?: string },
 ): Promise<ActionResult<{ token: string }>> {
+  const t = await getTranslations("browser.errors");
   const parsed = shareOptionsSchema.safeParse(options);
-  if (!parsed.success) return actionError("Invalid share options.");
-  if (!key || key.endsWith("/"))
-    return actionError("Only files can be shared.");
+  if (!parsed.success) return actionError(t("invalidShareOptions"));
+  if (!key || key.endsWith("/")) return actionError(t("onlyFilesShareable"));
 
   if (!(await isPublicSharingEnabled())) {
-    return actionError("Public share links are disabled on this instance.");
+    return actionError(t("sharingDisabled"));
   }
   const session = await getSession();
   const result = await requireSourceAccess(sourceId);
-  if (!session || !result) return actionError("Source not found.");
+  if (!session || !result) return actionError(t("sourceNotFound"));
   const { source } = result;
 
   const files = getFilesClient(source);
   try {
     if (!(await files.exists(key))) {
-      return actionError("This file no longer exists.");
+      return actionError(t("fileNoLongerExists"));
     }
   } catch (error) {
     console.error(`[share] exists check failed (source=${source.id}):`, error);
-    return actionError("Could not reach this source.");
+    return actionError(t("sourceUnreachable"));
   }
 
   const token = generateShareToken();

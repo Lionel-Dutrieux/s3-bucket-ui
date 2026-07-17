@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { moveEntries } from "@/features/browser/actions";
@@ -24,6 +25,9 @@ export function MoveToDialog({
   onOpenChange: (open: boolean) => void;
   onMoved: () => void;
 }) {
+  const t = useTranslations("browser.moveToDialog");
+  const tFolder = useTranslations("browser.folderPicker");
+  const tErrors = useTranslations("browser.errors");
   const open = targets !== null;
   const [destPrefix, setDestPrefix] = useState("");
   const { pending, track } = usePendingAction();
@@ -47,7 +51,7 @@ export function MoveToDialog({
       toast.error(result.error);
       return;
     }
-    toast.success(`Moved ${moveCount} item${moveCount === 1 ? "" : "s"}`);
+    toast.success(t("movedToast", { count: moveCount }));
     onMoved();
   };
 
@@ -56,17 +60,17 @@ export function MoveToDialog({
       open={open}
       onOpenChange={onOpenChange}
       pending={pending}
-      title={`Move ${count} item${count === 1 ? "" : "s"} to…`}
-      description="Moving copies each object to the destination and deletes the original. Folders move everything inside them."
+      title={t("title", { count })}
+      description={t("description")}
       destinationLabel={`→ /${destPrefix}`}
-      submitLabel="Move here"
-      pendingLabel="Moving…"
+      submitLabel={t("moveHere")}
+      pendingLabel={t("moving")}
       submitDisabled={!plan || !!plan.error || moveCount === 0}
       onSubmit={run}
     >
       <FolderPicker
         sourceId={sourceId}
-        rootLabel="Root"
+        rootLabel={tFolder("root")}
         prefix={destPrefix}
         onPrefixChange={setDestPrefix}
         disabled={pending}
@@ -74,7 +78,7 @@ export function MoveToDialog({
 
       {plan?.error ? (
         <p role="alert" className="text-sm text-destructive">
-          {plan.error}
+          {tErrors("selfMove")}
         </p>
       ) : null}
     </DestinationDialog>
