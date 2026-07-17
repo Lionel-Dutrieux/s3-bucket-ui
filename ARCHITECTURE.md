@@ -87,7 +87,15 @@ src/lib/          Shared low-level modules: prisma client, crypto, env,
                   mailer (mail.ts), clipboard helper (clipboard.ts).
 src/components/   App shell (layout/), providers (providers/), shared widgets
                   (confirm-dialog) and shadcn/ui primitives (ui/, lint off).
+src/i18n/         next-intl configuration: config.ts (pure — locales, default,
+                  cookie name), request.ts (getRequestConfig: cookie, else
+                  Accept-Language, else default, loads messages/<locale>.json),
+                  negotiation.ts (pure Accept-Language parsing, unit-tested).
 src/generated/    Prisma client output (gitignored, regenerated on install).
+messages/         en.json / fr.json — one namespace per feature area (common,
+                  layout, auth, account, browser, sources, admin, activity,
+                  shares). English is the source of truth; both files must
+                  carry the same key tree.
 prisma/           Schema + versioned SQL migrations (migrations/).
 ```
 
@@ -153,6 +161,15 @@ callers return 404/notFound() and never reveal that a source exists.
 - **Validation has one source of truth per input** (zod, in
   `features/*/lib/schema(s).ts`): the form validates it client-side, the
   action re-parses it server-side. Never hand-validate in two places.
+- **Every UI string goes through next-intl** (`useTranslations` in client
+  components, `getTranslations` in RSCs, `generateMetadata`, server actions
+  and route handlers). Pure modules (`features/*/lib/`, `src/lib/`) never
+  import next-intl — they expose message **keys** (e.g.
+  `features/activity/lib/operation-labels.ts`) and the component resolves
+  them at render with `t(key)`. Server-action errors are translated
+  server-side before they reach the `ActionResult`. Locale resolution is a
+  cookie, else `Accept-Language`, else English — no `[locale]` route segment,
+  no middleware. Out of scope: zod messages, emails, server logs.
 
 ## Key decisions
 
@@ -253,6 +270,14 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
   regenerate the client (into `src/generated/`). Commit the new folder under
   `prisma/migrations/`. Production applies it automatically on the next
   deploy.
+- **Add a translated string?** Add the key to **both**
+  `messages/en.json` and `messages/fr.json`, under the namespace matching the
+  feature (`common`, `layout`, `auth`, `account`, `browser`, `sources`,
+  `admin`, `activity`, `shares`). Client component: `useTranslations(ns)` +
+  `t("key")`; RSC/`generateMetadata`/server action/route handler:
+  `await getTranslations(ns)`. ICU for interpolation/plurals (`{count,
+  plural, one {# item} other {# items}}`), never string concatenation. A
+  pure `lib/` module exposes the key, not the resolved text.
 - **Audit a new write action?** Call `recordOperation` from
   `src/lib/dal/operations.ts` after the write succeeds, and add a label/icon
   in `features/activity/lib/operation-labels.ts`.

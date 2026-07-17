@@ -25,6 +25,9 @@ the conventions. The short version:
   `requireAdmin` for pages, `requireSourceAccess` for anything
   source-scoped (uniform 404). `proxy.ts` is optimistic UX, never a guard.
 - Forms: always the TanStack Form kit (`src/forms/`, `useAppForm`).
+- i18n: every UI string through next-intl (`useTranslations`/
+  `getTranslations`), keys in `messages/en.json` **and** `messages/fr.json`;
+  pure `lib/` modules expose keys, never resolved text.
 - Prisma only inside `src/lib/dal/` (and `src/lib/auth/` for the better-auth
   instance); route-handler errors via `apiError`.
 - Verify with `pnpm typecheck && pnpm lint && pnpm test && pnpm build`; the
