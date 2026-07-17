@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   BRANDING_LOGO_MAX_BYTES,
   brandingSchema,
+  oidcSettingsSchema,
+  smtpSettingsSchema,
 } from "@/features/admin/lib/schema";
 
 const svgLogo = `data:image/svg+xml;base64,${Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'/>").toString("base64")}`;
@@ -65,6 +67,49 @@ describe("brandingSchema", () => {
         appName: "Acme",
         primaryColor: null,
         logo: oversized,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("smtpSettingsSchema", () => {
+  it("accepts a full config, password optional (null = keep current)", () => {
+    expect(
+      smtpSettingsSchema.safeParse({
+        host: "mail.example.com",
+        port: 587,
+        secure: false,
+        user: "mailer",
+        password: null,
+        from: "App <app@example.com>",
+      }).success,
+    ).toBe(true);
+  });
+  it("rejects out-of-range port and empty host", () => {
+    expect(
+      smtpSettingsSchema.safeParse({
+        host: "",
+        port: 70_000,
+        secure: false,
+        user: null,
+        password: null,
+        from: "a@b.c",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("oidcSettingsSchema", () => {
+  it("requires an https discovery URL", () => {
+    expect(
+      oidcSettingsSchema.safeParse({
+        discoveryUrl:
+          "http://insecure.example/.well-known/openid-configuration",
+        clientId: "id",
+        clientSecret: "secret",
+        providerLabel: "SSO",
+        scopes: "openid profile",
+        groupsClaim: "groups",
       }).success,
     ).toBe(false);
   });

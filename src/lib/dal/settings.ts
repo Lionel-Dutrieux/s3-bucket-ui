@@ -1,5 +1,6 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
+import { decrypt, encrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
 
 const SIGN_UP_KEY = "allowPublicSignUp";
@@ -152,4 +153,72 @@ export async function updateBrandingSettings(input: {
 
 export async function clearBrandingSettings(): Promise<void> {
   await deleteSettings(BRANDING_KEYS);
+}
+
+// --- runtime config (SMTP / OIDC overrides + version) ---
+
+const CONFIG_VERSION_KEY = "configVersion";
+const SECRET_KEYS = new Set(["smtp.password", "oidc.clientSecret"]);
+
+export async function getConfigVersion(): Promise<number> {
+  const row = await prisma.setting.findUnique({
+    where: { key: CONFIG_VERSION_KEY },
+    select: { value: true },
+  });
+  return row ? Number(row.value) : 0;
+}
+
+function bumpConfigVersion(current: number): Prisma.PrismaPromise<unknown> {
+  return prisma.setting.upsert({
+    where: { key: CONFIG_VERSION_KEY },
+    create: { key: CONFIG_VERSION_KEY, value: String(current + 1) },
+    update: { value: String(current + 1) },
+  });
+}
+
+/** Overrides DB d'un groupe, clés sans préfixe, secrets déchiffrés. */
+export async function getConfigOverrides(
+  prefix: "smtp" | "oidc",
+): Promise<Record<string, string>> {
+  const rows = await prisma.setting.findMany({
+    where: { key: { startsWith: `${prefix}.` } },
+    select: { key: true, value: true },
+  });
+  const result: Record<string, string> = {};
+  for (const row of rows) {
+    if (row.key === CONFIG_VERSION_KEY) continue;
+    const field = row.key.slice(prefix.length + 1);
+    result[field] = SECRET_KEYS.has(row.key) ? decrypt(row.value) : row.value;
+  }
+  return result;
+}
+
+/** null supprime la clé ; le tout + bump de version en une transaction. */
+export async function setConfigOverrides(
+  prefix: "smtp" | "oidc",
+  values: Record<string, string | null>,
+): Promise<void> {
+  const version = await getConfigVersion();
+  const operations: Prisma.PrismaPromise<unknown>[] = [];
+  for (const [field, value] of Object.entries(values)) {
+    const key = `${prefix}.${field}`;
+    if (value === null) {
+      operations.push(deleteSettings([key]));
+    } else {
+      const stored = SECRET_KEYS.has(key) ? encrypt(value) : value;
+      operations.push(setStringSetting(key, stored));
+    }
+  }
+  operations.push(bumpConfigVersion(version));
+  await prisma.$transaction(operations);
+}
+
+export async function clearConfigOverrides(
+  prefix: "smtp" | "oidc",
+): Promise<void> {
+  const version = await getConfigVersion();
+  await prisma.$transaction([
+    prisma.setting.deleteMany({ where: { key: { startsWith: `${prefix}.` } } }),
+    bumpConfigVersion(version),
+  ]);
 }

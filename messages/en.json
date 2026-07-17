@@ -728,7 +728,46 @@
       "removeMemberFailed": "Could not remove this member.",
       "invalidGrant": "Invalid grant.",
       "saveGrantFailed": "Could not save this grant.",
-      "removeGrantFailed": "Could not remove this grant."
+      "removeGrantFailed": "Could not remove this grant.",
+      "oidcDiscoveryFailed": "Could not reach or validate the OIDC discovery endpoint.",
+      "smtpNotConfigured": "SMTP is not configured.",
+      "testEmailFailed": "Could not send the test email."
+    },
+    "runtimeConfig": {
+      "provenance": { "env": "env", "custom": "custom" },
+      "resetToEnv": "Restore environment values",
+      "resetConfirm": "This removes every value saved here and falls back to the environment variables. Continue?",
+      "saved": "Settings saved.",
+      "testEmailSubject": "Test Email from S3 Bucket UI",
+      "testEmailBody": "This is a test email sent from S3 Bucket UI to verify email delivery is working.",
+      "smtp": {
+        "title": "Email (SMTP)",
+        "description": "Relay used for password-reset and account emails. Environment variables provide the defaults; values saved here override them.",
+        "host": "Host",
+        "port": "Port",
+        "secure": "TLS (implicit)",
+        "user": "Username",
+        "password": "Password",
+        "passwordSet": "•••• (configured — type to replace)",
+        "passwordUnset": "Not set",
+        "from": "Sender",
+        "sendTest": "Send a test email",
+        "testSent": "Test email sent to {email}."
+      },
+      "oidc": {
+        "title": "Single Sign-On (OIDC)",
+        "description": "Generic OpenID Connect provider. Environment variables provide the defaults; values saved here override them.",
+        "discoveryUrl": "Discovery URL",
+        "clientId": "Client ID",
+        "clientSecret": "Client secret",
+        "secretSet": "•••• (configured — type to replace)",
+        "secretUnset": "Not set",
+        "providerLabel": "Sign-in button label",
+        "scopes": "Scopes",
+        "groupsClaim": "Groups claim",
+        "callbackInfo": "Register this callback URL with your identity provider:",
+        "lockoutWarning": "Before enabling “OIDC only”, verify the SSO sign-in works in a private window — a broken OIDC config with password sign-in disabled locks everyone out."
+      }
     }
   },
   "activity": {

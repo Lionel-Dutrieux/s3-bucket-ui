@@ -728,7 +728,46 @@
       "removeMemberFailed": "Dieses Mitglied konnte nicht entfernt werden.",
       "invalidGrant": "Ungültige Berechtigung.",
       "saveGrantFailed": "Diese Berechtigung konnte nicht gespeichert werden.",
-      "removeGrantFailed": "Diese Berechtigung konnte nicht entfernt werden."
+      "removeGrantFailed": "Diese Berechtigung konnte nicht entfernt werden.",
+      "oidcDiscoveryFailed": "Der OIDC-Discovery-Endpunkt konnte nicht erreicht oder validiert werden.",
+      "smtpNotConfigured": "SMTP ist nicht konfiguriert.",
+      "testEmailFailed": "Die Test-E-Mail konnte nicht gesendet werden."
+    },
+    "runtimeConfig": {
+      "provenance": { "env": "Umgebung", "custom": "Eigene" },
+      "resetToEnv": "Umgebungswerte wiederherstellen",
+      "resetConfirm": "Dies entfernt alle hier gespeicherten Werte und greift wieder auf die Umgebungsvariablen zurück. Fortfahren?",
+      "saved": "Einstellungen gespeichert.",
+      "testEmailSubject": "Test-E-Mail von S3 Bucket UI",
+      "testEmailBody": "Dies ist eine Test-E-Mail von S3 Bucket UI, um zu überprüfen, ob die E-Mail-Zustellung funktioniert.",
+      "smtp": {
+        "title": "E-Mail (SMTP)",
+        "description": "Relay für Passwort-Zurücksetzen- und Konto-E-Mails. Umgebungsvariablen liefern die Standardwerte; hier gespeicherte Werte überschreiben sie.",
+        "host": "Host",
+        "port": "Port",
+        "secure": "TLS (implizit)",
+        "user": "Benutzername",
+        "password": "Passwort",
+        "passwordSet": "•••• (konfiguriert — zum Ersetzen eingeben)",
+        "passwordUnset": "Nicht festgelegt",
+        "from": "Absender",
+        "sendTest": "Test-E-Mail senden",
+        "testSent": "Test-E-Mail an {email} gesendet."
+      },
+      "oidc": {
+        "title": "Single Sign-On (OIDC)",
+        "description": "Generischer OpenID-Connect-Anbieter. Umgebungsvariablen liefern die Standardwerte; hier gespeicherte Werte überschreiben sie.",
+        "discoveryUrl": "Discovery-URL",
+        "clientId": "Client-ID",
+        "clientSecret": "Client-Secret",
+        "secretSet": "•••• (konfiguriert — zum Ersetzen eingeben)",
+        "secretUnset": "Nicht festgelegt",
+        "providerLabel": "Beschriftung der Anmelde-Schaltfläche",
+        "scopes": "Scopes",
+        "groupsClaim": "Groups-Claim",
+        "callbackInfo": "Registrieren Sie diese Callback-URL bei Ihrem Identity Provider:",
+        "lockoutWarning": "Bevor Sie „Nur OIDC“ aktivieren, prüfen Sie die SSO-Anmeldung in einem privaten Fenster — eine fehlerhafte OIDC-Konfiguration bei deaktivierter Passwort-Anmeldung sperrt alle aus."
+      }
     }
   },
   "activity": {

@@ -9,7 +9,7 @@ import {
   type SessionRow,
   SessionsList,
 } from "@/features/auth/components/sessions-list";
-import { auth } from "@/lib/auth/auth";
+import { getAuth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/session";
 import { isOidcOnly } from "@/lib/dal/settings";
 
@@ -22,6 +22,7 @@ export default async function AccountPage() {
   const session = await requireSession();
   const t = await getTranslations("account");
   const requestHeaders = await headers();
+  const auth = await getAuth();
   const [sessions, accounts, oidcOnly] = await Promise.all([
     auth.api.listSessions({ headers: requestHeaders }),
     auth.api.listUserAccounts({ headers: requestHeaders }),

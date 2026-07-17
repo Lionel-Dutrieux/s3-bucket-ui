@@ -728,7 +728,46 @@
       "removeMemberFailed": "无法移除此成员。",
       "invalidGrant": "授权无效。",
       "saveGrantFailed": "无法保存此授权。",
-      "removeGrantFailed": "无法移除此授权。"
+      "removeGrantFailed": "无法移除此授权。",
+      "oidcDiscoveryFailed": "无法访问或验证 OIDC 发现端点。",
+      "smtpNotConfigured": "SMTP 未配置。",
+      "testEmailFailed": "无法发送测试邮件。"
+    },
+    "runtimeConfig": {
+      "provenance": { "env": "环境变量", "custom": "自定义" },
+      "resetToEnv": "恢复环境变量的值",
+      "resetConfirm": "这将移除此处保存的所有值，并回退到环境变量。是否继续？",
+      "saved": "设置已保存。",
+      "testEmailSubject": "来自 S3 Bucket UI 的测试邮件",
+      "testEmailBody": "这是来自 S3 Bucket UI 的测试邮件，用于验证电子邮件传送是否正常工作。",
+      "smtp": {
+        "title": "邮件（SMTP）",
+        "description": "用于密码重置和账户邮件的中继服务器。环境变量提供默认值；此处保存的值会覆盖它们。",
+        "host": "主机",
+        "port": "端口",
+        "secure": "TLS（隐式）",
+        "user": "用户名",
+        "password": "密码",
+        "passwordSet": "••••（已配置 — 输入以替换）",
+        "passwordUnset": "未设置",
+        "from": "发件人",
+        "sendTest": "发送测试邮件",
+        "testSent": "测试邮件已发送至 {email}。"
+      },
+      "oidc": {
+        "title": "单点登录（OIDC）",
+        "description": "通用 OpenID Connect 提供商。环境变量提供默认值；此处保存的值会覆盖它们。",
+        "discoveryUrl": "发现 URL",
+        "clientId": "客户端 ID",
+        "clientSecret": "客户端密钥",
+        "secretSet": "••••（已配置 — 输入以替换）",
+        "secretUnset": "未设置",
+        "providerLabel": "登录按钮标签",
+        "scopes": "Scopes",
+        "groupsClaim": "分组声明（groups claim）",
+        "callbackInfo": "请在您的身份提供商处注册此回调 URL：",
+        "lockoutWarning": "启用「仅 OIDC」之前，请在隐私窗口中验证 SSO 登录是否正常 — 如果 OIDC 配置有误且已禁用密码登录，将导致所有人都无法登录。"
+      }
     }
   },
   "activity": {

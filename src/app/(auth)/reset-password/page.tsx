@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { ResetPasswordForm } from "@/features/auth/components/reset-password-form";
+import { isSmtpConfigured } from "@/lib/config";
 import { isOidcOnly } from "@/lib/dal/settings";
-import { smtpEnabled } from "@/lib/env";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth.resetPassword");
@@ -20,7 +20,7 @@ interface ResetPasswordPageProps {
 export default async function ResetPasswordPage({
   searchParams,
 }: ResetPasswordPageProps) {
-  if (!smtpEnabled() || (await isOidcOnly())) redirect("/sign-in");
+  if (!(await isSmtpConfigured()) || (await isOidcOnly())) redirect("/sign-in");
 
   const sp = await searchParams;
   const token = typeof sp.token === "string" ? sp.token : undefined;

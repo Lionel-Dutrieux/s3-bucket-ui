@@ -2,7 +2,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
-import { auth } from "./auth";
+import { getAuth } from "./auth";
 
 export type Session = NonNullable<Awaited<ReturnType<typeof getSession>>>;
 export type SessionUser = Session["user"];
@@ -13,7 +13,7 @@ export type SessionUser = Session["user"];
  * layout protects nothing else.
  */
 export const getSession = cache(async () =>
-  auth.api.getSession({ headers: await headers() }),
+  (await getAuth()).api.getSession({ headers: await headers() }),
 );
 
 export function isAdmin(user: Pick<SessionUser, "role">): boolean {

@@ -5,9 +5,9 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
+import { getOidcConfig } from "@/lib/config";
 import { isOidcOnly, isPublicSignUpEnabled } from "@/lib/dal/settings";
 import { hasAnyUser } from "@/lib/dal/users";
-import { env, oidcEnabled } from "@/lib/env";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth.signUp");
@@ -43,7 +43,7 @@ export default async function SignUpPage() {
     );
   }
 
-  return (
-    <SignUpForm oidcLabel={oidcEnabled() ? env.OIDC_PROVIDER_LABEL : null} />
-  );
+  const oidc = await getOidcConfig();
+
+  return <SignUpForm oidcLabel={oidc ? oidc.providerLabel : null} />;
 }

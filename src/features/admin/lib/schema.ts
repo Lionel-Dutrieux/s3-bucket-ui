@@ -75,3 +75,29 @@ export const brandingSchema = z.object({
 });
 
 export type BrandingValues = z.infer<typeof brandingSchema>;
+
+// --- runtime config (SMTP / OIDC) ---
+
+export const smtpSettingsSchema = z.object({
+  host: z.string().trim().min(1, "SMTP host is required.").max(255),
+  port: z.number().int().min(1).max(65535),
+  secure: z.boolean(),
+  user: z.string().trim().max(255).nullable(),
+  // null → keep the currently stored secret (write-only field).
+  password: z.string().min(1).max(1024).nullable(),
+  from: z.string().trim().min(3, "Sender address is required.").max(320),
+});
+export type SmtpSettingsValues = z.infer<typeof smtpSettingsSchema>;
+
+export const oidcSettingsSchema = z.object({
+  discoveryUrl: z
+    .url("Enter the full discovery URL.")
+    .startsWith("https://", "The discovery URL must use https."),
+  clientId: z.string().trim().min(1, "Client ID is required.").max(255),
+  // null → keep the currently stored secret (write-only field).
+  clientSecret: z.string().min(1).max(1024).nullable(),
+  providerLabel: z.string().trim().min(1).max(64),
+  scopes: z.string().trim().min(1).max(255),
+  groupsClaim: z.string().trim().min(1).max(64),
+});
+export type OidcSettingsValues = z.infer<typeof oidcSettingsSchema>;

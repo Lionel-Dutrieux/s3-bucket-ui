@@ -728,7 +728,46 @@
       "removeMemberFailed": "Impossible de retirer ce membre.",
       "invalidGrant": "Droit invalide.",
       "saveGrantFailed": "Impossible d'enregistrer ce droit.",
-      "removeGrantFailed": "Impossible de retirer ce droit."
+      "removeGrantFailed": "Impossible de retirer ce droit.",
+      "oidcDiscoveryFailed": "Impossible d'atteindre ou de valider le point de terminaison de découverte OIDC.",
+      "smtpNotConfigured": "SMTP n'est pas configuré.",
+      "testEmailFailed": "Impossible d'envoyer l'email de test."
+    },
+    "runtimeConfig": {
+      "provenance": { "env": "env.", "custom": "personnalisé" },
+      "resetToEnv": "Restaurer les valeurs d'environnement",
+      "resetConfirm": "Cela supprime toutes les valeurs enregistrées ici et revient aux variables d'environnement. Continuer ?",
+      "saved": "Paramètres enregistrés.",
+      "testEmailSubject": "Email de test depuis S3 Bucket UI",
+      "testEmailBody": "Cet email de test est envoyé depuis S3 Bucket UI pour vérifier que la livraison des emails fonctionne.",
+      "smtp": {
+        "title": "Email (SMTP)",
+        "description": "Relais utilisé pour les emails de réinitialisation de mot de passe et de compte. Les variables d'environnement fournissent les valeurs par défaut ; les valeurs enregistrées ici les remplacent.",
+        "host": "Hôte",
+        "port": "Port",
+        "secure": "TLS (implicite)",
+        "user": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "passwordSet": "•••• (configuré — saisissez pour remplacer)",
+        "passwordUnset": "Non défini",
+        "from": "Expéditeur",
+        "sendTest": "Envoyer un email de test",
+        "testSent": "Email de test envoyé à {email}."
+      },
+      "oidc": {
+        "title": "Authentification unique (OIDC)",
+        "description": "Fournisseur OpenID Connect générique. Les variables d'environnement fournissent les valeurs par défaut ; les valeurs enregistrées ici les remplacent.",
+        "discoveryUrl": "URL de découverte",
+        "clientId": "ID client",
+        "clientSecret": "Secret client",
+        "secretSet": "•••• (configuré — saisissez pour remplacer)",
+        "secretUnset": "Non défini",
+        "providerLabel": "Libellé du bouton de connexion",
+        "scopes": "Scopes",
+        "groupsClaim": "Claim des groupes",
+        "callbackInfo": "Enregistrez cette URL de rappel auprès de votre fournisseur d'identité :",
+        "lockoutWarning": "Avant d'activer « OIDC uniquement », vérifiez que la connexion SSO fonctionne dans une fenêtre privée — une configuration OIDC défectueuse avec la connexion par mot de passe désactivée bloque tout le monde dehors."
+      }
     }
   },
   "activity": {

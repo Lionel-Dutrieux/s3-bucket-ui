@@ -80,11 +80,6 @@ export function oidcEnabled(): boolean {
   );
 }
 
-/** Password-reset emails are available only when an SMTP relay is set. */
-export function smtpEnabled(): boolean {
-  return Boolean(env.SMTP_HOST && env.SMTP_FROM);
-}
-
 /** Boot-time check: SMTP_HOST and SMTP_FROM come as a pair. */
 export function assertSmtpEnv(): void {
   const set = [env.SMTP_HOST, env.SMTP_FROM].filter(
