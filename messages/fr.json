@@ -5,6 +5,7 @@
     "save": "Enregistrer",
     "delete": "Supprimer",
     "loading": "Chargement…",
+    "metaDescription": "Gestionnaire de fichiers pour vos buckets de stockage — lecture seule par défaut.",
     "errorPage": {
       "title": "Une erreur est survenue",
       "description": "Une erreur inattendue s'est produite. Réessayez — si le problème persiste, consultez les journaux du serveur.",

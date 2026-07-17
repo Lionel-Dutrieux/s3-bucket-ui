@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -22,10 +22,10 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const { appName } = await getBranding();
+  const t = await getTranslations("common");
   return {
     title: { default: appName, template: `%s – ${appName}` },
-    description:
-      "File manager for your storage buckets — read-only by default.",
+    description: t("metaDescription"),
   };
 }
 
