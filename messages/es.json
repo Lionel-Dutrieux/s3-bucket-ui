@@ -171,6 +171,22 @@
       "errorFallback": "No se pudo contactar con {provider} — inténtalo de nuevo."
     }
   },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "Autenticación de dos factores",
+      "title": "Autenticación de dos factores",
+      "description": "Introduce el código de tu aplicación de autenticación.",
+      "codeLabel": "Código de autenticación",
+      "backupLabel": "Código de respaldo",
+      "trustLabel": "Confiar en este dispositivo",
+      "trustDescription": "Omitir la verificación en dos pasos en este dispositivo durante 30 días.",
+      "useBackup": "Usar un código de respaldo",
+      "useTotp": "Usar tu aplicación de autenticación",
+      "submit": "Verificar",
+      "submitPending": "Verificando…",
+      "error": "Ese código es incorrecto o ha caducado."
+    }
+  },
   "browser": {
     "page": {
       "metaFallbackTitle": "Fuente",

@@ -171,6 +171,22 @@
       "errorFallback": "Impossible de joindre {provider} — réessayez."
     }
   },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "Authentification à deux facteurs",
+      "title": "Authentification à deux facteurs",
+      "description": "Saisissez le code de votre application d'authentification.",
+      "codeLabel": "Code d'authentification",
+      "backupLabel": "Code de secours",
+      "trustLabel": "Faire confiance à cet appareil",
+      "trustDescription": "Ne plus demander le 2FA sur cet appareil pendant 30 jours.",
+      "useBackup": "Utiliser un code de secours",
+      "useTotp": "Utiliser votre application d'authentification",
+      "submit": "Vérifier",
+      "submitPending": "Vérification…",
+      "error": "Ce code est incorrect ou expiré."
+    }
+  },
   "browser": {
     "page": {
       "metaFallbackTitle": "Source",

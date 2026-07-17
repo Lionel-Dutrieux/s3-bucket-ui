@@ -171,6 +171,22 @@
       "errorFallback": "Could not reach {provider} — try again."
     }
   },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "Two-factor authentication",
+      "title": "Two-factor authentication",
+      "description": "Enter the code from your authenticator app.",
+      "codeLabel": "Authentication code",
+      "backupLabel": "Backup code",
+      "trustLabel": "Trust this device",
+      "trustDescription": "Skip 2FA on this device for 30 days.",
+      "useBackup": "Use a backup code",
+      "useTotp": "Use your authenticator app",
+      "submit": "Verify",
+      "submitPending": "Verifying…",
+      "error": "That code is incorrect or expired."
+    }
+  },
   "browser": {
     "page": {
       "metaFallbackTitle": "Source",

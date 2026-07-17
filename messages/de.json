@@ -171,6 +171,22 @@
       "errorFallback": "{provider} konnte nicht erreicht werden — versuchen Sie es erneut."
     }
   },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "Zwei-Faktor-Authentifizierung",
+      "title": "Zwei-Faktor-Authentifizierung",
+      "description": "Geben Sie den Code aus Ihrer Authenticator-App ein.",
+      "codeLabel": "Authentifizierungscode",
+      "backupLabel": "Wiederherstellungscode",
+      "trustLabel": "Diesem Gerät vertrauen",
+      "trustDescription": "2FA auf diesem Gerät für 30 Tage überspringen.",
+      "useBackup": "Wiederherstellungscode verwenden",
+      "useTotp": "Authenticator-App verwenden",
+      "submit": "Bestätigen",
+      "submitPending": "Wird geprüft…",
+      "error": "Dieser Code ist falsch oder abgelaufen."
+    }
+  },
   "browser": {
     "page": {
       "metaFallbackTitle": "Quelle",

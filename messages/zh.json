@@ -171,6 +171,22 @@
       "errorFallback": "无法连接 {provider} — 请重试。"
     }
   },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "双重验证",
+      "title": "双重验证",
+      "description": "请输入身份验证器应用中的验证码。",
+      "codeLabel": "验证码",
+      "backupLabel": "备用代码",
+      "trustLabel": "信任此设备",
+      "trustDescription": "此设备在 30 天内跳过双重验证。",
+      "useBackup": "使用备用代码",
+      "useTotp": "使用身份验证器应用",
+      "submit": "验证",
+      "submitPending": "验证中…",
+      "error": "验证码不正确或已过期。"
+    }
+  },
   "browser": {
     "page": {
       "metaFallbackTitle": "来源",

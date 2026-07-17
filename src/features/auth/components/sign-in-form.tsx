@@ -36,12 +36,16 @@ export function SignInForm({
     validators: { onChange: signInSchema },
     onSubmit: async ({ value }) => {
       setServerError(undefined);
-      const { error } = await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email: value.email,
         password: value.password,
       });
       if (error) {
         setServerError(error.message ?? t("errorFallback"));
+        return;
+      }
+      if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
+        router.push("/two-factor");
         return;
       }
       router.push("/");

@@ -46,3 +46,13 @@ export const signUpSchema = z.object({
   password: passwordSchema,
 });
 export type SignUpValues = z.infer<typeof signUpSchema>;
+
+export const twoFactorChallengeSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(6, "Enter the 6-digit code.")
+    .max(11, "Code is too long."),
+  trustDevice: z.boolean(),
+});
+export type TwoFactorChallengeValues = z.infer<typeof twoFactorChallengeSchema>;
