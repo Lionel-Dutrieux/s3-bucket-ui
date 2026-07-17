@@ -160,6 +160,101 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
     fieldLabels: S3_FIELD_LABELS,
   },
   {
+    id: "akamai",
+    label: "Akamai / Linode Object Storage",
+    adapter: "s3",
+    region: "from-endpoint", // us-east-1.linodeobjects.com → us-east-1
+    forcePathStyle: false,
+    endpointPlaceholder: "https://<region>.linodeobjects.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "idrive-e2",
+    label: "IDrive e2",
+    adapter: "s3",
+    region: "us-east-1", // gateway ignores it; keep a valid SigV4 default
+    endpointPlaceholder: "https://<region>.idrivee2-XX.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "vultr",
+    label: "Vultr Object Storage",
+    adapter: "s3",
+    region: "from-endpoint", // ewr1.vultrobjects.com → ewr1
+    forcePathStyle: false,
+    endpointPlaceholder: "https://<region>.vultrobjects.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "filebase",
+    label: "Filebase",
+    adapter: "s3",
+    region: "us-east-1",
+    endpointPlaceholder: "https://s3.filebase.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "exoscale",
+    label: "Exoscale SOS",
+    adapter: "s3",
+    region: "from-endpoint", // sos-ch-gva-2.exo.io → ch-gva-2
+    forcePathStyle: false,
+    endpointPlaceholder: "https://sos-<zone>.exo.io",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "oracle-cloud",
+    label: "Oracle Cloud Object Storage",
+    adapter: "s3",
+    region: "from-endpoint", // …objectstorage.<region>.oraclecloud.com
+    endpointPlaceholder:
+      "https://<namespace>.compat.objectstorage.<region>.oraclecloud.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "ibm-cos",
+    label: "IBM Cloud Object Storage",
+    adapter: "s3",
+    region: "from-endpoint", // s3.<region>.cloud-object-storage… → <region>
+    endpointPlaceholder:
+      "https://s3.<region>.cloud-object-storage.appdomain.cloud",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "tigris",
+    label: "Tigris",
+    adapter: "s3",
+    region: "auto",
+    endpointPlaceholder: "https://fly.storage.tigris.dev",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "tencent-cos",
+    label: "Tencent Cloud COS",
+    adapter: "s3",
+    region: "from-endpoint", // cos.<region>.myqcloud.com → <region>
+    forcePathStyle: false,
+    endpointPlaceholder: "https://cos.<region>.myqcloud.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "alibaba-oss",
+    label: "Alibaba Cloud OSS",
+    adapter: "s3",
+    region: "from-endpoint", // oss-<region>.aliyuncs.com → <region>
+    forcePathStyle: false,
+    endpointPlaceholder: "https://oss-<region>.aliyuncs.com",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
+    id: "yandex",
+    label: "Yandex Object Storage",
+    adapter: "s3",
+    region: "ru-central1",
+    endpointPlaceholder: "https://storage.yandexcloud.net",
+    fieldLabels: S3_FIELD_LABELS,
+  },
+  {
     // Catch-all for anything speaking the S3 API without a dedicated entry:
     // Garage, SeaweedFS, Ceph RGW, LocalStack, …
     id: "s3-compatible",

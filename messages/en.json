@@ -388,9 +388,16 @@
     "moveToDialog": {
       "title": "Move {count, plural, one {# item} other {# items}} to…",
       "description": "Moving copies each object to the destination and deletes the original. Folders move everything inside them.",
+      "destinationSourceAria": "Destination source",
+      "loadingSources": "Loading sources…",
+      "chooseSource": "Choose a source…",
+      "thisSource": "this source",
+      "noWritableSources": "You don't have edit access on any source.",
       "moveHere": "Move here",
       "moving": "Moving…",
-      "movedToast": "{count, plural, one {Moved # item} other {Moved # items}}"
+      "movedToast": "{count, plural, one {Moved # item} other {Moved # items}}",
+      "movedAcrossToast": "{moved, plural, one {# object moved} other {# objects moved}}{skipped, select, 0 {} other {, {skipped} skipped}} to {name}",
+      "movePartialFailedToast": "{moved, plural, one {# object moved} other {# objects moved}}{skipped, select, 0 {} other {, {skipped} skipped}}, {failed} failed — run it again to retry."
     },
     "moveDialog": {
       "title": "Move {count, plural, one {# item} other {# items}} into “{destLabel}”?",
@@ -759,6 +766,7 @@
       "rename": "Renamed",
       "renameFolder": "Renamed folder",
       "move": "Moved",
+      "moveTo": "Moved to",
       "copy": "Duplicated",
       "copyTo": "Copied",
       "migrate": "Copied source",

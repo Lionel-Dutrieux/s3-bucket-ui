@@ -386,11 +386,18 @@
       "copyPartialFailedToast": "{copied, plural, other {已复制 # 个对象}}{skipped, select, 0 {} other {，跳过 {skipped} 个}}，{failed} 个失败 — 请再次运行以重试。"
     },
     "moveToDialog": {
-      "title": "移动 {count, plural, other {# 个项目}} 到…",
-      "description": "移动会将每个对象复制到目标位置并删除原件。文件夹会移动其中所有内容。",
+      "title": "将 {count} 个项目移动到…",
+      "description": "移动会将每个对象复制到目标位置并删除原件。文件夹会带上其中的所有内容。",
+      "destinationSourceAria": "目标数据源",
+      "loadingSources": "正在加载数据源…",
+      "chooseSource": "选择数据源…",
+      "thisSource": "当前数据源",
+      "noWritableSources": "你对任何数据源都没有写入权限。",
       "moveHere": "移动到此处",
-      "moving": "移动中…",
-      "movedToast": "{count, plural, other {已移动 # 个项目}}"
+      "moving": "正在移动…",
+      "movedToast": "已移动 {count} 个项目",
+      "movedAcrossToast": "已移动 {moved} 个对象{skipped, select, 0 {} other {，跳过 {skipped} 个}} 到 {name}",
+      "movePartialFailedToast": "已移动 {moved} 个对象{skipped, select, 0 {} other {，跳过 {skipped} 个}}，{failed} 个失败 — 请重新运行以重试。"
     },
     "moveDialog": {
       "title": "将 {count, plural, other {# 个项目}} 移动到“{destLabel}”？",
@@ -759,6 +766,7 @@
       "rename": "已重命名",
       "renameFolder": "已重命名文件夹",
       "move": "已移动",
+      "moveTo": "已移动至",
       "copy": "已创建副本",
       "copyTo": "已复制",
       "migrate": "已复制来源",

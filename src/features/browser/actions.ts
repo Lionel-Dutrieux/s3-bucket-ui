@@ -22,8 +22,10 @@ import {
 import { withWriteAccess } from "@/features/browser/server/guards";
 import {
   type CrossCopySummary,
+  type CrossMoveSummary,
   copyEntriesAcross,
   deletePrefix,
+  moveEntriesAcross,
   movePrefix,
 } from "@/features/browser/server/mutations";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
@@ -488,6 +490,80 @@ export async function moveEntries(
       return actionOk();
     },
   );
+}
+
+/**
+ * Moves a selection into a folder of ANOTHER source: copies each object across
+ * (streaming through this process) then removes it from the origin. Editing
+ * the origin AND the destination is required — a move destroys the origin, so
+ * it needs more than the read grant a copy-to does. Non-destructive on partial
+ * failure: only objects confirmed copied are removed from the origin.
+ */
+export async function moveEntriesToSource(
+  sourceId: string,
+  destSourceId: string,
+  targets: EntryTarget[],
+  destPrefix: string,
+): Promise<ActionResult<CrossMoveSummary>> {
+  const t = await getTranslations("browser.errors");
+  if (destPrefix !== "" && !destPrefix.endsWith("/")) {
+    return actionError(t("invalidDestination"));
+  }
+  if (targets.length === 0) return actionError(t("nothingSelected"));
+  if (targets.length > MOVE_ENTRIES_MAX) {
+    return actionError(t("moveAtMost", { max: MOVE_ENTRIES_MAX }));
+  }
+  if (
+    targets.some(
+      (target) => target.kind === "folder" && !target.prefix.endsWith("/"),
+    )
+  ) {
+    return actionError(t("invalidFolder"));
+  }
+
+  // Same-source moves go through moveEntries (native, with the self/descendant
+  // guard); this cross-source path must not run the copy+delete engine inside
+  // one bucket. The dialog never calls it this way — this rejects crafted requests.
+  if (destSourceId === sourceId) {
+    return actionError(t("invalidDestination"));
+  }
+
+  const origin = await requireSourceAccess(sourceId);
+  if (!origin) return actionError(t("sourceNotFound"));
+  if (!origin.access.canEdit) return actionError(t("editDenied"));
+  const dest = await requireSourceAccess(destSourceId);
+  if (!dest) return actionError(t("destinationNotFound"));
+  if (!dest.access.canEdit) return actionError(t("addDeniedOther"));
+
+  try {
+    const result = await moveEntriesAcross(
+      getFilesClient(origin.source),
+      getFilesClient(dest.source),
+      targets,
+      destPrefix,
+    );
+    if ("error" in result) return actionError(result.error);
+
+    const single = targets.length === 1 ? targets[0] : null;
+    await recordOperation({
+      action: "move-to",
+      sourceId: origin.source.id,
+      sourceName: origin.source.name,
+      target: single
+        ? single.kind === "file"
+          ? single.key
+          : single.prefix
+        : `${targets.length} items`,
+      detail: `→ ${dest.source.name}:/${destPrefix}`,
+    });
+    return actionOk(result.summary);
+  } catch (error) {
+    console.error(
+      `[browser] cross-move failed (source=${sourceId} → ${destSourceId}):`,
+      error,
+    );
+    return actionError(t("moveFailure"));
+  }
 }
 
 const shareOptionsSchema = z.object({

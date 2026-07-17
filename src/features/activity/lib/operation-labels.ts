@@ -22,6 +22,7 @@ export type OperationLabelKey =
   | "rename"
   | "renameFolder"
   | "move"
+  | "moveTo"
   | "copy"
   | "copyTo"
   | "migrate"
@@ -52,6 +53,7 @@ const LABELS: Record<string, OperationLabel> = {
   rename: { labelKey: "rename", icon: Pencil },
   "rename-folder": { labelKey: "renameFolder", icon: Pencil },
   move: { labelKey: "move", icon: FolderInput },
+  "move-to": { labelKey: "moveTo", icon: FolderInput },
   copy: { labelKey: "copy", icon: Copy },
   "copy-to": { labelKey: "copyTo", icon: Copy },
   migrate: { labelKey: "migrate", icon: ArrowRightLeft },

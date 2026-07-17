@@ -62,7 +62,9 @@ export interface CrossCopySummary {
   failed: number;
 }
 
-export type CrossCopyResult = { error: string } | { summary: CrossCopySummary };
+export type CrossCopyResult =
+  | { error: string }
+  | { summary: CrossCopySummary; copiedSrcKeys: string[] };
 
 /**
  * Copies a selection (files + folders, expanded and bounded) from one source
@@ -119,6 +121,7 @@ export async function copyEntriesAcross(
   }
 
   const summary: CrossCopySummary = { copied: 0, skipped: 0, failed: 0 };
+  const copiedSrcKeys: string[] = [];
   for (let i = 0; i < pairs.length; i += CROSS_COPY_CONCURRENCY) {
     await Promise.all(
       pairs.slice(i, i + CROSS_COPY_CONCURRENCY).map(async (pair) => {
@@ -132,6 +135,7 @@ export async function copyEntriesAcross(
             contentType: stored.type || undefined,
           });
           summary.copied++;
+          copiedSrcKeys.push(pair.srcKey);
         } catch (error) {
           summary.failed++;
           console.error(
@@ -142,7 +146,7 @@ export async function copyEntriesAcross(
       }),
     );
   }
-  return { summary };
+  return { summary, copiedSrcKeys };
 }
 
 /**
@@ -167,4 +171,55 @@ export async function deletePrefix(
   }
   const t = await getTranslations("browser.errors");
   return t("folderTooLargeToDelete");
+}
+
+export interface CrossMoveSummary {
+  moved: number;
+  skipped: number;
+  failed: number;
+}
+
+export type CrossMoveResult = { error: string } | { summary: CrossMoveSummary };
+
+/**
+ * Cross-source move: copies a selection into another source (reusing the
+ * cross-copy engine), then deletes from the origin ONLY the objects confirmed
+ * copied. Objects that were skipped (already present at the destination) or
+ * failed to copy are left untouched, so a partial run never loses data. A
+ * failure to clean up the origin after a successful copy is logged but still
+ * counts as "moved" (the object then exists on both sides — safe, not lost).
+ */
+export async function moveEntriesAcross(
+  from: Files,
+  to: Files,
+  targets: EntryTarget[],
+  destPrefix: string,
+): Promise<CrossMoveResult> {
+  const copy = await copyEntriesAcross(from, to, targets, destPrefix);
+  if ("error" in copy) return { error: copy.error };
+
+  let cleanupFailures = 0;
+  for (let i = 0; i < copy.copiedSrcKeys.length; i += DELETE_FOLDER_BATCH) {
+    const batch = copy.copiedSrcKeys.slice(i, i + DELETE_FOLDER_BATCH);
+    try {
+      const result = await from.delete(batch);
+      if (result.errors?.length) cleanupFailures += result.errors.length;
+    } catch (error) {
+      cleanupFailures += batch.length;
+      console.error("[browser] cross-move cleanup failed:", error);
+    }
+  }
+  if (cleanupFailures > 0) {
+    console.error(
+      `[browser] cross-move left ${cleanupFailures} origin object(s) after copy`,
+    );
+  }
+
+  return {
+    summary: {
+      moved: copy.summary.copied,
+      skipped: copy.summary.skipped,
+      failed: copy.summary.failed,
+    },
+  };
 }

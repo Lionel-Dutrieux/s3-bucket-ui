@@ -1,17 +1,28 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { moveEntries } from "@/features/browser/actions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { moveEntries, moveEntriesToSource } from "@/features/browser/actions";
+import { browserQueries } from "@/features/browser/api/queries";
 import { DestinationDialog } from "@/features/browser/components/destination-dialog";
 import { FolderPicker } from "@/features/browser/components/folder-picker";
 import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
 import { type EntryTarget, planMove } from "@/features/browser/lib/move";
 
 /**
- * Explicit "Move to…" with a destination picker — the keyboard/mobile
- * counterpart of drag-and-drop, same folder browser as Copy to….
+ * "Move to…" with a destination picker. Defaults to the current source (a
+ * plain within-source move, native copy+delete with the all-or-nothing
+ * conflict check); pick another source to move across — copy through this
+ * process, then delete the copied objects from the origin.
  */
 export function MoveToDialog({
   sourceId,
@@ -29,29 +40,66 @@ export function MoveToDialog({
   const tFolder = useTranslations("browser.folderPicker");
   const tErrors = useTranslations("browser.errors");
   const open = targets !== null;
+  const [destSourceId, setDestSourceId] = useState("");
   const [destPrefix, setDestPrefix] = useState("");
   const { pending, track } = usePendingAction();
 
-  // Fresh start each time the dialog opens.
+  // Fresh start each time the dialog opens — default to the current source.
   useEffect(() => {
-    if (open) setDestPrefix("");
-  }, [open]);
+    if (open) {
+      setDestSourceId(sourceId);
+      setDestPrefix("");
+    }
+  }, [open, sourceId]);
 
+  const sources = useQuery({
+    ...browserQueries.writableSources(),
+    enabled: open,
+  });
+  const dest = sources.data?.find((source) => source.id === destSourceId);
+  const isSameSource = destSourceId === sourceId;
   const count = targets?.length ?? 0;
-  // Same rules as a drop: no moving a folder into itself, no no-ops.
-  const plan = targets ? planMove(targets, destPrefix) : null;
-  const moveCount = plan && !plan.error ? plan.moves.length : 0;
+
+  // Self/descendant guard only makes sense within the same source.
+  const plan = targets && isSameSource ? planMove(targets, destPrefix) : null;
+  const intraMoveCount = plan && !plan.error ? plan.moves.length : 0;
+
+  const submitDisabled =
+    !destSourceId ||
+    (isSameSource ? !!plan?.error || intraMoveCount === 0 : false);
 
   const run = async () => {
-    if (!targets || !plan || plan.error || moveCount === 0) return;
+    if (!targets || !destSourceId) return;
+
+    if (isSameSource) {
+      if (!plan || plan.error || intraMoveCount === 0) return;
+      const result = await track(() =>
+        moveEntries(sourceId, targets, destPrefix),
+      );
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(t("movedToast", { count: intraMoveCount }));
+      onMoved();
+      return;
+    }
+
     const result = await track(() =>
-      moveEntries(sourceId, targets, destPrefix),
+      moveEntriesToSource(sourceId, destSourceId, targets, destPrefix),
     );
     if (!result.ok) {
       toast.error(result.error);
       return;
     }
-    toast.success(t("movedToast", { count: moveCount }));
+    const { moved, skipped, failed } = result.data;
+    if (failed > 0) {
+      toast.warning(t("movePartialFailedToast", { moved, skipped, failed }));
+    } else {
+      toast.success(
+        t("movedAcrossToast", { moved, skipped, name: dest?.name ?? "" }),
+      );
+    }
     onMoved();
   };
 
@@ -62,19 +110,63 @@ export function MoveToDialog({
       pending={pending}
       title={t("title", { count })}
       description={t("description")}
-      destinationLabel={`→ /${destPrefix}`}
+      destinationLabel={dest ? `→ ${dest.name}:/${destPrefix}` : ""}
       submitLabel={t("moveHere")}
       pendingLabel={t("moving")}
-      submitDisabled={!plan || !!plan.error || moveCount === 0}
+      submitDisabled={submitDisabled}
       onSubmit={run}
     >
-      <FolderPicker
-        sourceId={sourceId}
-        rootLabel={tFolder("root")}
-        prefix={destPrefix}
-        onPrefixChange={setDestPrefix}
-        disabled={pending}
-      />
+      <Select
+        value={destSourceId}
+        onValueChange={(value) => {
+          setDestSourceId(value);
+          setDestPrefix("");
+        }}
+        disabled={pending || sources.isPending}
+      >
+        <SelectTrigger
+          className="w-full"
+          aria-label={t("destinationSourceAria")}
+        >
+          <SelectValue
+            placeholder={
+              sources.isPending ? t("loadingSources") : t("chooseSource")
+            }
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {sources.data?.map((source) => (
+            <SelectItem key={source.id} value={source.id}>
+              {source.name}
+              {source.id === sourceId ? (
+                <span className="text-xs text-muted-foreground">
+                  {t("thisSource")}
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  {source.bucket}
+                </span>
+              )}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {sources.data?.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          {t("noWritableSources")}
+        </p>
+      ) : null}
+
+      {destSourceId ? (
+        <FolderPicker
+          sourceId={destSourceId}
+          rootLabel={dest?.name ?? tFolder("root")}
+          prefix={destPrefix}
+          onPrefixChange={setDestPrefix}
+          disabled={pending}
+        />
+      ) : null}
 
       {plan?.error ? (
         <p role="alert" className="text-sm text-destructive">

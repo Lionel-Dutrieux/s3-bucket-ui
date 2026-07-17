@@ -387,10 +387,17 @@
     },
     "moveToDialog": {
       "title": "Déplacer {count, plural, one {# élément} other {# éléments}} vers…",
-      "description": "Déplacer copie chaque objet vers la destination puis supprime l'original. Les dossiers déplacent tout leur contenu.",
+      "description": "Le déplacement copie chaque objet vers la destination puis supprime l'original. Les dossiers emportent tout leur contenu.",
+      "destinationSourceAria": "Source de destination",
+      "loadingSources": "Chargement des sources…",
+      "chooseSource": "Choisir une source…",
+      "thisSource": "cette source",
+      "noWritableSources": "Vous n'avez accès en écriture à aucune source.",
       "moveHere": "Déplacer ici",
       "moving": "Déplacement…",
-      "movedToast": "{count, plural, one {# élément déplacé} other {# éléments déplacés}}"
+      "movedToast": "{count, plural, one {# élément déplacé} other {# éléments déplacés}}",
+      "movedAcrossToast": "{moved, plural, one {# objet déplacé} other {# objets déplacés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}} vers {name}",
+      "movePartialFailedToast": "{moved, plural, one {# objet déplacé} other {# objets déplacés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}}, {failed} en échec — relancez pour réessayer."
     },
     "moveDialog": {
       "title": "Déplacer {count, plural, one {# élément} other {# éléments}} dans « {destLabel} » ?",
@@ -759,6 +766,7 @@
       "rename": "Renommé",
       "renameFolder": "Dossier renommé",
       "move": "Déplacé",
+      "moveTo": "Déplacé vers",
       "copy": "Dupliqué",
       "copyTo": "Copié",
       "migrate": "Source copiée",

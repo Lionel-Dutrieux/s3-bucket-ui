@@ -11,6 +11,7 @@ export type OperationAction =
   | "rename"
   | "rename-folder"
   | "move"
+  | "move-to"
   | "copy"
   | "copy-to"
   | "migrate"
