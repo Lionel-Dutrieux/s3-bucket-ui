@@ -4,5 +4,10 @@
     "save": "Save",
     "delete": "Delete",
     "loading": "Loading…"
+  },
+  "auth": {
+    "userMenu": {
+      "language": "Language"
+    }
   }
 }

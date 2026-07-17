@@ -1,22 +1,30 @@
 "use client";
 
 import {
+  Check,
   ChevronsUpDown,
+  Languages,
   LogOut,
   ShieldCheck,
   UserRoundCog,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
+import { setLocale } from "@/features/auth/actions";
+import type { Locale } from "@/i18n/config";
 import { authClient } from "@/lib/auth/client";
 
 export interface SidebarUser {
@@ -25,12 +33,24 @@ export interface SidebarUser {
   role: string;
 }
 
+const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
+  { value: "en", label: "English" },
+  { value: "fr", label: "Français" },
+];
+
 export function UserMenu({ user }: { user: SidebarUser }) {
   const router = useRouter();
+  const t = useTranslations("auth");
+  const locale = useLocale();
 
   const handleSignOut = async () => {
     await authClient.signOut();
     router.push("/sign-in");
+    router.refresh();
+  };
+
+  const handleLocaleChange = async (value: Locale) => {
+    await setLocale({ locale: value });
     router.refresh();
   };
 
@@ -77,6 +97,29 @@ export function UserMenu({ user }: { user: SidebarUser }) {
             Account
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Languages aria-hidden />
+            {t("userMenu.language")}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {LOCALE_OPTIONS.map((option) => (
+              <DropdownMenuItem
+                key={option.value}
+                onSelect={() => handleLocaleChange(option.value)}
+              >
+                <Check
+                  className={
+                    option.value === locale ? "opacity-100" : "opacity-0"
+                  }
+                  aria-hidden
+                />
+                {option.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={handleSignOut}>
           <LogOut aria-hidden />
           Sign out
