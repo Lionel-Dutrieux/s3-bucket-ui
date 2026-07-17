@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
 import { authClient } from "@/lib/auth/client";
@@ -18,11 +19,52 @@ function parseManualKey(totpURI: string): string | null {
   }
 }
 
+function BackupCodesList({ codes }: { codes: string[] }) {
+  return (
+    <ul className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-3 font-mono text-sm">
+      {codes.map((code) => (
+        <li key={code}>{code}</li>
+      ))}
+    </ul>
+  );
+}
+
+function CopyCodesButton({
+  codes,
+  label,
+  copiedToast,
+  errorToast,
+}: {
+  codes: string[];
+  label: string;
+  copiedToast: string;
+  errorToast: string;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(codes.join("\n"));
+          toast.success(copiedToast);
+        } catch {
+          toast.error(errorToast);
+        }
+      }}
+    >
+      {label}
+    </Button>
+  );
+}
+
 export function TwoFactorSetupForm({ enabled }: { enabled: boolean }) {
   const t = useTranslations("twoFactor.setup");
   const [isEnabled, setIsEnabled] = useState(enabled);
   const [enrollment, setEnrollment] = useState<Enrollment>();
   const [serverError, setServerError] = useState<string>();
+  const [regeneratedCodes, setRegeneratedCodes] = useState<string[]>();
+  const [regenerateError, setRegenerateError] = useState<string>();
 
   // Step 1 — password unlocks enable() and returns the TOTP URI + backup codes.
   const enableForm = useAppForm({
@@ -77,6 +119,24 @@ export function TwoFactorSetupForm({ enabled }: { enabled: boolean }) {
     },
   });
 
+  // Regenerate — password required; invalidates the previous set of codes.
+  const regenerateForm = useAppForm({
+    defaultValues: { password: "" },
+    onSubmit: async ({ value, formApi }) => {
+      setRegenerateError(undefined);
+      const { data, error } = await authClient.twoFactor.generateBackupCodes({
+        password: value.password,
+      });
+      if (error || !data) {
+        setRegenerateError(error?.message ?? t("regenerateError"));
+        return;
+      }
+      setRegeneratedCodes(data.backupCodes);
+      formApi.reset();
+      toast.success(t("regeneratedToast"));
+    },
+  });
+
   if (enrollment) {
     const manualKey = parseManualKey(enrollment.totpURI);
     return (
@@ -94,11 +154,13 @@ export function TwoFactorSetupForm({ enabled }: { enabled: boolean }) {
           ) : null}
         </div>
         <p className="text-xs text-muted-foreground">{t("backupHelp")}</p>
-        <ul className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-3 font-mono text-sm">
-          {enrollment.backupCodes.map((code) => (
-            <li key={code}>{code}</li>
-          ))}
-        </ul>
+        <BackupCodesList codes={enrollment.backupCodes} />
+        <CopyCodesButton
+          codes={enrollment.backupCodes}
+          label={t("copyCodes")}
+          copiedToast={t("codesCopiedToast")}
+          errorToast={t("copyError")}
+        />
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -131,32 +193,77 @@ export function TwoFactorSetupForm({ enabled }: { enabled: boolean }) {
 
   if (isEnabled) {
     return (
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          disableForm.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        <p className="text-sm text-muted-foreground">{t("enabledHelp")}</p>
-        <disableForm.AppField name="password">
-          {(field) => (
-            <field.TextField
-              label={t("passwordLabel")}
-              type="password"
-              autoComplete="current-password"
-            />
-          )}
-        </disableForm.AppField>
-        <FormAlert error={serverError} />
-        <div className="flex justify-end">
-          <disableForm.AppForm>
-            <disableForm.SubmitButton pendingLabel={t("disablePending")}>
-              {t("disableSubmit")}
-            </disableForm.SubmitButton>
-          </disableForm.AppForm>
+      <div className="space-y-6">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            disableForm.handleSubmit();
+          }}
+          className="space-y-4"
+        >
+          <p className="text-sm text-muted-foreground">{t("enabledHelp")}</p>
+          <disableForm.AppField name="password">
+            {(field) => (
+              <field.TextField
+                label={t("passwordLabel")}
+                type="password"
+                autoComplete="current-password"
+              />
+            )}
+          </disableForm.AppField>
+          <FormAlert error={serverError} />
+          <div className="flex justify-end">
+            <disableForm.AppForm>
+              <disableForm.SubmitButton pendingLabel={t("disablePending")}>
+                {t("disableSubmit")}
+              </disableForm.SubmitButton>
+            </disableForm.AppForm>
+          </div>
+        </form>
+
+        <div className="space-y-4 border-t pt-6">
+          <h3 className="text-sm font-medium">{t("regenerateHeading")}</h3>
+          <p className="text-sm text-muted-foreground">{t("regenerateHelp")}</p>
+          {regeneratedCodes ? (
+            <>
+              <BackupCodesList codes={regeneratedCodes} />
+              <CopyCodesButton
+                codes={regeneratedCodes}
+                label={t("copyCodes")}
+                copiedToast={t("codesCopiedToast")}
+                errorToast={t("copyError")}
+              />
+            </>
+          ) : null}
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              regenerateForm.handleSubmit();
+            }}
+            className="space-y-4"
+          >
+            <regenerateForm.AppField name="password">
+              {(field) => (
+                <field.TextField
+                  label={t("passwordLabel")}
+                  type="password"
+                  autoComplete="current-password"
+                />
+              )}
+            </regenerateForm.AppField>
+            <FormAlert error={regenerateError} />
+            <div className="flex justify-end">
+              <regenerateForm.AppForm>
+                <regenerateForm.SubmitButton
+                  pendingLabel={t("regeneratePending")}
+                >
+                  {t("regenerateSubmit")}
+                </regenerateForm.SubmitButton>
+              </regenerateForm.AppForm>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     );
   }
 

@@ -205,7 +205,16 @@
       "disableSubmit": "Desactivar",
       "disablePending": "Desactivando…",
       "disableError": "No se pudo desactivar. Comprueba tu contraseña.",
-      "disabledToast": "Autenticación de dos factores desactivada."
+      "disabledToast": "Autenticación de dos factores desactivada.",
+      "copyCodes": "Copiar códigos",
+      "codesCopiedToast": "Códigos de respaldo copiados.",
+      "copyError": "No se pudo copiar al portapapeles.",
+      "regenerateHeading": "Códigos de respaldo",
+      "regenerateHelp": "Genera un nuevo conjunto — esto invalida tus códigos anteriores.",
+      "regenerateSubmit": "Regenerar códigos de respaldo",
+      "regeneratePending": "Regenerando…",
+      "regenerateError": "No se pudo regenerar. Comprueba tu contraseña.",
+      "regeneratedToast": "Nuevos códigos de respaldo generados."
     }
   },
   "browser": {

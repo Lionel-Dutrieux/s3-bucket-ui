@@ -205,7 +205,16 @@
       "disableSubmit": "Disable",
       "disablePending": "Disabling…",
       "disableError": "Couldn't disable. Check your password.",
-      "disabledToast": "Two-factor authentication disabled."
+      "disabledToast": "Two-factor authentication disabled.",
+      "copyCodes": "Copy codes",
+      "codesCopiedToast": "Backup codes copied.",
+      "copyError": "Couldn't copy to clipboard.",
+      "regenerateHeading": "Backup codes",
+      "regenerateHelp": "Generate a new set — this invalidates your old codes.",
+      "regenerateSubmit": "Regenerate backup codes",
+      "regeneratePending": "Regenerating…",
+      "regenerateError": "Couldn't regenerate. Check your password.",
+      "regeneratedToast": "New backup codes generated."
     }
   },
   "browser": {

@@ -205,7 +205,16 @@
       "disableSubmit": "禁用",
       "disablePending": "正在禁用…",
       "disableError": "无法禁用。请检查您的密码。",
-      "disabledToast": "双重验证已禁用。"
+      "disabledToast": "双重验证已禁用。",
+      "copyCodes": "复制代码",
+      "codesCopiedToast": "备用代码已复制。",
+      "copyError": "无法复制到剪贴板。",
+      "regenerateHeading": "备用代码",
+      "regenerateHelp": "生成一组新代码 — 这将使您的旧代码失效。",
+      "regenerateSubmit": "重新生成备用代码",
+      "regeneratePending": "正在重新生成…",
+      "regenerateError": "无法重新生成。请检查您的密码。",
+      "regeneratedToast": "已生成新的备用代码。"
     }
   },
   "browser": {

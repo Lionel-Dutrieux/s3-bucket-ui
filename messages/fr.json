@@ -205,7 +205,16 @@
       "disableSubmit": "Désactiver",
       "disablePending": "Désactivation…",
       "disableError": "Impossible de désactiver. Vérifiez votre mot de passe.",
-      "disabledToast": "Authentification à deux facteurs désactivée."
+      "disabledToast": "Authentification à deux facteurs désactivée.",
+      "copyCodes": "Copier les codes",
+      "codesCopiedToast": "Codes de secours copiés.",
+      "copyError": "Impossible de copier dans le presse-papiers.",
+      "regenerateHeading": "Codes de secours",
+      "regenerateHelp": "Générer un nouveau jeu — vos anciens codes seront invalidés.",
+      "regenerateSubmit": "Régénérer les codes de secours",
+      "regeneratePending": "Régénération…",
+      "regenerateError": "Impossible de régénérer. Vérifiez votre mot de passe.",
+      "regeneratedToast": "Nouveaux codes de secours générés."
     }
   },
   "browser": {

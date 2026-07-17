@@ -205,7 +205,16 @@
       "disableSubmit": "Deaktivieren",
       "disablePending": "Wird deaktiviert…",
       "disableError": "Deaktivierung fehlgeschlagen. Überprüfen Sie Ihr Passwort.",
-      "disabledToast": "Zwei-Faktor-Authentifizierung deaktiviert."
+      "disabledToast": "Zwei-Faktor-Authentifizierung deaktiviert.",
+      "copyCodes": "Codes kopieren",
+      "codesCopiedToast": "Wiederherstellungscodes kopiert.",
+      "copyError": "Kopieren in die Zwischenablage fehlgeschlagen.",
+      "regenerateHeading": "Wiederherstellungscodes",
+      "regenerateHelp": "Einen neuen Satz erzeugen — dadurch werden Ihre alten Codes ungültig.",
+      "regenerateSubmit": "Wiederherstellungscodes neu generieren",
+      "regeneratePending": "Wird neu generiert…",
+      "regenerateError": "Neu generieren fehlgeschlagen. Überprüfen Sie Ihr Passwort.",
+      "regeneratedToast": "Neue Wiederherstellungscodes generiert."
     }
   },
   "browser": {
