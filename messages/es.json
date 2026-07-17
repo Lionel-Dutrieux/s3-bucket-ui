@@ -65,6 +65,7 @@
     "description": "Conectado como {email}.",
     "profileSection": "Perfil",
     "passwordSection": "Contraseña",
+    "twoFactorSection": "Autenticación de dos factores",
     "sessionsSection": "Sesiones",
     "sessionsDescription": "Todos los lugares donde esta cuenta ha iniciado sesión. Revocar una sesión desconecta ese dispositivo de inmediato.",
     "profile": {
@@ -185,6 +186,26 @@
       "submit": "Verificar",
       "submitPending": "Verificando…",
       "error": "Ese código es incorrecto o ha caducado."
+    },
+    "setup": {
+      "disabledHelp": "Añade un segundo paso al iniciar sesión con una aplicación de autenticación.",
+      "enabledHelp": "La autenticación de dos factores está activada. Introduce tu contraseña para desactivarla.",
+      "passwordLabel": "Contraseña actual",
+      "enableSubmit": "Activar",
+      "enablePending": "Activando…",
+      "enableError": "No se pudo iniciar la configuración. Comprueba tu contraseña.",
+      "scanHelp": "Escanea este código QR con tu aplicación de autenticación, o introduce la clave manualmente.",
+      "manualKeyLabel": "O introduce esta clave manualmente",
+      "backupHelp": "Guarda estos códigos de respaldo en un lugar seguro — cada uno funciona una vez si pierdes tu dispositivo.",
+      "confirmLabel": "Introduce el código de 6 dígitos para confirmar",
+      "confirmSubmit": "Confirmar",
+      "confirmPending": "Confirmando…",
+      "confirmError": "Ese código es incorrecto. Inténtalo de nuevo.",
+      "enabledToast": "Autenticación de dos factores activada.",
+      "disableSubmit": "Desactivar",
+      "disablePending": "Desactivando…",
+      "disableError": "No se pudo desactivar. Comprueba tu contraseña.",
+      "disabledToast": "Autenticación de dos factores desactivada."
     }
   },
   "browser": {

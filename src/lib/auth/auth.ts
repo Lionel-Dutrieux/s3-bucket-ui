@@ -168,10 +168,14 @@ function buildAuth(oidcConfig: OidcConfig | null) {
     },
     plugins: [
       admin(),
+      // twoFactor() must come before the conditional genericOAuth spread:
+      // a conditional array spread widens the plugins tuple type for every
+      // element after it, which silently drops twoFactorEnabled from the
+      // inferred session user type.
+      twoFactor({ issuer: TWO_FACTOR_ISSUER }),
       ...(oidcConfig
         ? [genericOAuth({ config: [buildOidcProvider(oidcConfig)] })]
         : []),
-      twoFactor({ issuer: TWO_FACTOR_ISSUER }),
       nextCookies(), // must stay last so server actions can set cookies
     ],
   });

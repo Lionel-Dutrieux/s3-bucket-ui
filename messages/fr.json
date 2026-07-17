@@ -65,6 +65,7 @@
     "description": "Connecté en tant que {email}.",
     "profileSection": "Profil",
     "passwordSection": "Mot de passe",
+    "twoFactorSection": "Authentification à deux facteurs",
     "sessionsSection": "Sessions",
     "sessionsDescription": "Tous les endroits où ce compte est connecté. Révoquer une session déconnecte immédiatement cet appareil.",
     "profile": {
@@ -185,6 +186,26 @@
       "submit": "Vérifier",
       "submitPending": "Vérification…",
       "error": "Ce code est incorrect ou expiré."
+    },
+    "setup": {
+      "disabledHelp": "Ajoutez une seconde étape à la connexion avec une application d'authentification.",
+      "enabledHelp": "L'authentification à deux facteurs est activée. Saisissez votre mot de passe pour la désactiver.",
+      "passwordLabel": "Mot de passe actuel",
+      "enableSubmit": "Activer",
+      "enablePending": "Activation…",
+      "enableError": "Impossible de démarrer la configuration. Vérifiez votre mot de passe.",
+      "scanHelp": "Scannez ce QR code avec votre application d'authentification, ou saisissez la clé manuellement.",
+      "manualKeyLabel": "Ou saisissez cette clé manuellement",
+      "backupHelp": "Conservez ces codes de secours en lieu sûr — chacun fonctionne une fois si vous perdez votre appareil.",
+      "confirmLabel": "Saisissez le code à 6 chiffres pour confirmer",
+      "confirmSubmit": "Confirmer",
+      "confirmPending": "Confirmation…",
+      "confirmError": "Ce code est incorrect. Réessayez.",
+      "enabledToast": "Authentification à deux facteurs activée.",
+      "disableSubmit": "Désactiver",
+      "disablePending": "Désactivation…",
+      "disableError": "Impossible de désactiver. Vérifiez votre mot de passe.",
+      "disabledToast": "Authentification à deux facteurs désactivée."
     }
   },
   "browser": {

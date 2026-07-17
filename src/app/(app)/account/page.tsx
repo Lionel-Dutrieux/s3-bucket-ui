@@ -9,6 +9,7 @@ import {
   type SessionRow,
   SessionsList,
 } from "@/features/auth/components/sessions-list";
+import { TwoFactorSetupForm } from "@/features/auth/components/two-factor-setup-form";
 import { getAuth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/session";
 import { isOidcOnly } from "@/lib/dal/settings";
@@ -69,6 +70,17 @@ export default async function AccountPage() {
               {t("passwordSection")}
             </h3>
             <ChangePasswordForm />
+          </section>
+        ) : null}
+
+        {hasPassword && !oidcOnly ? (
+          <section className="rounded-xl border bg-card p-4 shadow-sm">
+            <h3 className="mb-3 text-sm font-semibold">
+              {t("twoFactorSection")}
+            </h3>
+            <TwoFactorSetupForm
+              enabled={session.user.twoFactorEnabled ?? false}
+            />
           </section>
         ) : null}
 

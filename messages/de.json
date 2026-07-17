@@ -65,6 +65,7 @@
     "description": "Angemeldet als {email}.",
     "profileSection": "Profil",
     "passwordSection": "Passwort",
+    "twoFactorSection": "Zwei-Faktor-Authentifizierung",
     "sessionsSection": "Sitzungen",
     "sessionsDescription": "Überall, wo dieses Konto angemeldet ist. Das Widerrufen einer Sitzung meldet dieses Gerät sofort ab.",
     "profile": {
@@ -185,6 +186,26 @@
       "submit": "Bestätigen",
       "submitPending": "Wird geprüft…",
       "error": "Dieser Code ist falsch oder abgelaufen."
+    },
+    "setup": {
+      "disabledHelp": "Fügen Sie beim Anmelden einen zweiten Schritt mit einer Authenticator-App hinzu.",
+      "enabledHelp": "Die Zwei-Faktor-Authentifizierung ist aktiviert. Geben Sie Ihr Passwort ein, um sie zu deaktivieren.",
+      "passwordLabel": "Aktuelles Passwort",
+      "enableSubmit": "Aktivieren",
+      "enablePending": "Wird aktiviert…",
+      "enableError": "Einrichtung konnte nicht gestartet werden. Überprüfen Sie Ihr Passwort.",
+      "scanHelp": "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App oder geben Sie den Schlüssel manuell ein.",
+      "manualKeyLabel": "Oder geben Sie diesen Schlüssel manuell ein",
+      "backupHelp": "Bewahren Sie diese Wiederherstellungscodes sicher auf — jeder funktioniert einmal, falls Sie Ihr Gerät verlieren.",
+      "confirmLabel": "Geben Sie den 6-stelligen Code zur Bestätigung ein",
+      "confirmSubmit": "Bestätigen",
+      "confirmPending": "Wird bestätigt…",
+      "confirmError": "Dieser Code ist falsch. Versuchen Sie es erneut.",
+      "enabledToast": "Zwei-Faktor-Authentifizierung aktiviert.",
+      "disableSubmit": "Deaktivieren",
+      "disablePending": "Wird deaktiviert…",
+      "disableError": "Deaktivierung fehlgeschlagen. Überprüfen Sie Ihr Passwort.",
+      "disabledToast": "Zwei-Faktor-Authentifizierung deaktiviert."
     }
   },
   "browser": {
