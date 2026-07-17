@@ -3,6 +3,7 @@
 import { HardDrive, History, Link2, Search, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { type BrandingInfo, BrandMark } from "@/components/layout/brand-mark";
 import { OPEN_COMMAND_PALETTE_EVENT } from "@/components/layout/command-palette";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -39,6 +40,7 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const admin = user.role === "admin";
+  const t = useTranslations("layout.sidebar");
 
   // One sidebar group per provider type, in registry order; sources whose
   // provider is no longer registered fall back to a generic group.
@@ -51,7 +53,12 @@ export function AppSidebar({
   const orphans = sources.filter((source) => !getProvider(source.provider));
   const groups = [
     ...known,
-    { key: "other", label: "Other", icon: HardDrive, sources: orphans },
+    {
+      key: "other",
+      label: t("otherGroup"),
+      icon: HardDrive,
+      sources: orphans,
+    },
   ].filter((group) => group.sources.length > 0);
 
   return (
@@ -70,7 +77,7 @@ export function AppSidebar({
           className="flex h-8 w-full items-center gap-2 rounded-lg border bg-background px-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <Search className="size-3.5" aria-hidden />
-          <span className="flex-1 text-left">Search…</span>
+          <span className="flex-1 text-left">{t("search")}</span>
           <kbd className="rounded border bg-muted px-1 font-mono text-[10px]">
             ⌘K
           </kbd>
@@ -125,22 +132,24 @@ export function AppSidebar({
         ))}
         {sources.length === 0 ? (
           <SidebarGroup>
-            <SidebarGroupLabel>Sources</SidebarGroupLabel>
+            <SidebarGroupLabel>{t("sourcesGroup")}</SidebarGroupLabel>
             <SidebarGroupContent>
               {admin ? (
                 <p className="px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                  No sources yet — add one from{" "}
-                  <Link
-                    href="/admin/sources"
-                    className="font-medium text-foreground underline-offset-4 hover:underline"
-                  >
-                    Admin → Sources
-                  </Link>
-                  .
+                  {t.rich("noSourcesAdmin", {
+                    link: (chunks) => (
+                      <Link
+                        href="/admin/sources"
+                        className="font-medium text-foreground underline-offset-4 hover:underline"
+                      >
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
                 </p>
               ) : (
                 <p className="px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                  No sources available yet. An admin needs to grant you access.
+                  {t("noSourcesUser")}
                 </p>
               )}
             </SidebarGroupContent>
@@ -154,7 +163,7 @@ export function AppSidebar({
             <SidebarMenuButton asChild isActive={pathname === "/shares"}>
               <Link href="/shares">
                 <Link2 className="size-4" aria-hidden />
-                Shared links
+                {t("sharedLinks")}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -164,7 +173,7 @@ export function AppSidebar({
                 <SidebarMenuButton asChild isActive={pathname === "/activity"}>
                   <Link href="/activity">
                     <History className="size-4" aria-hidden />
-                    Activity
+                    {t("activity")}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -175,7 +184,7 @@ export function AppSidebar({
                 >
                   <Link href="/admin/users">
                     <Settings2 className="size-4" aria-hidden />
-                    Admin
+                    {t("admin")}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -183,7 +192,7 @@ export function AppSidebar({
           ) : null}
         </SidebarMenu>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Theme</span>
+          <span className="text-xs text-muted-foreground">{t("theme")}</span>
           <ThemeToggle />
         </div>
         <SidebarMenu>

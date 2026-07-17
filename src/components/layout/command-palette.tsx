@@ -2,6 +2,7 @@
 
 import { Plus, Settings2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   Command,
@@ -29,6 +30,7 @@ export function CommandPalette({
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const t = useTranslations("layout.commandPalette");
 
   const go = (path: string) => {
     setOpen(false);
@@ -58,16 +60,16 @@ export function CommandPalette({
       <CommandDialog
         open={open}
         onOpenChange={setOpen}
-        title="Command palette"
-        description="Jump to a source or add a new one"
+        title={t("title")}
+        description={t("description")}
       >
         {/* This CommandDialog doesn't wrap children in <Command> itself. */}
         <Command>
-          <CommandInput placeholder="Search sources…" />
+          <CommandInput placeholder={t("searchPlaceholder")} />
           <CommandList>
-            <CommandEmpty>No results.</CommandEmpty>
+            <CommandEmpty>{t("noResults")}</CommandEmpty>
             {sources.length > 0 ? (
-              <CommandGroup heading="Sources">
+              <CommandGroup heading={t("sourcesHeading")}>
                 {sources.map((source) => {
                   const Icon = providerIcon(source.provider);
                   return (
@@ -92,14 +94,14 @@ export function CommandPalette({
             {canManage ? (
               <>
                 <CommandSeparator />
-                <CommandGroup heading="Administration">
+                <CommandGroup heading={t("administrationHeading")}>
                   <CommandItem onSelect={() => go("/admin/sources")}>
                     <Plus aria-hidden />
-                    Add source
+                    {t("addSource")}
                   </CommandItem>
                   <CommandItem onSelect={() => go("/admin/users")}>
                     <Settings2 aria-hidden />
-                    Open admin
+                    {t("openAdmin")}
                   </CommandItem>
                 </CommandGroup>
               </>

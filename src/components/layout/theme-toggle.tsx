@@ -1,20 +1,22 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
 
 const MODES = [
-  { mode: "light", label: "Light theme", icon: Sun },
-  { mode: "dark", label: "Dark theme", icon: Moon },
-  { mode: "system", label: "System theme", icon: Monitor },
+  { mode: "light", labelKey: "light", icon: Sun },
+  { mode: "dark", labelKey: "dark", icon: Moon },
+  { mode: "system", labelKey: "system", icon: Monitor },
 ] as const;
 
 const emptySubscribe = () => () => {};
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("layout.themeToggle");
   // Theme is unknown until mounted (localStorage) — avoid a hydration mismatch.
   const mounted = useSyncExternalStore(
     emptySubscribe,
@@ -26,11 +28,12 @@ export function ThemeToggle() {
     // biome-ignore lint/a11y/useSemanticElements: segmented control, not a form fieldset
     <div
       role="group"
-      aria-label="Theme"
+      aria-label={t("groupLabel")}
       className="flex items-center gap-0.5 rounded-md border p-0.5"
     >
-      {MODES.map(({ mode, label, icon: Icon }) => {
+      {MODES.map(({ mode, labelKey, icon: Icon }) => {
         const isActive = mounted && theme === mode;
+        const label = t(labelKey);
         return (
           <button
             key={mode}

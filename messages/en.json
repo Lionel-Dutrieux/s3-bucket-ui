@@ -3,7 +3,58 @@
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "errorPage": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Try again — if it keeps happening, check the server logs.",
+      "descriptionWithDigest": "An unexpected error occurred. Try again — if it keeps happening, check the server logs (digest {digest}).",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "This page doesn't exist — the source may have been removed.",
+      "backToSources": "Back to sources"
+    },
+    "home": {
+      "headerTitle": "All sources",
+      "title": "Sources",
+      "description": "Every bucket you have access to. Pick one to start browsing.",
+      "sourceCount": "{count, plural, one {# source} other {# sources}}",
+      "emptyTitleAdmin": "No sources yet",
+      "emptyDescriptionAdmin": "Connect a storage bucket to start browsing your files.",
+      "emptyTitleUser": "No sources available",
+      "emptyDescriptionUser": "An admin needs to grant you access to a source first.",
+      "addSource": "Add source"
+    }
+  },
+  "layout": {
+    "sidebar": {
+      "search": "Search…",
+      "otherGroup": "Other",
+      "sourcesGroup": "Sources",
+      "noSourcesAdmin": "No sources yet — add one from <link>Admin → Sources</link>.",
+      "noSourcesUser": "No sources available yet. An admin needs to grant you access.",
+      "sharedLinks": "Shared links",
+      "activity": "Activity",
+      "admin": "Admin",
+      "theme": "Theme"
+    },
+    "commandPalette": {
+      "title": "Command palette",
+      "description": "Jump to a source or add a new one",
+      "searchPlaceholder": "Search sources…",
+      "noResults": "No results.",
+      "sourcesHeading": "Sources",
+      "administrationHeading": "Administration",
+      "addSource": "Add source",
+      "openAdmin": "Open admin"
+    },
+    "themeToggle": {
+      "light": "Light theme",
+      "dark": "Dark theme",
+      "system": "System theme",
+      "groupLabel": "Theme"
+    }
   },
   "auth": {
     "userMenu": {

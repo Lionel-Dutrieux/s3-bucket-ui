@@ -3,7 +3,58 @@
     "cancel": "Annuler",
     "save": "Enregistrer",
     "delete": "Supprimer",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "errorPage": {
+      "title": "Une erreur est survenue",
+      "description": "Une erreur inattendue s'est produite. Réessayez — si le problème persiste, consultez les journaux du serveur.",
+      "descriptionWithDigest": "Une erreur inattendue s'est produite. Réessayez — si le problème persiste, consultez les journaux du serveur (référence {digest}).",
+      "retry": "Réessayer"
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "Cette page n'existe pas — la source a peut-être été supprimée.",
+      "backToSources": "Retour aux sources"
+    },
+    "home": {
+      "headerTitle": "Toutes les sources",
+      "title": "Sources",
+      "description": "Tous les buckets auxquels vous avez accès. Choisissez-en un pour commencer à parcourir.",
+      "sourceCount": "{count, plural, one {# source} other {# sources}}",
+      "emptyTitleAdmin": "Aucune source pour le moment",
+      "emptyDescriptionAdmin": "Connectez un bucket de stockage pour commencer à parcourir vos fichiers.",
+      "emptyTitleUser": "Aucune source disponible",
+      "emptyDescriptionUser": "Un administrateur doit d'abord vous donner accès à une source.",
+      "addSource": "Ajouter une source"
+    }
+  },
+  "layout": {
+    "sidebar": {
+      "search": "Rechercher…",
+      "otherGroup": "Autre",
+      "sourcesGroup": "Sources",
+      "noSourcesAdmin": "Aucune source pour le moment — ajoutez-en une depuis <link>Administration → Sources</link>.",
+      "noSourcesUser": "Aucune source disponible pour le moment. Un administrateur doit vous donner accès.",
+      "sharedLinks": "Liens partagés",
+      "activity": "Activité",
+      "admin": "Administration",
+      "theme": "Thème"
+    },
+    "commandPalette": {
+      "title": "Palette de commandes",
+      "description": "Accéder à une source ou en ajouter une nouvelle",
+      "searchPlaceholder": "Rechercher des sources…",
+      "noResults": "Aucun résultat.",
+      "sourcesHeading": "Sources",
+      "administrationHeading": "Administration",
+      "addSource": "Ajouter une source",
+      "openAdmin": "Ouvrir l'administration"
+    },
+    "themeToggle": {
+      "light": "Thème clair",
+      "dark": "Thème sombre",
+      "system": "Thème système",
+      "groupLabel": "Thème"
+    }
   },
   "auth": {
     "userMenu": {
