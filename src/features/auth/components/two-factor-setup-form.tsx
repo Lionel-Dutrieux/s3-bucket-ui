@@ -145,11 +145,14 @@ export function TwoFactorSetupForm({ enabled }: { enabled: boolean }) {
         <div className="flex flex-col items-center gap-2 rounded-lg border bg-white p-4">
           <QRCodeSVG value={enrollment.totpURI} size={160} />
           {manualKey ? (
+            // The box is always bg-white (so the QR scans in any theme), so
+            // this text needs fixed dark colors — inheriting the theme's
+            // foreground makes it white-on-white in dark mode.
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">
-                {t("manualKeyLabel")}
+              <p className="text-xs text-neutral-500">{t("manualKeyLabel")}</p>
+              <p className="break-all font-mono text-sm text-neutral-900">
+                {manualKey}
               </p>
-              <p className="break-all font-mono text-sm">{manualKey}</p>
             </div>
           ) : null}
         </div>
