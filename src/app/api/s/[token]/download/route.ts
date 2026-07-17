@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { sharePreviewKind } from "@/features/shares/lib/preview";
 import { apiError } from "@/lib/api-error";
+import { recordOperation } from "@/lib/dal/operations";
 import { countShareDownload, getActiveShare } from "@/lib/dal/shares";
 import { getSource } from "@/lib/dal/sources";
 import { isUnlocked } from "@/lib/shares/unlock";
@@ -50,6 +51,13 @@ export async function GET(
   // not every Range request a seeking <video> fires.
   if (!inline && !request.headers.get("range")) {
     await countShareDownload(share.id);
+    await recordOperation({
+      action: "share-download",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: share.key,
+      detail: "share-link",
+    });
   }
 
   const files = getFilesClient(source);

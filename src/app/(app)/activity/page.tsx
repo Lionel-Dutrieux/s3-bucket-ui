@@ -1,9 +1,10 @@
-import { History } from "lucide-react";
+import { Download, History } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/empty-state";
 import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { PageHeader } from "@/components/page-header";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -15,7 +16,11 @@ import {
 import { ActivityFilters } from "@/features/activity/components/activity-filters";
 import { operationLabel } from "@/features/activity/lib/operation-labels";
 import { requireAdmin } from "@/lib/auth/session";
-import { listOperationSourceNames, listOperations } from "@/lib/dal/operations";
+import {
+  listOperationSourceNames,
+  listOperations,
+  purgeExpiredOperations,
+} from "@/lib/dal/operations";
 import { formatDateTime, formatRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +39,9 @@ export default async function ActivityPage({
   // Admin-only: the journal spans all sources, including ones a regular user
   // was never granted.
   await requireAdmin();
+  // Lazy retention purge: fast (throttled to 1×/day) and never throws, so the
+  // freshly-listed data below already reflects it.
+  await purgeExpiredOperations();
   const t = await getTranslations("activity");
 
   const sp = await searchParams;
@@ -47,6 +55,14 @@ export default async function ActivityPage({
     listOperationSourceNames(),
   ]);
 
+  const exportQuery = new URLSearchParams();
+  if (action) exportQuery.set("action", action);
+  if (sourceName) exportQuery.set("source", sourceName);
+  if (q) exportQuery.set("q", q);
+  const exportParams = exportQuery.toString();
+  const exportHref = (format: "csv" | "json") =>
+    `/api/activity/export?format=${format}${exportParams ? `&${exportParams}` : ""}`;
+
   return (
     <>
       <AppHeader title={t("headerTitle")} />
@@ -56,8 +72,24 @@ export default async function ActivityPage({
             carries the nav label — stacking the same word twice reads odd. */}
         <PageHeader title={t("title")} description={t("description")}>
           {operations.length > 0 ? (
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {t("entryCount", { count: operations.length })}
+            <span className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {t("entryCount", { count: operations.length })}
+              </span>
+              <a
+                href={exportHref("csv")}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                <Download aria-hidden />
+                {t("exportCsv")}
+              </a>
+              <a
+                href={exportHref("json")}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                <Download aria-hidden />
+                {t("exportJson")}
+              </a>
             </span>
           ) : null}
         </PageHeader>

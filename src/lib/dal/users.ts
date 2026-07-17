@@ -59,3 +59,11 @@ export async function listUserOptions(): Promise<UserOption[]> {
   });
   return rows.map((row) => ({ id: row.id, label: row.email }));
 }
+
+/** Whether this user has an email/password credential (vs. OIDC-only). */
+export async function hasPasswordCredential(userId: string): Promise<boolean> {
+  const count = await prisma.account.count({
+    where: { userId, providerId: "credential" },
+  });
+  return count > 0;
+}

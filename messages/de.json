@@ -215,6 +215,11 @@
       "regeneratePending": "Wird neu generiert…",
       "regenerateError": "Neu generieren fehlgeschlagen. Überprüfen Sie Ihr Passwort.",
       "regeneratedToast": "Neue Wiederherstellungscodes generiert."
+    },
+    "gate": {
+      "metaTitle": "Zwei-Faktor-Authentifizierung einrichten",
+      "heading": "Zwei-Faktor-Authentifizierung erforderlich",
+      "intro": "Ihre Organisation verlangt für dieses Konto eine Zwei-Faktor-Authentifizierung. Richten Sie sie jetzt ein, um fortzufahren."
     }
   },
   "browser": {
@@ -729,7 +734,23 @@
       "sharingTitle": "Öffentliche Freigabelinks",
       "sharingDescription": "Erlaubt Benutzern mit Zugriff auf eine Quelle, öffentliche Links zu ihren Dateien zu erstellen (widerrufbar, mit Ablaufdatum, optional passwortgeschützt). Das Deaktivieren blockiert das Erstellen neuer Links — bestehende funktionieren weiter, bis sie widerrufen werden oder ablaufen.",
       "sharingEnabledToast": "Öffentliche Freigabelinks aktiviert",
-      "sharingDisabledToast": "Öffentliche Freigabelinks deaktiviert"
+      "sharingDisabledToast": "Öffentliche Freigabelinks deaktiviert",
+      "twoFactorPolicyTitle": "Zwei-Faktor-Authentifizierung",
+      "twoFactorPolicyDescription": "Verlangt von Konten, die Zwei-Faktor-Authentifizierung einzurichten, bevor sie die App weiter nutzen können: Aus (nie erforderlich), Admins (nur Admin-Konten) oder Alle (jedes Konto). Im Nur-OIDC-Modus an den Identitätsanbieter delegiert.",
+      "twoFactorPolicyOff": "Aus — nie erforderlich",
+      "twoFactorPolicyAdmins": "Nur Admins",
+      "twoFactorPolicyAll": "Alle Konten",
+      "twoFactorPolicyConfirmTitle": "Zwei-Faktor-Authentifizierung verlangen?",
+      "twoFactorPolicyConfirmDescription": "Betroffene Konten ohne Zwei-Faktor-Authentifizierung werden bei ihrer nächsten Navigation zur Einrichtung aufgefordert, bevor sie die App weiter nutzen können.",
+      "twoFactorPolicyToast": "Richtlinie für Zwei-Faktor-Authentifizierung aktualisiert",
+      "auditRetentionTitle": "Aufbewahrung des Aktivitätsprotokolls",
+      "auditRetentionDescription": "Wie lange Einträge im Aktivitätsprotokoll aufbewahrt werden, bevor sie automatisch gelöscht werden. Die Bereinigung läuft verzögert beim Öffnen des Aktivitätsprotokolls, höchstens einmal täglich.",
+      "auditRetentionForever": "Unbegrenzt aufbewahren",
+      "auditRetention30": "30 Tage",
+      "auditRetention90": "90 Tage",
+      "auditRetention180": "180 Tage",
+      "auditRetention365": "365 Tage",
+      "auditRetentionToast": "Aufbewahrungsdauer des Aktivitätsprotokolls aktualisiert"
     },
     "brandingForm": {
       "title": "White-Labeling",
@@ -859,8 +880,13 @@
       "migrate": "Quelle kopiert",
       "shareCreate": "Freigabelink erstellt",
       "shareRevoke": "Freigabelink widerrufen",
-      "signInFailed": "Anmeldung fehlgeschlagen"
-    }
+      "signInFailed": "Anmeldung fehlgeschlagen",
+      "download": "Heruntergeladen",
+      "downloadZip": "Als ZIP heruntergeladen",
+      "shareDownload": "Über Freigabelink heruntergeladen"
+    },
+    "exportCsv": "CSV exportieren",
+    "exportJson": "JSON exportieren"
   },
   "shares": {
     "metaTitle": "Geteilte Links",
@@ -938,7 +964,8 @@
       "selectionTooLargeEntries": "Diese Auswahl enthält mehr als {max} Einträge — zu groß für ein einziges Archiv.",
       "selectionTooLargeFiles": "Diese Auswahl enthält mehr als {max} Dateien — zu groß für ein einziges Archiv.",
       "selectionReadFailed": "Diese Auswahl konnte nicht gelesen werden.",
-      "selectionEmpty": "Diese Auswahl ist leer."
+      "selectionEmpty": "Diese Auswahl ist leer.",
+      "notFound": "Nicht gefunden."
     }
   }
 }

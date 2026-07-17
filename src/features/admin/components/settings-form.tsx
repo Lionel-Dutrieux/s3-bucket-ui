@@ -2,30 +2,67 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
+  setAuditRetention,
   setOidcOnlyEnabled,
   setPublicSharing,
   setSignUpEnabled,
+  setTwoFactorPolicy,
 } from "@/features/admin/actions";
 import type { ActionResult } from "@/lib/action-result";
+import type { TwoFactorPolicy } from "@/lib/dal/settings";
+
+// Stricter-than ordering — used to decide whether tightening the policy
+// warrants a confirmation (affected accounts get locked out of email/
+// password flows until they enroll 2FA on their next navigation).
+const POLICY_RANK: Record<TwoFactorPolicy, number> = {
+  off: 0,
+  admins: 1,
+  all: 2,
+};
+
+const AUDIT_RETENTION_LABEL_KEYS = {
+  0: "auditRetentionForever",
+  30: "auditRetention30",
+  90: "auditRetention90",
+  180: "auditRetention180",
+  365: "auditRetention365",
+} as const;
+const AUDIT_RETENTION_OPTIONS = [0, 30, 90, 180, 365] as const;
 
 export function SettingsForm({
   signUpEnabled,
   oidcOnly,
   oidcConfigured,
   sharingEnabled,
+  twoFactorPolicy,
+  auditRetentionDays,
 }: {
   signUpEnabled: boolean;
   oidcOnly: boolean;
   oidcConfigured: boolean;
   sharingEnabled: boolean;
+  twoFactorPolicy: TwoFactorPolicy;
+  auditRetentionDays: number;
 }) {
   const [pending, startTransition] = useTransition();
+  const [pendingPolicy, setPendingPolicy] = useState<TwoFactorPolicy | null>(
+    null,
+  );
   const router = useRouter();
   const t = useTranslations("admin.settingsForm");
+  const tCommon = useTranslations("common");
 
   const run = (work: () => Promise<ActionResult>, success: string) => {
     startTransition(async () => {
@@ -37,6 +74,17 @@ export function SettingsForm({
       toast.success(success);
       router.refresh();
     });
+  };
+
+  const applyTwoFactorPolicy = (policy: TwoFactorPolicy) =>
+    run(() => setTwoFactorPolicy(policy), t("twoFactorPolicyToast"));
+
+  const onTwoFactorPolicyChange = (policy: TwoFactorPolicy) => {
+    if (POLICY_RANK[policy] > POLICY_RANK[twoFactorPolicy]) {
+      setPendingPolicy(policy);
+      return;
+    }
+    applyTwoFactorPolicy(policy);
   };
 
   return (
@@ -81,6 +129,49 @@ export function SettingsForm({
           )
         }
       />
+      {!oidcOnly && (
+        <SettingSelectRow
+          title={t("twoFactorPolicyTitle")}
+          description={t("twoFactorPolicyDescription")}
+          value={twoFactorPolicy}
+          disabled={pending}
+          onChange={onTwoFactorPolicyChange}
+          options={[
+            { value: "off", label: t("twoFactorPolicyOff") },
+            { value: "admins", label: t("twoFactorPolicyAdmins") },
+            { value: "all", label: t("twoFactorPolicyAll") },
+          ]}
+        />
+      )}
+      <SettingSelectRow
+        title={t("auditRetentionTitle")}
+        description={t("auditRetentionDescription")}
+        value={String(auditRetentionDays)}
+        disabled={pending}
+        onChange={(value) =>
+          run(() => setAuditRetention(Number(value)), t("auditRetentionToast"))
+        }
+        options={AUDIT_RETENTION_OPTIONS.map((days) => ({
+          value: String(days),
+          label: t(AUDIT_RETENTION_LABEL_KEYS[days]),
+        }))}
+      />
+      <ConfirmDialog
+        open={pendingPolicy !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingPolicy(null);
+        }}
+        title={t("twoFactorPolicyConfirmTitle")}
+        description={t("twoFactorPolicyConfirmDescription")}
+        confirmLabel={tCommon("confirm")}
+        destructive={false}
+        pending={pending}
+        onConfirm={() => {
+          if (pendingPolicy === null) return;
+          applyTwoFactorPolicy(pendingPolicy);
+          setPendingPolicy(null);
+        }}
+      />
     </div>
   );
 }
@@ -112,6 +203,49 @@ function SettingRow({
         onCheckedChange={onChange}
         aria-label={title}
       />
+    </div>
+  );
+}
+
+function SettingSelectRow<Value extends string>({
+  title,
+  description,
+  value,
+  disabled,
+  onChange,
+  options,
+}: {
+  title: string;
+  description: string;
+  value: Value;
+  disabled: boolean;
+  onChange: (value: Value) => void;
+  options: { value: Value; label: string }[];
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4 p-4">
+      <div className="space-y-1">
+        <p className="text-sm font-medium">{title}</p>
+        <p className="max-w-prose text-sm text-muted-foreground">
+          {description}
+        </p>
+      </div>
+      <Select
+        value={value}
+        disabled={disabled}
+        onValueChange={(next) => onChange(next as Value)}
+      >
+        <SelectTrigger aria-label={title}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

@@ -222,3 +222,68 @@ export async function clearConfigOverrides(
     bumpConfigVersion(version),
   ]);
 }
+
+// --- 2FA policy ---
+
+const TWO_FACTOR_POLICY_KEY = "twoFactorPolicy";
+
+export type TwoFactorPolicy = "off" | "admins" | "all";
+
+/**
+ * Org-wide 2FA enrollment policy: `off` (never required), `admins` (admins
+ * only) or `all` (every account). Defaults to `off` — any absent or unknown
+ * stored value is treated as `off`.
+ */
+export async function getTwoFactorPolicy(): Promise<TwoFactorPolicy> {
+  const row = await prisma.setting.findUnique({
+    where: { key: TWO_FACTOR_POLICY_KEY },
+    select: { value: true },
+  });
+  if (row?.value === "admins" || row?.value === "all") {
+    return row.value;
+  }
+  return "off";
+}
+
+export async function setTwoFactorPolicy(
+  policy: TwoFactorPolicy,
+): Promise<void> {
+  await setStringSetting(TWO_FACTOR_POLICY_KEY, policy);
+}
+
+// --- audit retention ---
+
+export const AUDIT_RETENTION_DAYS_KEY = "auditRetentionDays";
+export const AUDIT_LAST_PURGE_KEY = "auditLastPurgeAt";
+
+/**
+ * How long audit trail entries are kept, in days. `0` means keep forever
+ * (the default) — any absent, non-numeric or negative stored value is
+ * treated as `0`.
+ */
+export async function getAuditRetentionDays(): Promise<number> {
+  const row = await prisma.setting.findUnique({
+    where: { key: AUDIT_RETENTION_DAYS_KEY },
+    select: { value: true },
+  });
+  const parsed = row ? Number(row.value) : Number.NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+export async function setAuditRetentionDays(days: number): Promise<void> {
+  await setStringSetting(AUDIT_RETENTION_DAYS_KEY, String(days));
+}
+
+/** Epoch ms of the last lazy purge, or `null` if it never ran. */
+export async function getAuditLastPurgeAt(): Promise<number | null> {
+  const row = await prisma.setting.findUnique({
+    where: { key: AUDIT_LAST_PURGE_KEY },
+    select: { value: true },
+  });
+  const parsed = row ? Number(row.value) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+export async function setAuditLastPurgeAt(epochMs: number): Promise<void> {
+  await setStringSetting(AUDIT_LAST_PURGE_KEY, String(epochMs));
+}

@@ -215,6 +215,11 @@
       "regeneratePending": "Régénération…",
       "regenerateError": "Impossible de régénérer. Vérifiez votre mot de passe.",
       "regeneratedToast": "Nouveaux codes de secours générés."
+    },
+    "gate": {
+      "metaTitle": "Configurer l'authentification à deux facteurs",
+      "heading": "Authentification à deux facteurs requise",
+      "intro": "Votre organisation exige l'authentification à deux facteurs sur ce compte. Configurez-la maintenant pour continuer."
     }
   },
   "browser": {
@@ -729,7 +734,23 @@
       "sharingTitle": "Liens publics",
       "sharingDescription": "Permet aux utilisateurs ayant accès à une source de créer des liens publics vers ses fichiers (révocables, expirables, protégeables par mot de passe). Désactiver ceci bloque la création de nouveaux liens — les liens existants continuent de fonctionner jusqu'à révocation ou expiration.",
       "sharingEnabledToast": "Liens publics activés",
-      "sharingDisabledToast": "Liens publics désactivés"
+      "sharingDisabledToast": "Liens publics désactivés",
+      "twoFactorPolicyTitle": "Authentification à deux facteurs",
+      "twoFactorPolicyDescription": "Exige des comptes qu'ils configurent l'authentification à deux facteurs avant de pouvoir continuer à utiliser l'application : désactivée (jamais requise), admins (comptes admin uniquement) ou tous (chaque compte). Déléguée au fournisseur d'identité lorsque le mode OIDC uniquement est actif.",
+      "twoFactorPolicyOff": "Désactivée — jamais requise",
+      "twoFactorPolicyAdmins": "Admins uniquement",
+      "twoFactorPolicyAll": "Tous les comptes",
+      "twoFactorPolicyConfirmTitle": "Exiger l'authentification à deux facteurs ?",
+      "twoFactorPolicyConfirmDescription": "Les comptes concernés qui n'ont pas encore configuré l'authentification à deux facteurs devront le faire lors de leur prochaine navigation, avant de pouvoir continuer à utiliser l'application.",
+      "twoFactorPolicyToast": "Politique d'authentification à deux facteurs mise à jour",
+      "auditRetentionTitle": "Rétention du journal d'activité",
+      "auditRetentionDescription": "Durée de conservation des entrées du journal d'activité avant purge automatique. La purge s'exécute paresseusement à l'ouverture du journal, au maximum une fois par jour.",
+      "auditRetentionForever": "Conserver indéfiniment",
+      "auditRetention30": "30 jours",
+      "auditRetention90": "90 jours",
+      "auditRetention180": "180 jours",
+      "auditRetention365": "365 jours",
+      "auditRetentionToast": "Rétention du journal d'activité mise à jour"
     },
     "brandingForm": {
       "title": "Marque blanche",
@@ -859,8 +880,13 @@
       "migrate": "Source copiée",
       "shareCreate": "Lien de partage créé",
       "shareRevoke": "Lien de partage révoqué",
-      "signInFailed": "Échec de connexion"
-    }
+      "signInFailed": "Échec de connexion",
+      "download": "Téléchargé",
+      "downloadZip": "Téléchargé en ZIP",
+      "shareDownload": "Téléchargé via un lien de partage"
+    },
+    "exportCsv": "Exporter en CSV",
+    "exportJson": "Exporter en JSON"
   },
   "shares": {
     "metaTitle": "Liens partagés",
@@ -938,7 +964,8 @@
       "selectionTooLargeEntries": "Cette sélection contient plus de {max} éléments — trop volumineuse pour une seule archive.",
       "selectionTooLargeFiles": "Cette sélection contient plus de {max} fichiers — trop volumineuse pour une seule archive.",
       "selectionReadFailed": "Impossible de lire cette sélection.",
-      "selectionEmpty": "Cette sélection est vide."
+      "selectionEmpty": "Cette sélection est vide.",
+      "notFound": "Introuvable."
     }
   }
 }

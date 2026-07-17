@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
@@ -58,8 +59,17 @@ function CopyCodesButton({
   );
 }
 
-export function TwoFactorSetupForm({ enabled }: { enabled: boolean }) {
+export function TwoFactorSetupForm({
+  enabled,
+  redirectOnEnabled,
+}: {
+  enabled: boolean;
+  /** When set, navigate here right after enrollment succeeds (the forced
+   * /setup-2fa gate) instead of showing the "disable" screen in place. */
+  redirectOnEnabled?: string;
+}) {
   const t = useTranslations("twoFactor.setup");
+  const router = useRouter();
   const [isEnabled, setIsEnabled] = useState(enabled);
   const [enrollment, setEnrollment] = useState<Enrollment>();
   const [serverError, setServerError] = useState<string>();
@@ -98,6 +108,7 @@ export function TwoFactorSetupForm({ enabled }: { enabled: boolean }) {
       setEnrollment(undefined);
       setIsEnabled(true);
       toast.success(t("enabledToast"));
+      if (redirectOnEnabled) router.push(redirectOnEnabled);
     },
   });
 
