@@ -619,6 +619,8 @@
       "joinedColumn": "加入时间",
       "you": "（您）",
       "banned": "已封禁",
+      "twoFactor": "2FA",
+      "twoFactorEnabledLabel": "已启用双重验证",
       "admin": "管理员",
       "user": "用户",
       "actionsFor": "{email} 的操作",

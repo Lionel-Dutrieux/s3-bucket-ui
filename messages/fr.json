@@ -619,6 +619,8 @@
       "joinedColumn": "Inscrit",
       "you": "(vous)",
       "banned": "banni",
+      "twoFactor": "2FA",
+      "twoFactorEnabledLabel": "Authentification à deux facteurs activée",
       "admin": "Admin",
       "user": "Utilisateur",
       "actionsFor": "Actions pour {email}",

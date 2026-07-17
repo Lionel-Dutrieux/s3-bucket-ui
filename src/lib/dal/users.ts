@@ -8,6 +8,7 @@ export interface UserRow {
   email: string;
   role: string;
   banned: boolean;
+  twoFactorEnabled: boolean;
   createdAt: Date;
   groups: string[];
 }
@@ -21,6 +22,7 @@ export async function listUsers(): Promise<UserRow[]> {
       email: true,
       role: true,
       banned: true,
+      twoFactorEnabled: true,
       createdAt: true,
       memberships: {
         select: { group: { select: { name: true } } },
@@ -34,6 +36,7 @@ export async function listUsers(): Promise<UserRow[]> {
     email: row.email,
     role: row.role ?? "user",
     banned: row.banned ?? false,
+    twoFactorEnabled: row.twoFactorEnabled ?? false,
     createdAt: row.createdAt,
     groups: row.memberships.map((membership) => membership.group.name),
   }));

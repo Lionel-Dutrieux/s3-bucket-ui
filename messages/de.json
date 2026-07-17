@@ -619,6 +619,8 @@
       "joinedColumn": "Beigetreten",
       "you": "(Sie)",
       "banned": "gesperrt",
+      "twoFactor": "2FA",
+      "twoFactorEnabledLabel": "Zwei-Faktor-Authentifizierung aktiviert",
       "admin": "Admin",
       "user": "Benutzer",
       "actionsFor": "Aktionen für {email}",
