@@ -15,15 +15,55 @@
 
 </div>
 
+<!--
+  Hero screenshot — capture once UI is stable. Shot list:
+  - List view of a source with breadcrumbs
+  - Grid view with image thumbnails
+  - Sidebar showing several provider logos (S3, R2, Azure, SFTP, ...)
+  Save as docs/assets/hero.png, then uncomment:
+
+  <p align="center">
+    <img src="docs/assets/hero.png" alt="Bucket UI — list and grid views with breadcrumbs and provider sidebar" width="900" />
+  </p>
+-->
+
 ## Why Bucket UI?
 
-Storage consoles are built for engineers, one provider at a time. Bucket UI
-puts **every bucket, share and NAS you own behind one interface your whole
-team can use** — browse, preview, search, upload and share, with per-user and
-per-group permissions enforced server-side. A source stays invisible until an
-admin grants it.
+Giving someone access to a bucket usually means handing them the S3
+credentials — one console per provider, built for engineers, not for the
+person who just needs one file. Bucket UI puts all the storage you own (object
+stores and protocols) behind one interface and **grants access to a bucket
+without ever handing out its credentials.** Per-user and per-group
+permissions are enforced server-side, and a source stays invisible until an
+admin grants it — with native OIDC SSO, grants, an audit trail and
+white-labeling, it's enterprise-grade access control, **free and
+self-hosted.**
+
+> "I built Bucket UI to manage the S3 buckets behind my Dokploy apps —
+> pulling backups, curating an app's media, handing a single document to
+> someone who had no bucket access."
+
+### How it works
+
+The database only ever holds authentication, permissions and source
+definitions — never your files. Every browse, upload, download and preview
+goes straight to the storage itself through
+[files-sdk](https://files-sdk.dev); **Bucket UI never copies or stores your
+files.** No lock-in, no data duplication.
 
 ## ✨ Features
+
+<!--
+  Demo GIF — capture once UI is stable. Shot list:
+  - Browse a source, toggle list -> grid view
+  - Open a preview (image or PDF), navigate with </>
+  - Search across a source, open a result straight into preview
+  - Upload a file/folder with the progress tray
+  - Create a share link with expiry/password, then revoke it
+  Save as docs/assets/demo.gif, then uncomment:
+
+  ![Bucket UI demo](docs/assets/demo.gif)
+-->
 
 - **Familiar browsing** — list and grid views with image thumbnails, breadcrumbs,
   drag & drop, right-click menus, multi-select with shift-click, keyboard
