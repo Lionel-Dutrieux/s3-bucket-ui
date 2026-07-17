@@ -215,6 +215,11 @@
       "regeneratePending": "Regenerating…",
       "regenerateError": "Couldn't regenerate. Check your password.",
       "regeneratedToast": "New backup codes generated."
+    },
+    "gate": {
+      "metaTitle": "Set up two-factor authentication",
+      "heading": "Two-factor authentication required",
+      "intro": "Your organization requires two-factor authentication on this account. Set it up now to continue."
     }
   },
   "browser": {
@@ -729,7 +734,23 @@
       "sharingTitle": "Public share links",
       "sharingDescription": "Let users with access to a source create public links to its files (revocable, expirable, optionally password-protected). Turning this off blocks creating new links — existing ones keep working until revoked or expired.",
       "sharingEnabledToast": "Public share links enabled",
-      "sharingDisabledToast": "Public share links disabled"
+      "sharingDisabledToast": "Public share links disabled",
+      "twoFactorPolicyTitle": "Two-factor authentication",
+      "twoFactorPolicyDescription": "Require accounts to enroll in two-factor authentication before they can keep using the app: off (never required), admins (admin accounts only) or all (every account). Delegated to the identity provider when OIDC-only is on.",
+      "twoFactorPolicyOff": "Off — never required",
+      "twoFactorPolicyAdmins": "Admins only",
+      "twoFactorPolicyAll": "All accounts",
+      "twoFactorPolicyConfirmTitle": "Require two-factor authentication?",
+      "twoFactorPolicyConfirmDescription": "Affected accounts without two-factor authentication will be prompted to set it up on their next navigation, before they can continue using the app.",
+      "twoFactorPolicyToast": "Two-factor authentication policy updated",
+      "auditRetentionTitle": "Audit log retention",
+      "auditRetentionDescription": "How long activity log entries are kept before being purged automatically. Purging runs lazily when the activity log is opened, at most once a day.",
+      "auditRetentionForever": "Keep forever",
+      "auditRetention30": "30 days",
+      "auditRetention90": "90 days",
+      "auditRetention180": "180 days",
+      "auditRetention365": "365 days",
+      "auditRetentionToast": "Audit log retention updated"
     },
     "brandingForm": {
       "title": "White labelling",
@@ -859,8 +880,13 @@
       "migrate": "Copied source",
       "shareCreate": "Shared link created",
       "shareRevoke": "Shared link revoked",
-      "signInFailed": "Sign-in failed"
-    }
+      "signInFailed": "Sign-in failed",
+      "download": "Downloaded",
+      "downloadZip": "Downloaded as ZIP",
+      "shareDownload": "Downloaded via shared link"
+    },
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON"
   },
   "shares": {
     "metaTitle": "Shared links",
@@ -938,7 +964,8 @@
       "selectionTooLargeEntries": "This selection holds more than {max} entries — too large for one archive.",
       "selectionTooLargeFiles": "This selection holds more than {max} files — too large for one archive.",
       "selectionReadFailed": "Could not read this selection.",
-      "selectionEmpty": "This selection is empty."
+      "selectionEmpty": "This selection is empty.",
+      "notFound": "Not found."
     }
   }
 }

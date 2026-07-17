@@ -215,6 +215,11 @@
       "regeneratePending": "Regenerando…",
       "regenerateError": "No se pudo regenerar. Comprueba tu contraseña.",
       "regeneratedToast": "Nuevos códigos de respaldo generados."
+    },
+    "gate": {
+      "metaTitle": "Configurar la autenticación en dos pasos",
+      "heading": "Se requiere autenticación en dos pasos",
+      "intro": "Tu organización exige la autenticación en dos pasos en esta cuenta. Configúrala ahora para continuar."
     }
   },
   "browser": {
@@ -729,7 +734,23 @@
       "sharingTitle": "Enlaces públicos",
       "sharingDescription": "Permite que los usuarios con acceso a una fuente creen enlaces públicos a sus archivos (revocables, caducables y protegibles opcionalmente con contraseña). Desactivar esto bloquea la creación de nuevos enlaces — los existentes siguen funcionando hasta que se revoquen o caduquen.",
       "sharingEnabledToast": "Enlaces públicos activados",
-      "sharingDisabledToast": "Enlaces públicos desactivados"
+      "sharingDisabledToast": "Enlaces públicos desactivados",
+      "twoFactorPolicyTitle": "Autenticación en dos pasos",
+      "twoFactorPolicyDescription": "Exige a las cuentas configurar la autenticación en dos pasos antes de seguir usando la app: desactivada (nunca obligatoria), administradores (solo cuentas de administrador) o todas (cada cuenta). Se delega en el proveedor de identidad cuando el modo solo OIDC está activo.",
+      "twoFactorPolicyOff": "Desactivada — nunca obligatoria",
+      "twoFactorPolicyAdmins": "Solo administradores",
+      "twoFactorPolicyAll": "Todas las cuentas",
+      "twoFactorPolicyConfirmTitle": "¿Exigir autenticación en dos pasos?",
+      "twoFactorPolicyConfirmDescription": "Las cuentas afectadas que no tengan autenticación en dos pasos deberán configurarla en su próxima navegación, antes de poder seguir usando la app.",
+      "twoFactorPolicyToast": "Política de autenticación en dos pasos actualizada",
+      "auditRetentionTitle": "Retención del registro de actividad",
+      "auditRetentionDescription": "Cuánto tiempo se conservan las entradas del registro de actividad antes de purgarse automáticamente. La purga se ejecuta de forma diferida al abrir el registro de actividad, como máximo una vez al día.",
+      "auditRetentionForever": "Conservar indefinidamente",
+      "auditRetention30": "30 días",
+      "auditRetention90": "90 días",
+      "auditRetention180": "180 días",
+      "auditRetention365": "365 días",
+      "auditRetentionToast": "Retención del registro de actividad actualizada"
     },
     "brandingForm": {
       "title": "Marca blanca",
@@ -859,8 +880,13 @@
       "migrate": "Fuente copiada",
       "shareCreate": "Enlace de compartición creado",
       "shareRevoke": "Enlace de compartición revocado",
-      "signInFailed": "Error al iniciar sesión"
-    }
+      "signInFailed": "Error al iniciar sesión",
+      "download": "Descargado",
+      "downloadZip": "Descargado como ZIP",
+      "shareDownload": "Descargado mediante enlace compartido"
+    },
+    "exportCsv": "Exportar CSV",
+    "exportJson": "Exportar JSON"
   },
   "shares": {
     "metaTitle": "Enlaces compartidos",
@@ -938,7 +964,8 @@
       "selectionTooLargeEntries": "Esta selección contiene más de {max} elementos — demasiado grande para un solo archivo comprimido.",
       "selectionTooLargeFiles": "Esta selección contiene más de {max} archivos — demasiado grande para un solo archivo comprimido.",
       "selectionReadFailed": "No se pudo leer esta selección.",
-      "selectionEmpty": "Esta selección está vacía."
+      "selectionEmpty": "Esta selección está vacía.",
+      "notFound": "No encontrado."
     }
   }
 }

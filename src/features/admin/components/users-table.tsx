@@ -52,7 +52,7 @@ function initialsOf(name: string): string {
  * promoting, banning and deleting are one mis-click apart in the dropdown. */
 type PendingAction = { kind: "role" | "ban" | "delete"; user: UserRow };
 
-type UsersTableT = ReturnType<typeof useTranslations>;
+type UsersTableT = ReturnType<typeof useTranslations<"admin.usersTable">>;
 
 function confirmCopyFor(action: PendingAction, t: UsersTableT) {
   const { kind, user } = action;

@@ -4,6 +4,7 @@ import { ZIP_MAX_ENTRIES } from "@/features/browser/lib/limits";
 import { folderName } from "@/features/browser/lib/move";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
+import { recordOperation } from "@/lib/dal/operations";
 import { getZipFilesClient } from "@/lib/storage/client";
 
 /**
@@ -92,6 +93,14 @@ export async function GET(
     return apiError(404, t("folderEmpty"));
   }
 
+  await recordOperation({
+    action: "download-zip",
+    sourceId: result.source.id,
+    sourceName: result.source.name,
+    target: prefix,
+    detail: `${keys.size} files`,
+  });
+
   const filename = `${folderName(prefix) || result.source.bucket}.zip`;
   return zipResponse(files, keys, prefix, filename);
 }
@@ -158,6 +167,14 @@ export async function POST(
     const t = await getTranslations("api.errors");
     return apiError(404, t("selectionEmpty"));
   }
+
+  await recordOperation({
+    action: "download-zip",
+    sourceId: result.source.id,
+    sourceName: result.source.name,
+    target: base || result.source.bucket,
+    detail: `${keys.size} files (selection)`,
+  });
 
   const filename = `${
     (base ? folderName(base) : "") || result.source.bucket

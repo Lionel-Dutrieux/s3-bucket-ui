@@ -14,6 +14,8 @@ import {
   getSmtpProvenance,
 } from "@/lib/config";
 import {
+  getAuditRetentionDays,
+  getTwoFactorPolicy,
   isOidcOnly,
   isPublicSharingEnabled,
   isPublicSignUpEnabled,
@@ -32,6 +34,8 @@ export default async function AdminSettingsPage() {
     signUpEnabled,
     oidcOnly,
     sharingEnabled,
+    twoFactorPolicy,
+    auditRetentionDays,
     branding,
     smtp,
     oidc,
@@ -41,6 +45,8 @@ export default async function AdminSettingsPage() {
     isPublicSignUpEnabled(),
     isOidcOnly(),
     isPublicSharingEnabled(),
+    getTwoFactorPolicy(),
+    getAuditRetentionDays(),
     getBranding(),
     getSmtpConfig(),
     getOidcConfig(),
@@ -57,6 +63,8 @@ export default async function AdminSettingsPage() {
           oidcOnly={oidcOnly}
           oidcConfigured={oidc !== null}
           sharingEnabled={sharingEnabled}
+          twoFactorPolicy={twoFactorPolicy}
+          auditRetentionDays={auditRetentionDays}
         />
         <BrandingForm
           appName={branding.appName}

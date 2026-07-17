@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
+import { z } from "zod";
 import {
   type BrandingValues,
   brandingSchema,
@@ -29,6 +30,8 @@ import { deleteGrant, upsertGrant } from "@/lib/dal/permissions";
 import {
   clearBrandingSettings,
   clearConfigOverrides,
+  setAuditRetentionDays as dalSetAuditRetentionDays,
+  setTwoFactorPolicy as dalSetTwoFactorPolicy,
   isOidcOnly,
   setConfigOverrides,
   setOidcOnly,
@@ -38,6 +41,15 @@ import {
 } from "@/lib/dal/settings";
 import { oidcEnabled } from "@/lib/env";
 import { sendMail } from "@/lib/mail";
+
+const twoFactorPolicySchema = z.enum(["off", "admins", "all"]);
+const auditRetentionSchema = z.union([
+  z.literal(0),
+  z.literal(30),
+  z.literal(90),
+  z.literal(180),
+  z.literal(365),
+]);
 
 // Every action runs through withAdmin (features/admin/server/guard.ts), which
 // re-checks the admin role server-side — the /admin layout guard protects
@@ -93,6 +105,44 @@ export async function setOidcOnlyEnabled(
         return actionError(t("oidcNotConfigured"));
       }
       await setOidcOnly(enabled === true);
+      return actionOk();
+    },
+  );
+}
+
+export async function setTwoFactorPolicy(
+  policy: string,
+): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "set 2FA policy",
+      failureMessage: t("settingUpdateFailed"),
+    },
+    async () => {
+      const parsed = twoFactorPolicySchema.safeParse(policy);
+      if (!parsed.success) {
+        return actionError(t("invalidInput"));
+      }
+      await dalSetTwoFactorPolicy(parsed.data);
+      return actionOk();
+    },
+  );
+}
+
+export async function setAuditRetention(days: number): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "set audit retention",
+      failureMessage: t("settingUpdateFailed"),
+    },
+    async () => {
+      const parsed = auditRetentionSchema.safeParse(days);
+      if (!parsed.success) {
+        return actionError(t("invalidInput"));
+      }
+      await dalSetAuditRetentionDays(parsed.data);
       return actionOk();
     },
   );

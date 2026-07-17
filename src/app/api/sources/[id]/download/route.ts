@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
+import { recordOperation } from "@/lib/dal/operations";
 import { getFilesClient } from "@/lib/storage/client";
 import { streamObject } from "@/lib/storage/stream";
 
@@ -28,6 +29,15 @@ export async function GET(
     return apiError(404, t("sourceNotFound"));
   }
   const { source } = result;
+
+  if (!request.headers.get("range")) {
+    await recordOperation({
+      action: "download",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: key,
+    });
+  }
 
   const files = getFilesClient(source);
   const filename = key.split("/").pop() || "download";

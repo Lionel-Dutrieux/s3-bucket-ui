@@ -215,6 +215,11 @@
       "regeneratePending": "正在重新生成…",
       "regenerateError": "无法重新生成。请检查您的密码。",
       "regeneratedToast": "已生成新的备用代码。"
+    },
+    "gate": {
+      "metaTitle": "设置双重验证",
+      "heading": "需要双重验证",
+      "intro": "您所在的组织要求此账户启用双重验证。请立即完成设置以继续。"
     }
   },
   "browser": {
@@ -729,7 +734,23 @@
       "sharingTitle": "公开分享链接",
       "sharingDescription": "允许有权访问某来源的用户为其文件创建公开链接（可撤销、可设过期、可选密码保护）。关闭此项会阻止创建新链接 — 现有链接在被撤销或过期前仍可使用。",
       "sharingEnabledToast": "公开分享链接已启用",
-      "sharingDisabledToast": "公开分享链接已停用"
+      "sharingDisabledToast": "公开分享链接已停用",
+      "twoFactorPolicyTitle": "双重身份验证",
+      "twoFactorPolicyDescription": "要求账户在继续使用应用前设置双重身份验证：关闭（从不要求）、仅管理员（仅管理员账户）或全部（所有账户）。启用仅 OIDC 模式时，该项交由身份提供商处理。",
+      "twoFactorPolicyOff": "关闭 — 从不要求",
+      "twoFactorPolicyAdmins": "仅管理员",
+      "twoFactorPolicyAll": "所有账户",
+      "twoFactorPolicyConfirmTitle": "要求双重身份验证？",
+      "twoFactorPolicyConfirmDescription": "受影响且尚未设置双重身份验证的账户，将在下次访问时被要求先完成设置，才能继续使用应用。",
+      "twoFactorPolicyToast": "双重身份验证策略已更新",
+      "auditRetentionTitle": "审计日志保留期限",
+      "auditRetentionDescription": "活动日志条目在被自动清除前保留的时长。清除操作在打开活动日志时惰性执行,每天最多一次。",
+      "auditRetentionForever": "永久保留",
+      "auditRetention30": "30 天",
+      "auditRetention90": "90 天",
+      "auditRetention180": "180 天",
+      "auditRetention365": "365 天",
+      "auditRetentionToast": "审计日志保留期限已更新"
     },
     "brandingForm": {
       "title": "白标定制",
@@ -859,8 +880,13 @@
       "migrate": "已复制来源",
       "shareCreate": "已创建分享链接",
       "shareRevoke": "已撤销分享链接",
-      "signInFailed": "登录失败"
-    }
+      "signInFailed": "登录失败",
+      "download": "已下载",
+      "downloadZip": "已下载为 ZIP",
+      "shareDownload": "已通过分享链接下载"
+    },
+    "exportCsv": "导出 CSV",
+    "exportJson": "导出 JSON"
   },
   "shares": {
     "metaTitle": "分享链接",
@@ -938,7 +964,8 @@
       "selectionTooLargeEntries": "所选内容包含超过 {max} 个条目 — 太大，无法打包为单个压缩包。",
       "selectionTooLargeFiles": "所选内容包含超过 {max} 个文件 — 太大，无法打包为单个压缩包。",
       "selectionReadFailed": "无法读取所选内容。",
-      "selectionEmpty": "所选内容为空。"
+      "selectionEmpty": "所选内容为空。",
+      "notFound": "未找到。"
     }
   }
 }

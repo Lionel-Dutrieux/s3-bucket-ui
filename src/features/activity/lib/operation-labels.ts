@@ -1,6 +1,8 @@
 import {
   ArrowRightLeft,
   Copy,
+  Download,
+  FileArchive,
   FolderInput,
   FolderPlus,
   Link2,
@@ -28,7 +30,10 @@ export type OperationLabelKey =
   | "migrate"
   | "shareCreate"
   | "shareRevoke"
-  | "signInFailed";
+  | "signInFailed"
+  | "download"
+  | "downloadZip"
+  | "shareDownload";
 
 // Presentation for each audited action. `destructive` tints the icon so a
 // delete reads differently from an upload at a glance. `labelKey` resolves
@@ -64,6 +69,9 @@ const LABELS: Record<string, OperationLabel> = {
     icon: ShieldAlert,
     destructive: true,
   },
+  download: { labelKey: "download", icon: Download },
+  "download-zip": { labelKey: "downloadZip", icon: FileArchive },
+  "share-download": { labelKey: "shareDownload", icon: Link2 },
 };
 
 /**
