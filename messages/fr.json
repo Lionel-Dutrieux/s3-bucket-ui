@@ -626,7 +626,7 @@
       "title": "Créer un groupe",
       "description": "Les membres partagent l'accès aux sources du groupe. Si le nom correspond exactement à une valeur de la revendication de groupes de votre fournisseur d'identité, les membres y sont assignés automatiquement à la connexion.",
       "nameLabel": "Nom",
-      "namePlaceholder": "developpeurs",
+      "namePlaceholder": "développeurs",
       "createdToast": "Groupe « {name} » créé",
       "submit": "Créer le groupe",
       "submitPending": "Création…"
