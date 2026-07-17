@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -19,6 +20,7 @@ export function useSourceActions(
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("sources");
 
   const openEdit = () => {
     router.push(`/admin/sources/${source.id}/edit`);
@@ -34,7 +36,7 @@ export function useSourceActions(
         return;
       }
       setConfirmOpen(false);
-      toast.success("Source removed");
+      toast.success(t("actions.removedToast"));
       options?.onRemoved?.();
     });
   };
@@ -43,10 +45,10 @@ export function useSourceActions(
     <ConfirmDialog
       open={confirmOpen}
       onOpenChange={setConfirmOpen}
-      title={`Remove ${source.name}?`}
-      description="This only removes the source here — nothing in your bucket is touched."
-      confirmLabel="Remove"
-      pendingLabel="Removing…"
+      title={t("actions.removeConfirmTitle", { name: source.name })}
+      description={t("actions.removeConfirmDescription")}
+      confirmLabel={t("remove")}
+      pendingLabel={t("actions.removePendingLabel")}
       pending={pending}
       onConfirm={handleRemove}
     />

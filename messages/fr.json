@@ -456,5 +456,82 @@
       "source": "Source",
       "rendered": "Rendu"
     }
+  },
+  "sources": {
+    "metaTitle": "Sources",
+    "title": "Sources",
+    "description": "Connectez des buckets et décidez qui peut les utiliser. Une ligne de droit donne l'accès en lecture ; les interrupteurs ajoutent la modification (envoi, renommage, déplacement, nouveau dossier) et la suppression.",
+    "emptyTitle": "Aucune source pour le moment",
+    "emptyDescription": "Connectez un bucket pour commencer à accorder l'accès — il reste invisible pour tout le monde sauf les administrateurs tant que vous ne l'avez pas fait.",
+    "addSource": "Ajouter une source",
+    "edit": "Modifier",
+    "remove": "Supprimer",
+    "removeAria": "Supprimer {name}",
+    "connectionVerifiedNote": "La connexion est revérifiée lors de l'enregistrement.",
+    "editPage": {
+      "metaTitle": "Modifier la source",
+      "title": "Modifier {name}",
+      "backToSources": "Retour aux sources"
+    },
+    "dialog": {
+      "changeProviderTitle": "Changer de fournisseur",
+      "pickProviderDescription": "Choisissez où vivent vos fichiers — les informations de connexion viennent ensuite.",
+      "connectTitle": "Connecter {provider}",
+      "credentialsEncryptedNote": "Les identifiants sont chiffrés avant d'être stockés."
+    },
+    "form": {
+      "changeButton": "Changer",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Documents d'équipe",
+      "endpointLabel": "Point de terminaison",
+      "accessNote": "Qui peut parcourir, modifier ou supprimer sur cette source se gère par utilisateur et par groupe depuis l'administration.",
+      "connectionSuccessful": "Connexion réussie.",
+      "secretPlaceholderEdit": "Laisser vide pour conserver l'actuel",
+      "testConnection": "Tester la connexion",
+      "testing": "Test en cours…",
+      "saving": "Enregistrement…",
+      "adding": "Ajout…",
+      "saveChanges": "Enregistrer les modifications",
+      "successUpdated": "Source mise à jour",
+      "successAdded": "Source ajoutée"
+    },
+    "cardActions": {
+      "migrateAria": "Copier le contenu de {name} vers une autre source"
+    },
+    "menu": {
+      "optionsAria": "Options de la source"
+    },
+    "actions": {
+      "removeConfirmTitle": "Supprimer {name} ?",
+      "removeConfirmDescription": "Cela ne fait que retirer la source ici — rien n'est touché dans votre bucket.",
+      "removePendingLabel": "Suppression…",
+      "removedToast": "Source supprimée"
+    },
+    "migrate": {
+      "title": "Copier le contenu vers une autre source",
+      "description": "Chaque objet de <bold>{name}</bold> est copié vers la destination — y compris entre fournisseurs différents si besoin. Les objets déjà présents là-bas sont ignorés, et rien n'est supprimé de cette source.",
+      "destinationAria": "Source de destination",
+      "choosePlaceholder": "Choisir une destination…",
+      "copyingStatus": "Copie en cours — les sources volumineuses peuvent prendre du temps, laissez cette page ouverte.",
+      "copyingButton": "Copie en cours…",
+      "copyEverything": "Tout copier",
+      "copiedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}} vers {name}",
+      "partialFailedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}}, {failed} échoué(s) — recommencez pour réessayer."
+    },
+    "picker": {
+      "searchPlaceholder": "Rechercher des fournisseurs…",
+      "searchAria": "Rechercher des fournisseurs",
+      "noProviderMatch": "Aucun fournisseur ne correspond à « {query} ». Tout ce qui parle l'API S3 fonctionne avec <link>{label}</link>."
+    },
+    "errors": {
+      "notAuthorized": "Vous n'êtes pas autorisé à gérer les sources.",
+      "invalidInput": "Entrée invalide.",
+      "sourceNotFound": "Source introuvable.",
+      "connectionFailed": "Échec de la connexion — vérifiez le point de terminaison, le nom du bucket et les identifiants.",
+      "invalidSource": "Source invalide.",
+      "sameSourceDestination": "Choisissez une source différente comme destination.",
+      "migrationFailed": "Échec de la migration — vérifiez la connectivité des deux sources et réessayez.",
+      "removeFailed": "Impossible de supprimer cette source."
+    }
   }
 }

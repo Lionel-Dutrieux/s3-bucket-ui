@@ -456,5 +456,82 @@
       "source": "Source",
       "rendered": "Rendered"
     }
+  },
+  "sources": {
+    "metaTitle": "Sources",
+    "title": "Sources",
+    "description": "Connect buckets and decide who can use them. A grant row gives read access; the switches add edit (upload, rename, move, new folder) and delete.",
+    "emptyTitle": "No sources yet",
+    "emptyDescription": "Add a bucket to start granting access — it stays invisible to everyone but admins until you do.",
+    "addSource": "Add source",
+    "edit": "Edit",
+    "remove": "Remove",
+    "removeAria": "Remove {name}",
+    "connectionVerifiedNote": "The connection is verified again when you save.",
+    "editPage": {
+      "metaTitle": "Edit source",
+      "title": "Edit {name}",
+      "backToSources": "Back to sources"
+    },
+    "dialog": {
+      "changeProviderTitle": "Change provider",
+      "pickProviderDescription": "Pick where your files live — connection details come next.",
+      "connectTitle": "Connect {provider}",
+      "credentialsEncryptedNote": "Credentials are encrypted before they are stored."
+    },
+    "form": {
+      "changeButton": "Change",
+      "nameLabel": "Name",
+      "namePlaceholder": "Team documents",
+      "endpointLabel": "Endpoint",
+      "accessNote": "Who can browse, edit or delete on this source is managed per user and group from the admin area.",
+      "connectionSuccessful": "Connection successful.",
+      "secretPlaceholderEdit": "Leave blank to keep the current one",
+      "testConnection": "Test connection",
+      "testing": "Testing…",
+      "saving": "Saving…",
+      "adding": "Adding…",
+      "saveChanges": "Save changes",
+      "successUpdated": "Source updated",
+      "successAdded": "Source added"
+    },
+    "cardActions": {
+      "migrateAria": "Copy the contents of {name} to another source"
+    },
+    "menu": {
+      "optionsAria": "Source options"
+    },
+    "actions": {
+      "removeConfirmTitle": "Remove {name}?",
+      "removeConfirmDescription": "This only removes the source here — nothing in your bucket is touched.",
+      "removePendingLabel": "Removing…",
+      "removedToast": "Source removed"
+    },
+    "migrate": {
+      "title": "Copy contents to another source",
+      "description": "Every object in <bold>{name}</bold> is copied into the destination — across providers if needed. Objects already present there are skipped, and nothing is removed from this source.",
+      "destinationAria": "Destination source",
+      "choosePlaceholder": "Choose a destination…",
+      "copyingStatus": "Copying — large sources can take a while, keep this page open.",
+      "copyingButton": "Copying…",
+      "copyEverything": "Copy everything",
+      "copiedToast": "{transferred, plural, one {# object copied} other {# objects copied}}{skipped, select, 0 {} other {, {skipped} skipped}} to {name}",
+      "partialFailedToast": "{transferred, plural, one {# object copied} other {# objects copied}}{skipped, select, 0 {} other {, {skipped} skipped}}, {failed} failed — run it again to retry."
+    },
+    "picker": {
+      "searchPlaceholder": "Search providers…",
+      "searchAria": "Search providers",
+      "noProviderMatch": "No provider matches “{query}”. Anything speaking the S3 API works with <link>{label}</link>."
+    },
+    "errors": {
+      "notAuthorized": "You are not allowed to manage sources.",
+      "invalidInput": "Invalid input.",
+      "sourceNotFound": "Source not found.",
+      "connectionFailed": "Connection failed — check the endpoint, bucket name and credentials.",
+      "invalidSource": "Invalid source.",
+      "sameSourceDestination": "Pick a different source as the destination.",
+      "migrationFailed": "Migration failed — check both sources' connectivity and try again.",
+      "removeFailed": "Could not remove this source."
+    }
   }
 }

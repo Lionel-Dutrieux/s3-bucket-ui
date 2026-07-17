@@ -1,5 +1,6 @@
 import { Cylinder } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { SourceAccess } from "@/features/admin/components/source-access";
@@ -13,10 +14,14 @@ import { getSource, listSources } from "@/lib/dal/sources";
 import { listUserOptions } from "@/lib/dal/users";
 import { getProvider } from "@/lib/storage/providers";
 
-export const metadata: Metadata = { title: "Sources" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("sources");
+  return { title: t("metaTitle") };
+}
 
 export default async function AdminSourcesPage() {
   await requireAdmin();
+  const t = await getTranslations("sources");
   const [sources, users, groups] = await Promise.all([
     listSources(),
     listUserOptions(),
@@ -29,18 +34,15 @@ export default async function AdminSourcesPage() {
 
   return (
     <>
-      <PageHeader
-        title="Sources"
-        description="Connect buckets and decide who can use them. A grant row gives read access; the switches add edit (upload, rename, move, new folder) and delete."
-      >
+      <PageHeader title={t("title")} description={t("description")}>
         <AddSourceButton />
       </PageHeader>
 
       {sources.length === 0 ? (
         <EmptyState
           icon={Cylinder}
-          title="No sources yet"
-          description="Add a bucket to start granting access — it stays invisible to everyone but admins until you do."
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
         />
       ) : (
         <div className="space-y-4">

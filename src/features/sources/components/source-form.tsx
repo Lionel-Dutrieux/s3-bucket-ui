@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ export function SourceForm({
 }: SourceFormProps) {
   const [serverError, setServerError] = useState<string>();
   const [test, setTest] = useState<TestStatus>({ state: "idle" });
+  const t = useTranslations("sources");
 
   const form = useAppForm({
     defaultValues: edit?.initialValues ?? {
@@ -72,7 +74,7 @@ export function SourceForm({
         setServerError(result.error);
         return;
       }
-      toast.success(edit ? "Source updated" : "Source added");
+      toast.success(edit ? t("form.successUpdated") : t("form.successAdded"));
       onSuccess();
     },
   });
@@ -122,15 +124,15 @@ export function SourceForm({
           size="sm"
           onClick={onChangeProvider}
         >
-          Change
+          {t("form.changeButton")}
         </Button>
       </div>
 
       <form.AppField name="name">
         {(field) => (
           <field.TextField
-            label="Name"
-            placeholder="Team documents"
+            label={t("form.nameLabel")}
+            placeholder={t("form.namePlaceholder")}
             autoFocus={!edit}
           />
         )}
@@ -139,7 +141,7 @@ export function SourceForm({
       <form.AppField name="endpoint">
         {(field) => (
           <field.TextField
-            label="Endpoint"
+            label={t("form.endpointLabel")}
             placeholder={definition.endpointPlaceholder}
             mono
           />
@@ -163,22 +165,19 @@ export function SourceForm({
             label={secretAccessKey}
             type="password"
             autoComplete="new-password"
-            placeholder={
-              edit ? "Leave blank to keep the current one" : undefined
-            }
+            placeholder={edit ? t("form.secretPlaceholderEdit") : undefined}
             mono
           />
         )}
       </form.AppField>
 
-      <p className="text-xs text-muted-foreground">
-        Who can browse, edit or delete on this source is managed per user and
-        group from the admin area.
-      </p>
+      <p className="text-xs text-muted-foreground">{t("form.accessNote")}</p>
 
       <FormAlert
         error={test.state === "failed" ? test.message : serverError}
-        success={test.state === "ok" ? "Connection successful." : undefined}
+        success={
+          test.state === "ok" ? t("form.connectionSuccessful") : undefined
+        }
       />
 
       <DialogFooter>
@@ -194,20 +193,20 @@ export function SourceForm({
               {test.state === "testing" ? (
                 <>
                   <Loader2Icon className="animate-spin" aria-hidden />
-                  Testing…
+                  {t("form.testing")}
                 </>
               ) : (
-                "Test connection"
+                t("form.testConnection")
               )}
             </Button>
           )}
         </form.Subscribe>
         <form.AppForm>
           <form.SubmitButton
-            pendingLabel={edit ? "Saving…" : "Adding…"}
+            pendingLabel={edit ? t("form.saving") : t("form.adding")}
             disabled={test.state === "testing"}
           >
-            {edit ? "Save changes" : "Add source"}
+            {edit ? t("form.saveChanges") : t("addSource")}
           </form.SubmitButton>
         </form.AppForm>
       </DialogFooter>
