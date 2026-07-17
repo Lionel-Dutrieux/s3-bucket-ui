@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import {
   type DroppedFile,
   filesFromDataTransfer,
-} from "@/features/browser/lib/drop";
+} from "@/features/browser/components/drop";
 
 /**
  * Drop-to-upload wiring for the browser surface: spreads `dropZoneProps` on

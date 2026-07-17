@@ -14,7 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { addGroupMember, removeGroupMember } from "@/features/admin/actions";
+import {
+  addGroupMember,
+  removeGroupMember,
+} from "@/features/admin/actions/groups";
 import { SearchCombobox } from "@/features/admin/components/search-combobox";
 import type { ActionResult } from "@/lib/action-result";
 import type { GroupRow } from "@/lib/dal/groups";

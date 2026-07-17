@@ -19,7 +19,7 @@ import {
   setPublicSharing,
   setSignUpEnabled,
   setTwoFactorPolicy,
-} from "@/features/admin/actions";
+} from "@/features/admin/actions/settings";
 import type { ActionResult } from "@/lib/action-result";
 import type { TwoFactorPolicy } from "@/lib/dal/settings";
 

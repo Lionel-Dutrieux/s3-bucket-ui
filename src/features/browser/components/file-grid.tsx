@@ -6,12 +6,12 @@ import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { thumbnailSrc } from "@/features/browser/api/client";
 import { useEntryDnd } from "@/features/browser/components/dnd";
+import { FileIcon } from "@/features/browser/components/file-icon";
+import { InlineRenameInput } from "@/features/browser/components/inline-rename";
 import {
   EntryActionsMenu,
   EntryContextMenu,
-} from "@/features/browser/components/entry-actions";
-import { FileIcon } from "@/features/browser/components/file-icon";
-import { InlineRenameInput } from "@/features/browser/components/inline-rename";
+} from "@/features/browser/components/menus/entry-actions";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";

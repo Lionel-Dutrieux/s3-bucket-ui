@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { moveEntries } from "@/features/browser/actions";
+import { moveEntries } from "@/features/browser/actions/transfer";
 import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
 import type { EntryTarget } from "@/features/browser/lib/move";
 

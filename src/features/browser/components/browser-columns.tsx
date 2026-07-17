@@ -6,9 +6,9 @@ import Link from "next/link";
 import type { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { downloadUrl, zipUrl } from "@/features/browser/api/client";
-import { EntryActionsMenu } from "@/features/browser/components/entry-actions";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { InlineRenameInput } from "@/features/browser/components/inline-rename";
+import { EntryActionsMenu } from "@/features/browser/components/menus/entry-actions";
 import {
   type BrowserEntry,
   compareByModified,

@@ -1,8 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Select,
@@ -11,11 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { copyEntriesToSource } from "@/features/browser/actions";
-import { browserQueries } from "@/features/browser/api/queries";
-import { DestinationDialog } from "@/features/browser/components/destination-dialog";
-import { FolderPicker } from "@/features/browser/components/folder-picker";
-import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
+import { copyEntriesToSource } from "@/features/browser/actions/transfer";
+import { DestinationDialog } from "@/features/browser/components/dialogs/destination-dialog";
+import { FolderPicker } from "@/features/browser/components/dialogs/folder-picker";
+import { useDestinationPicker } from "@/features/browser/hooks/use-destination-picker";
 import type { EntryTarget } from "@/features/browser/lib/move";
 
 /**
@@ -38,26 +35,18 @@ export function CopyToDialog({
 }) {
   const t = useTranslations("browser.copyToDialog");
   const tFolder = useTranslations("browser.folderPicker");
-  const open = targets !== null;
-  const [destSourceId, setDestSourceId] = useState<string>("");
-  const [destPrefix, setDestPrefix] = useState("");
-  const { pending, track } = usePendingAction();
-
-  // Fresh start each time the dialog opens.
-  useEffect(() => {
-    if (open) {
-      setDestSourceId("");
-      setDestPrefix("");
-    }
-  }, [open]);
-
-  const sources = useQuery({
-    ...browserQueries.writableSources(),
-    enabled: open,
-  });
-
-  const dest = sources.data?.find((source) => source.id === destSourceId);
-  const count = targets?.length ?? 0;
+  const {
+    open,
+    destSourceId,
+    destPrefix,
+    setDestPrefix,
+    selectDestSource,
+    sources,
+    dest,
+    count,
+    pending,
+    track,
+  } = useDestinationPicker({ targets });
 
   const run = async () => {
     if (!targets || !dest) return;
@@ -92,10 +81,7 @@ export function CopyToDialog({
     >
       <Select
         value={destSourceId}
-        onValueChange={(value) => {
-          setDestSourceId(value);
-          setDestPrefix("");
-        }}
+        onValueChange={selectDestSource}
         disabled={pending || sources.isPending}
       >
         <SelectTrigger

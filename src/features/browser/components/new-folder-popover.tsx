@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { createFolder } from "@/features/browser/actions";
+import { createFolder } from "@/features/browser/actions/entries";
 import { folderNameSchema } from "@/features/browser/lib/schemas";
 import { useAppForm } from "@/forms/form";
 

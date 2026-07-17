@@ -1,8 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Select,
@@ -11,11 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { moveEntries, moveEntriesToSource } from "@/features/browser/actions";
-import { browserQueries } from "@/features/browser/api/queries";
-import { DestinationDialog } from "@/features/browser/components/destination-dialog";
-import { FolderPicker } from "@/features/browser/components/folder-picker";
-import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
+import {
+  moveEntries,
+  moveEntriesToSource,
+} from "@/features/browser/actions/transfer";
+import { DestinationDialog } from "@/features/browser/components/dialogs/destination-dialog";
+import { FolderPicker } from "@/features/browser/components/dialogs/folder-picker";
+import { useDestinationPicker } from "@/features/browser/hooks/use-destination-picker";
 import { type EntryTarget, planMove } from "@/features/browser/lib/move";
 
 /**
@@ -39,26 +39,20 @@ export function MoveToDialog({
   const t = useTranslations("browser.moveToDialog");
   const tFolder = useTranslations("browser.folderPicker");
   const tErrors = useTranslations("browser.errors");
-  const open = targets !== null;
-  const [destSourceId, setDestSourceId] = useState("");
-  const [destPrefix, setDestPrefix] = useState("");
-  const { pending, track } = usePendingAction();
+  const {
+    open,
+    destSourceId,
+    destPrefix,
+    setDestPrefix,
+    selectDestSource,
+    sources,
+    dest,
+    count,
+    pending,
+    track,
+  } = useDestinationPicker({ targets, defaultSourceId: sourceId });
 
-  // Fresh start each time the dialog opens — default to the current source.
-  useEffect(() => {
-    if (open) {
-      setDestSourceId(sourceId);
-      setDestPrefix("");
-    }
-  }, [open, sourceId]);
-
-  const sources = useQuery({
-    ...browserQueries.writableSources(),
-    enabled: open,
-  });
-  const dest = sources.data?.find((source) => source.id === destSourceId);
   const isSameSource = destSourceId === sourceId;
-  const count = targets?.length ?? 0;
 
   // Self/descendant guard only makes sense within the same source.
   const plan = targets && isSameSource ? planMove(targets, destPrefix) : null;
@@ -118,10 +112,7 @@ export function MoveToDialog({
     >
       <Select
         value={destSourceId}
-        onValueChange={(value) => {
-          setDestSourceId(value);
-          setDestPrefix("");
-        }}
+        onValueChange={selectDestSource}
         disabled={pending || sources.isPending}
       >
         <SelectTrigger

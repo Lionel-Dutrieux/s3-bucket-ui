@@ -7,7 +7,10 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { removeSourceGrant, upsertSourceGrant } from "@/features/admin/actions";
+import {
+  removeSourceGrant,
+  upsertSourceGrant,
+} from "@/features/admin/actions/groups";
 import { SearchCombobox } from "@/features/admin/components/search-combobox";
 import type { ActionResult } from "@/lib/action-result";
 import type { GrantRow } from "@/lib/dal/permissions";

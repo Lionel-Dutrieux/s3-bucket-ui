@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createGroup } from "@/features/admin/actions";
+import { createGroup } from "@/features/admin/actions/groups";
 import { createGroupSchema } from "@/features/admin/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";

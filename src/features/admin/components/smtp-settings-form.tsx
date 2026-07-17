@@ -13,7 +13,7 @@ import {
   resetSmtpSettings,
   sendTestEmail,
   updateSmtpSettings,
-} from "@/features/admin/actions";
+} from "@/features/admin/actions/settings";
 import { ProvenanceBadge } from "@/features/admin/components/provenance-badge";
 import { useAppForm } from "@/forms/form";
 import type { Provenance, SmtpField } from "@/lib/config/resolve";

@@ -17,41 +17,27 @@ import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
-import {
-  deleteEntries,
-  deleteFolder,
-  deleteObject,
-  duplicateObject,
-} from "@/features/browser/actions";
-import { downloadUrl, zipSelectionUrl } from "@/features/browser/api/client";
+import { duplicateObject } from "@/features/browser/actions/entries";
 import {
   createBrowserColumns,
   createSelectColumn,
 } from "@/features/browser/components/browser-columns";
 import { BrowserToolbar } from "@/features/browser/components/browser-toolbar";
-import { CopyToDialog } from "@/features/browser/components/copy-to-dialog";
-import { DetailsPanel } from "@/features/browser/components/details-panel";
-import {
-  type DragData,
-  DragPreview,
-  ParentDropZone,
-} from "@/features/browser/components/dnd";
+import { BrowserDialogs } from "@/features/browser/components/dialogs/browser-dialogs";
+import { DetailsPanel } from "@/features/browser/components/dialogs/details-panel";
+import { DragPreview, ParentDropZone } from "@/features/browser/components/dnd";
 import { DropOverlay } from "@/features/browser/components/drop-overlay";
 import { FileGrid } from "@/features/browser/components/file-grid";
 import { FileTable } from "@/features/browser/components/file-table";
-import { MoveDialog } from "@/features/browser/components/move-dialog";
-import { MoveToDialog } from "@/features/browser/components/move-to-dialog";
-import { PreviewDialog } from "@/features/browser/components/preview-dialog";
-import { SearchCommand } from "@/features/browser/components/search-command";
 import { SelectionToolbar } from "@/features/browser/components/selection-toolbar";
-import { ShareDialog } from "@/features/browser/components/share-dialog";
 import { UploadTray } from "@/features/browser/components/upload-tray";
 import { useBrowserDialogs } from "@/features/browser/hooks/use-browser-dialogs";
-import { useDropUpload } from "@/features/browser/hooks/use-drop-upload";
-import { useEntryDrag } from "@/features/browser/hooks/use-entry-drag";
+import { useBrowserDnd } from "@/features/browser/hooks/use-browser-dnd";
+import { useBrowserShortcuts } from "@/features/browser/hooks/use-browser-shortcuts";
+import { useBulkDownload } from "@/features/browser/hooks/use-bulk-download";
+import { useEntryDeletion } from "@/features/browser/hooks/use-entry-deletion";
 import { useEntrySelection } from "@/features/browser/hooks/use-entry-selection";
 import { useUploads } from "@/features/browser/hooks/use-uploads";
 import {
@@ -60,11 +46,10 @@ import {
   entryMatches,
 } from "@/features/browser/lib/entries";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
-import type { EntryTarget } from "@/features/browser/lib/move";
+import { toTarget } from "@/features/browser/lib/move";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
-import { submitZipDownload } from "@/features/browser/lib/zip-download";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
 
 export interface BrowserPermissions {
@@ -72,22 +57,15 @@ export interface BrowserPermissions {
   delete: boolean;
 }
 
-/** Folder/file union → the shape the move actions take. */
-function toTarget(entry: BrowserEntry): EntryTarget {
-  return entry.kind === "folder"
-    ? { kind: "folder", prefix: entry.prefix }
-    : { kind: "file", key: entry.key };
-}
-
 /**
  * Client shell around the listing: one TanStack Table instance filters and
  * sorts the entries the server already loaded (this page only). The list view
  * renders the table; the grid view consumes the same row model, so search and
  * sort apply to both. Filter and sort live in the URL (?q=, ?sort=) so a
- * refresh or a shared link keeps them. Selection, drag-and-drop and the
- * mutually-exclusive dialogs live in their own hooks (use-entry-selection,
- * use-entry-drag, use-browser-dialogs); write controls only render when the
- * source's permissions allow them (the server re-checks every call).
+ * refresh or a shared link keeps them. Selection, drag-and-drop, deletion, the
+ * bulk download and the mutually-exclusive dialogs each live in their own hook;
+ * write controls only render when the source's permissions allow them (the
+ * server re-checks every call).
  */
 export function FileBrowser({
   sourceId,
@@ -134,7 +112,6 @@ export function FileBrowser({
   );
   const [details, setDetails] = useState<FileEntry | null>(null);
   const [renameTarget, setRenameTarget] = useState<BrowserEntry | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const dialogs = useBrowserDialogs();
   const selection = useEntrySelection();
   const { rowSelection, setRowSelection } = selection;
@@ -147,10 +124,6 @@ export function FileBrowser({
 
   const refresh = useCallback(() => router.refresh(), [router]);
   const uploads = useUploads(sourceId, prefix, refresh);
-  const { dragging, dropZoneProps } = useDropUpload(
-    permissions.upload,
-    uploads.addFiles,
-  );
   // Renaming and moving keep the content (copy + delete of the old key under
   // the hood) — they're edits, gated on the edit capability alone.
   const canRename = permissions.upload;
@@ -160,25 +133,6 @@ export function FileBrowser({
     setSorting((prev) =>
       typeof updater === "function" ? updater(prev) : updater,
     );
-  };
-
-  const deleteTarget =
-    dialogs.dialog?.kind === "delete" ? dialogs.dialog.entry : null;
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    const result =
-      deleteTarget.kind === "folder"
-        ? await deleteFolder(sourceId, deleteTarget.prefix)
-        : await deleteObject(sourceId, deleteTarget.key);
-    setDeleting(false);
-    if (!result.ok) {
-      toast.error(result.error);
-      return;
-    }
-    toast.success(t("deletedToast", { name: deleteTarget.name }));
-    dialogs.close();
-    router.refresh();
   };
 
   const handleRenameEnd = (renamed: boolean) => {
@@ -276,47 +230,36 @@ export function FileBrowser({
   // The "move to parent folder" drop zone's destination — null at the root.
   const parentPrefix = parentPrefixOf(prefix);
 
-  // Keyboard verbs on the current selection: Enter opens, F2 renames,
-  // Delete deletes. Skipped while typing or while an overlay is up.
-  // No dependency array: re-subscribing keeps the handler's closure fresh.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target?.isContentEditable ||
-        target?.closest(
-          '[data-slot="dialog-content"], [data-slot="sheet-content"]',
-        )
-      ) {
-        return;
-      }
-      if (selectedRows.length === 0) return;
-      const single =
-        selectedRows.length === 1 ? selectedRows[0].original : null;
+  const deleteTarget =
+    dialogs.dialog?.kind === "delete" ? dialogs.dialog.entry : null;
+  const { deleting, handleDelete, handleBulkDelete } = useEntryDeletion({
+    sourceId,
+    deleteTarget,
+    selectedRows,
+    onDeleted: () => {
+      dialogs.close();
+      router.refresh();
+    },
+    onBulkSettled: () => {
+      dialogs.close();
+      selection.clear();
+      router.refresh();
+    },
+  });
 
-      if (event.key === "Enter" && single) {
-        event.preventDefault();
-        if (single.kind === "folder") {
-          router.push(
-            `/source/${sourceId}?prefix=${encodeURIComponent(single.prefix)}`,
-          );
-        } else if (isPreviewable(single.name)) {
-          openPreview(single);
-        } else {
-          setDetails(single);
-        }
-      } else if (event.key === "F2" && single && canRename) {
-        event.preventDefault();
-        setRenameTarget(single);
-      } else if (event.key === "Delete" && permissions.delete) {
-        event.preventDefault();
-        dialogs.openBulkDelete();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+  const handleBulkDownload = useBulkDownload(sourceId, prefix, selectedRows);
+
+  // Keyboard verbs on the current selection: Enter opens, F2 renames, Delete
+  // deletes — skipped while typing or while an overlay is up.
+  useBrowserShortcuts({
+    sourceId,
+    selectedRows,
+    canRename,
+    canDelete: permissions.delete,
+    onPreview: openPreview,
+    onDetails: setDetails,
+    onRename: setRenameTarget,
+    onBulkDelete: dialogs.openBulkDelete,
   });
 
   const gridSelection = {
@@ -325,47 +268,6 @@ export function FileBrowser({
     active: selectedCount > 0,
   };
 
-  const selectedFiles = selectedRows
-    .map((row) => row.original)
-    .filter((entry) => entry.kind === "file");
-
-  // A single file downloads through its plain link (presigned when the
-  // provider supports it); anything more — several files, any folder —
-  // streams as one ZIP of the selection.
-  const handleBulkDownload = () => {
-    const selectedFolders = selectedRows
-      .map((row) => row.original)
-      .filter((entry) => entry.kind === "folder");
-    if (selectedFiles.length === 1 && selectedFolders.length === 0) {
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl(sourceId, selectedFiles[0].key);
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      return;
-    }
-    submitZipDownload(zipSelectionUrl(sourceId), {
-      base: prefix,
-      keys: selectedFiles.map((file) => file.key),
-      prefixes: selectedFolders.map((folder) => folder.prefix),
-    });
-  };
-
-  const handleBulkDelete = async () => {
-    const targets = selectedRows.map((row) => toTarget(row.original));
-    setDeleting(true);
-    const result = await deleteEntries(sourceId, targets);
-    setDeleting(false);
-    dialogs.close();
-    selection.clear();
-    // Partial failures still deleted some objects — refresh either way.
-    router.refresh();
-    if (!result.ok) {
-      toast.error(result.error);
-    } else {
-      toast.success(t("deletedToastBulk", { count: targets.length }));
-    }
-  };
   // Previewable files in display order — the dialog's ←/→ walk this list.
   const previewFiles = rows
     .map((row) => row.original)
@@ -374,17 +276,13 @@ export function FileBrowser({
         entry.kind === "file" && isPreviewable(entry.name),
     );
 
-  // The moving set: the whole selection if the dragged row is part of it,
-  // otherwise just the dragged row.
-  const movingTargets = (dragged: DragData): EntryTarget[] => {
-    const selectedIds = new Set(Object.keys(rowSelection));
-    if (selectedIds.size > 1 && selectedIds.has(dragged.rowId)) {
-      return selectedRows.map((row) => toTarget(row.original));
-    }
-    return [dragged.target];
-  };
-
-  const drag = useEntryDrag({ movingTargets, onMoveRequest: dialogs.openMove });
+  const { dragging, dropZoneProps, drag } = useBrowserDnd({
+    canUpload: permissions.upload,
+    addFiles: uploads.addFiles,
+    rowSelection,
+    selectedRows,
+    onMoveRequest: dialogs.openMove,
+  });
 
   return (
     <div className="relative min-h-[calc(100dvh-6rem)]" {...dropZoneProps}>
@@ -523,103 +421,20 @@ export function FileBrowser({
 
       {dragging ? <DropOverlay /> : null}
 
-      <PreviewDialog
+      <BrowserDialogs
         sourceId={sourceId}
-        file={preview}
-        files={previewFiles}
-        onFileChange={openPreview}
-        onOpenChange={(open) => {
-          if (!open) setPreviewKey(null);
-        }}
+        dialogs={dialogs}
+        preview={preview}
+        previewFiles={previewFiles}
+        onPreviewFileChange={openPreview}
+        onClosePreview={() => setPreviewKey(null)}
         onShare={canShare ? dialogs.openShare : undefined}
-      />
-      <ShareDialog
-        sourceId={sourceId}
-        file={dialogs.dialog?.kind === "share" ? dialogs.dialog.file : null}
-        onOpenChange={(open) => {
-          if (!open) dialogs.close();
-        }}
-      />
-
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        onOpenChange={(open) => {
-          if (!open && !deleting) dialogs.close();
-        }}
-        title={t("deleteConfirmTitle", { name: deleteTarget?.name ?? "" })}
-        titleClassName="break-all"
-        description={
-          deleteTarget?.kind === "folder"
-            ? t("deleteFolderDescription")
-            : t("deleteFileDescription")
-        }
-        confirmLabel={t("deleteConfirmLabel")}
-        pendingLabel={t("deletePendingLabel")}
-        pending={deleting}
-        onConfirm={handleDelete}
-      />
-
-      <ConfirmDialog
-        open={dialogs.dialog?.kind === "bulk-delete"}
-        onOpenChange={(open) => {
-          if (!open && !deleting) dialogs.close();
-        }}
-        title={t("deleteConfirmTitleBulk", { count: selectedCount })}
-        description={t("deleteBulkDescription")}
-        confirmLabel={t("deleteConfirmLabel")}
-        pendingLabel={t("deletePendingLabel")}
-        pending={deleting}
-        onConfirm={handleBulkDelete}
-      />
-
-      <MoveDialog
-        sourceId={sourceId}
-        request={
-          dialogs.dialog?.kind === "move" ? dialogs.dialog.request : null
-        }
-        onOpenChange={(open) => {
-          if (!open) dialogs.close();
-        }}
-        onMoved={() => {
-          dialogs.close();
-          selection.clear();
-          router.refresh();
-        }}
-      />
-
-      <SearchCommand
-        sourceId={sourceId}
-        open={dialogs.dialog?.kind === "search"}
-        onOpenChange={(open) => {
-          if (!open) dialogs.close();
-        }}
-        initialQuery={query}
-      />
-
-      <MoveToDialog
-        sourceId={sourceId}
-        targets={
-          dialogs.dialog?.kind === "move-to" ? dialogs.dialog.targets : null
-        }
-        onOpenChange={(open) => {
-          if (!open) dialogs.close();
-        }}
-        onMoved={() => {
-          dialogs.close();
-          selection.clear();
-          router.refresh();
-        }}
-      />
-
-      <CopyToDialog
-        sourceId={sourceId}
-        targets={
-          dialogs.dialog?.kind === "copy-to" ? dialogs.dialog.targets : null
-        }
-        onOpenChange={(open) => {
-          if (!open) dialogs.close();
-        }}
-        onCopied={() => {
+        deleting={deleting}
+        onDelete={handleDelete}
+        onBulkDelete={handleBulkDelete}
+        selectedCount={selectedCount}
+        query={query}
+        onMutationComplete={() => {
           dialogs.close();
           selection.clear();
           router.refresh();

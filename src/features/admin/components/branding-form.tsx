@@ -7,7 +7,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { resetBranding, updateBranding } from "@/features/admin/actions";
+import {
+  resetBranding,
+  updateBranding,
+} from "@/features/admin/actions/branding";
 import { BRANDING_LOGO_MAX_BYTES } from "@/features/admin/lib/schema";
 import { useAppForm } from "@/forms/form";
 import { DEFAULT_APP_NAME } from "@/lib/branding/constants";

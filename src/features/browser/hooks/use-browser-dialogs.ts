@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { MoveRequest } from "@/features/browser/components/move-dialog";
+import type { MoveRequest } from "@/features/browser/components/dialogs/move-dialog";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import type { EntryTarget } from "@/features/browser/lib/move";

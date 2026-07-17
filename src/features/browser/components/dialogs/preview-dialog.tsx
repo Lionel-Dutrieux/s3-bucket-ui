@@ -16,7 +16,7 @@ import { downloadUrl, previewSrc } from "@/features/browser/api/client";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { previewKindOf } from "@/features/browser/lib/preview-kind";
 import { formatBytes, formatDate } from "@/lib/format";
-import { VIEWERS } from "./viewers/registry";
+import { VIEWERS } from "../viewers/registry";
 
 const NAV_BUTTON_CLASS =
   "absolute top-1/2 z-10 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full border bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:text-foreground";

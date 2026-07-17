@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-import { renameFolder, renameObject } from "@/features/browser/actions";
+import { renameFolder, renameObject } from "@/features/browser/actions/entries";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { splitFileName } from "@/features/browser/lib/file-name";
 import { entryNameSchema } from "@/features/browser/lib/schemas";

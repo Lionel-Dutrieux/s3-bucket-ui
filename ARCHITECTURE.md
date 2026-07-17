@@ -25,7 +25,9 @@ src/features/     One folder per domain. Features may import from lib/,
                   forms/ and components/, never from app/ or from another
                   feature. Inside a feature:
     actions.ts    'use server' — thin server actions: zod-parse input,
-                  delegate, return ActionResult.
+                  delegate, return ActionResult. Large features split this
+                  into an actions/ folder by sub-domain (no barrel — call
+                  sites import the specific file).
     api/          client.ts (typed fetchers + URL builders for the feature's
                   routes) and queries.ts (TanStack Query queryOptions
                   factories — the only place query keys are defined).
@@ -250,7 +252,8 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
 - **Add an S3-compatible provider?** One entry in
   `src/lib/storage/providers.ts` + its icon in
   `features/sources/components/provider-icons.ts`.
-- **Add a server action?** In the feature's `actions.ts`: zod-parse the
+- **Add a server action?** In the feature's `actions.ts` (or the matching
+  file under `actions/` when the feature splits them): zod-parse the
   input (schema in `lib/`), delegate to a `server/` module or the DAL, return
   `ActionResult`. Wrap browser writes in `withWriteAccess`, admin actions in
   `withAdmin`; gate source actions with `currentAdmin()`.

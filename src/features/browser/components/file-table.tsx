@@ -20,7 +20,7 @@ import { useEntryDnd } from "@/features/browser/components/dnd";
 import {
   type EntryActionHandlers,
   EntryContextMenu,
-} from "@/features/browser/components/entry-actions";
+} from "@/features/browser/components/menus/entry-actions";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { cn } from "@/lib/utils";
 

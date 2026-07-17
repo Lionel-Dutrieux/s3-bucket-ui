@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GridSortMenu } from "@/features/browser/components/grid-sort-menu";
+import { GridSortMenu } from "@/features/browser/components/menus/grid-sort-menu";
 import { NewFolderPopover } from "@/features/browser/components/new-folder-popover";
 import type { ViewMode } from "@/features/browser/lib/view";
 

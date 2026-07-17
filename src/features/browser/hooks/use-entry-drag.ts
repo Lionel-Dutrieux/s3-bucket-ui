@@ -11,8 +11,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { MoveRequest } from "@/features/browser/components/dialogs/move-dialog";
 import type { DragData, DropData } from "@/features/browser/components/dnd";
-import type { MoveRequest } from "@/features/browser/components/move-dialog";
 import {
   type EntryTarget,
   folderName,

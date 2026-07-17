@@ -1,8 +1,17 @@
 // Pure move planning — no I/O, unit-tested in move.test.ts.
 
+import type { BrowserEntry } from "@/features/browser/lib/entries";
+
 export type EntryTarget =
   | { kind: "file"; key: string }
   | { kind: "folder"; prefix: string };
+
+/** Folder/file union → the shape the move/transfer actions take. */
+export function toTarget(entry: BrowserEntry): EntryTarget {
+  return entry.kind === "folder"
+    ? { kind: "folder", prefix: entry.prefix }
+    : { kind: "file", key: entry.key };
+}
 
 export interface MoveOp {
   kind: "file" | "folder";

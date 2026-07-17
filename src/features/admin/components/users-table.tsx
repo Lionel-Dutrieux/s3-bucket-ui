@@ -34,7 +34,7 @@ import {
   removeUser,
   setUserRole,
   unbanUser,
-} from "@/features/admin/actions";
+} from "@/features/admin/actions/users";
 import type { ActionResult } from "@/lib/action-result";
 import type { UserRow } from "@/lib/dal/users";
 import { formatDateTime } from "@/lib/format";

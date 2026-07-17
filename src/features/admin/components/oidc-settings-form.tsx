@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import {
   resetOidcSettings,
   updateOidcSettings,
-} from "@/features/admin/actions";
+} from "@/features/admin/actions/settings";
 import { ProvenanceBadge } from "@/features/admin/components/provenance-badge";
 import { useAppForm } from "@/forms/form";
 import type { OidcField, Provenance } from "@/lib/config/resolve";

@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { createShareLink } from "@/features/browser/actions";
+import { createShareLink } from "@/features/browser/actions/share";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { useAppForm } from "@/forms/form";
 import { copyText } from "@/lib/clipboard";

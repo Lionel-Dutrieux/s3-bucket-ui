@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { deleteGroup } from "@/features/admin/actions";
+import { deleteGroup } from "@/features/admin/actions/groups";
 import { GroupMembersDialog } from "@/features/admin/components/group-members-dialog";
 import type { GroupRow } from "@/lib/dal/groups";
 import type { UserOption } from "@/lib/dal/users";
