@@ -387,10 +387,17 @@
     },
     "moveToDialog": {
       "title": "Mover {count, plural, one {# elemento} other {# elementos}} a…",
-      "description": "Mover copia cada objeto al destino y elimina el original. Las carpetas mueven todo su contenido.",
+      "description": "Mover copia cada objeto al destino y elimina el original. Las carpetas se llevan todo su contenido.",
+      "destinationSourceAria": "Origen de destino",
+      "loadingSources": "Cargando orígenes…",
+      "chooseSource": "Elige un origen…",
+      "thisSource": "este origen",
+      "noWritableSources": "No tienes acceso de edición en ningún origen.",
       "moveHere": "Mover aquí",
       "moving": "Moviendo…",
-      "movedToast": "{count, plural, one {# elemento movido} other {# elementos movidos}}"
+      "movedToast": "{count, plural, one {# elemento movido} other {# elementos movidos}}",
+      "movedAcrossToast": "{moved, plural, one {# objeto movido} other {# objetos movidos}}{skipped, select, 0 {} other {, {skipped} omitido(s)}} a {name}",
+      "movePartialFailedToast": "{moved, plural, one {# objeto movido} other {# objetos movidos}}{skipped, select, 0 {} other {, {skipped} omitido(s)}}, {failed} con error — ejecútalo de nuevo para reintentar."
     },
     "moveDialog": {
       "title": "¿Mover {count, plural, one {# elemento} other {# elementos}} a «{destLabel}»?",

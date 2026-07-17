@@ -387,10 +387,17 @@
     },
     "moveToDialog": {
       "title": "{count, plural, one {# Element} other {# Elemente}} verschieben nach…",
-      "description": "Beim Verschieben wird jedes Objekt zum Ziel kopiert und das Original gelöscht. Ordner verschieben ihren gesamten Inhalt.",
+      "description": "Beim Verschieben wird jedes Objekt an das Ziel kopiert und das Original gelöscht. Ordner nehmen ihren gesamten Inhalt mit.",
+      "destinationSourceAria": "Zielquelle",
+      "loadingSources": "Quellen werden geladen…",
+      "chooseSource": "Quelle auswählen…",
+      "thisSource": "diese Quelle",
+      "noWritableSources": "Sie haben auf keine Quelle Schreibzugriff.",
       "moveHere": "Hierher verschieben",
       "moving": "Wird verschoben…",
-      "movedToast": "{count, plural, one {# Element verschoben} other {# Elemente verschoben}}"
+      "movedToast": "{count, plural, one {# Element verschoben} other {# Elemente verschoben}}",
+      "movedAcrossToast": "{moved, plural, one {# Objekt verschoben} other {# Objekte verschoben}}{skipped, select, 0 {} other {, {skipped} übersprungen}} nach {name}",
+      "movePartialFailedToast": "{moved, plural, one {# Objekt verschoben} other {# Objekte verschoben}}{skipped, select, 0 {} other {, {skipped} übersprungen}}, {failed} fehlgeschlagen — erneut ausführen, um es zu wiederholen."
     },
     "moveDialog": {
       "title": "{count, plural, one {# Element} other {# Elemente}} nach „{destLabel}“ verschieben?",
