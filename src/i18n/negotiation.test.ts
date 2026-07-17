@@ -9,7 +9,10 @@ describe("pickLocale", () => {
     expect(pickLocale("fr-BE,fr;q=0.9,en;q=0.8")).toBe("fr");
   });
   it("falls back to en for unsupported languages", () => {
-    expect(pickLocale("de-DE,de;q=0.9")).toBe("en");
+    expect(pickLocale("ja-JP,ja;q=0.9")).toBe("en");
+  });
+  it("picks a supported language over an unsupported higher-weighted one", () => {
+    expect(pickLocale("ja;q=0.9,de;q=0.8")).toBe("de");
   });
   it("respects q-weights", () => {
     expect(pickLocale("en;q=0.5,fr;q=0.9")).toBe("fr");

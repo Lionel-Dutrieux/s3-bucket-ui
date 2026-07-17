@@ -36,6 +36,9 @@ export interface SidebarUser {
 const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: "en", label: "English" },
   { value: "fr", label: "Français" },
+  { value: "de", label: "Deutsch" },
+  { value: "es", label: "Español" },
+  { value: "zh", label: "中文" },
 ];
 
 export function UserMenu({ user }: { user: SidebarUser }) {
