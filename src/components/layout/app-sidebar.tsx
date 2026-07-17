@@ -4,6 +4,7 @@ import { HardDrive, History, Link2, Search, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { type BrandingInfo, BrandMark } from "@/components/layout/brand-mark";
 import { OPEN_COMMAND_PALETTE_EVENT } from "@/components/layout/command-palette";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -41,6 +42,14 @@ export function AppSidebar({
   const pathname = usePathname();
   const admin = user.role === "admin";
   const t = useTranslations("layout.sidebar");
+  // ⌘ only exists on Apple keyboards; everywhere else the palette opens with
+  // Ctrl+K. The server can't know the platform, so the hint mounts client-side.
+  const [shortcutHint, setShortcutHint] = useState<string | null>(null);
+  useEffect(() => {
+    setShortcutHint(
+      /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? "⌘K" : "Ctrl K",
+    );
+  }, []);
 
   // One sidebar group per provider type, in registry order; sources whose
   // provider is no longer registered fall back to a generic group.
@@ -78,9 +87,11 @@ export function AppSidebar({
         >
           <Search className="size-3.5" aria-hidden />
           <span className="flex-1 text-left">{t("search")}</span>
-          <kbd className="rounded border bg-muted px-1 font-mono text-[10px]">
-            ⌘K
-          </kbd>
+          {shortcutHint ? (
+            <kbd className="rounded border bg-muted px-1 font-mono text-[10px]">
+              {shortcutHint}
+            </kbd>
+          ) : null}
         </button>
       </SidebarHeader>
 

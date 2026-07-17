@@ -13,7 +13,7 @@ import {
 import { ArrowLeft, FolderOpen, SearchX } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -88,6 +88,7 @@ export function FileBrowser({
   const router = useRouter();
   const t = useTranslations("browser.fileBrowser");
   const columnsT = useTranslations("browser.columns");
+  const locale = useLocale();
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
   const [sorting, setSorting] = useQueryState(
     "sort",
@@ -154,8 +155,11 @@ export function FileBrowser({
   // Selection serves bulk download too, so it's on regardless of
   // permissions — only the bulk Delete button is permission-gated.
   const columns = useMemo(
-    () => [createSelectColumn(columnsT), ...createBrowserColumns(columnsT)],
-    [columnsT],
+    () => [
+      createSelectColumn(columnsT),
+      ...createBrowserColumns(columnsT, locale),
+    ],
+    [columnsT, locale],
   );
 
   const table = useReactTable({
@@ -199,6 +203,7 @@ export function FileBrowser({
         : null,
       onRenameEnd: handleRenameEnd,
       onToggleSelect: selection.toggleSelect,
+      activeId: details?.key ?? null,
     },
   });
 
@@ -392,6 +397,7 @@ export function FileBrowser({
                       : null
                   }
                   onRenameEnd={handleRenameEnd}
+                  activeId={details?.key ?? null}
                 />
               ) : (
                 <FileTable table={table} canMove={canMove} />

@@ -1,6 +1,6 @@
 import { Download, History } from "lucide-react";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/empty-state";
 import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { PageHeader } from "@/components/page-header";
@@ -43,6 +43,7 @@ export default async function ActivityPage({
   // freshly-listed data below already reflects it.
   await purgeExpiredOperations();
   const t = await getTranslations("activity");
+  const locale = await getLocale();
 
   const sp = await searchParams;
   const action = typeof sp.action === "string" ? sp.action : undefined;
@@ -181,8 +182,10 @@ export default async function ActivityPage({
                         ) : null}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
-                        <span title={formatDateTime(operation.createdAt)}>
-                          {formatRelative(operation.createdAt)}
+                        <span
+                          title={formatDateTime(operation.createdAt, locale)}
+                        >
+                          {formatRelative(operation.createdAt, locale)}
                         </span>
                       </TableCell>
                       <TableCell className="truncate text-xs text-muted-foreground max-md:hidden">

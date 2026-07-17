@@ -2,7 +2,7 @@
 
 import { MonitorSmartphone, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,7 @@ export function SessionsList({ sessions }: { sessions: SessionRow[] }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const t = useTranslations("account.sessions");
+  const locale = useLocale();
 
   const revoke = (token: string) => {
     startTransition(async () => {
@@ -87,7 +88,9 @@ export function SessionsList({ sessions }: { sessions: SessionRow[] }) {
                 const ip = describeIp(session.ipAddress);
                 return ip ? `${ip} · ` : "";
               })()}
-              {t("activeAt", { time: formatDateTime(session.updatedAt) })}
+              {t("activeAt", {
+                time: formatDateTime(session.updatedAt, locale),
+              })}
             </p>
           </div>
           {session.current ? null : (

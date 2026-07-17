@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { thumbnailSrc } from "@/features/browser/api/client";
 import { useEntryDnd } from "@/features/browser/components/dnd";
+import { EntryName } from "@/features/browser/components/entry-name";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { InlineRenameInput } from "@/features/browser/components/inline-rename";
 import {
@@ -16,6 +17,10 @@ import type { BrowserEntry } from "@/features/browser/lib/entries";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
+import {
+  CHECKERBOARD_CLASS,
+  isVectorImage,
+} from "@/features/browser/lib/thumbs";
 import { formatBytes } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +60,7 @@ export function FileGrid({
   canMove = false,
   renamingId,
   onRenameEnd,
+  activeId,
 }: {
   sourceId: string;
   folders: FolderEntry[];
@@ -78,6 +84,8 @@ export function FileGrid({
   renamingId?: string | null;
   /** Ends the inline rename; true when a rename actually happened. */
   onRenameEnd?: (renamed: boolean) => void;
+  /** File key whose details panel is open — its card stays highlighted. */
+  activeId?: string | null;
 }) {
   const t = useTranslations("browser.grid");
   return (
@@ -128,6 +136,7 @@ export function FileGrid({
                 onMove={onMove}
                 renaming={renamingId === file.key}
                 onRenameEnd={onRenameEnd}
+                active={activeId === file.key}
               />
             ))}
           </div>
@@ -230,9 +239,10 @@ function FolderCard({
               className="relative z-10"
             />
           ) : (
+            // The section heading and the icon already say "folder" — no
+            // subtitle repeating it a third time.
             <p className="truncate text-sm font-medium">{folder.name}</p>
           )}
-          <p className="text-xs text-muted-foreground">{t("folderLabel")}</p>
         </div>
         {/* Overlay link keeps the whole card clickable without
           nesting the delete button inside it. */}
@@ -272,6 +282,7 @@ function FileCard({
   onMove,
   renaming = false,
   onRenameEnd,
+  active = false,
 }: {
   sourceId: string;
   file: FileEntry;
@@ -286,6 +297,8 @@ function FileCard({
   onMove?: (entry: BrowserEntry) => void;
   renaming?: boolean;
   onRenameEnd?: (renamed: boolean) => void;
+  /** True while this file's details panel is open. */
+  active?: boolean;
 }) {
   const t = useTranslations("browser.grid");
   const dnd = useEntryDnd({
@@ -319,16 +332,31 @@ function FileCard({
           "group relative overflow-hidden rounded-lg border bg-card transition-colors hover:bg-muted/50",
           canMove && "cursor-grab",
           dnd.isDragging && "opacity-40",
+          // The details panel names its file, but the grid must show WHICH
+          // card it belongs to — the link survives scrolling.
+          active && "border-primary/60 ring-1 ring-primary/60",
         )}
       >
-        <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-muted/40">
+        <div
+          className={cn(
+            "flex aspect-[4/3] items-center justify-center overflow-hidden",
+            categoryOf(file.name) === "image"
+              ? CHECKERBOARD_CLASS
+              : "bg-muted/40",
+          )}
+        >
           {categoryOf(file.name) === "image" ? (
             // biome-ignore lint/performance/noImgElement: redirects to a presigned bucket URL, not optimizable
             <img
               src={thumbnailSrc(sourceId, file.key)}
               alt=""
               loading="lazy"
-              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+              className={cn(
+                "h-full w-full transition-transform group-hover:scale-105",
+                isVectorImage(file.name)
+                  ? "object-contain p-4"
+                  : "object-cover",
+              )}
             />
           ) : (
             <div className="flex flex-col items-center gap-2 transition-transform group-hover:scale-105">
@@ -350,7 +378,7 @@ function FileCard({
               className="relative z-10"
             />
           ) : (
-            <p className="truncate text-sm font-medium">{file.name}</p>
+            <EntryName name={file.name} className="text-sm font-medium" />
           )}
           <p className="text-xs text-muted-foreground tabular-nums">
             {formatBytes(file.size)}

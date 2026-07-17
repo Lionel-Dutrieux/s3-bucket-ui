@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { downloadUrl, zipUrl } from "@/features/browser/api/client";
+import { EntryName } from "@/features/browser/components/entry-name";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { InlineRenameInput } from "@/features/browser/components/inline-rename";
 import { EntryActionsMenu } from "@/features/browser/components/menus/entry-actions";
@@ -44,6 +45,8 @@ declare module "@tanstack/react-table" {
     onRenameEnd?: (renamed: boolean) => void;
     /** Selection toggle that understands shift-click ranges. */
     onToggleSelect?: (id: string, shift: boolean) => void;
+    /** File key whose details panel is open — its row stays highlighted. */
+    activeId?: string | null;
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     headClassName?: string;
@@ -130,7 +133,10 @@ export function createSelectColumn(t: ColumnsT): ColumnDef<BrowserEntry> {
   };
 }
 
-export function createBrowserColumns(t: ColumnsT): ColumnDef<BrowserEntry>[] {
+export function createBrowserColumns(
+  t: ColumnsT,
+  locale: string,
+): ColumnDef<BrowserEntry>[] {
   return [
     {
       id: "name",
@@ -186,7 +192,7 @@ export function createBrowserColumns(t: ColumnsT): ColumnDef<BrowserEntry>[] {
             title={t("previewFile", { name: entry.name })}
           >
             <FileIcon name={entry.name} className="size-4 shrink-0" />
-            <span className="truncate">{entry.name}</span>
+            <EntryName name={entry.name} />
           </button>
         ) : (
           // No preview for this type → open its details, never a surprise
@@ -198,7 +204,7 @@ export function createBrowserColumns(t: ColumnsT): ColumnDef<BrowserEntry>[] {
             title={t("detailsOf", { name: entry.name })}
           >
             <FileIcon name={entry.name} className="size-4 shrink-0" />
-            <span className="truncate">{entry.name}</span>
+            <EntryName name={entry.name} />
           </button>
         );
       },
@@ -231,10 +237,10 @@ export function createBrowserColumns(t: ColumnsT): ColumnDef<BrowserEntry>[] {
           // wall clock shifts between server render and hydration — suppress
           // the (harmless) mismatch.
           <span
-            title={formatDate(row.original.lastModified)}
+            title={formatDate(row.original.lastModified, locale)}
             suppressHydrationWarning
           >
-            {formatRelative(row.original.lastModified)}
+            {formatRelative(row.original.lastModified, locale)}
           </span>
         ) : (
           "—"
