@@ -3,7 +3,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { admin, genericOAuth } from "better-auth/plugins";
+import { admin, genericOAuth, twoFactor } from "better-auth/plugins";
 import { normalizeGroupsClaim } from "@/lib/authz/oidc-groups";
 import { getOidcConfig, type OidcConfig } from "@/lib/config";
 import { syncOidcMemberships } from "@/lib/dal/groups";
@@ -26,6 +26,9 @@ async function syncGroupsFromOidcCallback(
   if (!ctxPath?.includes("/oauth2/callback")) return;
   await syncOidcMemberships(user.id, normalizeGroupsClaim(user.oidcGroups));
 }
+
+/** Label shown in users' authenticator apps for TOTP entries. */
+const TWO_FACTOR_ISSUER = "Bucket UI";
 
 /** Email/password endpoints refused when the instance runs OIDC-only. */
 const PASSWORD_ENDPOINTS = new Set([
@@ -168,6 +171,7 @@ function buildAuth(oidcConfig: OidcConfig | null) {
       ...(oidcConfig
         ? [genericOAuth({ config: [buildOidcProvider(oidcConfig)] })]
         : []),
+      twoFactor({ issuer: TWO_FACTOR_ISSUER }),
       nextCookies(), // must stay last so server actions can set cookies
     ],
   });

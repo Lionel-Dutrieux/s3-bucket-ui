@@ -1,6 +1,10 @@
-import { adminClient, genericOAuthClient } from "better-auth/client/plugins";
+import {
+  adminClient,
+  genericOAuthClient,
+  twoFactorClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
-  plugins: [adminClient(), genericOAuthClient()],
+  plugins: [adminClient(), genericOAuthClient(), twoFactorClient()],
 });
