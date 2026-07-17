@@ -486,7 +486,7 @@
       "endpointLabel": "Point de terminaison",
       "accessNote": "Qui peut parcourir, modifier ou supprimer sur cette source se gère par utilisateur et par groupe depuis l'administration.",
       "connectionSuccessful": "Connexion réussie.",
-      "secretPlaceholderEdit": "Laisser vide pour conserver l'actuel",
+      "secretPlaceholderEdit": "Laisser vide pour conserver la valeur actuelle",
       "testConnection": "Tester la connexion",
       "testing": "Test en cours…",
       "saving": "Enregistrement…",
@@ -515,8 +515,8 @@
       "copyingStatus": "Copie en cours — les sources volumineuses peuvent prendre du temps, laissez cette page ouverte.",
       "copyingButton": "Copie en cours…",
       "copyEverything": "Tout copier",
-      "copiedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}} vers {name}",
-      "partialFailedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}}, {failed} échoué(s) — recommencez pour réessayer."
+      "copiedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped, plural, one {# ignoré} other {# ignorés}}}} vers {name}",
+      "partialFailedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped, plural, one {# ignoré} other {# ignorés}}}}, {failed, plural, one {# échoué} other {# échoués}} — recommencez pour réessayer."
     },
     "picker": {
       "searchPlaceholder": "Rechercher des fournisseurs…",
