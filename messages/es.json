@@ -759,6 +759,7 @@
       "rename": "Renombrado",
       "renameFolder": "Carpeta renombrada",
       "move": "Movido",
+      "moveTo": "Movido a",
       "copy": "Duplicado",
       "copyTo": "Copiado",
       "migrate": "Fuente copiada",

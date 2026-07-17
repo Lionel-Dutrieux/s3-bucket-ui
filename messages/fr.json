@@ -759,6 +759,7 @@
       "rename": "Renommé",
       "renameFolder": "Dossier renommé",
       "move": "Déplacé",
+      "moveTo": "Déplacé",
       "copy": "Dupliqué",
       "copyTo": "Copié",
       "migrate": "Source copiée",

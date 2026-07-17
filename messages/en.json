@@ -759,6 +759,7 @@
       "rename": "Renamed",
       "renameFolder": "Renamed folder",
       "move": "Moved",
+      "moveTo": "Moved to",
       "copy": "Duplicated",
       "copyTo": "Copied",
       "migrate": "Copied source",

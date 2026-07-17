@@ -759,6 +759,7 @@
       "rename": "已重命名",
       "renameFolder": "已重命名文件夹",
       "move": "已移动",
+      "moveTo": "已移动至",
       "copy": "已创建副本",
       "copyTo": "已复制",
       "migrate": "已复制来源",
