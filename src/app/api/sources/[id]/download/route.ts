@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
 import { getFilesClient } from "@/lib/storage/client";
@@ -16,13 +17,15 @@ export async function GET(
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
   if (!key) {
-    return apiError(400, "Missing key.");
+    const t = await getTranslations("api.errors");
+    return apiError(400, t("missingKey"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
   const { source } = result;
 
@@ -42,13 +45,14 @@ export async function GET(
       rangeHeader: request.headers.get("range"),
     });
   } catch (error) {
+    const t = await getTranslations("api.errors");
     if ((error as { code?: string }).code === "NotFound") {
-      return apiError(404, "File not found.");
+      return apiError(404, t("fileNotFound"));
     }
     console.error(
       `[download] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return apiError(502, "Could not download this file.");
+    return apiError(502, t("downloadFailed"));
   }
 }

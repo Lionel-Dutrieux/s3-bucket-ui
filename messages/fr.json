@@ -810,7 +810,40 @@
     "errors": {
       "linkUnavailable": "Ce lien n'est plus disponible.",
       "wrongPassword": "Mot de passe incorrect.",
-      "linkNotFound": "Lien introuvable."
+      "linkNotFound": "Lien introuvable.",
+      "notFound": "Introuvable.",
+      "downloadFailed": "Impossible de télécharger ce fichier."
+    }
+  },
+  "api": {
+    "errors": {
+      "signInRequired": "Connectez-vous pour lister les sources.",
+      "noCustomLogo": "Aucun logo personnalisé n'est configuré.",
+      "missingKey": "Clé manquante.",
+      "detailsLoadFailed": "Impossible de charger les détails de ce fichier.",
+      "fileNotFound": "Fichier introuvable.",
+      "downloadFailed": "Impossible de télécharger ce fichier.",
+      "folderListFailed": "Impossible de lister ce dossier.",
+      "noPreview": "Ce type de fichier n'a pas d'aperçu.",
+      "previewLoadFailed": "Impossible de charger cet aperçu.",
+      "searchTooShort": "Saisissez au moins 2 caractères.",
+      "searchFailed": "Échec de la recherche — réessayez.",
+      "noTextPreview": "Ce type de fichier n'a pas d'aperçu texte.",
+      "textPreviewLoadFailed": "Impossible de charger un aperçu de ce fichier.",
+      "notAnImage": "Ce n'est pas une image.",
+      "thumbnailLoadFailed": "Impossible de charger cette miniature.",
+      "invalidKey": "Clé invalide.",
+      "uploadNotAllowed": "Vous n'êtes pas autorisé à envoyer des fichiers dans cette source.",
+      "missingBody": "Corps manquant.",
+      "uploadTooLarge": "Le fichier est trop volumineux — 5 Go maximum.",
+      "uploadFailed": "Échec de l'envoi.",
+      "folderTooLargeForZip": "Ce dossier contient plus de {max} fichiers — trop volumineux pour une seule archive.",
+      "folderReadFailed": "Impossible de lire ce dossier.",
+      "folderEmpty": "Ce dossier est vide.",
+      "selectionTooLargeEntries": "Cette sélection contient plus de {max} éléments — trop volumineuse pour une seule archive.",
+      "selectionTooLargeFiles": "Cette sélection contient plus de {max} fichiers — trop volumineuse pour une seule archive.",
+      "selectionReadFailed": "Impossible de lire cette sélection.",
+      "selectionEmpty": "Cette sélection est vide."
     }
   }
 }

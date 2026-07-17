@@ -810,7 +810,40 @@
     "errors": {
       "linkUnavailable": "This link is no longer available.",
       "wrongPassword": "Wrong password.",
-      "linkNotFound": "Link not found."
+      "linkNotFound": "Link not found.",
+      "notFound": "Not found.",
+      "downloadFailed": "Could not download this file."
+    }
+  },
+  "api": {
+    "errors": {
+      "signInRequired": "Sign in to list sources.",
+      "noCustomLogo": "No custom logo is configured.",
+      "missingKey": "Missing key.",
+      "detailsLoadFailed": "Could not load the details for this file.",
+      "fileNotFound": "File not found.",
+      "downloadFailed": "Could not download this file.",
+      "folderListFailed": "Could not list this folder.",
+      "noPreview": "This file type has no preview.",
+      "previewLoadFailed": "Could not load this preview.",
+      "searchTooShort": "Enter at least 2 characters.",
+      "searchFailed": "Search failed — try again.",
+      "noTextPreview": "This file type has no text preview.",
+      "textPreviewLoadFailed": "Could not load a preview for this file.",
+      "notAnImage": "Not an image.",
+      "thumbnailLoadFailed": "Could not load this thumbnail.",
+      "invalidKey": "Invalid key.",
+      "uploadNotAllowed": "You are not allowed to upload to this source.",
+      "missingBody": "Missing body.",
+      "uploadTooLarge": "File is too large — 5 GiB max.",
+      "uploadFailed": "Upload failed.",
+      "folderTooLargeForZip": "This folder holds more than {max} files — too large for one archive.",
+      "folderReadFailed": "Could not read this folder.",
+      "folderEmpty": "This folder is empty.",
+      "selectionTooLargeEntries": "This selection holds more than {max} entries — too large for one archive.",
+      "selectionTooLargeFiles": "This selection holds more than {max} files — too large for one archive.",
+      "selectionReadFailed": "Could not read this selection.",
+      "selectionEmpty": "This selection is empty."
     }
   }
 }

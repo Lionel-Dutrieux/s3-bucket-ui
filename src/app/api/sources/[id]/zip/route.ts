@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { ZIP_MAX_ENTRIES } from "@/features/browser/lib/limits";
 import { folderName } from "@/features/browser/lib/move";
 import { apiError } from "@/lib/api-error";
@@ -60,33 +61,35 @@ export async function GET(
   const { id } = await ctx.params;
   const prefix = request.nextUrl.searchParams.get("prefix");
   if (!prefix?.endsWith("/")) {
-    return apiError(400, "Invalid folder.");
+    const t = await getTranslations("browser.errors");
+    return apiError(400, t("invalidFolder"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
 
   const files = getZipFilesClient(result.source);
   const keys = new Set<string>();
   try {
     if ((await collectPrefix(files, prefix, keys)) === TOO_LARGE) {
-      return apiError(
-        413,
-        `This folder holds more than ${ZIP_MAX_ENTRIES} files — too large for one archive.`,
-      );
+      const t = await getTranslations("api.errors");
+      return apiError(413, t("folderTooLargeForZip", { max: ZIP_MAX_ENTRIES }));
     }
   } catch (error) {
     console.error(
       `[zip] listing failed (source=${result.source.id}, prefix="${prefix}"):`,
       error,
     );
-    return apiError(502, "Could not read this folder.");
+    const t = await getTranslations("api.errors");
+    return apiError(502, t("folderReadFailed"));
   }
   if (keys.size === 0) {
-    return apiError(404, "This folder is empty.");
+    const t = await getTranslations("api.errors");
+    return apiError(404, t("folderEmpty"));
   }
 
   const filename = `${folderName(prefix) || result.source.bucket}.zip`;
@@ -103,24 +106,29 @@ export async function POST(
   const fileKeys = form.getAll("key").map(String);
   const prefixes = form.getAll("prefix").map(String);
   if (fileKeys.length + prefixes.length === 0) {
-    return apiError(400, "Nothing selected.");
+    const t = await getTranslations("browser.errors");
+    return apiError(400, t("nothingSelected"));
   }
   if (base !== "" && !base.endsWith("/")) {
-    return apiError(400, "Invalid folder.");
+    const t = await getTranslations("browser.errors");
+    return apiError(400, t("invalidFolder"));
   }
   if (prefixes.some((prefix) => !prefix.endsWith("/"))) {
-    return apiError(400, "Invalid folder.");
+    const t = await getTranslations("browser.errors");
+    return apiError(400, t("invalidFolder"));
   }
   if (fileKeys.length + prefixes.length > ZIP_MAX_ENTRIES) {
+    const t = await getTranslations("api.errors");
     return apiError(
       413,
-      `This selection holds more than ${ZIP_MAX_ENTRIES} entries — too large for one archive.`,
+      t("selectionTooLargeEntries", { max: ZIP_MAX_ENTRIES }),
     );
   }
 
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
 
   const files = getZipFilesClient(result.source);
@@ -131,9 +139,10 @@ export async function POST(
         keys.size > ZIP_MAX_ENTRIES ||
         (await collectPrefix(files, prefix, keys)) === TOO_LARGE
       ) {
+        const t = await getTranslations("api.errors");
         return apiError(
           413,
-          `This selection holds more than ${ZIP_MAX_ENTRIES} files — too large for one archive.`,
+          t("selectionTooLargeFiles", { max: ZIP_MAX_ENTRIES }),
         );
       }
     }
@@ -142,10 +151,12 @@ export async function POST(
       `[zip] selection listing failed (source=${result.source.id}):`,
       error,
     );
-    return apiError(502, "Could not read this selection.");
+    const t = await getTranslations("api.errors");
+    return apiError(502, t("selectionReadFailed"));
   }
   if (keys.size === 0) {
-    return apiError(404, "This selection is empty.");
+    const t = await getTranslations("api.errors");
+    return apiError(404, t("selectionEmpty"));
   }
 
   const filename = `${

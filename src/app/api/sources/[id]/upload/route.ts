@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { apiError } from "@/lib/api-error";
 import { requireSourceAccess } from "@/lib/auth/access";
 import { recordOperation } from "@/lib/dal/operations";
@@ -45,25 +46,30 @@ export async function POST(
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
   if (!key || key.endsWith("/")) {
-    return apiError(400, "Invalid key.");
+    const t = await getTranslations("api.errors");
+    return apiError(400, t("invalidKey"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
   const { source, access } = result;
   if (!access.canEdit) {
-    return apiError(403, "You are not allowed to upload to this source.");
+    const t = await getTranslations("api.errors");
+    return apiError(403, t("uploadNotAllowed"));
   }
 
   if (!request.body) {
-    return apiError(400, "Missing body.");
+    const t = await getTranslations("api.errors");
+    return apiError(400, t("missingBody"));
   }
   const declaredLength = Number(request.headers.get("content-length"));
   if (Number.isFinite(declaredLength) && declaredLength > MAX_UPLOAD_BYTES) {
-    return apiError(413, TOO_LARGE);
+    const t = await getTranslations("api.errors");
+    return apiError(413, t("uploadTooLarge"));
   }
 
   try {
@@ -79,12 +85,14 @@ export async function POST(
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {
     if (error instanceof UploadTooLargeError) {
-      return apiError(413, TOO_LARGE);
+      const t = await getTranslations("api.errors");
+      return apiError(413, t("uploadTooLarge"));
     }
     console.error(
       `[upload] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return apiError(502, "Upload failed.");
+    const t = await getTranslations("api.errors");
+    return apiError(502, t("uploadFailed"));
   }
 }

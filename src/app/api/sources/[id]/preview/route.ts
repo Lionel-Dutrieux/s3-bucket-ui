@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { PREVIEW_TTL_SECONDS } from "@/features/browser/lib/limits";
 import { apiError } from "@/lib/api-error";
@@ -24,19 +25,22 @@ export async function GET(
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
   if (!key) {
-    return apiError(400, "Missing key.");
+    const t = await getTranslations("api.errors");
+    return apiError(400, t("missingKey"));
   }
 
   const filename = key.split("/").pop() || "file";
   const category = categoryOf(filename);
   if (!category || !URL_PREVIEW_CATEGORIES.has(category)) {
-    return apiError(415, "This file type has no preview.");
+    const t = await getTranslations("api.errors");
+    return apiError(415, t("noPreview"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
   const { source } = result;
 
@@ -58,13 +62,14 @@ export async function GET(
       contentType: category === "pdf" ? "application/pdf" : undefined,
     });
   } catch (error) {
+    const t = await getTranslations("api.errors");
     if ((error as { code?: string }).code === "NotFound") {
-      return apiError(404, "File not found.");
+      return apiError(404, t("fileNotFound"));
     }
     console.error(
       `[preview] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return apiError(502, "Could not load this preview.");
+    return apiError(502, t("previewLoadFailed"));
   }
 }

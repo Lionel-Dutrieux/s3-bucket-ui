@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { THUMBNAIL_TTL_SECONDS } from "@/features/browser/lib/limits";
 import { apiError } from "@/lib/api-error";
@@ -19,18 +20,21 @@ export async function GET(
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
   if (!key) {
-    return apiError(400, "Missing key.");
+    const t = await getTranslations("api.errors");
+    return apiError(400, t("missingKey"));
   }
 
   const filename = key.split("/").pop() || "file";
   if (categoryOf(filename) !== "image") {
-    return apiError(415, "Not an image.");
+    const t = await getTranslations("api.errors");
+    return apiError(415, t("notAnImage"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
   const { source } = result;
 
@@ -48,13 +52,14 @@ export async function GET(
       disposition: "inline",
     });
   } catch (error) {
+    const t = await getTranslations("api.errors");
     if ((error as { code?: string }).code === "NotFound") {
-      return apiError(404, "File not found.");
+      return apiError(404, t("fileNotFound"));
     }
     console.error(
       `[thumbnail] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return apiError(502, "Could not load this thumbnail.");
+    return apiError(502, t("thumbnailLoadFailed"));
   }
 }

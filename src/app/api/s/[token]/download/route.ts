@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { sharePreviewKind } from "@/features/shares/lib/preview";
 import { apiError } from "@/lib/api-error";
@@ -24,12 +25,19 @@ export async function GET(
 ) {
   const { token } = await ctx.params;
   const share = await getActiveShare(token);
-  if (!share) return apiError(404, "Not found.");
+  if (!share) {
+    const t = await getTranslations("shares.errors");
+    return apiError(404, t("notFound"));
+  }
   if (share.passwordHash && !(await isUnlocked(token))) {
-    return apiError(401, "This link is password-protected.");
+    const t = await getTranslations("shares.publicViewer");
+    return apiError(401, t("passwordProtected"));
   }
   const source = await getSource(share.sourceId);
-  if (!source) return apiError(404, "Not found.");
+  if (!source) {
+    const t = await getTranslations("shares.errors");
+    return apiError(404, t("notFound"));
+  }
 
   const filename = share.key.split("/").pop() || "file";
   const category = categoryOf(filename);
@@ -73,10 +81,11 @@ export async function GET(
       contentType: inline && category === "pdf" ? "application/pdf" : undefined,
     });
   } catch (error) {
+    const t = await getTranslations("shares.errors");
     if ((error as { code?: string }).code === "NotFound") {
-      return apiError(404, "Not found.");
+      return apiError(404, t("notFound"));
     }
     console.error(`[share-download] failed (share=${share.id}):`, error);
-    return apiError(502, "Could not download this file.");
+    return apiError(502, t("downloadFailed"));
   }
 }
