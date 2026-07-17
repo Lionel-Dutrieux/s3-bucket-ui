@@ -521,6 +521,13 @@ export async function moveEntriesToSource(
     return actionError(t("invalidFolder"));
   }
 
+  // Same-source moves go through moveEntries (native, with the self/descendant
+  // guard); this cross-source path must not run the copy+delete engine inside
+  // one bucket. The dialog never calls it this way — this rejects crafted requests.
+  if (destSourceId === sourceId) {
+    return actionError(t("invalidDestination"));
+  }
+
   const origin = await requireSourceAccess(sourceId);
   if (!origin) return actionError(t("sourceNotFound"));
   if (!origin.access.canEdit) return actionError(t("editDenied"));
