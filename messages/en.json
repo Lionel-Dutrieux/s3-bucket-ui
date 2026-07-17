@@ -212,7 +212,12 @@
       "onlyFilesShareable": "Only files can be shared.",
       "sharingDisabled": "Public share links are disabled on this instance.",
       "fileNoLongerExists": "This file no longer exists.",
-      "sourceUnreachable": "Could not reach this source."
+      "sourceUnreachable": "Could not reach this source.",
+      "actionFailed": "Could not complete this action — try again.",
+      "folderTooLargeToMove": "This folder holds more than {max} objects — too large to move in one go.",
+      "selectionTooLargeToCopy": "This selection holds more than {max} objects — too large to copy in one go.",
+      "objectsNotDeleted": "{count, plural, one {# object} other {# objects}} could not be deleted.",
+      "folderTooLargeToDelete": "This folder is too large to delete in one go — some objects remain, run it again."
     },
     "filteredEmpty": {
       "title": "No {type} in this folder",

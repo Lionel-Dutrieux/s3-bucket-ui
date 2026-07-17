@@ -212,7 +212,12 @@
       "onlyFilesShareable": "Seuls les fichiers peuvent être partagés.",
       "sharingDisabled": "Les liens de partage publics sont désactivés sur cette instance.",
       "fileNoLongerExists": "Ce fichier n'existe plus.",
-      "sourceUnreachable": "Impossible d'atteindre cette source."
+      "sourceUnreachable": "Impossible d'atteindre cette source.",
+      "actionFailed": "Impossible d'effectuer cette action — réessayez.",
+      "folderTooLargeToMove": "Ce dossier contient plus de {max} objets — trop volumineux pour être déplacé en une fois.",
+      "selectionTooLargeToCopy": "Cette sélection contient plus de {max} objets — trop volumineuse pour être copiée en une fois.",
+      "objectsNotDeleted": "{count, plural, one {# objet n'a pas pu être supprimé} other {# objets n'ont pas pu être supprimés}}.",
+      "folderTooLargeToDelete": "Ce dossier est trop volumineux pour être supprimé en une fois — des objets restent, relancez l'opération."
     },
     "filteredEmpty": {
       "title": "Aucun élément « {type} » dans ce dossier",

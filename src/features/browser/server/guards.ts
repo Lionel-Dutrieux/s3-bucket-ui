@@ -1,5 +1,6 @@
 import "server-only";
 import type { Files } from "files-sdk";
+import { getTranslations } from "next-intl/server";
 import { type ActionResult, actionError } from "@/lib/action-result";
 import { requireSourceAccess } from "@/lib/auth/access";
 import type { Source } from "@/lib/dal/sources";
@@ -15,8 +16,8 @@ interface WriteGuard {
   need: { edit?: boolean; delete?: boolean };
   /** User message when a required capability is missing. */
   denied: string;
-  /** Verb phrase used for the log tag ("… failed") and the default error
-   *  ("Could not ….") — e.g. "create the folder", "delete this file". */
+  /** Verb phrase used for the log tag ("… failed") — e.g. "create the
+   *  folder", "delete this file". Technical, never shown to the user. */
   action: string;
   /** Overrides the error returned on an unexpected failure. */
   failureMessage?: string;
@@ -35,8 +36,9 @@ export async function withWriteAccess(
   guard: WriteGuard,
   run: (ctx: WriteContext) => Promise<ActionResult>,
 ): Promise<ActionResult> {
+  const t = await getTranslations("browser.errors");
   const result = await requireSourceAccess(sourceId);
-  if (!result) return actionError("Source not found.");
+  if (!result) return actionError(t("sourceNotFound"));
   const { source, access } = result;
   if (guard.need.edit && !access.canEdit) {
     return actionError(guard.denied);
@@ -52,6 +54,6 @@ export async function withWriteAccess(
       `[browser] ${guard.action} failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return actionError(guard.failureMessage ?? `Could not ${guard.action}.`);
+    return actionError(guard.failureMessage ?? t("actionFailed"));
   }
 }
