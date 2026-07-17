@@ -59,7 +59,7 @@ const ROW_ACTION_CLASS =
 const NUMERIC_CELL_CLASS =
   "text-right text-xs text-muted-foreground tabular-nums";
 
-type ColumnsT = ReturnType<typeof useTranslations>;
+type ColumnsT = ReturnType<typeof useTranslations<"browser.columns">>;
 
 // Sorting is delegated to pure comparators; TanStack inverts them for the
 // descending direction, and the table re-groups folders first afterwards.
