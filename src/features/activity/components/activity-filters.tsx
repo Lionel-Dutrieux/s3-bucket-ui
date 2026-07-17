@@ -2,6 +2,7 @@
 
 import { Cylinder, ListFilter, Search, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,8 @@ export function ActivityFilters({
   q: string;
   sourceNames: string[];
 }) {
+  const t = useTranslations("activity");
+  const tOperations = useTranslations("activity.operations");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -61,7 +64,10 @@ export function ActivityFilters({
   }, [search, q, pathname, router]);
 
   const hasFilters = Boolean(action || sourceName || q);
-  const actionLabel = OPERATION_FILTERS.find((f) => f.id === action)?.label;
+  const activeFilter = OPERATION_FILTERS.find((f) => f.id === action);
+  const actionLabel = activeFilter
+    ? tOperations(activeFilter.labelKey)
+    : undefined;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -73,8 +79,8 @@ export function ActivityFilters({
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search target, detail or user"
-          aria-label="Search activity"
+          placeholder={t("filters.searchPlaceholder")}
+          aria-label={t("filters.searchAria")}
           className="h-8 pl-8"
         />
       </div>
@@ -87,7 +93,7 @@ export function ActivityFilters({
             className={cn("h-8", action && "border-primary/40 text-foreground")}
           >
             <ListFilter aria-hidden />
-            {actionLabel ?? "Action"}
+            {actionLabel ?? t("filters.action")}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="min-w-44">
@@ -98,12 +104,12 @@ export function ActivityFilters({
             }
           >
             <DropdownMenuRadioItem value="all">
-              All actions
+              {t("filters.allActions")}
             </DropdownMenuRadioItem>
             <DropdownMenuSeparator />
             {OPERATION_FILTERS.map((filter) => (
               <DropdownMenuRadioItem key={filter.id} value={filter.id}>
-                {filter.label}
+                {tOperations(filter.labelKey)}
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>
@@ -122,7 +128,7 @@ export function ActivityFilters({
               )}
             >
               <Cylinder aria-hidden />
-              {sourceName ?? "Source"}
+              {sourceName ?? t("filters.source")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-44">
@@ -133,7 +139,7 @@ export function ActivityFilters({
               }
             >
               <DropdownMenuRadioItem value="all">
-                All sources
+                {t("filters.allSources")}
               </DropdownMenuRadioItem>
               <DropdownMenuSeparator />
               {sourceNames.map((name) => (
@@ -157,7 +163,7 @@ export function ActivityFilters({
           }}
         >
           <X aria-hidden />
-          Clear
+          {t("filters.clear")}
         </Button>
       ) : null}
     </div>

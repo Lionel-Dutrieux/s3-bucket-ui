@@ -1,5 +1,6 @@
 import { History } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/empty-state";
 import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { PageHeader } from "@/components/page-header";
@@ -18,7 +19,10 @@ import { listOperationSourceNames, listOperations } from "@/lib/dal/operations";
 import { formatDateTime, formatRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Activity" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("activity");
+  return { title: t("metaTitle") };
+}
 
 interface ActivityPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -30,6 +34,7 @@ export default async function ActivityPage({
   // Admin-only: the journal spans all sources, including ones a regular user
   // was never granted.
   await requireAdmin();
+  const t = await getTranslations("activity");
 
   const sp = await searchParams;
   const action = typeof sp.action === "string" ? sp.action : undefined;
@@ -44,18 +49,15 @@ export default async function ActivityPage({
 
   return (
     <>
-      <AppHeader title="Activity" />
+      <AppHeader title={t("headerTitle")} />
 
       <PageContainer>
         {/* "Activity log", not "Activity": the sticky header above already
             carries the nav label — stacking the same word twice reads odd. */}
-        <PageHeader
-          title="Activity log"
-          description="Every write across all sources — uploads, deletions, renames, moves and shares. Reads aren't recorded."
-        >
+        <PageHeader title={t("title")} description={t("description")}>
           {operations.length > 0 ? (
             <span className="text-xs text-muted-foreground tabular-nums">
-              {operations.length} entr{operations.length === 1 ? "y" : "ies"}
+              {t("entryCount", { count: operations.length })}
             </span>
           ) : null}
         </PageHeader>
@@ -71,14 +73,14 @@ export default async function ActivityPage({
           hasFilters ? (
             <EmptyState
               icon={History}
-              title="No matching activity"
-              description="Nothing in the log matches these filters — clear them to see everything."
+              title={t("emptyFilteredTitle")}
+              description={t("emptyFilteredDescription")}
             />
           ) : (
             <EmptyState
               icon={History}
-              title="No activity yet"
-              description="Uploads, deletions, renames and moves will show up here as they happen."
+              title={t("emptyTitle")}
+              description={t("emptyDescription")}
             />
           )
         ) : (
@@ -88,20 +90,29 @@ export default async function ActivityPage({
             <Table className="table-fixed">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-40">Action</TableHead>
-                  <TableHead className="w-36 max-lg:hidden">Source</TableHead>
-                  <TableHead>Target</TableHead>
-                  <TableHead className="w-40 max-md:hidden">When</TableHead>
-                  <TableHead className="w-40 max-md:hidden">By</TableHead>
+                  <TableHead className="w-40">{t("columns.action")}</TableHead>
+                  <TableHead className="w-36 max-lg:hidden">
+                    {t("columns.source")}
+                  </TableHead>
+                  <TableHead>{t("columns.target")}</TableHead>
+                  <TableHead className="w-40 max-md:hidden">
+                    {t("columns.when")}
+                  </TableHead>
+                  <TableHead className="w-40 max-md:hidden">
+                    {t("columns.by")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {operations.map((operation) => {
                   const {
-                    label,
+                    labelKey,
                     icon: Icon,
                     destructive,
                   } = operationLabel(operation.action);
+                  const label = labelKey
+                    ? t(`operations.${labelKey}`)
+                    : operation.action;
                   return (
                     <TableRow key={operation.id}>
                       <TableCell>

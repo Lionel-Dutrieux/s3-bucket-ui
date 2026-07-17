@@ -722,5 +722,94 @@
       "saveGrantFailed": "Could not save this grant.",
       "removeGrantFailed": "Could not remove this grant."
     }
+  },
+  "activity": {
+    "metaTitle": "Activity",
+    "headerTitle": "Activity",
+    "title": "Activity log",
+    "description": "Every write across all sources — uploads, deletions, renames, moves and shares. Reads aren't recorded.",
+    "entryCount": "{count, plural, one {# entry} other {# entries}}",
+    "emptyFilteredTitle": "No matching activity",
+    "emptyFilteredDescription": "Nothing in the log matches these filters — clear them to see everything.",
+    "emptyTitle": "No activity yet",
+    "emptyDescription": "Uploads, deletions, renames and moves will show up here as they happen.",
+    "columns": {
+      "action": "Action",
+      "source": "Source",
+      "target": "Target",
+      "when": "When",
+      "by": "By"
+    },
+    "filters": {
+      "searchPlaceholder": "Search target, detail or user",
+      "searchAria": "Search activity",
+      "action": "Action",
+      "allActions": "All actions",
+      "source": "Source",
+      "allSources": "All sources",
+      "clear": "Clear"
+    },
+    "operations": {
+      "upload": "Uploaded",
+      "createFolder": "Created folder",
+      "delete": "Deleted",
+      "deleteFolder": "Deleted folder",
+      "deleteMany": "Deleted items",
+      "rename": "Renamed",
+      "renameFolder": "Renamed folder",
+      "move": "Moved",
+      "copy": "Duplicated",
+      "copyTo": "Copied",
+      "migrate": "Copied source",
+      "shareCreate": "Shared link created",
+      "shareRevoke": "Shared link revoked",
+      "signInFailed": "Sign-in failed"
+    }
+  },
+  "shares": {
+    "metaTitle": "Shared links",
+    "headerTitle": "Shared links",
+    "title": "Shared links",
+    "descriptionAdmin": "Public links on this instance. Revoking one kills it immediately for everyone.",
+    "descriptionUser": "Public links you created. Revoking one kills it immediately for everyone.",
+    "deletedSource": "(deleted source)",
+    "emptyTitle": "No shared links yet",
+    "emptyDescription": "Share a file from the browser and the link will show up here.",
+    "copiedToast": "Link copied",
+    "copyFailedToast": "Copy failed — open the link and copy the address bar.",
+    "revokedToast": "Link revoked",
+    "passwordProtected": "password-protected",
+    "never": "Never",
+    "columns": {
+      "file": "File",
+      "source": "Source",
+      "created": "Created",
+      "expires": "Expires",
+      "downloads": "Downloads",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "copyLinkAria": "Copy link to {name}",
+    "copyLinkTitle": "Copy link",
+    "revokeLinkAria": "Revoke link to {name}",
+    "revokeLinkTitle": "Revoke",
+    "publicViewer": {
+      "metaTitle": "Shared file",
+      "unnamedFile": "file",
+      "download": "Download",
+      "passwordProtected": "This link is password-protected.",
+      "passwordLabel": "Password",
+      "unlocking": "Unlocking…",
+      "unlock": "Unlock"
+    },
+    "errors": {
+      "linkUnavailable": "This link is no longer available.",
+      "wrongPassword": "Wrong password.",
+      "linkNotFound": "Link not found."
+    }
   }
 }

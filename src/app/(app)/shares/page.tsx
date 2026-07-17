@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -8,15 +9,19 @@ import {
 import { requireSession } from "@/lib/auth/session";
 import { listSharesFor } from "@/lib/dal/shares";
 
-export const metadata: Metadata = { title: "Shared links" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("shares");
+  return { title: t("metaTitle") };
+}
 
 export default async function SharesPage() {
   const session = await requireSession();
+  const t = await getTranslations("shares");
   const shares = await listSharesFor(session.user);
   const rows: ShareRow[] = shares.map((share) => ({
     id: share.id,
     key: share.key,
-    sourceName: share.source?.name ?? "(deleted source)",
+    sourceName: share.source?.name ?? t("deletedSource"),
     createdAt: share.createdAt.getTime(),
     expiresAt: share.expiresAt?.getTime() ?? null,
     revoked: share.revokedAt !== null,
@@ -27,15 +32,13 @@ export default async function SharesPage() {
 
   return (
     <>
-      <AppHeader title="Shared links" />
+      <AppHeader title={t("headerTitle")} />
 
       <PageContainer>
         <PageHeader
-          title="Shared links"
+          title={t("title")}
           description={
-            isAdminViewer
-              ? "Public links on this instance. Revoking one kills it immediately for everyone."
-              : "Public links you created. Revoking one kills it immediately for everyone."
+            isAdminViewer ? t("descriptionAdmin") : t("descriptionUser")
           }
         />
         <SharesTable shares={rows} />

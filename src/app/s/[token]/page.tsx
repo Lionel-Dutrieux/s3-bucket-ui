@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { type BrandingInfo, BrandMark } from "@/components/layout/brand-mark";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import { PublicShareCard } from "@/features/shares/components/public-share-card";
@@ -11,7 +12,10 @@ import { getSource } from "@/lib/dal/sources";
 import { isUnlocked } from "@/lib/shares/unlock";
 import { getFilesClient } from "@/lib/storage/client";
 
-export const metadata: Metadata = { title: "Shared file" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("shares");
+  return { title: t("publicViewer.metaTitle") };
+}
 
 export default async function SharePage({
   params,
@@ -20,6 +24,7 @@ export default async function SharePage({
 }) {
   const { token } = await params;
   const branding = await getBranding();
+  const t = await getTranslations("shares.publicViewer");
   // Uniform notFound() for unknown, revoked and expired alike.
   const share = await getActiveShare(token);
   if (!share) notFound();
@@ -35,7 +40,7 @@ export default async function SharePage({
   const source = await getSource(share.sourceId);
   if (!source) notFound();
 
-  const filename = share.key.split("/").pop() || "file";
+  const filename = share.key.split("/").pop() || t("unnamedFile");
   let size: number;
   try {
     size = (await getFilesClient(source).head(share.key)).size;

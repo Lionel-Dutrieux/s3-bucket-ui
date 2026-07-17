@@ -722,5 +722,94 @@
       "saveGrantFailed": "Impossible d'enregistrer ce droit.",
       "removeGrantFailed": "Impossible de retirer ce droit."
     }
+  },
+  "activity": {
+    "metaTitle": "Activité",
+    "headerTitle": "Activité",
+    "title": "Journal d'activité",
+    "description": "Chaque écriture sur toutes les sources — envois, suppressions, renommages, déplacements et partages. Les lectures ne sont pas enregistrées.",
+    "entryCount": "{count, plural, one {# entrée} other {# entrées}}",
+    "emptyFilteredTitle": "Aucune activité correspondante",
+    "emptyFilteredDescription": "Rien dans le journal ne correspond à ces filtres — effacez-les pour tout voir.",
+    "emptyTitle": "Aucune activité pour le moment",
+    "emptyDescription": "Les envois, suppressions, renommages et déplacements apparaîtront ici au fur et à mesure.",
+    "columns": {
+      "action": "Action",
+      "source": "Source",
+      "target": "Cible",
+      "when": "Quand",
+      "by": "Par"
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher une cible, un détail ou un utilisateur",
+      "searchAria": "Rechercher dans l'activité",
+      "action": "Action",
+      "allActions": "Toutes les actions",
+      "source": "Source",
+      "allSources": "Toutes les sources",
+      "clear": "Effacer"
+    },
+    "operations": {
+      "upload": "Envoyé",
+      "createFolder": "Dossier créé",
+      "delete": "Supprimé",
+      "deleteFolder": "Dossier supprimé",
+      "deleteMany": "Éléments supprimés",
+      "rename": "Renommé",
+      "renameFolder": "Dossier renommé",
+      "move": "Déplacé",
+      "copy": "Dupliqué",
+      "copyTo": "Copié",
+      "migrate": "Source copiée",
+      "shareCreate": "Lien de partage créé",
+      "shareRevoke": "Lien de partage révoqué",
+      "signInFailed": "Échec de connexion"
+    }
+  },
+  "shares": {
+    "metaTitle": "Liens partagés",
+    "headerTitle": "Liens partagés",
+    "title": "Liens partagés",
+    "descriptionAdmin": "Liens publics sur cette instance. Révoquer un lien le tue immédiatement pour tout le monde.",
+    "descriptionUser": "Liens publics que vous avez créés. Révoquer un lien le tue immédiatement pour tout le monde.",
+    "deletedSource": "(source supprimée)",
+    "emptyTitle": "Aucun lien partagé pour le moment",
+    "emptyDescription": "Partagez un fichier depuis le navigateur et le lien apparaîtra ici.",
+    "copiedToast": "Lien copié",
+    "copyFailedToast": "Échec de la copie — ouvrez le lien et copiez-le depuis la barre d'adresse.",
+    "revokedToast": "Lien révoqué",
+    "passwordProtected": "protégé par mot de passe",
+    "never": "Jamais",
+    "columns": {
+      "file": "Fichier",
+      "source": "Source",
+      "created": "Créé",
+      "expires": "Expire",
+      "downloads": "Téléchargements",
+      "status": "Statut"
+    },
+    "status": {
+      "active": "Actif",
+      "expired": "Expiré",
+      "revoked": "Révoqué"
+    },
+    "copyLinkAria": "Copier le lien vers {name}",
+    "copyLinkTitle": "Copier le lien",
+    "revokeLinkAria": "Révoquer le lien vers {name}",
+    "revokeLinkTitle": "Révoquer",
+    "publicViewer": {
+      "metaTitle": "Fichier partagé",
+      "unnamedFile": "fichier",
+      "download": "Télécharger",
+      "passwordProtected": "Ce lien est protégé par mot de passe.",
+      "passwordLabel": "Mot de passe",
+      "unlocking": "Déverrouillage…",
+      "unlock": "Déverrouiller"
+    },
+    "errors": {
+      "linkUnavailable": "Ce lien n'est plus disponible.",
+      "wrongPassword": "Mot de passe incorrect.",
+      "linkNotFound": "Lien introuvable."
+    }
   }
 }
