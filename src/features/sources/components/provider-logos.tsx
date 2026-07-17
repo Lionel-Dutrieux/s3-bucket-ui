@@ -1,14 +1,19 @@
 import {
+  siAkamai,
+  siAlibabacloud,
   siBackblaze,
   siCloudflare,
   siDigitalocean,
+  siExoscale,
   siGooglecloudstorage,
   siHetzner,
   siMinio,
   siNextcloud,
   siOvh,
   siScaleway,
+  siVultr,
   siWasabi,
+  siYandexcloud,
 } from "simple-icons";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { cn } from "@/lib/utils";
@@ -52,6 +57,11 @@ const BRAND_MARKS: Record<string, BrandMark> = {
   wasabi: siWasabi,
   scaleway: siScaleway,
   ovhcloud: siOvh,
+  akamai: siAkamai,
+  vultr: siVultr,
+  exoscale: siExoscale,
+  "alibaba-oss": siAlibabacloud,
+  yandex: siYandexcloud,
   webdav: siNextcloud,
 };
 
