@@ -56,59 +56,57 @@ export function CommandPalette({
   }, []);
 
   return (
-    <>
-      <CommandDialog
-        open={open}
-        onOpenChange={setOpen}
-        title={t("title")}
-        description={t("description")}
-      >
-        {/* This CommandDialog doesn't wrap children in <Command> itself. */}
-        <Command>
-          <CommandInput placeholder={t("searchPlaceholder")} />
-          <CommandList>
-            <CommandEmpty>{t("noResults")}</CommandEmpty>
-            {sources.length > 0 ? (
-              <CommandGroup heading={t("sourcesHeading")}>
-                {sources.map((source) => {
-                  const Icon = providerIcon(source.provider);
-                  return (
-                    <CommandItem
-                      key={source.id}
-                      value={`${source.name} ${source.bucket}`}
-                      onSelect={() => {
-                        setOpen(false);
-                        router.push(`/source/${source.id}`);
-                      }}
-                    >
-                      <Icon aria-hidden />
-                      <span className="truncate">{source.name}</span>
-                      <span className="ml-auto truncate text-xs text-muted-foreground">
-                        {source.bucket}
-                      </span>
-                    </CommandItem>
-                  );
-                })}
+    <CommandDialog
+      open={open}
+      onOpenChange={setOpen}
+      title={t("title")}
+      description={t("description")}
+    >
+      {/* This CommandDialog doesn't wrap children in <Command> itself. */}
+      <Command>
+        <CommandInput placeholder={t("searchPlaceholder")} />
+        <CommandList>
+          <CommandEmpty>{t("noResults")}</CommandEmpty>
+          {sources.length > 0 ? (
+            <CommandGroup heading={t("sourcesHeading")}>
+              {sources.map((source) => {
+                const Icon = providerIcon(source.provider);
+                return (
+                  <CommandItem
+                    key={source.id}
+                    value={`${source.name} ${source.bucket}`}
+                    onSelect={() => {
+                      setOpen(false);
+                      router.push(`/source/${source.id}`);
+                    }}
+                  >
+                    <Icon aria-hidden />
+                    <span className="truncate">{source.name}</span>
+                    <span className="ml-auto truncate text-xs text-muted-foreground">
+                      {source.bucket}
+                    </span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          ) : null}
+          {canManage ? (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading={t("administrationHeading")}>
+                <CommandItem onSelect={() => go("/admin/sources")}>
+                  <Plus aria-hidden />
+                  {t("addSource")}
+                </CommandItem>
+                <CommandItem onSelect={() => go("/admin/users")}>
+                  <Settings2 aria-hidden />
+                  {t("openAdmin")}
+                </CommandItem>
               </CommandGroup>
-            ) : null}
-            {canManage ? (
-              <>
-                <CommandSeparator />
-                <CommandGroup heading={t("administrationHeading")}>
-                  <CommandItem onSelect={() => go("/admin/sources")}>
-                    <Plus aria-hidden />
-                    {t("addSource")}
-                  </CommandItem>
-                  <CommandItem onSelect={() => go("/admin/users")}>
-                    <Settings2 aria-hidden />
-                    {t("openAdmin")}
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            ) : null}
-          </CommandList>
-        </Command>
-      </CommandDialog>
-    </>
+            </>
+          ) : null}
+        </CommandList>
+      </Command>
+    </CommandDialog>
   );
 }
