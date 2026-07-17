@@ -252,7 +252,7 @@
     },
     "selectionToolbar": {
       "clearSelection": "Clear selection",
-      "selectedCount": "{count} selected",
+      "selectedCount": "{count, plural, one {# selected} other {# selected}}",
       "selectAll": "Select all",
       "deselectAll": "Deselect all",
       "download": "Download",
@@ -283,7 +283,7 @@
       "minChars": "Type at least 2 characters to search.",
       "failed": "Search failed.",
       "noResults": "Nothing matches “{query}” in this source.",
-      "truncated": "First {count} matches — refine to narrow down",
+      "truncated": "{count, plural, one {First # match — refine to narrow down} other {First # matches — refine to narrow down}}",
       "filesHeading": "Files",
       "loadingResults": "Searching…"
     },

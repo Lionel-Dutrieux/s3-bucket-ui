@@ -252,7 +252,7 @@
     },
     "selectionToolbar": {
       "clearSelection": "Effacer la sélection",
-      "selectedCount": "{count} sélectionné(s)",
+      "selectedCount": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
       "selectAll": "Tout sélectionner",
       "deselectAll": "Tout désélectionner",
       "download": "Télécharger",
@@ -283,7 +283,7 @@
       "minChars": "Saisissez au moins 2 caractères pour lancer la recherche.",
       "failed": "Échec de la recherche.",
       "noResults": "Rien ne correspond à « {query} » dans cette source.",
-      "truncated": "{count} premiers résultats — affinez la recherche pour préciser",
+      "truncated": "{count, plural, one {Premier résultat — affinez la recherche pour préciser} other {# premiers résultats — affinez la recherche pour préciser}}",
       "filesHeading": "Fichiers",
       "loadingResults": "Recherche…"
     },
