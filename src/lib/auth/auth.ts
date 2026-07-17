@@ -66,6 +66,17 @@ function buildAuth(oidcConfig: OidcConfig | null) {
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : [],
+    session: {
+      // Disable better-auth's session-freshness gate (default freshAge: 24h).
+      // The gate is keyed on session *createdAt*, so once a session crosses 24h
+      // the freshness-guarded endpoints throw SESSION_NOT_FRESH — including the
+      // read-only /list-sessions that /account renders, which then 500s the
+      // whole page. It also blocks stale-session profile-name updates. Our
+      // genuinely sensitive operations are gated by password re-entry instead
+      // (change-password, 2FA enable/disable) or an authoritative re-read
+      // (revoke-session), so freshness buys us nothing here.
+      freshAge: 0,
+    },
     // On by default in production. In-memory counters fit the single-container
     // deployment (they reset on restart — acceptable for brute-force slowdown).
     // The global default (100 req / 10 s) stays untouched so session lookups
