@@ -2,6 +2,7 @@
 
 import { UserRound, UsersRound, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function SourceAccess({
 }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("admin.sourceAccess");
 
   const run = (work: () => Promise<ActionResult>) => {
     startTransition(async () => {
@@ -51,13 +53,13 @@ export function SourceAccess({
   );
   const pickerGroups = [
     {
-      heading: "Groups",
+      heading: t("groupsHeading"),
       options: groups
         .filter((group) => !granted.has(`group:${group.id}`))
         .map((group) => ({ value: `group:${group.id}`, label: group.label })),
     },
     {
-      heading: "Users",
+      heading: t("usersHeading"),
       options: users
         .filter((user) => !granted.has(`user:${user.id}`))
         .map((user) => ({ value: `user:${user.id}`, label: user.label })),
@@ -80,9 +82,7 @@ export function SourceAccess({
   return (
     <div className="space-y-3">
       {grants.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nobody has access yet — only admins can see this source.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
         <ul className="divide-y rounded-md border">
           {grants.map((grant) => (
@@ -102,11 +102,11 @@ export function SourceAccess({
                 {grant.subject.label}
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                Edit
+                {t("editLabel")}
                 <Switch
                   checked={grant.canEdit}
                   disabled={pending}
-                  aria-label={`Allow ${grant.subject.label} to edit`}
+                  aria-label={t("allowEditAria", { name: grant.subject.label })}
                   onCheckedChange={(checked) =>
                     run(() =>
                       upsertSourceGrant({
@@ -120,11 +120,13 @@ export function SourceAccess({
                 />
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                Delete
+                {t("deleteLabel")}
                 <Switch
                   checked={grant.canDelete}
                   disabled={pending}
-                  aria-label={`Allow ${grant.subject.label} to delete`}
+                  aria-label={t("allowDeleteAria", {
+                    name: grant.subject.label,
+                  })}
                   onCheckedChange={(checked) =>
                     run(() =>
                       upsertSourceGrant({
@@ -143,7 +145,7 @@ export function SourceAccess({
                 className="size-6 text-muted-foreground"
                 disabled={pending}
                 onClick={() => run(() => removeSourceGrant(grant.id))}
-                aria-label={`Revoke access for ${grant.subject.label}`}
+                aria-label={t("revokeAria", { name: grant.subject.label })}
               >
                 <X className="size-3.5" aria-hidden />
               </Button>
@@ -153,9 +155,9 @@ export function SourceAccess({
       )}
 
       <SearchCombobox
-        label="Grant access"
-        searchPlaceholder="Search users and groups…"
-        emptyMessage="No matching user or group."
+        label={t("grantAccess")}
+        searchPlaceholder={t("searchPlaceholder")}
+        emptyMessage={t("emptyMessage")}
         groups={pickerGroups}
         onSelect={addGrant}
         disabled={pending}

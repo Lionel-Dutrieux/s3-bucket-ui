@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -19,18 +20,15 @@ import { useAppForm } from "@/forms/form";
 
 export function CreateGroupDialog({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("admin.createGroupDialog");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Create group</DialogTitle>
-          <DialogDescription>
-            Members share the group&rsquo;s source access. If the name exactly
-            matches a value of your identity provider&rsquo;s groups claim,
-            members are assigned automatically at sign-in.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         {open ? <CreateGroupForm onSuccess={() => setOpen(false)} /> : null}
       </DialogContent>
@@ -41,6 +39,7 @@ export function CreateGroupDialog({ children }: { children: React.ReactNode }) {
 function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
   const [serverError, setServerError] = useState<string>();
   const router = useRouter();
+  const t = useTranslations("admin.createGroupDialog");
 
   const form = useAppForm({
     defaultValues: { name: "" },
@@ -52,7 +51,7 @@ function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
         setServerError(result.error);
         return;
       }
-      toast.success(`Group "${value.name.trim()}" created`);
+      toast.success(t("createdToast", { name: value.name.trim() }));
       onSuccess();
       router.refresh();
     },
@@ -68,7 +67,11 @@ function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
     >
       <form.AppField name="name">
         {(field) => (
-          <field.TextField label="Name" placeholder="developers" autoFocus />
+          <field.TextField
+            label={t("nameLabel")}
+            placeholder={t("namePlaceholder")}
+            autoFocus
+          />
         )}
       </form.AppField>
 
@@ -76,8 +79,8 @@ function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
 
       <DialogFooter>
         <form.AppForm>
-          <form.SubmitButton pendingLabel="Creating…">
-            Create group
+          <form.SubmitButton pendingLabel={t("submitPending")}>
+            {t("submit")}
           </form.SubmitButton>
         </form.AppForm>
       </DialogFooter>

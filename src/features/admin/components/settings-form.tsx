@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -24,6 +25,7 @@ export function SettingsForm({
 }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("admin.settingsForm");
 
   const run = (work: () => Promise<ActionResult>, success: string) => {
     startTransition(async () => {
@@ -40,44 +42,42 @@ export function SettingsForm({
   return (
     <div className="divide-y rounded-xl border bg-card shadow-sm">
       <SettingRow
-        title="Public sign-up"
-        description="Let anyone with the URL create an email/password account. New accounts still see nothing until you grant them sources. Off by default — accounts are then created from the Users tab. OIDC sign-in is not affected: your identity provider decides who can use it."
+        title={t("signUpTitle")}
+        description={t("signUpDescription")}
         checked={signUpEnabled}
         disabled={pending}
         onChange={(enabled) =>
           run(
             () => setSignUpEnabled(enabled),
-            enabled ? "Public sign-up enabled" : "Public sign-up disabled",
+            enabled ? t("signUpEnabledToast") : t("signUpDisabledToast"),
           )
         }
       />
       <SettingRow
-        title="OIDC only"
+        title={t("oidcOnlyTitle")}
         description={
           oidcConfigured
-            ? "Disable every email/password entry point (sign-in, sign-up, password reset and change) — the SSO provider becomes the only way in. If the provider goes down, so does sign-in: keep an admin session open when testing."
-            : "Disable email/password sign-in entirely. Requires an OIDC provider (OIDC_* environment variables) — configure one first."
+            ? t("oidcOnlyDescriptionConfigured")
+            : t("oidcOnlyDescriptionUnconfigured")
         }
         checked={oidcOnly}
         disabled={pending || (!oidcConfigured && !oidcOnly)}
         onChange={(enabled) =>
           run(
             () => setOidcOnlyEnabled(enabled),
-            enabled ? "OIDC-only mode enabled" : "OIDC-only mode disabled",
+            enabled ? t("oidcOnlyEnabledToast") : t("oidcOnlyDisabledToast"),
           )
         }
       />
       <SettingRow
-        title="Public share links"
-        description="Let users with access to a source create public links to its files (revocable, expirable, optionally password-protected). Turning this off blocks creating new links — existing ones keep working until revoked or expired."
+        title={t("sharingTitle")}
+        description={t("sharingDescription")}
         checked={sharingEnabled}
         disabled={pending}
         onChange={(enabled) =>
           run(
             () => setPublicSharing(enabled),
-            enabled
-              ? "Public share links enabled"
-              : "Public share links disabled",
+            enabled ? t("sharingEnabledToast") : t("sharingDisabledToast"),
           )
         }
       />

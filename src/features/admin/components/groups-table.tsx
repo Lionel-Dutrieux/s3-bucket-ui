@@ -2,6 +2,7 @@
 
 import { Trash2, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -30,15 +31,18 @@ export function GroupsTable({
   const [deleting, setDeleting] = useState<GroupRow | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("admin.groupsTable");
 
   return (
     <>
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead>Group</TableHead>
-            <TableHead className="w-40">Members</TableHead>
-            <TableHead className="w-44 max-md:hidden">Created</TableHead>
+            <TableHead>{t("groupColumn")}</TableHead>
+            <TableHead className="w-40">{t("membersColumn")}</TableHead>
+            <TableHead className="w-44 max-md:hidden">
+              {t("createdColumn")}
+            </TableHead>
             <TableHead className="w-24" />
           </TableRow>
         </TableHeader>
@@ -57,8 +61,7 @@ export function GroupsTable({
                 </span>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground tabular-nums">
-                {group.members.length} member
-                {group.members.length === 1 ? "" : "s"}
+                {t("memberCount", { count: group.members.length })}
               </TableCell>
               <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
                 {formatDateTime(group.createdAt)}
@@ -67,7 +70,7 @@ export function GroupsTable({
                 <span className="flex justify-end gap-1">
                   <GroupMembersDialog group={group} users={users}>
                     <Button variant="outline" size="sm">
-                      Members
+                      {t("members")}
                     </Button>
                   </GroupMembersDialog>
                   <Button
@@ -76,7 +79,7 @@ export function GroupsTable({
                     className="size-8 text-muted-foreground hover:text-destructive"
                     disabled={pending}
                     onClick={() => setDeleting(group)}
-                    aria-label={`Delete group ${group.name}`}
+                    aria-label={t("deleteAria", { name: group.name })}
                   >
                     <Trash2 className="size-4" aria-hidden />
                   </Button>
@@ -92,10 +95,10 @@ export function GroupsTable({
         onOpenChange={(open) => {
           if (!open) setDeleting(null);
         }}
-        title={`Delete the "${deleting?.name}" group?`}
-        description="Its memberships and source grants are removed — members lose whatever access came from this group."
-        confirmLabel="Delete group"
-        pendingLabel="Deleting…"
+        title={t("confirmDeleteTitle", { name: deleting?.name ?? "" })}
+        description={t("confirmDeleteDescription")}
+        confirmLabel={t("confirmDeleteLabel")}
+        pendingLabel={t("confirmDeleting")}
         pending={pending}
         onConfirm={() => {
           if (!deleting) return;

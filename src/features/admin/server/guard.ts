@@ -1,9 +1,8 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { type ActionResult, actionError } from "@/lib/action-result";
 import { currentAdmin, type SessionUser } from "@/lib/auth/session";
-
-const NOT_AUTHORIZED = "You are not allowed to administrate this app.";
 
 interface AdminGuard {
   /** Verb phrase used for the log tag ("[admin] … failed") and the default
@@ -30,7 +29,10 @@ export async function withAdmin(
   run: (admin: SessionUser) => Promise<ActionResult>,
 ): Promise<ActionResult> {
   const admin = await currentAdmin();
-  if (!admin) return actionError(NOT_AUTHORIZED);
+  if (!admin) {
+    const t = await getTranslations("admin.errors");
+    return actionError(t("notAuthorized"));
+  }
 
   let result: ActionResult;
   try {

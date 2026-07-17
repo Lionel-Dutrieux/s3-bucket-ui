@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import {
   type BrandingValues,
   brandingSchema,
@@ -38,10 +39,11 @@ import { oidcEnabled } from "@/lib/env";
 export async function setSignUpEnabled(
   enabled: boolean,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "toggle sign-up",
-      failureMessage: "Could not update this setting.",
+      failureMessage: t("settingUpdateFailed"),
     },
     async () => {
       await setPublicSignUpEnabled(enabled === true);
@@ -53,10 +55,11 @@ export async function setSignUpEnabled(
 export async function setPublicSharing(
   enabled: boolean,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "toggle public sharing",
-      failureMessage: "Could not update this setting.",
+      failureMessage: t("settingUpdateFailed"),
       revalidate: false,
     },
     async () => {
@@ -69,17 +72,16 @@ export async function setPublicSharing(
 export async function setOidcOnlyEnabled(
   enabled: boolean,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "toggle oidc-only",
-      failureMessage: "Could not update this setting.",
+      failureMessage: t("settingUpdateFailed"),
     },
     async () => {
       // Refuse to lock the door when there is no other way in.
       if (enabled === true && !oidcEnabled()) {
-        return actionError(
-          "Configure an OIDC provider first — enabling this now would lock everyone out.",
-        );
+        return actionError(t("oidcNotConfigured"));
       }
       await setOidcOnly(enabled === true);
       return actionOk();
@@ -90,15 +92,18 @@ export async function setOidcOnlyEnabled(
 export async function updateBranding(
   input: BrandingValues,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "update branding",
-      failureMessage: "Could not save the branding settings.",
+      failureMessage: t("brandingSaveFailed"),
     },
     async () => {
       const parsed = brandingSchema.safeParse(input);
       if (!parsed.success) {
-        return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
+        return actionError(
+          parsed.error.issues[0]?.message ?? t("invalidInput"),
+        );
       }
       await updateBrandingSettings(parsed.data);
       return actionOk();
@@ -107,10 +112,11 @@ export async function updateBranding(
 }
 
 export async function resetBranding(): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "reset branding",
-      failureMessage: "Could not reset the branding settings.",
+      failureMessage: t("brandingResetFailed"),
     },
     async () => {
       await clearBrandingSettings();
@@ -125,17 +131,19 @@ export async function resetBranding(): Promise<ActionResult> {
 export async function createUser(
   input: CreateUserValues,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "create user",
       context: input.email,
-      failureMessage:
-        "Could not create this account — the email may already be in use.",
+      failureMessage: t("createUserFailed"),
     },
     async () => {
       const parsed = createUserSchema.safeParse(input);
       if (!parsed.success) {
-        return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
+        return actionError(
+          parsed.error.issues[0]?.message ?? t("invalidInput"),
+        );
       }
       await auth.api.createUser({
         body: {
@@ -155,17 +163,18 @@ export async function setUserRole(
   userId: string,
   role: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "set role",
       context: `user=${userId}`,
-      failureMessage: "Could not change this user's role.",
+      failureMessage: t("setRoleFailed"),
     },
     async (admin) => {
       const parsedRole = roleSchema.safeParse(role);
-      if (!parsedRole.success) return actionError("Unknown role.");
+      if (!parsedRole.success) return actionError(t("unknownRole"));
       if (userId === admin.id) {
-        return actionError("You cannot change your own role.");
+        return actionError(t("cannotChangeOwnRole"));
       }
       await auth.api.setRole({
         body: { userId, role: parsedRole.data },
@@ -177,10 +186,15 @@ export async function setUserRole(
 }
 
 export async function banUser(userId: string): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
-    { action: "ban this user", context: `user=${userId}` },
+    {
+      action: "ban this user",
+      context: `user=${userId}`,
+      failureMessage: t("banUserFailed"),
+    },
     async (admin) => {
-      if (userId === admin.id) return actionError("You cannot ban yourself.");
+      if (userId === admin.id) return actionError(t("cannotBanSelf"));
       await auth.api.banUser({ body: { userId }, headers: await headers() });
       return actionOk();
     },
@@ -188,8 +202,13 @@ export async function banUser(userId: string): Promise<ActionResult> {
 }
 
 export async function unbanUser(userId: string): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
-    { action: "unban this user", context: `user=${userId}` },
+    {
+      action: "unban this user",
+      context: `user=${userId}`,
+      failureMessage: t("unbanUserFailed"),
+    },
     async () => {
       await auth.api.unbanUser({ body: { userId }, headers: await headers() });
       return actionOk();
@@ -198,11 +217,16 @@ export async function unbanUser(userId: string): Promise<ActionResult> {
 }
 
 export async function removeUser(userId: string): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
-    { action: "remove this user", context: `user=${userId}` },
+    {
+      action: "remove this user",
+      context: `user=${userId}`,
+      failureMessage: t("removeUserFailed"),
+    },
     async (admin) => {
       if (userId === admin.id) {
-        return actionError("You cannot remove yourself.");
+        return actionError(t("cannotRemoveSelf"));
       }
       await auth.api.removeUser({ body: { userId }, headers: await headers() });
       return actionOk();
@@ -213,21 +237,34 @@ export async function removeUser(userId: string): Promise<ActionResult> {
 // --- groups ---
 
 export async function createGroup(name: string): Promise<ActionResult> {
-  return withAdmin({ action: "create this group", context: name }, async () => {
-    const parsed = groupNameSchema.safeParse(name);
-    if (!parsed.success) {
-      return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
-    }
-    if ((await dalCreateGroup(parsed.data)) === "name-taken") {
-      return actionError("A group with that name already exists.");
-    }
-    return actionOk();
-  });
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "create this group",
+      context: name,
+      failureMessage: t("createGroupFailed"),
+    },
+    async () => {
+      const parsed = groupNameSchema.safeParse(name);
+      if (!parsed.success) {
+        return actionError(parsed.error.issues[0]?.message ?? t("invalidName"));
+      }
+      if ((await dalCreateGroup(parsed.data)) === "name-taken") {
+        return actionError(t("groupNameTaken"));
+      }
+      return actionOk();
+    },
+  );
 }
 
 export async function deleteGroup(groupId: string): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
-    { action: "delete this group", context: `group=${groupId}` },
+    {
+      action: "delete this group",
+      context: `group=${groupId}`,
+      failureMessage: t("deleteGroupFailed"),
+    },
     async () => {
       await dalDeleteGroup(groupId);
       return actionOk();
@@ -239,8 +276,13 @@ export async function addGroupMember(
   groupId: string,
   userId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
-    { action: "add this member", context: `group=${groupId}` },
+    {
+      action: "add this member",
+      context: `group=${groupId}`,
+      failureMessage: t("addMemberFailed"),
+    },
     async () => {
       await dalAddGroupMember(groupId, userId);
       return actionOk();
@@ -252,8 +294,13 @@ export async function removeGroupMember(
   groupId: string,
   userId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
-    { action: "remove this member", context: `group=${groupId}` },
+    {
+      action: "remove this member",
+      context: `group=${groupId}`,
+      failureMessage: t("removeMemberFailed"),
+    },
     async () => {
       await dalRemoveGroupMember(groupId, userId);
       return actionOk();
@@ -269,14 +316,16 @@ export async function upsertSourceGrant(input: {
   canEdit: boolean;
   canDelete: boolean;
 }): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
     {
       action: "save this grant",
       context: `source=${input.sourceId}`,
+      failureMessage: t("saveGrantFailed"),
     },
     async () => {
       const parsed = grantInputSchema.safeParse(input);
-      if (!parsed.success) return actionError("Invalid grant.");
+      if (!parsed.success) return actionError(t("invalidGrant"));
       await upsertGrant(parsed.data);
       return actionOk();
     },
@@ -286,8 +335,13 @@ export async function upsertSourceGrant(input: {
 export async function removeSourceGrant(
   grantId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
   return withAdmin(
-    { action: "remove this grant", context: `grant=${grantId}` },
+    {
+      action: "remove this grant",
+      context: `grant=${grantId}`,
+      failureMessage: t("removeGrantFailed"),
+    },
     async () => {
       await deleteGrant(grantId);
       return actionOk();

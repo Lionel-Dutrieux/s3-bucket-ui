@@ -8,6 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -50,43 +51,41 @@ function initialsOf(name: string): string {
  * promoting, banning and deleting are one mis-click apart in the dropdown. */
 type PendingAction = { kind: "role" | "ban" | "delete"; user: UserRow };
 
-function confirmCopyFor(action: PendingAction) {
+type UsersTableT = ReturnType<typeof useTranslations>;
+
+function confirmCopyFor(action: PendingAction, t: UsersTableT) {
   const { kind, user } = action;
   if (kind === "role") {
     return user.role === "admin"
       ? {
-          title: `Remove admin rights from ${user.email}?`,
-          description:
-            "They keep their account but only see sources they hold a grant on.",
-          confirmLabel: "Make user",
-          pendingLabel: "Updating…",
+          title: t("confirmRemoveAdminTitle", { email: user.email }),
+          description: t("confirmRemoveAdminDescription"),
+          confirmLabel: t("makeUser"),
+          pendingLabel: t("confirmRoleUpdating"),
           destructive: false,
         }
       : {
-          title: `Make ${user.email} an admin?`,
-          description:
-            "Admins see every source, manage accounts and grants, and read the audit log.",
-          confirmLabel: "Make admin",
-          pendingLabel: "Updating…",
+          title: t("confirmMakeAdminTitle", { email: user.email }),
+          description: t("confirmMakeAdminDescription"),
+          confirmLabel: t("makeAdmin"),
+          pendingLabel: t("confirmRoleUpdating"),
           destructive: false,
         };
   }
   if (kind === "ban") {
     return {
-      title: `Ban ${user.email}?`,
-      description:
-        "They are signed out everywhere and can no longer sign in until unbanned.",
-      confirmLabel: "Ban user",
-      pendingLabel: "Banning…",
+      title: t("confirmBanTitle", { email: user.email }),
+      description: t("confirmBanDescription"),
+      confirmLabel: t("confirmBanLabel"),
+      pendingLabel: t("confirmBanning"),
       destructive: true,
     };
   }
   return {
-    title: `Delete ${user.email}?`,
-    description:
-      "Their account, sessions and grants are permanently deleted. Their past activity stays in the audit log.",
-    confirmLabel: "Delete user",
-    pendingLabel: "Deleting…",
+    title: t("confirmDeleteTitle", { email: user.email }),
+    description: t("confirmDeleteDescription"),
+    confirmLabel: t("confirmDeleteLabel"),
+    pendingLabel: t("confirmDeleting"),
     destructive: true,
   };
 }
@@ -101,6 +100,8 @@ export function UsersTable({
   const [confirming, setConfirming] = useState<PendingAction | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("admin.usersTable");
+  const tCommon = useTranslations("common");
 
   const run = (work: () => Promise<ActionResult>, done?: () => void) => {
     startTransition(async () => {
@@ -119,10 +120,12 @@ export function UsersTable({
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead>User</TableHead>
-            <TableHead className="w-28">Role</TableHead>
-            <TableHead className="max-lg:hidden">Groups</TableHead>
-            <TableHead className="w-44 max-md:hidden">Joined</TableHead>
+            <TableHead>{t("userColumn")}</TableHead>
+            <TableHead className="w-28">{t("roleColumn")}</TableHead>
+            <TableHead className="max-lg:hidden">{t("groupsColumn")}</TableHead>
+            <TableHead className="w-44 max-md:hidden">
+              {t("joinedColumn")}
+            </TableHead>
             <TableHead className="w-12" />
           </TableRow>
         </TableHeader>
@@ -139,12 +142,12 @@ export function UsersTable({
                       {user.name}
                       {user.id === selfId ? (
                         <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                          (you)
+                          {t("you")}
                         </span>
                       ) : null}
                       {user.banned ? (
                         <span className="ml-1.5 rounded-md border border-destructive/20 bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
-                          banned
+                          {t("banned")}
                         </span>
                       ) : null}
                     </span>
@@ -158,12 +161,12 @@ export function UsersTable({
                 {user.role === "admin" ? (
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     <ShieldCheck className="size-3.5" aria-hidden />
-                    Admin
+                    {t("admin")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 rounded-md border bg-muted/50 px-2 py-0.5 text-xs font-medium text-muted-foreground">
                     <UserRound className="size-3.5" aria-hidden />
-                    User
+                    {t("user")}
                   </span>
                 )}
               </TableCell>
@@ -195,7 +198,7 @@ export function UsersTable({
                         size="icon"
                         className="size-7"
                         disabled={pending}
-                        aria-label={`Actions for ${user.email}`}
+                        aria-label={t("actionsFor", { email: user.email })}
                       >
                         <MoreHorizontal className="size-4" aria-hidden />
                       </Button>
@@ -205,7 +208,7 @@ export function UsersTable({
                         onSelect={() => setConfirming({ kind: "role", user })}
                       >
                         <ShieldCheck aria-hidden />
-                        {user.role === "admin" ? "Make user" : "Make admin"}
+                        {user.role === "admin" ? t("makeUser") : t("makeAdmin")}
                       </DropdownMenuItem>
                       {user.banned ? (
                         // Unbanning restores access — no confirmation needed.
@@ -213,14 +216,14 @@ export function UsersTable({
                           onSelect={() => run(() => unbanUser(user.id))}
                         >
                           <ShieldOff aria-hidden />
-                          Unban
+                          {t("unban")}
                         </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem
                           onSelect={() => setConfirming({ kind: "ban", user })}
                         >
                           <ShieldOff aria-hidden />
-                          Ban
+                          {t("ban")}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -229,7 +232,7 @@ export function UsersTable({
                         onSelect={() => setConfirming({ kind: "delete", user })}
                       >
                         <Trash2 aria-hidden />
-                        Delete
+                        {t("delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -246,11 +249,11 @@ export function UsersTable({
           if (!open && !pending) setConfirming(null);
         }}
         {...(confirming
-          ? confirmCopyFor(confirming)
+          ? confirmCopyFor(confirming, t)
           : {
               title: "",
               description: "",
-              confirmLabel: "Confirm",
+              confirmLabel: tCommon("confirm"),
             })}
         pending={pending}
         onConfirm={() => {
