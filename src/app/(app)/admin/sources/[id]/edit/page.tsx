@@ -2,13 +2,17 @@ import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { SourceFormCard } from "@/features/sources/components/source-form-card";
 import { requireAdmin } from "@/lib/auth/session";
 import { getSource } from "@/lib/dal/sources";
 
-export const metadata: Metadata = { title: "Edit source" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("sources.editPage");
+  return { title: t("metaTitle") };
+}
 
 export default async function EditSourcePage({
   params,
@@ -16,6 +20,7 @@ export default async function EditSourcePage({
   params: Promise<{ id: string }>;
 }) {
   await requireAdmin();
+  const t = await getTranslations("sources");
   const { id } = await params;
   const source = await getSource(id);
   if (!source) notFound();
@@ -23,13 +28,13 @@ export default async function EditSourcePage({
   return (
     <>
       <PageHeader
-        title={`Edit ${source.name}`}
-        description="The connection is verified again when you save."
+        title={t("editPage.title", { name: source.name })}
+        description={t("connectionVerifiedNote")}
       >
         <Button size="sm" variant="outline" asChild>
           <Link href="/admin/sources">
             <ArrowLeft aria-hidden />
-            Back to sources
+            {t("editPage.backToSources")}
           </Link>
         </Button>
       </PageHeader>

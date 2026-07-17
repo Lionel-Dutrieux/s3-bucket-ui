@@ -81,6 +81,11 @@ export function zipUrl(sourceId: string, prefix: string): string {
   return `/api/sources/${sourceId}/zip?prefix=${encodeURIComponent(prefix)}`;
 }
 
+/** Endpoint the selection-ZIP form POSTs to (fields: base, key*, prefix*). */
+export function zipSelectionUrl(sourceId: string): string {
+  return `/api/sources/${sourceId}/zip`;
+}
+
 /** Endpoint the XHR uploader POSTs one file body to. */
 export function uploadUrl(sourceId: string, key: string): string {
   return `/api/sources/${sourceId}/upload?key=${encodeURIComponent(key)}`;

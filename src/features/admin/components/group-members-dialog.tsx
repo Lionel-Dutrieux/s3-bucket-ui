@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export function GroupMembersDialog({
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("admin.groupMembersDialog");
 
   const run = (work: () => Promise<ActionResult>) => {
     startTransition(async () => {
@@ -54,19 +56,12 @@ export function GroupMembersDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{group.name}</DialogTitle>
-          <DialogDescription>
-            Members share every source grant given to this group. Memberships
-            marked oidc were assigned by the identity provider and follow its
-            groups claim.
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           {group.members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No members yet — add one below, or let the OIDC claim populate the
-              group at sign-in.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("emptyMembers")}</p>
           ) : (
             <ul className="max-h-72 divide-y overflow-y-auto rounded-md border">
               {group.members.map((member) => (
@@ -83,9 +78,9 @@ export function GroupMembersDialog({
                   {member.via === "oidc" ? (
                     <span
                       className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground"
-                      title="Assigned by the identity provider's groups claim"
+                      title={t("oidcBadgeTitle")}
                     >
-                      oidc
+                      {t("oidcBadge")}
                     </span>
                   ) : null}
                   <Button
@@ -96,7 +91,10 @@ export function GroupMembersDialog({
                     onClick={() =>
                       run(() => removeGroupMember(group.id, member.userId))
                     }
-                    aria-label={`Remove ${member.email} from ${group.name}`}
+                    aria-label={t("removeAria", {
+                      email: member.email,
+                      name: group.name,
+                    })}
                   >
                     <X className="size-3.5" aria-hidden />
                   </Button>
@@ -106,10 +104,10 @@ export function GroupMembersDialog({
           )}
 
           <SearchCombobox
-            label="Add member"
-            searchPlaceholder="Search users…"
-            emptyMessage="No matching user."
-            groups={[{ heading: "Users", options: candidates }]}
+            label={t("addMember")}
+            searchPlaceholder={t("searchPlaceholder")}
+            emptyMessage={t("emptyMessage")}
+            groups={[{ heading: t("usersHeading"), options: candidates }]}
             onSelect={(userId) => run(() => addGroupMember(group.id, userId))}
             disabled={pending}
           />

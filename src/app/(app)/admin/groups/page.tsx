@@ -1,5 +1,6 @@
 import { Plus, UsersRound } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -9,22 +10,23 @@ import { requireAdmin } from "@/lib/auth/session";
 import { listGroups } from "@/lib/dal/groups";
 import { listUserOptions } from "@/lib/dal/users";
 
-export const metadata: Metadata = { title: "Groups" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.groupsPage");
+  return { title: t("metaTitle") };
+}
 
 export default async function AdminGroupsPage() {
   await requireAdmin();
+  const t = await getTranslations("admin.groupsPage");
   const [groups, users] = await Promise.all([listGroups(), listUserOptions()]);
 
   return (
     <>
-      <PageHeader
-        title="Groups"
-        description="Groups bundle source access. At OIDC sign-in, claim values that exactly match a group name are assigned automatically — memberships added here by hand are never touched by that sync."
-      >
+      <PageHeader title={t("title")} description={t("description")}>
         <CreateGroupDialog>
           <Button size="sm">
             <Plus aria-hidden />
-            Create group
+            {t("createGroup")}
           </Button>
         </CreateGroupDialog>
       </PageHeader>
@@ -32,8 +34,8 @@ export default async function AdminGroupsPage() {
       {groups.length === 0 ? (
         <EmptyState
           icon={UsersRound}
-          title="No groups yet"
-          description="Create one to grant several people the same sources at once — name it after an identity provider group to fill it automatically."
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
         />
       ) : (
         <div className="overflow-hidden rounded-xl border bg-card shadow-sm">

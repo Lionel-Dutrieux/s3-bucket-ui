@@ -1,6 +1,6 @@
 import type { Files } from "files-sdk";
 import { describe, expect, it } from "vitest";
-import { streamObject } from "@/features/browser/server/stream";
+import { streamObject } from "@/lib/storage/stream";
 
 function fakeFiles(type: string): Files {
   return {

@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import type { TextPreviewResult } from "@/features/browser/api/client";
 import { isTextFile } from "@/features/browser/lib/file-types";
 import { TEXT_PREVIEW_MAX_BYTES } from "@/features/browser/lib/limits";
@@ -18,18 +19,21 @@ export async function GET(
   const { id } = await ctx.params;
   const key = request.nextUrl.searchParams.get("key");
   if (!key) {
-    return apiError(400, "Missing key.");
+    const t = await getTranslations("api.errors");
+    return apiError(400, t("missingKey"));
   }
 
   const filename = key.split("/").pop() || "file";
   if (!isTextFile(filename)) {
-    return apiError(415, "This file type has no text preview.");
+    const t = await getTranslations("api.errors");
+    return apiError(415, t("noTextPreview"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
   const { source } = result;
 
@@ -47,6 +51,7 @@ export async function GET(
       `[text-preview] failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return apiError(502, "Could not load a preview for this file.");
+    const t = await getTranslations("api.errors");
+    return apiError(502, t("textPreviewLoadFailed"));
   }
 }

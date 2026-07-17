@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/groups", label: "Groups" },
-  { href: "/admin/sources", label: "Sources" },
-  { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/users", labelKey: "users" },
+  { href: "/admin/groups", labelKey: "groups" },
+  { href: "/admin/sources", labelKey: "sources" },
+  { href: "/admin/settings", labelKey: "settings" },
 ] as const;
 
 export function AdminNav() {
   const pathname = usePathname();
+  const t = useTranslations("admin.nav");
 
   return (
     <nav className="flex gap-1">
@@ -30,7 +32,7 @@ export function AdminNav() {
                 : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </Link>
         );
       })}

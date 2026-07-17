@@ -1,5 +1,6 @@
 import "server-only";
 import type { Files } from "files-sdk";
+import { getTranslations } from "next-intl/server";
 import {
   CROSS_COPY_CONCURRENCY,
   CROSS_COPY_MAX_OBJECTS,
@@ -36,8 +37,9 @@ export async function movePrefix(
     keys.push(...page.items.map((item) => item.key));
     cursor = page.cursor;
     if (keys.length > FOLDER_MOVE_MAX_OBJECTS) {
+      const t = await getTranslations("browser.errors");
       return {
-        error: `This folder holds more than ${FOLDER_MOVE_MAX_OBJECTS} objects — too large to move in one go.`,
+        error: t("folderTooLargeToMove", { max: FOLDER_MOVE_MAX_OBJECTS }),
       };
     }
   } while (cursor);
@@ -102,15 +104,17 @@ export async function copyEntriesAcross(
       }
       cursor = page.cursor;
       if (pairs.length > CROSS_COPY_MAX_OBJECTS) {
+        const t = await getTranslations("browser.errors");
         return {
-          error: `This selection holds more than ${CROSS_COPY_MAX_OBJECTS} objects — too large to copy in one go.`,
+          error: t("selectionTooLargeToCopy", { max: CROSS_COPY_MAX_OBJECTS }),
         };
       }
     } while (cursor);
   }
   if (pairs.length > CROSS_COPY_MAX_OBJECTS) {
+    const t = await getTranslations("browser.errors");
     return {
-      error: `This selection holds more than ${CROSS_COPY_MAX_OBJECTS} objects — too large to copy in one go.`,
+      error: t("selectionTooLargeToCopy", { max: CROSS_COPY_MAX_OBJECTS }),
     };
   }
 
@@ -156,9 +160,11 @@ export async function deletePrefix(
     if (page.items.length === 0) return null;
     const result = await files.delete(page.items.map((item) => item.key));
     if (result.errors?.length) {
-      return `${result.errors.length} object${result.errors.length === 1 ? "" : "s"} could not be deleted.`;
+      const t = await getTranslations("browser.errors");
+      return t("objectsNotDeleted", { count: result.errors.length });
     }
     if (!page.cursor) return null;
   }
-  return "This folder is too large to delete in one go — some objects remain, run it again.";
+  const t = await getTranslations("browser.errors");
+  return t("folderTooLargeToDelete");
 }

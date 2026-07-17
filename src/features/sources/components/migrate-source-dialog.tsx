@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Loader2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export function MigrateSourceDialog({
   const [destId, setDestId] = useState<string>("");
   const [pending, setPending] = useState(false);
   const dest = destinations.find((candidate) => candidate.id === destId);
+  const t = useTranslations("sources");
 
   const run = async () => {
     if (!dest) return;
@@ -53,13 +55,14 @@ export function MigrateSourceDialog({
       return;
     }
     const { transferred, skipped, failed } = result.data;
-    const summary = `${transferred} object${transferred === 1 ? "" : "s"} copied${
-      skipped ? `, ${skipped} skipped` : ""
-    }`;
     if (failed > 0) {
-      toast.warning(`${summary}, ${failed} failed — run it again to retry.`);
+      toast.warning(
+        t("migrate.partialFailedToast", { transferred, skipped, failed }),
+      );
     } else {
-      toast.success(`${summary} to ${dest.name}`);
+      toast.success(
+        t("migrate.copiedToast", { transferred, skipped, name: dest.name }),
+      );
     }
     onOpenChange(false);
   };
@@ -73,19 +76,23 @@ export function MigrateSourceDialog({
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Copy contents to another source</DialogTitle>
+          <DialogTitle>{t("migrate.title")}</DialogTitle>
           <DialogDescription>
-            Every object in{" "}
-            <span className="font-medium text-foreground">{source.name}</span>{" "}
-            is copied into the destination — across providers if needed. Objects
-            already present there are skipped, and nothing is removed from this
-            source.
+            {t.rich("migrate.description", {
+              name: source.name,
+              bold: (chunks) => (
+                <span className="font-medium text-foreground">{chunks}</span>
+              ),
+            })}
           </DialogDescription>
         </DialogHeader>
 
         <Select value={destId} onValueChange={setDestId} disabled={pending}>
-          <SelectTrigger className="w-full" aria-label="Destination source">
-            <SelectValue placeholder="Choose a destination…" />
+          <SelectTrigger
+            className="w-full"
+            aria-label={t("migrate.destinationAria")}
+          >
+            <SelectValue placeholder={t("migrate.choosePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {destinations.map((candidate) => {
@@ -109,17 +116,17 @@ export function MigrateSourceDialog({
             className="flex items-center gap-2 text-sm text-muted-foreground"
           >
             <Loader2Icon className="size-4 animate-spin" aria-hidden />
-            Copying — large sources can take a while, keep this page open.
+            {t("migrate.copyingStatus")}
           </p>
         ) : null}
 
         <DialogFooter>
           <Button onClick={run} disabled={pending || !dest}>
             {pending ? (
-              "Copying…"
+              t("migrate.copyingButton")
             ) : (
               <>
-                Copy everything
+                {t("migrate.copyEverything")}
                 <ArrowRight aria-hidden />
               </>
             )}

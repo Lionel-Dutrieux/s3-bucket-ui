@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { changePasswordSchema } from "@/features/auth/lib/schema";
@@ -8,6 +9,7 @@ import { useAppForm } from "@/forms/form";
 import { authClient } from "@/lib/auth/client";
 
 export function ChangePasswordForm() {
+  const t = useTranslations("account.changePassword");
   const [serverError, setServerError] = useState<string>();
 
   const form = useAppForm({
@@ -22,10 +24,10 @@ export function ChangePasswordForm() {
         revokeOtherSessions: true,
       });
       if (error) {
-        setServerError(error.message ?? "Could not change the password.");
+        setServerError(error.message ?? t("changeError"));
         return;
       }
-      toast.success("Password changed — other sessions were signed out");
+      toast.success(t("changeSuccess"));
       formApi.reset();
     },
   });
@@ -41,7 +43,7 @@ export function ChangePasswordForm() {
       <form.AppField name="currentPassword">
         {(field) => (
           <field.TextField
-            label="Current password"
+            label={t("currentPasswordLabel")}
             type="password"
             autoComplete="current-password"
           />
@@ -50,7 +52,7 @@ export function ChangePasswordForm() {
       <form.AppField name="newPassword">
         {(field) => (
           <field.TextField
-            label="New password"
+            label={t("newPasswordLabel")}
             type="password"
             autoComplete="new-password"
           />
@@ -61,8 +63,8 @@ export function ChangePasswordForm() {
 
       <div className="flex justify-end">
         <form.AppForm>
-          <form.SubmitButton pendingLabel="Changing…">
-            Change password
+          <form.SubmitButton pendingLabel={t("submitPending")}>
+            {t("submit")}
           </form.SubmitButton>
         </form.AppForm>
       </div>

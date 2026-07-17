@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export function BrandingForm({
 }) {
   const router = useRouter();
   const [resetting, startReset] = useTransition();
+  const t = useTranslations("admin.brandingForm");
 
   const form = useAppForm({
     defaultValues: {
@@ -46,7 +48,7 @@ export function BrandingForm({
       // Clear the pending upload so an unrelated later save doesn't
       // re-send the data-URL and needlessly bump the logo version.
       form.setFieldValue("logo", undefined);
-      toast.success("Branding updated");
+      toast.success(t("updatedToast"));
       router.refresh();
     },
   });
@@ -63,7 +65,7 @@ export function BrandingForm({
         primaryColor: "",
         logo: undefined,
       });
-      toast.success("Branding reset to defaults");
+      toast.success(t("resetToast"));
       router.refresh();
     });
 
@@ -76,17 +78,16 @@ export function BrandingForm({
       className="space-y-4 rounded-xl border bg-card p-4 shadow-sm"
     >
       <div className="space-y-1">
-        <p className="text-sm font-medium">White labelling</p>
+        <p className="text-sm font-medium">{t("title")}</p>
         <p className="max-w-prose text-sm text-muted-foreground">
-          Rebrand this instance: the name, logo and primary color apply to the
-          sidebar, the sign-in page, public share pages and the browser tab.
+          {t("description")}
         </p>
       </div>
 
       <form.AppField name="appName">
         {(field) => (
           <field.TextField
-            label="Application name"
+            label={t("appNameLabel")}
             placeholder={DEFAULT_APP_NAME}
           />
         )}
@@ -95,7 +96,7 @@ export function BrandingForm({
       <form.AppField name="primaryColor">
         {(field) => (
           <div className="space-y-2">
-            <Label htmlFor="branding-color">Primary color</Label>
+            <Label htmlFor="branding-color">{t("primaryColorLabel")}</Label>
             <div className="flex items-center gap-2">
               <input
                 id="branding-color"
@@ -107,7 +108,7 @@ export function BrandingForm({
                 className="size-9 cursor-pointer rounded-lg border bg-background p-1"
               />
               <span className="font-mono text-sm text-muted-foreground">
-                {field.state.value || "Default (amber)"}
+                {field.state.value || t("defaultColor")}
               </span>
               {field.state.value ? (
                 <Button
@@ -116,7 +117,7 @@ export function BrandingForm({
                   size="sm"
                   onClick={() => field.handleChange("")}
                 >
-                  Use default
+                  {t("useDefault")}
                 </Button>
               ) : null}
             </div>
@@ -131,18 +132,18 @@ export function BrandingForm({
             field.state.value === undefined ? logoUrl : field.state.value;
           return (
             <div className="space-y-2">
-              <Label htmlFor="branding-logo">Custom logo</Label>
+              <Label htmlFor="branding-logo">{t("logoLabel")}</Label>
               <div className="flex items-center gap-3">
                 {preview ? (
                   // biome-ignore lint/performance/noImgElement: data-URL preview of the uploaded logo.
                   <img
                     src={preview}
-                    alt="Logo preview"
+                    alt={t("logoPreviewAlt")}
                     className="max-h-9 max-w-36 rounded border bg-muted/40 object-contain p-1"
                   />
                 ) : (
                   <span className="text-sm text-muted-foreground">
-                    None — the app name is shown instead.
+                    {t("noLogo")}
                   </span>
                 )}
                 <Input
@@ -154,18 +155,17 @@ export function BrandingForm({
                     const file = event.target.files?.[0];
                     if (!file) return;
                     if (!ACCEPTED_TYPES.includes(file.type)) {
-                      toast.error("Use an SVG, PNG or WebP image.");
+                      toast.error(t("invalidLogoType"));
                       return;
                     }
                     if (file.size > BRANDING_LOGO_MAX_BYTES) {
-                      toast.error("The logo must be 512 KB or smaller.");
+                      toast.error(t("logoTooLarge"));
                       return;
                     }
                     const reader = new FileReader();
                     reader.onload = () =>
                       field.handleChange(reader.result as string);
-                    reader.onerror = () =>
-                      toast.error("Could not read this file.");
+                    reader.onerror = () => toast.error(t("logoReadError"));
                     reader.readAsDataURL(file);
                     event.target.value = "";
                   }}
@@ -177,14 +177,11 @@ export function BrandingForm({
                     size="sm"
                     onClick={() => field.handleChange(null)}
                   >
-                    Remove
+                    {t("removeLogo")}
                   </Button>
                 ) : null}
               </div>
-              <p className="text-xs text-muted-foreground">
-                SVG, PNG or WebP, 512 KB max. Replaces the app name in the
-                sidebar — a horizontal mark with the company name works best.
-              </p>
+              <p className="text-xs text-muted-foreground">{t("logoHelp")}</p>
             </div>
           );
         }}
@@ -198,11 +195,11 @@ export function BrandingForm({
           disabled={resetting}
           onClick={reset}
         >
-          Reset branding
+          {t("resetBranding")}
         </Button>
         <form.AppForm>
-          <form.SubmitButton pendingLabel="Saving…">
-            Save branding
+          <form.SubmitButton pendingLabel={t("saving")}>
+            {t("saveBranding")}
           </form.SubmitButton>
         </form.AppForm>
       </div>

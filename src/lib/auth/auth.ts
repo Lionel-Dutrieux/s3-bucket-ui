@@ -58,6 +58,19 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins: env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : [],
+  // On by default in production. In-memory counters fit the single-container
+  // deployment (they reset on restart — acceptable for brute-force slowdown).
+  // The global default (100 req / 10 s) stays untouched so session lookups
+  // never throttle; only credential endpoints get strict limits.
+  rateLimit: {
+    customRules: {
+      "/sign-in/email": { window: 60, max: 5 },
+      "/sign-up/email": { window: 60, max: 5 },
+      "/request-password-reset": { window: 300, max: 3 },
+      "/reset-password": { window: 300, max: 5 },
+      "/change-password": { window: 60, max: 5 },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     // Reset emails only when an SMTP relay is configured — without it the

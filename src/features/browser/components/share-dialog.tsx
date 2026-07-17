@@ -2,6 +2,7 @@
 
 import { useStore } from "@tanstack/react-form";
 import { Check, Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -35,6 +36,7 @@ export function ShareDialog({
   file: FileEntry | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("browser.shareDialog");
   // Once minted, the dialog switches to the copy view until closed.
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -71,9 +73,9 @@ export function ShareDialog({
     if (!createdUrl) return;
     if (await copyText(createdUrl)) {
       setCopied(true);
-      toast.success("Link copied");
+      toast.success(t("copiedToast"));
     } else {
-      toast.error("Copy failed — select the link and copy it manually.");
+      toast.error(t("copyFailedToast"));
     }
   };
 
@@ -82,12 +84,9 @@ export function ShareDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="truncate pr-6">
-            Share {file?.name}
+            {t("title", { name: file?.name ?? "" })}
           </DialogTitle>
-          <DialogDescription>
-            Anyone with the link can download this file — no account needed.
-            Manage links from Shared links.
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         {createdUrl ? (
@@ -95,7 +94,7 @@ export function ShareDialog({
             <Input readOnly value={createdUrl} className="font-mono text-sm" />
             <Button type="button" variant="outline" size="icon" onClick={copy}>
               {copied ? <Check aria-hidden /> : <Copy aria-hidden />}
-              <span className="sr-only">Copy link</span>
+              <span className="sr-only">{t("copyLink")}</span>
             </Button>
           </div>
         ) : (
@@ -109,7 +108,7 @@ export function ShareDialog({
             <form.AppField name="expiresIn">
               {(field) => (
                 <field.SelectField
-                  label="Expires"
+                  label={t("expiresLabel")}
                   options={SHARE_EXPIRY_OPTIONS}
                 />
               )}
@@ -117,17 +116,17 @@ export function ShareDialog({
             <form.AppField name="password">
               {(field) => (
                 <field.TextField
-                  label="Password (optional)"
+                  label={t("passwordLabel")}
                   type="password"
                   autoComplete="off"
-                  placeholder="Leave empty for none"
+                  placeholder={t("passwordPlaceholder")}
                 />
               )}
             </form.AppField>
             <DialogFooter>
               <form.AppForm>
-                <form.SubmitButton pendingLabel="Creating…">
-                  Create link
+                <form.SubmitButton pendingLabel={t("creating")}>
+                  {t("createLink")}
                 </form.SubmitButton>
               </form.AppForm>
             </DialogFooter>

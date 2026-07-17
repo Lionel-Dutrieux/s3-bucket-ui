@@ -2,6 +2,7 @@
 
 import { MailCheck } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { forgotPasswordSchema } from "@/features/auth/lib/schema";
@@ -12,6 +13,7 @@ import { authClient } from "@/lib/auth/client";
 export function ForgotPasswordForm() {
   const [serverError, setServerError] = useState<string>();
   const [sent, setSent] = useState(false);
+  const t = useTranslations("auth.forgotPassword");
 
   const form = useAppForm({
     defaultValues: { email: "" },
@@ -23,7 +25,7 @@ export function ForgotPasswordForm() {
         redirectTo: "/reset-password",
       });
       if (error) {
-        setServerError(error.message ?? "Could not send the reset email.");
+        setServerError(error.message ?? t("errorFallback"));
         return;
       }
       setSent(true);
@@ -38,15 +40,14 @@ export function ForgotPasswordForm() {
         </div>
         <div className="space-y-1.5">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Check your inbox
+            {t("sentTitle")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            If an account exists for that address, a reset link is on its way.
-            It expires in one hour.
+            {t("sentDescription")}
           </p>
         </div>
         <Button variant="outline" className="w-full" asChild>
-          <Link href="/sign-in">Back to sign in</Link>
+          <Link href="/sign-in">{t("backToSignIn")}</Link>
         </Button>
       </div>
     );
@@ -55,12 +56,8 @@ export function ForgotPasswordForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Reset your password
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your account email — we&rsquo;ll send you a reset link.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <form
@@ -73,10 +70,10 @@ export function ForgotPasswordForm() {
         <form.AppField name="email">
           {(field) => (
             <field.TextField
-              label="Email"
+              label={t("emailLabel")}
               type="email"
               autoComplete="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               autoFocus
             />
           )}
@@ -85,19 +82,22 @@ export function ForgotPasswordForm() {
         <FormAlert error={serverError} />
 
         <form.AppForm>
-          <form.SubmitButton className="w-full" pendingLabel="Sending…">
-            Send reset link
+          <form.SubmitButton
+            className="w-full"
+            pendingLabel={t("submitPending")}
+          >
+            {t("submit")}
           </form.SubmitButton>
         </form.AppForm>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">
-        Remembered it?{" "}
+        {t("remembered")}{" "}
         <Link
           href="/sign-in"
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
-          Sign in
+          {t("signInLink")}
         </Link>
       </p>
     </div>

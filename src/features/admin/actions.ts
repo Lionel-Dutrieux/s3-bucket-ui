@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import {
   type BrandingValues,
   brandingSchema,
@@ -11,9 +11,9 @@ import {
   groupNameSchema,
   roleSchema,
 } from "@/features/admin/lib/schema";
+import { withAdmin } from "@/features/admin/server/guard";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { auth } from "@/lib/auth/auth";
-import { currentAdmin } from "@/lib/auth/session";
 import {
   addGroupMember as dalAddGroupMember,
   createGroup as dalCreateGroup,
@@ -30,94 +30,100 @@ import {
 } from "@/lib/dal/settings";
 import { oidcEnabled } from "@/lib/env";
 
-const NOT_AUTHORIZED = "You are not allowed to administrate this app.";
+// Every action runs through withAdmin (features/admin/server/guard.ts), which
+// re-checks the admin role server-side — the /admin layout guard protects
+// pages only, never these POST endpoints.
 
 // --- settings ---
 
 export async function setSignUpEnabled(
   enabled: boolean,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await setPublicSignUpEnabled(enabled === true);
-  } catch (error) {
-    console.error("[admin] toggle sign-up failed:", error);
-    return actionError("Could not update this setting.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "toggle sign-up",
+      failureMessage: t("settingUpdateFailed"),
+    },
+    async () => {
+      await setPublicSignUpEnabled(enabled === true);
+      return actionOk();
+    },
+  );
 }
 
 export async function setPublicSharing(
   enabled: boolean,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await setPublicSharingEnabled(enabled === true);
-  } catch (error) {
-    console.error("[admin] toggle public sharing failed:", error);
-    return actionError("Could not update this setting.");
-  }
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "toggle public sharing",
+      failureMessage: t("settingUpdateFailed"),
+      revalidate: false,
+    },
+    async () => {
+      await setPublicSharingEnabled(enabled === true);
+      return actionOk();
+    },
+  );
 }
 
 export async function setOidcOnlyEnabled(
   enabled: boolean,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-  // Refuse to lock the door when there is no other way in.
-  if (enabled === true && !oidcEnabled()) {
-    return actionError(
-      "Configure an OIDC provider first — enabling this now would lock everyone out.",
-    );
-  }
-
-  try {
-    await setOidcOnly(enabled === true);
-  } catch (error) {
-    console.error("[admin] toggle oidc-only failed:", error);
-    return actionError("Could not update this setting.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "toggle oidc-only",
+      failureMessage: t("settingUpdateFailed"),
+    },
+    async () => {
+      // Refuse to lock the door when there is no other way in.
+      if (enabled === true && !oidcEnabled()) {
+        return actionError(t("oidcNotConfigured"));
+      }
+      await setOidcOnly(enabled === true);
+      return actionOk();
+    },
+  );
 }
 
 export async function updateBranding(
   input: BrandingValues,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-  const parsed = brandingSchema.safeParse(input);
-  if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
-  }
-
-  try {
-    await updateBrandingSettings(parsed.data);
-  } catch (error) {
-    console.error("[admin] update branding failed:", error);
-    return actionError("Could not save the branding settings.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "update branding",
+      failureMessage: t("brandingSaveFailed"),
+    },
+    async () => {
+      const parsed = brandingSchema.safeParse(input);
+      if (!parsed.success) {
+        return actionError(
+          parsed.error.issues[0]?.message ?? t("invalidInput"),
+        );
+      }
+      await updateBrandingSettings(parsed.data);
+      return actionOk();
+    },
+  );
 }
 
 export async function resetBranding(): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await clearBrandingSettings();
-  } catch (error) {
-    console.error("[admin] reset branding failed:", error);
-    return actionError("Could not reset the branding settings.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "reset branding",
+      failureMessage: t("brandingResetFailed"),
+    },
+    async () => {
+      await clearBrandingSettings();
+      return actionOk();
+    },
+  );
 }
-
-// Every action re-checks the admin role server-side — the /admin layout guard
-// protects pages only, never these POST endpoints.
 
 // --- users (delegated to the better-auth admin plugin, which also handles
 // session revocation on ban/removal) ---
@@ -125,164 +131,181 @@ export async function resetBranding(): Promise<ActionResult> {
 export async function createUser(
   input: CreateUserValues,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-  const parsed = createUserSchema.safeParse(input);
-  if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? "Invalid input.");
-  }
-
-  try {
-    await auth.api.createUser({
-      body: {
-        name: parsed.data.name,
-        email: parsed.data.email,
-        password: parsed.data.password,
-        role: parsed.data.role,
-      },
-      headers: await headers(),
-    });
-  } catch (error) {
-    console.error(`[admin] create user failed (${parsed.data.email}):`, error);
-    return actionError(
-      "Could not create this account — the email may already be in use.",
-    );
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "create user",
+      context: input.email,
+      failureMessage: t("createUserFailed"),
+    },
+    async () => {
+      const parsed = createUserSchema.safeParse(input);
+      if (!parsed.success) {
+        return actionError(
+          parsed.error.issues[0]?.message ?? t("invalidInput"),
+        );
+      }
+      await auth.api.createUser({
+        body: {
+          name: parsed.data.name,
+          email: parsed.data.email,
+          password: parsed.data.password,
+          role: parsed.data.role,
+        },
+        headers: await headers(),
+      });
+      return actionOk();
+    },
+  );
 }
 
 export async function setUserRole(
   userId: string,
   role: string,
 ): Promise<ActionResult> {
-  const admin = await currentAdmin();
-  if (!admin) return actionError(NOT_AUTHORIZED);
-  const parsedRole = roleSchema.safeParse(role);
-  if (!parsedRole.success) return actionError("Unknown role.");
-  if (userId === admin.id) {
-    return actionError("You cannot change your own role.");
-  }
-
-  try {
-    await auth.api.setRole({
-      body: { userId, role: parsedRole.data },
-      headers: await headers(),
-    });
-  } catch (error) {
-    console.error(`[admin] set role failed (user=${userId}):`, error);
-    return actionError("Could not change this user's role.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "set role",
+      context: `user=${userId}`,
+      failureMessage: t("setRoleFailed"),
+    },
+    async (admin) => {
+      const parsedRole = roleSchema.safeParse(role);
+      if (!parsedRole.success) return actionError(t("unknownRole"));
+      if (userId === admin.id) {
+        return actionError(t("cannotChangeOwnRole"));
+      }
+      await auth.api.setRole({
+        body: { userId, role: parsedRole.data },
+        headers: await headers(),
+      });
+      return actionOk();
+    },
+  );
 }
 
 export async function banUser(userId: string): Promise<ActionResult> {
-  const admin = await currentAdmin();
-  if (!admin) return actionError(NOT_AUTHORIZED);
-  if (userId === admin.id) return actionError("You cannot ban yourself.");
-
-  try {
-    await auth.api.banUser({ body: { userId }, headers: await headers() });
-  } catch (error) {
-    console.error(`[admin] ban failed (user=${userId}):`, error);
-    return actionError("Could not ban this user.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "ban this user",
+      context: `user=${userId}`,
+      failureMessage: t("banUserFailed"),
+    },
+    async (admin) => {
+      if (userId === admin.id) return actionError(t("cannotBanSelf"));
+      await auth.api.banUser({ body: { userId }, headers: await headers() });
+      return actionOk();
+    },
+  );
 }
 
 export async function unbanUser(userId: string): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await auth.api.unbanUser({ body: { userId }, headers: await headers() });
-  } catch (error) {
-    console.error(`[admin] unban failed (user=${userId}):`, error);
-    return actionError("Could not unban this user.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "unban this user",
+      context: `user=${userId}`,
+      failureMessage: t("unbanUserFailed"),
+    },
+    async () => {
+      await auth.api.unbanUser({ body: { userId }, headers: await headers() });
+      return actionOk();
+    },
+  );
 }
 
 export async function removeUser(userId: string): Promise<ActionResult> {
-  const admin = await currentAdmin();
-  if (!admin) return actionError(NOT_AUTHORIZED);
-  if (userId === admin.id) return actionError("You cannot remove yourself.");
-
-  try {
-    await auth.api.removeUser({ body: { userId }, headers: await headers() });
-  } catch (error) {
-    console.error(`[admin] remove failed (user=${userId}):`, error);
-    return actionError("Could not remove this user.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "remove this user",
+      context: `user=${userId}`,
+      failureMessage: t("removeUserFailed"),
+    },
+    async (admin) => {
+      if (userId === admin.id) {
+        return actionError(t("cannotRemoveSelf"));
+      }
+      await auth.api.removeUser({ body: { userId }, headers: await headers() });
+      return actionOk();
+    },
+  );
 }
 
 // --- groups ---
 
 export async function createGroup(name: string): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-  const parsed = groupNameSchema.safeParse(name);
-  if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? "Invalid name.");
-  }
-
-  try {
-    if ((await dalCreateGroup(parsed.data)) === "name-taken") {
-      return actionError("A group with that name already exists.");
-    }
-  } catch (error) {
-    console.error(`[admin] create group failed (${parsed.data}):`, error);
-    return actionError("Could not create this group.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "create this group",
+      context: name,
+      failureMessage: t("createGroupFailed"),
+    },
+    async () => {
+      const parsed = groupNameSchema.safeParse(name);
+      if (!parsed.success) {
+        return actionError(parsed.error.issues[0]?.message ?? t("invalidName"));
+      }
+      if ((await dalCreateGroup(parsed.data)) === "name-taken") {
+        return actionError(t("groupNameTaken"));
+      }
+      return actionOk();
+    },
+  );
 }
 
 export async function deleteGroup(groupId: string): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await dalDeleteGroup(groupId);
-  } catch (error) {
-    console.error(`[admin] delete group failed (group=${groupId}):`, error);
-    return actionError("Could not delete this group.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "delete this group",
+      context: `group=${groupId}`,
+      failureMessage: t("deleteGroupFailed"),
+    },
+    async () => {
+      await dalDeleteGroup(groupId);
+      return actionOk();
+    },
+  );
 }
 
 export async function addGroupMember(
   groupId: string,
   userId: string,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await dalAddGroupMember(groupId, userId);
-  } catch (error) {
-    console.error(`[admin] add member failed (group=${groupId}):`, error);
-    return actionError("Could not add this member.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "add this member",
+      context: `group=${groupId}`,
+      failureMessage: t("addMemberFailed"),
+    },
+    async () => {
+      await dalAddGroupMember(groupId, userId);
+      return actionOk();
+    },
+  );
 }
 
 export async function removeGroupMember(
   groupId: string,
   userId: string,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await dalRemoveGroupMember(groupId, userId);
-  } catch (error) {
-    console.error(`[admin] remove member failed (group=${groupId}):`, error);
-    return actionError("Could not remove this member.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "remove this member",
+      context: `group=${groupId}`,
+      failureMessage: t("removeMemberFailed"),
+    },
+    async () => {
+      await dalRemoveGroupMember(groupId, userId);
+      return actionOk();
+    },
+  );
 }
 
 // --- source grants ---
@@ -293,31 +316,35 @@ export async function upsertSourceGrant(input: {
   canEdit: boolean;
   canDelete: boolean;
 }): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-  const parsed = grantInputSchema.safeParse(input);
-  if (!parsed.success) return actionError("Invalid grant.");
-
-  try {
-    await upsertGrant(parsed.data);
-  } catch (error) {
-    console.error(`[admin] grant failed (source=${input.sourceId}):`, error);
-    return actionError("Could not save this grant.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "save this grant",
+      context: `source=${input.sourceId}`,
+      failureMessage: t("saveGrantFailed"),
+    },
+    async () => {
+      const parsed = grantInputSchema.safeParse(input);
+      if (!parsed.success) return actionError(t("invalidGrant"));
+      await upsertGrant(parsed.data);
+      return actionOk();
+    },
+  );
 }
 
 export async function removeSourceGrant(
   grantId: string,
 ): Promise<ActionResult> {
-  if (!(await currentAdmin())) return actionError(NOT_AUTHORIZED);
-
-  try {
-    await deleteGrant(grantId);
-  } catch (error) {
-    console.error(`[admin] remove grant failed (grant=${grantId}):`, error);
-    return actionError("Could not remove this grant.");
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "remove this grant",
+      context: `grant=${grantId}`,
+      failureMessage: t("removeGrantFailed"),
+    },
+    async () => {
+      await deleteGrant(grantId);
+      return actionOk();
+    },
+  );
 }

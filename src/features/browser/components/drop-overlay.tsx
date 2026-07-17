@@ -1,7 +1,11 @@
+"use client";
+
 import { Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /** Full-surface overlay shown while files are dragged over the browser. */
 export function DropOverlay() {
+  const t = useTranslations("browser.dropOverlay");
   return (
     <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10 backdrop-blur-[1px]">
       <div className="flex flex-col items-center gap-3 rounded-xl bg-background/95 px-6 py-5 text-center shadow-lg">
@@ -9,10 +13,8 @@ export function DropOverlay() {
           <Upload className="size-6" aria-hidden />
         </div>
         <div>
-          <p className="text-sm font-semibold">Drop to upload</p>
-          <p className="text-xs text-muted-foreground">
-            Release to add files to this folder
-          </p>
+          <p className="text-sm font-semibold">{t("title")}</p>
+          <p className="text-xs text-muted-foreground">{t("description")}</p>
         </div>
       </div>
     </div>

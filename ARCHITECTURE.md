@@ -47,6 +47,12 @@ src/features/     One folder per domain. Features may import from lib/,
                   grant editor, and the admin server actions.
   activity/       Audit log UI (admin-only page): action/source/search
                   filters and the operation → label/icon mapping.
+  shares/         Share-link management and the public /s/<token> viewer:
+                  the "Shared links" page (users see their own, admins all),
+                  revocation and the password-unlock form. Link creation
+                  lives in browser/ (share dialog); the pure logic both
+                  features need (expiry, password, token, unlock cookie) sits
+                  in src/lib/shares/.
 src/forms/        TanStack Form infrastructure (createFormHook): reusable
                   field components (fields/), form components (SubmitButton,
                   FormAlert) and error helpers. No domain knowledge.
@@ -66,14 +72,30 @@ src/lib/authz/    Pure permission logic — no I/O, unit-tested: mergeGrants,
                   resolveAccess (role + grant → capabilities), groups-claim
                   normalization.
 src/lib/storage/  Shared storage infrastructure: provider registry
-                  (providers.ts, pure data), region resolution, and the
-                  files-sdk client factory (client.ts, server-only) — used by
-                  both features and the API routes.
+                  (providers.ts, pure data), region resolution, the files-sdk
+                  client factory (client.ts, server-only) and the streaming
+                  fallback (stream.ts — Range-aware body streaming for
+                  providers without presigned URLs) — used by both features
+                  and the API routes.
+src/lib/shares/   Share-link logic shared by browser/ (creation) and shares/
+                  (management) plus the public routes: expiry, password
+                  hashing, token generation, proof-of-password unlock cookie.
+src/lib/branding/ White-label branding shared by admin/ (settings form), the
+                  app shell and the public logo route.
 src/lib/          Shared low-level modules: prisma client, crypto, env,
-                  formatting, ActionResult, apiError, path helpers.
+                  formatting, ActionResult, apiError, path helpers, SMTP
+                  mailer (mail.ts), clipboard helper (clipboard.ts).
 src/components/   App shell (layout/), providers (providers/), shared widgets
                   (confirm-dialog) and shadcn/ui primitives (ui/, lint off).
+src/i18n/         next-intl configuration: config.ts (pure — locales, default,
+                  cookie name), request.ts (getRequestConfig: cookie, else
+                  Accept-Language, else default, loads messages/<locale>.json),
+                  negotiation.ts (pure Accept-Language parsing, unit-tested).
 src/generated/    Prisma client output (gitignored, regenerated on install).
+messages/         en.json / fr.json — one namespace per feature area (common,
+                  layout, auth, account, browser, sources, admin, activity,
+                  shares). English is the source of truth; both files must
+                  carry the same key tree.
 prisma/           Schema + versioned SQL migrations (migrations/).
 ```
 
@@ -101,12 +123,17 @@ Every server entry point re-validates (a layout check protects nothing else):
 
 | Entry | Guard |
 |---|---|
-| `(app)` layout, `/` | `requireSession` + `listSourcesFor` |
+| `(app)` layout, `/`, `/account`, `/shares` | `requireSession` (+ `listSourcesFor` for the sidebar) |
 | `/source/[id]` | `requireSourceAccess` → `notFound()` |
-| `/activity`, `/admin/*`, route `config`, source actions, admin actions | admin only |
-| 7 browser write actions | `withWriteAccess` (session + grant edit/delete) |
-| Routes `details/download/preview/share/text/thumbnail` | `requireSourceAccess` → 404 |
+| `/activity`, `/admin/*`, source actions | admin only (`requireAdmin` / `currentAdmin()`) |
+| admin actions | `withAdmin` (features/admin/server/guard.ts) |
+| 8 browser write actions | `withWriteAccess` (session + grant edit/delete) |
+| `copyEntriesToSource` | `requireSourceAccess` on both ends + `canEdit` on the destination |
+| `createShareLink` | session + `requireSourceAccess` + instance-wide public-sharing setting |
+| Routes `details/download/folders/preview/search/text/thumbnail/zip` | `requireSourceAccess` → 404 |
 | Route `upload` (POST) | `requireSourceAccess` + `canEdit` → 403 |
+| `/s/[token]`, `api/s/[token]/download` | share token + expiry (+ unlock cookie when password-protected) → 404 |
+| `api/branding/logo` | public by design (login page, share viewer) |
 | `/api/health`, `/api/auth/*`, `/sign-in`, `/sign-up` | public |
 | `proxy.ts` | optimistic cookie check only — **never** a security boundary |
 
@@ -121,8 +148,8 @@ callers return 404/notFound() and never reveal that a source exists.
   a discriminated union — callers narrow on `result.ok`. Actions zod-parse
   their input first, stay thin, and return only what the UI needs (never a
   raw DB record). Auth/permission checks happen inside the action path
-  (`withWriteAccess` for browser writes, `currentAdmin()` for sources/admin
-  actions), not in the page.
+  (`withWriteAccess` for browser writes, `withAdmin` for admin actions,
+  `currentAdmin()` for source actions), not in the page.
 - **Route handlers all fail with `apiError(status, message)`**
   (`{ error: string }` JSON) — the fetchers in `api/client.ts` rely on it.
 - **Query keys live only in `api/queries.ts`** as `queryOptions` factories
@@ -134,6 +161,15 @@ callers return 404/notFound() and never reveal that a source exists.
 - **Validation has one source of truth per input** (zod, in
   `features/*/lib/schema(s).ts`): the form validates it client-side, the
   action re-parses it server-side. Never hand-validate in two places.
+- **Every UI string goes through next-intl** (`useTranslations` in client
+  components, `getTranslations` in RSCs, `generateMetadata`, server actions
+  and route handlers). Pure modules (`features/*/lib/`, `src/lib/`) never
+  import next-intl — they expose message **keys** (e.g.
+  `features/activity/lib/operation-labels.ts`) and the component resolves
+  them at render with `t(key)`. Server-action errors are translated
+  server-side before they reach the `ActionResult`. Locale resolution is a
+  cookie, else `Accept-Language`, else English — no `[locale]` route segment,
+  no middleware. Out of scope: zod messages, emails, server logs.
 
 ## Key decisions
 
@@ -180,10 +216,12 @@ callers return 404/notFound() and never reveal that a source exists.
   share links and source config are GET routes returning JSON.
 - **Presigned URLs are capability-gated**: providers with no signing
   primitive (SFTP, FTP, WebDAV — `files.capabilities.signedUrl.supported`)
-  make download/preview/thumbnail stream the body through the app instead
-  (`features/browser/server/stream.ts`, Range-aware, inline HTML/SVG forced
-  to attachment), and the share action is hidden (`canShare` prop) and
-  refused server-side. After a
+  make download/preview/thumbnail — and share-link downloads — stream the
+  body through the app instead (`src/lib/storage/stream.ts`, Range-aware,
+  inline HTML/SVG forced to attachment). Share links themselves are not
+  capability-gated: any user with read access can create one (the `canShare`
+  prop only reflects the instance-wide public-sharing setting, re-checked in
+  `createShareLink`). After a
   mutation the browser calls `router.refresh()` (the listing is RSC-rendered);
   source mutations revalidate with `revalidatePath` (the sidebar lives in the
   layout).
@@ -214,8 +252,8 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
   `features/sources/components/provider-icons.ts`.
 - **Add a server action?** In the feature's `actions.ts`: zod-parse the
   input (schema in `lib/`), delegate to a `server/` module or the DAL, return
-  `ActionResult`. Wrap browser writes in `withWriteAccess`; gate
-  admin-only actions with `currentAdmin()`.
+  `ActionResult`. Wrap browser writes in `withWriteAccess`, admin actions in
+  `withAdmin`; gate source actions with `currentAdmin()`.
 - **Guard a new page or route?** Pages: `requireSession()` /
   `requireAdmin()` (`src/lib/auth/session.ts`); anything source-scoped:
   `requireSourceAccess(id)` (`src/lib/auth/access.ts`) and answer 404 on
@@ -232,6 +270,14 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
   regenerate the client (into `src/generated/`). Commit the new folder under
   `prisma/migrations/`. Production applies it automatically on the next
   deploy.
+- **Add a translated string?** Add the key to **both**
+  `messages/en.json` and `messages/fr.json`, under the namespace matching the
+  feature (`common`, `layout`, `auth`, `account`, `browser`, `sources`,
+  `admin`, `activity`, `shares`). Client component: `useTranslations(ns)` +
+  `t("key")`; RSC/`generateMetadata`/server action/route handler:
+  `await getTranslations(ns)`. ICU for interpolation/plurals (`{count,
+  plural, one {# item} other {# items}}`), never string concatenation. A
+  pure `lib/` module exposes the key, not the resolved text.
 - **Audit a new write action?** Call `recordOperation` from
   `src/lib/dal/operations.ts` after the write succeeds, and add a label/icon
   in `features/activity/lib/operation-labels.ts`.

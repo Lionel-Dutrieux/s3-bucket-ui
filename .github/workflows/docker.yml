@@ -29,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # arm64 builds run through QEMU emulation.
+      - uses: docker/setup-qemu-action@v3
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
@@ -55,9 +58,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          # The Dokploy target runs amd64; add linux/arm64 here if you ever
-          # deploy to ARM (roughly doubles the build time via QEMU).
-          platforms: linux/amd64
+          # arm64 covers Raspberry Pi / Ampere / Apple-silicon self-hosters;
+          # it builds via QEMU, which roughly doubles the build time.
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

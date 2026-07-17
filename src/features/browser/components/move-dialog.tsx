@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { moveEntries } from "@/features/browser/actions";
+import { usePendingAction } from "@/features/browser/hooks/use-pending-action";
 import type { EntryTarget } from "@/features/browser/lib/move";
 
 export interface MoveRequest {
@@ -35,24 +36,20 @@ export function MoveDialog({
   onOpenChange: (open: boolean) => void;
   onMoved: () => void;
 }) {
-  const [pending, setPending] = useState(false);
+  const t = useTranslations("browser.moveDialog");
+  const tCommon = useTranslations("common");
+  const { pending, track } = usePendingAction();
 
   const handleMove = async () => {
     if (!request) return;
-    setPending(true);
-    const result = await moveEntries(
-      sourceId,
-      request.targets,
-      request.destPrefix,
+    const result = await track(() =>
+      moveEntries(sourceId, request.targets, request.destPrefix),
     );
-    setPending(false);
     if (!result.ok) {
       toast.error(result.error);
       return;
     }
-    toast.success(
-      `Moved ${request.count} item${request.count === 1 ? "" : "s"}`,
-    );
+    toast.success(t("movedToast", { count: request.count }));
     onOpenChange(false);
     onMoved();
   };
@@ -67,16 +64,17 @@ export function MoveDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="break-all">
-            Move {request?.count} item{request?.count === 1 ? "" : "s"} into
-            &ldquo;{request?.destLabel}&rdquo;?
+            {t("title", {
+              count: request?.count ?? 0,
+              destLabel: request?.destLabel ?? "",
+            })}
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            Moving copies each object to the destination and deletes the
-            original. Folders move everything inside them.
-          </AlertDialogDescription>
+          <AlertDialogDescription>{t("description")}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>
+            {tCommon("cancel")}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={(event) => {
               event.preventDefault();
@@ -84,7 +82,7 @@ export function MoveDialog({
             }}
             disabled={pending}
           >
-            {pending ? "Moving…" : "Move"}
+            {pending ? t("moving") : t("move")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

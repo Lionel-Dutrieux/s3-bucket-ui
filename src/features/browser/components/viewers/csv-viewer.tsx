@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { browserQueries } from "@/features/browser/api/queries";
 import { parseCsvPreview } from "@/features/browser/lib/csv";
@@ -12,6 +13,7 @@ import type { ViewerProps } from "./types";
 const CSV_PREVIEW_ROWS = 500;
 
 export function CsvViewer({ sourceId, file }: ViewerProps) {
+  const t = useTranslations("browser.viewers");
   const query = useQuery({
     ...browserQueries.textPreview(sourceId, file.key),
     enabled: file.size > 0,
@@ -27,21 +29,21 @@ export function CsvViewer({ sourceId, file }: ViewerProps) {
 
   if (file.size === 0) {
     return (
-      <p className="p-6 text-sm text-muted-foreground">This file is empty.</p>
+      <p className="p-6 text-sm text-muted-foreground">{t("emptyFile")}</p>
     );
   }
   if (query.isPending) {
     return (
       <Loader2
         className="size-6 animate-spin text-muted-foreground"
-        aria-label="Loading preview"
+        aria-label={t("loadingPreview")}
       />
     );
   }
   if (query.error || !preview) {
     return (
       <p className="p-6 text-sm text-muted-foreground">
-        {query.error?.message ?? "Could not load a preview for this file."}
+        {query.error?.message ?? t("previewUnavailable")}
       </p>
     );
   }
@@ -51,7 +53,7 @@ export function CsvViewer({ sourceId, file }: ViewerProps) {
       {query.data?.truncated ? <TruncatedBanner /> : null}
       {preview.truncatedRows ? (
         <p className="border-b bg-muted px-4 py-1.5 text-xs text-muted-foreground">
-          Showing the first {CSV_PREVIEW_ROWS} rows.
+          {t("csvTruncatedRows", { count: CSV_PREVIEW_ROWS })}
         </p>
       ) : null}
       <table className="w-full border-collapse text-xs">

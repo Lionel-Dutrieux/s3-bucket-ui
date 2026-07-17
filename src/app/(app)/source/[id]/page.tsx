@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { FileBrowser } from "@/features/browser/components/file-browser";
@@ -28,7 +29,8 @@ export async function generateMetadata({
 }: SourcePageProps): Promise<Metadata> {
   const { id } = await params;
   const result = await requireSourceAccess(id);
-  return { title: result?.source.name ?? "Source" };
+  const t = await getTranslations("browser.page");
+  return { title: result?.source.name ?? t("metaFallbackTitle") };
 }
 
 export default async function SourcePage({
@@ -36,6 +38,8 @@ export default async function SourcePage({
   searchParams,
 }: SourcePageProps) {
   const { id } = await params;
+  const t = await getTranslations("browser.page");
+  const fileTypeT = await getTranslations("browser.fileTypes");
   const sp = await searchParams;
   const prefix = typeof sp.prefix === "string" ? sp.prefix : "";
   const cursor = typeof sp.cursor === "string" ? sp.cursor : undefined;
@@ -77,7 +81,7 @@ export default async function SourcePage({
         <div className="ml-auto flex items-center gap-2">
           {itemCount > 0 ? (
             <span className="text-xs text-muted-foreground tabular-nums max-sm:hidden">
-              {itemCount} item{itemCount === 1 ? "" : "s"}
+              {t("itemCount", { count: itemCount })}
               {listing.ok && listing.nextCursor ? "+" : ""}
             </span>
           ) : null}
@@ -93,9 +97,7 @@ export default async function SourcePage({
           <FilteredEmptyState
             sourceId={source.id}
             prefix={prefix}
-            typeLabel={
-              FILE_CATEGORIES.find((c) => c.id === activeType)?.label ?? ""
-            }
+            typeLabel={activeType ? fileTypeT(activeType) : ""}
           />
         ) : (
           <div className="p-4 pt-3">
@@ -124,7 +126,7 @@ export default async function SourcePage({
                       },
                     }}
                   >
-                    Next page
+                    {t("nextPage")}
                     <ChevronRight aria-hidden />
                   </Link>
                 </Button>
@@ -137,27 +139,33 @@ export default async function SourcePage({
   );
 }
 
-const ERROR_COPY: Record<ListErrorReason, { title: string; body: string }> = {
-  credentials: {
-    title: "Access denied",
-    body: "The bucket rejected the credentials for this source. They may have been rotated or revoked — edit the source to update them.",
-  },
-  "bucket-missing": {
-    title: "Bucket not found",
-    body: "The bucket this source points to doesn't exist anymore. It may have been renamed or deleted — edit the source to fix the bucket name.",
-  },
-  network: {
-    title: "Endpoint unreachable",
-    body: "The endpoint didn't respond. Check the endpoint URL on this source, or your network connection.",
-  },
-  unknown: {
-    title: "Couldn't load this folder",
-    body: "The bucket returned an unexpected error. Details were written to the server logs.",
-  },
-};
+async function errorCopy(
+  reason: ListErrorReason,
+): Promise<{ title: string; body: string }> {
+  const t = await getTranslations("browser.errors");
+  const copy: Record<ListErrorReason, { title: string; body: string }> = {
+    credentials: {
+      title: t("credentialsTitle"),
+      body: t("credentialsBody"),
+    },
+    "bucket-missing": {
+      title: t("bucketMissingTitle"),
+      body: t("bucketMissingBody"),
+    },
+    network: {
+      title: t("networkTitle"),
+      body: t("networkBody"),
+    },
+    unknown: {
+      title: t("unknownTitle"),
+      body: t("unknownBody"),
+    },
+  };
+  return copy[reason];
+}
 
-function ErrorState({ reason }: { reason: ListErrorReason }) {
-  const copy = ERROR_COPY[reason];
+async function ErrorState({ reason }: { reason: ListErrorReason }) {
+  const copy = await errorCopy(reason);
   return (
     <div className="flex h-full items-center justify-center p-6">
       <div className="flex max-w-sm flex-col items-center gap-3 text-center">
@@ -171,7 +179,7 @@ function ErrorState({ reason }: { reason: ListErrorReason }) {
   );
 }
 
-function FilteredEmptyState({
+async function FilteredEmptyState({
   sourceId,
   prefix,
   typeLabel,
@@ -180,6 +188,7 @@ function FilteredEmptyState({
   prefix: string;
   typeLabel: string;
 }) {
+  const t = await getTranslations("browser.filteredEmpty");
   return (
     <div className="flex h-full items-center justify-center p-6">
       <div className="flex max-w-sm flex-col items-center gap-3 text-center">
@@ -187,11 +196,9 @@ function FilteredEmptyState({
           <ListFilter className="size-5" aria-hidden />
         </div>
         <h2 className="text-base font-semibold">
-          No {typeLabel.toLowerCase()} in this folder
+          {t("title", { type: typeLabel.toLowerCase() })}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Nothing at this level matches the filter.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("description")}</p>
         <Button variant="outline" size="sm" asChild className="mt-1">
           <Link
             href={{
@@ -199,7 +206,7 @@ function FilteredEmptyState({
               query: prefix ? { prefix } : undefined,
             }}
           >
-            Clear filter
+            {t("clearFilter")}
           </Link>
         </Button>
       </div>

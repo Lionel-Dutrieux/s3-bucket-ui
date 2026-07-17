@@ -1,0 +1,47 @@
+# Self-contained demo stack: the app + its PostgreSQL in one command.
+#
+#   ENCRYPTION_KEY=$(openssl rand -hex 32) \
+#   BETTER_AUTH_SECRET=$(openssl rand -base64 32) \
+#   docker compose -f docker-compose.demo.yml up -d
+#
+# Then open http://localhost:3000 and sign up — the very first account
+# becomes the admin. Keep ENCRYPTION_KEY somewhere safe: source credentials
+# are encrypted with it and cannot be recovered without it.
+#
+# For a production deployment (reverse proxy, backups, your own PostgreSQL),
+# see docker-compose.yml (Dokploy-ready) and docs/operations.md.
+
+services:
+  bucket-ui:
+    # :latest = stable releases; :canary = every master commit; :1.2.3 to pin.
+    # Swap for `build: .` to build from source instead.
+    image: ghcr.io/lionel-dutrieux/s3-bucket-ui:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Generate one with: openssl rand -hex 32}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Generate one with: openssl rand -base64 32}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      DATABASE_URL: postgresql://bucket_ui:bucket_ui@db:5432/bucket_ui
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bucket_ui
+      POSTGRES_PASSWORD: bucket_ui
+      POSTGRES_DB: bucket_ui
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bucket_ui -d bucket_ui"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:

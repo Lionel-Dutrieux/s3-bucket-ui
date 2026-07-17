@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   Dialog,
@@ -32,6 +33,7 @@ export function SourceDialog({
   edit?: { sourceId: string; initialValues: SourceFormValues };
 }) {
   const router = useRouter();
+  const t = useTranslations("sources");
   const initialProvider = edit?.initialValues.provider ?? null;
   const [provider, setProvider] = useState<string | null>(initialProvider);
   const [picking, setPicking] = useState(!edit);
@@ -59,23 +61,25 @@ export function SourceDialog({
           {showPicker ? (
             <>
               <DialogTitle>
-                {edit ? "Change provider" : "Add source"}
+                {edit ? t("dialog.changeProviderTitle") : t("addSource")}
               </DialogTitle>
               <DialogDescription>
-                Pick where your files live — connection details come next.
+                {t("dialog.pickProviderDescription")}
               </DialogDescription>
             </>
           ) : (
             <>
               <DialogTitle>
                 {edit
-                  ? `Edit ${edit.initialValues.name}`
-                  : `Connect ${getProvider(provider)?.label ?? provider}`}
+                  ? t("editPage.title", { name: edit.initialValues.name })
+                  : t("dialog.connectTitle", {
+                      provider: getProvider(provider)?.label ?? provider,
+                    })}
               </DialogTitle>
               <DialogDescription>
                 {edit
-                  ? "The connection is verified again when you save."
-                  : "Credentials are encrypted before they are stored."}
+                  ? t("connectionVerifiedNote")
+                  : t("dialog.credentialsEncryptedNote")}
               </DialogDescription>
             </>
           )}

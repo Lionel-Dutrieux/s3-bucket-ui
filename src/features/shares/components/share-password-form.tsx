@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { z } from "zod";
 import { unlockShare } from "@/features/shares/actions";
@@ -11,6 +12,7 @@ const schema = z.object({
 });
 
 export function SharePasswordForm({ token }: { token: string }) {
+  const t = useTranslations("shares.publicViewer");
   const router = useRouter();
   const form = useAppForm({
     defaultValues: { password: "" },
@@ -34,13 +36,11 @@ export function SharePasswordForm({ token }: { token: string }) {
       }}
       className="space-y-4"
     >
-      <p className="text-sm text-muted-foreground">
-        This link is password-protected.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("passwordProtected")}</p>
       <form.AppField name="password">
         {(field) => (
           <field.TextField
-            label="Password"
+            label={t("passwordLabel")}
             type="password"
             autoComplete="off"
             autoFocus
@@ -48,7 +48,9 @@ export function SharePasswordForm({ token }: { token: string }) {
         )}
       </form.AppField>
       <form.AppForm>
-        <form.SubmitButton pendingLabel="Unlocking…">Unlock</form.SubmitButton>
+        <form.SubmitButton pendingLabel={t("unlocking")}>
+          {t("unlock")}
+        </form.SubmitButton>
       </form.AppForm>
     </form>
   );

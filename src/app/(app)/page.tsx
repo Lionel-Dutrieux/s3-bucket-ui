@@ -1,5 +1,6 @@
 import { ChevronRight, Cylinder, Plus } from "lucide-react";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/empty-state";
 import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { PageHeader } from "@/components/page-header";
@@ -12,19 +13,17 @@ import { getProvider } from "@/lib/storage/providers";
 export default async function HomePage() {
   const session = await requireSession();
   const sources = await listSourcesFor(session.user);
+  const t = await getTranslations("common.home");
 
   return (
     <>
-      <AppHeader title="All sources" />
+      <AppHeader title={t("headerTitle")} />
 
       <PageContainer>
-        <PageHeader
-          title="Sources"
-          description="Every bucket you have access to. Pick one to start browsing."
-        >
+        <PageHeader title={t("title")} description={t("description")}>
           {sources.length > 0 ? (
             <span className="text-xs text-muted-foreground tabular-nums">
-              {sources.length} source{sources.length === 1 ? "" : "s"}
+              {t("sourceCount", { count: sources.length })}
             </span>
           ) : null}
         </PageHeader>
@@ -35,20 +34,20 @@ export default async function HomePage() {
             tone="primary"
             title={
               session.user.role === "admin"
-                ? "No sources yet"
-                : "No sources available"
+                ? t("emptyTitleAdmin")
+                : t("emptyTitleUser")
             }
             description={
               session.user.role === "admin"
-                ? "Connect a storage bucket to start browsing your files."
-                : "An admin needs to grant you access to a source first."
+                ? t("emptyDescriptionAdmin")
+                : t("emptyDescriptionUser")
             }
           >
             {session.user.role === "admin" ? (
               <Button size="sm" className="mt-1" asChild>
                 <Link href="/admin/sources">
                   <Plus aria-hidden />
-                  Add source
+                  {t("addSource")}
                 </Link>
               </Button>
             ) : null}

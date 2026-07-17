@@ -1,0 +1,849 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "loading": "Chargement…",
+    "metaDescription": "Gestionnaire de fichiers pour vos buckets de stockage — lecture seule par défaut.",
+    "errorPage": {
+      "title": "Une erreur est survenue",
+      "description": "Une erreur inattendue s'est produite. Réessayez — si le problème persiste, consultez les journaux du serveur.",
+      "descriptionWithDigest": "Une erreur inattendue s'est produite. Réessayez — si le problème persiste, consultez les journaux du serveur (référence {digest}).",
+      "retry": "Réessayer"
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "Cette page n'existe pas — la source a peut-être été supprimée.",
+      "backToSources": "Retour aux sources"
+    },
+    "home": {
+      "headerTitle": "Toutes les sources",
+      "title": "Sources",
+      "description": "Tous les buckets auxquels vous avez accès. Choisissez-en un pour commencer à parcourir.",
+      "sourceCount": "{count, plural, one {# source} other {# sources}}",
+      "emptyTitleAdmin": "Aucune source pour le moment",
+      "emptyDescriptionAdmin": "Connectez un bucket de stockage pour commencer à parcourir vos fichiers.",
+      "emptyTitleUser": "Aucune source disponible",
+      "emptyDescriptionUser": "Un administrateur doit d'abord vous donner accès à une source.",
+      "addSource": "Ajouter une source"
+    }
+  },
+  "layout": {
+    "sidebar": {
+      "search": "Rechercher…",
+      "otherGroup": "Autre",
+      "sourcesGroup": "Sources",
+      "noSourcesAdmin": "Aucune source pour le moment — ajoutez-en une depuis <link>Administration → Sources</link>.",
+      "noSourcesUser": "Aucune source disponible pour le moment. Un administrateur doit vous donner accès.",
+      "sharedLinks": "Liens partagés",
+      "activity": "Activité",
+      "admin": "Administration",
+      "theme": "Thème"
+    },
+    "commandPalette": {
+      "title": "Palette de commandes",
+      "description": "Accéder à une source ou en ajouter une nouvelle",
+      "searchPlaceholder": "Rechercher des sources…",
+      "noResults": "Aucun résultat.",
+      "sourcesHeading": "Sources",
+      "administrationHeading": "Administration",
+      "addSource": "Ajouter une source",
+      "openAdmin": "Ouvrir l'administration"
+    },
+    "themeToggle": {
+      "light": "Thème clair",
+      "dark": "Thème sombre",
+      "system": "Thème système",
+      "groupLabel": "Thème"
+    }
+  },
+  "account": {
+    "metaTitle": "Compte",
+    "headerTitle": "Compte",
+    "title": "Votre compte",
+    "description": "Connecté en tant que {email}.",
+    "profileSection": "Profil",
+    "passwordSection": "Mot de passe",
+    "sessionsSection": "Sessions",
+    "sessionsDescription": "Tous les endroits où ce compte est connecté. Révoquer une session déconnecte immédiatement cet appareil.",
+    "profile": {
+      "nameLabel": "Nom",
+      "saveChanges": "Enregistrer les modifications",
+      "saving": "Enregistrement…",
+      "updateError": "Impossible de mettre à jour votre profil.",
+      "updateSuccess": "Profil mis à jour"
+    },
+    "changePassword": {
+      "currentPasswordLabel": "Mot de passe actuel",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "submit": "Changer le mot de passe",
+      "submitPending": "Modification…",
+      "changeError": "Impossible de changer le mot de passe.",
+      "changeSuccess": "Mot de passe modifié — les autres sessions ont été déconnectées"
+    },
+    "sessions": {
+      "unknownDevice": "Appareil inconnu",
+      "unknownOs": "OS inconnu",
+      "thisDevice": "cet appareil",
+      "activeAt": "actif {time}",
+      "revokeAria": "Révoquer cette session",
+      "revokeError": "Impossible de révoquer cette session.",
+      "revokeSuccess": "Session révoquée"
+    }
+  },
+  "auth": {
+    "userMenu": {
+      "language": "Langue",
+      "administrator": "Administrateur",
+      "member": "Membre",
+      "account": "Compte",
+      "signOut": "Se déconnecter"
+    },
+    "layout": {
+      "subtitle": "Gestionnaire de fichiers"
+    },
+    "signIn": {
+      "metaTitle": "Connexion",
+      "title": "Connexion",
+      "oidcOnlySubtitle": "Cette instance utilise la connexion via {provider}.",
+      "subtitle": "Bon retour — connectez-vous pour parcourir vos sources.",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "submitPending": "Connexion…",
+      "or": "ou",
+      "noAccount": "Pas encore de compte ?",
+      "signUpLink": "S'inscrire",
+      "errorFallback": "Échec de la connexion."
+    },
+    "signUp": {
+      "metaTitle": "Inscription",
+      "disabledTitle": "Les inscriptions sont désactivées",
+      "disabledDescription": "Les comptes sont créés par un administrateur sur cette instance — demandez-lui de créer le vôtre.",
+      "backToSignIn": "Retour à la connexion",
+      "title": "Créer votre compte",
+      "subtitle": "Les nouveaux comptes démarrent sans accès — un administrateur doit vous donner accès à des sources.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Ada Lovelace",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Mot de passe",
+      "submit": "Créer le compte",
+      "submitPending": "Création du compte…",
+      "or": "ou",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signInLink": "Se connecter",
+      "errorFallback": "Échec de l'inscription."
+    },
+    "forgotPassword": {
+      "metaTitle": "Réinitialiser le mot de passe",
+      "sentTitle": "Consultez votre boîte de réception",
+      "sentDescription": "Si un compte existe pour cette adresse, un lien de réinitialisation est en route. Il expire dans une heure.",
+      "backToSignIn": "Retour à la connexion",
+      "title": "Réinitialisez votre mot de passe",
+      "subtitle": "Indiquez l'e-mail de votre compte — nous vous enverrons un lien de réinitialisation.",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Envoyer le lien",
+      "submitPending": "Envoi…",
+      "remembered": "Vous vous en souvenez ?",
+      "signInLink": "Se connecter",
+      "errorFallback": "Impossible d'envoyer l'e-mail de réinitialisation."
+    },
+    "resetPassword": {
+      "metaTitle": "Réinitialiser le mot de passe",
+      "invalidTitle": "Ce lien n'est plus valide",
+      "invalidDescription": "Les liens de réinitialisation expirent au bout d'une heure et ne fonctionnent qu'une fois. Demandez-en un nouveau.",
+      "requestNewLink": "Demander un nouveau lien",
+      "title": "Choisissez un nouveau mot de passe",
+      "subtitle": "Les autres appareils restent connectés jusqu'à l'expiration de leur session.",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "submit": "Mettre à jour le mot de passe",
+      "submitPending": "Mise à jour…",
+      "successToast": "Mot de passe mis à jour — connectez-vous avec le nouveau",
+      "errorFallback": "Impossible de réinitialiser le mot de passe — le lien a peut-être expiré."
+    },
+    "oidc": {
+      "continueWith": "Continuer avec {provider}",
+      "errorFallback": "Impossible de joindre {provider} — réessayez."
+    }
+  },
+  "browser": {
+    "page": {
+      "metaFallbackTitle": "Source",
+      "itemCount": "{count, plural, one {# élément} other {# éléments}}",
+      "nextPage": "Page suivante"
+    },
+    "errors": {
+      "credentialsTitle": "Accès refusé",
+      "credentialsBody": "Le bucket a rejeté les identifiants de cette source. Ils ont peut-être été renouvelés ou révoqués — modifiez la source pour les mettre à jour.",
+      "bucketMissingTitle": "Bucket introuvable",
+      "bucketMissingBody": "Le bucket auquel pointe cette source n'existe plus. Il a peut-être été renommé ou supprimé — modifiez la source pour corriger le nom du bucket.",
+      "networkTitle": "Point de terminaison injoignable",
+      "networkBody": "Le point de terminaison n'a pas répondu. Vérifiez son URL sur cette source, ou votre connexion réseau.",
+      "unknownTitle": "Impossible de charger ce dossier",
+      "unknownBody": "Le bucket a renvoyé une erreur inattendue. Les détails ont été écrits dans les journaux du serveur.",
+      "editDenied": "Vous n'êtes pas autorisé à modifier cette source.",
+      "addDenied": "Vous n'êtes pas autorisé à ajouter des fichiers à cette source.",
+      "deleteDenied": "Vous n'êtes pas autorisé à supprimer depuis cette source.",
+      "addDeniedOther": "Vous n'êtes pas autorisé à ajouter des fichiers à cette autre source.",
+      "invalidName": "Nom invalide.",
+      "invalidFolder": "Dossier invalide.",
+      "invalidFile": "Fichier invalide.",
+      "invalidDestination": "Destination invalide.",
+      "nothingSelected": "Rien n'est sélectionné.",
+      "sourceNotFound": "Source introuvable.",
+      "destinationNotFound": "Destination introuvable.",
+      "nameExists": "Un élément portant ce nom existe déjà ici.",
+      "folderNameExists": "Un dossier portant ce nom existe déjà ici.",
+      "renameFolderFailure": "Impossible de renommer ce dossier — certains objets ont peut-être déjà été déplacés, actualisez pour vérifier.",
+      "duplicateTooLarge": "Ce fichier est trop volumineux pour être dupliqué sur ce fournisseur (512 Mo max).",
+      "tooManyDuplicates": "Trop de copies de ce fichier existent déjà ici — renommez-en une d'abord.",
+      "selectAtMost": "Sélectionnez au maximum {max} éléments à la fois.",
+      "someItemsFailedToDelete": "{count, plural, one {# élément n'a pas pu être supprimé} other {# éléments n'ont pas pu être supprimés}}.",
+      "copyAtMost": "Copiez au maximum {max} éléments à la fois.",
+      "moveAtMost": "Déplacez au maximum {max} éléments à la fois.",
+      "copySelectionFailed": "Impossible de copier la sélection — réessayez.",
+      "moveFailure": "Impossible de tout déplacer — certains éléments ont peut-être déjà été déplacés, actualisez pour vérifier.",
+      "destinationConflict": "Existe déjà dans la destination : {names}.",
+      "selfMove": "Vous ne pouvez pas déplacer un dossier dans lui-même.",
+      "invalidShareOptions": "Options de partage invalides.",
+      "onlyFilesShareable": "Seuls les fichiers peuvent être partagés.",
+      "sharingDisabled": "Les liens de partage publics sont désactivés sur cette instance.",
+      "fileNoLongerExists": "Ce fichier n'existe plus.",
+      "sourceUnreachable": "Impossible d'atteindre cette source.",
+      "actionFailed": "Impossible d'effectuer cette action — réessayez.",
+      "folderTooLargeToMove": "Ce dossier contient plus de {max} objets — trop volumineux pour être déplacé en une fois.",
+      "selectionTooLargeToCopy": "Cette sélection contient plus de {max} objets — trop volumineuse pour être copiée en une fois.",
+      "objectsNotDeleted": "{count, plural, one {# objet n'a pas pu être supprimé} other {# objets n'ont pas pu être supprimés}}.",
+      "folderTooLargeToDelete": "Ce dossier est trop volumineux pour être supprimé en une fois — des objets restent, relancez l'opération."
+    },
+    "filteredEmpty": {
+      "title": "Aucun élément « {type} » dans ce dossier",
+      "description": "Rien à ce niveau ne correspond au filtre.",
+      "clearFilter": "Effacer le filtre"
+    },
+    "fileTypes": {
+      "allTypes": "Tous les types",
+      "type": "Type",
+      "image": "Images",
+      "video": "Vidéos",
+      "audio": "Audio",
+      "document": "Documents",
+      "pdf": "PDF",
+      "spreadsheet": "Tableurs",
+      "code": "Code",
+      "archive": "Archives"
+    },
+    "toolbar": {
+      "filterPlaceholder": "Filtrer par nom",
+      "matchCount": "{count, plural, one {# résultat} other {# résultats}}",
+      "searchSource": "Rechercher dans la source",
+      "upload": "Envoyer"
+    },
+    "columns": {
+      "name": "Nom",
+      "size": "Taille",
+      "modified": "Modifié",
+      "selectAll": "Tout sélectionner",
+      "selectEntry": "Sélectionner {name}",
+      "previewFile": "Aperçu de {name}",
+      "detailsOf": "Détails de {name}",
+      "downloadZipTitle": "Télécharger en ZIP",
+      "downloadZipAria": "Télécharger {name} en ZIP",
+      "downloadTitle": "Télécharger",
+      "downloadAria": "Télécharger {name}",
+      "sortByAria": "Trier par {column}"
+    },
+    "grid": {
+      "foldersHeading": "Dossiers",
+      "filesHeading": "Fichiers",
+      "folderLabel": "Dossier",
+      "openFolder": "Ouvrir {name}",
+      "previewFile": "Aperçu de {name}",
+      "detailsOf": "Détails de {name}",
+      "selectEntry": "Sélectionner {name}"
+    },
+    "fileBrowser": {
+      "noMatchesTitle": "Aucun résultat",
+      "noMatchesDescription": "Rien dans ce dossier ne correspond à « {query} ».",
+      "clearFilter": "Effacer le filtre",
+      "emptyFolderTitle": "Ce dossier est vide",
+      "emptyFolderCanUpload": "Déposez des fichiers ici, ou utilisez Envoyer pour en ajouter.",
+      "emptyFolderReadOnly": "Les fichiers envoyés à cet endroit apparaîtront ici.",
+      "backToParent": "Retour au dossier parent",
+      "deletedToast": "{name} supprimé",
+      "deletedToastBulk": "{count, plural, one {# élément supprimé} other {# éléments supprimés}}",
+      "duplicatedToast": "{name} dupliqué",
+      "deleteConfirmTitle": "Supprimer {name} ?",
+      "deleteConfirmTitleBulk": "{count, plural, one {Supprimer # élément ?} other {Supprimer # éléments ?}}",
+      "deleteFolderDescription": "Cette action supprime définitivement le dossier et tout son contenu du bucket. Il n'y a pas d'annulation possible.",
+      "deleteFileDescription": "Cette action supprime définitivement l'objet du bucket. Il n'y a pas d'annulation possible.",
+      "deleteBulkDescription": "Cette action supprime définitivement la sélection du bucket — dossiers avec tout leur contenu. Il n'y a pas d'annulation possible.",
+      "deleteConfirmLabel": "Supprimer",
+      "deletePendingLabel": "Suppression…"
+    },
+    "selectionToolbar": {
+      "clearSelection": "Effacer la sélection",
+      "selectedCount": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
+      "selectAll": "Tout sélectionner",
+      "deselectAll": "Tout désélectionner",
+      "download": "Télécharger",
+      "copyTo": "Copier vers…",
+      "moveTo": "Déplacer vers…",
+      "delete": "Supprimer"
+    },
+    "breadcrumb": {
+      "showParentFolders": "Afficher les dossiers parents"
+    },
+    "sortMenu": {
+      "sort": "Trier",
+      "sortColumn": "Tri : {column}",
+      "ascending": "Croissant",
+      "descending": "Décroissant",
+      "clearSorting": "Effacer le tri"
+    },
+    "viewToggle": {
+      "listView": "Vue liste",
+      "gridView": "Vue grille",
+      "viewMode": "Mode d'affichage"
+    },
+    "searchCommand": {
+      "title": "Rechercher dans cette source",
+      "description": "Recherche parmi les noms et chemins de fichiers de tous les dossiers",
+      "placeholder": "Rechercher des fichiers dans cette source…",
+      "searching": "Recherche en cours",
+      "minChars": "Saisissez au moins 2 caractères pour lancer la recherche.",
+      "failed": "Échec de la recherche.",
+      "noResults": "Rien ne correspond à « {query} » dans cette source.",
+      "truncated": "{count, plural, one {Premier résultat — affinez la recherche pour préciser} other {# premiers résultats — affinez la recherche pour préciser}}",
+      "filesHeading": "Fichiers",
+      "loadingResults": "Recherche…"
+    },
+    "inlineRename": {
+      "invalidName": "Nom invalide",
+      "renamedToast": "Renommé en {name}",
+      "ariaWithExt": "Nouveau nom pour {name} (conserve {ext})",
+      "ariaPlain": "Nouveau nom pour {name}",
+      "renaming": "Renommage en cours"
+    },
+    "dnd": {
+      "dropToParent": "Déposer ici pour déplacer vers le dossier parent",
+      "itemsCount": "{count, plural, one {# élément} other {# éléments}}"
+    },
+    "dropOverlay": {
+      "title": "Déposer pour envoyer",
+      "description": "Relâchez pour ajouter des fichiers à ce dossier"
+    },
+    "entryActions": {
+      "actionsFor": "Actions pour {name}",
+      "moreActions": "Plus d'actions",
+      "downloadZip": "Télécharger en ZIP",
+      "moveTo": "Déplacer vers…",
+      "rename": "Renommer",
+      "deleteFolder": "Supprimer le dossier",
+      "preview": "Aperçu",
+      "details": "Détails",
+      "download": "Télécharger",
+      "share": "Partager",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer"
+    },
+    "newFolder": {
+      "trigger": "Nouveau dossier",
+      "label": "Nouveau dossier",
+      "placeholder": "Factures",
+      "creating": "Création…",
+      "create": "Créer le dossier",
+      "createdToast": "{name} créé"
+    },
+    "shareDialog": {
+      "title": "Partager {name}",
+      "description": "Toute personne disposant du lien peut télécharger ce fichier — aucun compte n'est nécessaire. Gérez les liens depuis Liens partagés.",
+      "copyLink": "Copier le lien",
+      "copiedToast": "Lien copié",
+      "copyFailedToast": "Échec de la copie — sélectionnez le lien et copiez-le manuellement.",
+      "expiresLabel": "Expire",
+      "passwordLabel": "Mot de passe (optionnel)",
+      "passwordPlaceholder": "Laisser vide pour aucun",
+      "createLink": "Créer le lien",
+      "creating": "Création…"
+    },
+    "copyToDialog": {
+      "title": "Copier {count, plural, one {# élément} other {# éléments}} vers…",
+      "description": "Choisissez une source et un dossier. Les objets déjà présents dans la destination sont ignorés ; rien n'est supprimé d'ici.",
+      "destinationSourceAria": "Source de destination",
+      "loadingSources": "Chargement des sources…",
+      "chooseSource": "Choisir une source…",
+      "thisSource": "cette source",
+      "copyHere": "Copier ici",
+      "copying": "Copie en cours…",
+      "noWritableSources": "Vous n'avez de droit d'édition sur aucune source.",
+      "copiedToast": "{copied, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}} vers {name}",
+      "copyPartialFailedToast": "{copied, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped} ignoré(s)}}, {failed} échoué(s) — recommencez pour réessayer."
+    },
+    "moveToDialog": {
+      "title": "Déplacer {count, plural, one {# élément} other {# éléments}} vers…",
+      "description": "Déplacer copie chaque objet vers la destination puis supprime l'original. Les dossiers déplacent tout leur contenu.",
+      "moveHere": "Déplacer ici",
+      "moving": "Déplacement…",
+      "movedToast": "{count, plural, one {# élément déplacé} other {# éléments déplacés}}"
+    },
+    "moveDialog": {
+      "title": "Déplacer {count, plural, one {# élément} other {# éléments}} dans « {destLabel} » ?",
+      "description": "Déplacer copie chaque objet vers la destination puis supprime l'original. Les dossiers déplacent tout leur contenu.",
+      "move": "Déplacer",
+      "moving": "Déplacement…",
+      "movedToast": "{count, plural, one {# élément déplacé} other {# éléments déplacés}}",
+      "parentFolderLabel": "le dossier parent"
+    },
+    "folderPicker": {
+      "root": "Racine",
+      "loadingFolders": "Chargement des dossiers…",
+      "listError": "Impossible de lister ce dossier.",
+      "noSubfolders": "Aucun sous-dossier — la sélection atterrit directement ici."
+    },
+    "uploadTray": {
+      "ariaLabel": "Envois",
+      "uploadingCount": "{count, plural, one {Envoi de # fichier…} other {Envoi de # fichiers…}}",
+      "failedCount": "{count, plural, one {# envoi en échec} other {# envois en échec}}",
+      "completeCount": "{count, plural, one {# envoi terminé} other {# envois terminés}}",
+      "queued": "En attente",
+      "collapse": "Réduire les envois",
+      "expand": "Développer les envois",
+      "dismissAria": "Ignorer les envois",
+      "cancelAria": "Annuler l'envoi de {name}",
+      "cancelTitle": "Annuler",
+      "retryAria": "Réessayer l'envoi de {name}",
+      "retryTitle": "Réessayer",
+      "progressAria": "Progression de l'envoi de {name}",
+      "uploadFailed": "Échec de l'envoi ({status}).",
+      "networkError": "Erreur réseau."
+    },
+    "previewDialog": {
+      "indexOfTotal": "{index} sur {total}",
+      "noPreview": "Impossible de charger un aperçu pour ce fichier.",
+      "share": "Partager",
+      "download": "Télécharger",
+      "previousFileAria": "Fichier précédent : {name}",
+      "previousFileTitle": "Fichier précédent (←)",
+      "nextFileAria": "Fichier suivant : {name}",
+      "nextFileTitle": "Fichier suivant (→)"
+    },
+    "detailsPanel": {
+      "ariaLabel": "Détails du fichier",
+      "closeAria": "Fermer les détails",
+      "copyKeyAria": "Copier la clé",
+      "copyKeyTitle": "Copier la clé",
+      "copiedToast": "Clé copiée",
+      "copyFailedToast": "Échec de la copie — votre navigateur a bloqué l'accès au presse-papiers.",
+      "loadingAria": "Chargement des détails",
+      "loadError": "Impossible de charger les détails de ce fichier.",
+      "size": "Taille",
+      "modified": "Modifié",
+      "contentType": "Content-Type",
+      "etag": "ETag",
+      "share": "Partager",
+      "download": "Télécharger"
+    },
+    "viewers": {
+      "loadingPreview": "Chargement de l'aperçu",
+      "emptyFile": "Ce fichier est vide.",
+      "previewUnavailable": "Impossible de charger un aperçu pour ce fichier.",
+      "truncatedBanner": "Affichage du premier Mo de ce fichier.",
+      "csvTruncatedRows": "Affichage des {count} premières lignes.",
+      "source": "Source",
+      "rendered": "Rendu"
+    }
+  },
+  "sources": {
+    "metaTitle": "Sources",
+    "title": "Sources",
+    "description": "Connectez des buckets et décidez qui peut les utiliser. Une ligne de droit donne l'accès en lecture ; les interrupteurs ajoutent la modification (envoi, renommage, déplacement, nouveau dossier) et la suppression.",
+    "emptyTitle": "Aucune source pour le moment",
+    "emptyDescription": "Connectez un bucket pour commencer à accorder l'accès — il reste invisible pour tout le monde sauf les administrateurs tant que vous ne l'avez pas fait.",
+    "addSource": "Ajouter une source",
+    "edit": "Modifier",
+    "remove": "Supprimer",
+    "removeAria": "Supprimer {name}",
+    "connectionVerifiedNote": "La connexion est revérifiée lors de l'enregistrement.",
+    "editPage": {
+      "metaTitle": "Modifier la source",
+      "title": "Modifier {name}",
+      "backToSources": "Retour aux sources"
+    },
+    "dialog": {
+      "changeProviderTitle": "Changer de fournisseur",
+      "pickProviderDescription": "Choisissez où vivent vos fichiers — les informations de connexion viennent ensuite.",
+      "connectTitle": "Connecter {provider}",
+      "credentialsEncryptedNote": "Les identifiants sont chiffrés avant d'être stockés."
+    },
+    "form": {
+      "changeButton": "Changer",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Documents d'équipe",
+      "endpointLabel": "Point de terminaison",
+      "accessNote": "Qui peut parcourir, modifier ou supprimer sur cette source se gère par utilisateur et par groupe depuis l'administration.",
+      "connectionSuccessful": "Connexion réussie.",
+      "secretPlaceholderEdit": "Laisser vide pour conserver la valeur actuelle",
+      "testConnection": "Tester la connexion",
+      "testing": "Test en cours…",
+      "saving": "Enregistrement…",
+      "adding": "Ajout…",
+      "saveChanges": "Enregistrer les modifications",
+      "successUpdated": "Source mise à jour",
+      "successAdded": "Source ajoutée"
+    },
+    "cardActions": {
+      "migrateAria": "Copier le contenu de {name} vers une autre source"
+    },
+    "menu": {
+      "optionsAria": "Options de la source"
+    },
+    "actions": {
+      "removeConfirmTitle": "Supprimer {name} ?",
+      "removeConfirmDescription": "Cela ne fait que retirer la source ici — rien n'est touché dans votre bucket.",
+      "removePendingLabel": "Suppression…",
+      "removedToast": "Source supprimée"
+    },
+    "migrate": {
+      "title": "Copier le contenu vers une autre source",
+      "description": "Chaque objet de <bold>{name}</bold> est copié vers la destination — y compris entre fournisseurs différents si besoin. Les objets déjà présents là-bas sont ignorés, et rien n'est supprimé de cette source.",
+      "destinationAria": "Source de destination",
+      "choosePlaceholder": "Choisir une destination…",
+      "copyingStatus": "Copie en cours — les sources volumineuses peuvent prendre du temps, laissez cette page ouverte.",
+      "copyingButton": "Copie en cours…",
+      "copyEverything": "Tout copier",
+      "copiedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped, plural, one {# ignoré} other {# ignorés}}}} vers {name}",
+      "partialFailedToast": "{transferred, plural, one {# objet copié} other {# objets copiés}}{skipped, select, 0 {} other {, {skipped, plural, one {# ignoré} other {# ignorés}}}}, {failed, plural, one {# échoué} other {# échoués}} — recommencez pour réessayer."
+    },
+    "picker": {
+      "searchPlaceholder": "Rechercher des fournisseurs…",
+      "searchAria": "Rechercher des fournisseurs",
+      "noProviderMatch": "Aucun fournisseur ne correspond à « {query} ». Tout ce qui parle l'API S3 fonctionne avec <link>{label}</link>."
+    },
+    "errors": {
+      "notAuthorized": "Vous n'êtes pas autorisé à gérer les sources.",
+      "invalidInput": "Entrée invalide.",
+      "sourceNotFound": "Source introuvable.",
+      "connectionFailed": "Échec de la connexion — vérifiez le point de terminaison, le nom du bucket et les identifiants.",
+      "invalidSource": "Source invalide.",
+      "sameSourceDestination": "Choisissez une source différente comme destination.",
+      "migrationFailed": "Échec de la migration — vérifiez la connectivité des deux sources et réessayez.",
+      "removeFailed": "Impossible de supprimer cette source."
+    }
+  },
+  "admin": {
+    "layout": {
+      "headerTitle": "Administration"
+    },
+    "nav": {
+      "users": "Utilisateurs",
+      "groups": "Groupes",
+      "sources": "Sources",
+      "settings": "Paramètres"
+    },
+    "usersPage": {
+      "metaTitle": "Utilisateurs",
+      "title": "Utilisateurs",
+      "description": "Les comptes s'inscrivent eux-mêmes ou sont créés ici. Les nouveaux utilisateurs ne voient rien tant que vous ne leur avez pas accordé de sources.",
+      "createUser": "Créer un utilisateur",
+      "accountsLabel": "Comptes",
+      "adminsLabel": "Administrateurs",
+      "adminsDetail": "accès complet à toutes les sources",
+      "groupsLabel": "Groupes",
+      "groupsDetail": "accès aux sources partagé",
+      "bannedDetail": "{count, plural, one {# banni} other {# bannis}}",
+      "noneBannedDetail": "aucun banni"
+    },
+    "usersTable": {
+      "userColumn": "Utilisateur",
+      "roleColumn": "Rôle",
+      "groupsColumn": "Groupes",
+      "joinedColumn": "Inscrit",
+      "you": "(vous)",
+      "banned": "banni",
+      "admin": "Admin",
+      "user": "Utilisateur",
+      "actionsFor": "Actions pour {email}",
+      "makeUser": "Rétrograder en utilisateur",
+      "makeAdmin": "Promouvoir en admin",
+      "unban": "Débannir",
+      "ban": "Bannir",
+      "delete": "Supprimer",
+      "confirmRemoveAdminTitle": "Retirer les droits d'administrateur à {email} ?",
+      "confirmRemoveAdminDescription": "Le compte est conservé, mais ne verra plus que les sources sur lesquelles il détient un droit.",
+      "confirmMakeAdminTitle": "Faire de {email} un administrateur ?",
+      "confirmMakeAdminDescription": "Les administrateurs voient toutes les sources, gèrent les comptes et les droits, et consultent le journal d'audit.",
+      "confirmRoleUpdating": "Mise à jour…",
+      "confirmBanTitle": "Bannir {email} ?",
+      "confirmBanDescription": "Le compte est déconnecté partout et ne peut plus se connecter tant qu'il n'est pas débanni.",
+      "confirmBanLabel": "Bannir l'utilisateur",
+      "confirmBanning": "Bannissement…",
+      "confirmDeleteTitle": "Supprimer {email} ?",
+      "confirmDeleteDescription": "Le compte, ses sessions et ses droits sont définitivement supprimés. Son activité passée reste dans le journal d'audit.",
+      "confirmDeleteLabel": "Supprimer l'utilisateur",
+      "confirmDeleting": "Suppression…"
+    },
+    "groupsPage": {
+      "metaTitle": "Groupes",
+      "title": "Groupes",
+      "description": "Les groupes regroupent des accès aux sources. À la connexion OIDC, les valeurs de la revendication qui correspondent exactement au nom d'un groupe sont assignées automatiquement — les appartenances ajoutées ici à la main ne sont jamais modifiées par cette synchronisation.",
+      "createGroup": "Créer un groupe",
+      "emptyTitle": "Aucun groupe pour le moment",
+      "emptyDescription": "Créez-en un pour accorder les mêmes sources à plusieurs personnes à la fois — nommez-le comme un groupe du fournisseur d'identité pour le remplir automatiquement."
+    },
+    "groupsTable": {
+      "groupColumn": "Groupe",
+      "membersColumn": "Membres",
+      "createdColumn": "Créé le",
+      "memberCount": "{count, plural, one {# membre} other {# membres}}",
+      "members": "Membres",
+      "deleteAria": "Supprimer le groupe {name}",
+      "confirmDeleteTitle": "Supprimer le groupe « {name} » ?",
+      "confirmDeleteDescription": "Ses appartenances et ses droits sur les sources sont retirés — les membres perdent l'accès qui venait de ce groupe.",
+      "confirmDeleteLabel": "Supprimer le groupe",
+      "confirmDeleting": "Suppression…"
+    },
+    "createUserDialog": {
+      "title": "Créer un utilisateur",
+      "description": "Le compte est utilisable immédiatement — communiquez le mot de passe à son titulaire et accordez-lui des sources.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Ada Lovelace",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ada@example.com",
+      "passwordLabel": "Mot de passe",
+      "roleLabel": "Rôle",
+      "roleUser": "Utilisateur — ne voit que les sources accordées",
+      "roleAdmin": "Admin — accès complet",
+      "createdToast": "Compte créé pour {email}",
+      "submit": "Créer l'utilisateur",
+      "submitPending": "Création…"
+    },
+    "createGroupDialog": {
+      "title": "Créer un groupe",
+      "description": "Les membres partagent l'accès aux sources du groupe. Si le nom correspond exactement à une valeur de la revendication de groupes de votre fournisseur d'identité, les membres y sont assignés automatiquement à la connexion.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "développeurs",
+      "createdToast": "Groupe « {name} » créé",
+      "submit": "Créer le groupe",
+      "submitPending": "Création…"
+    },
+    "groupMembersDialog": {
+      "description": "Les membres partagent chaque droit sur une source accordé à ce groupe. Les appartenances marquées oidc ont été assignées par le fournisseur d'identité et suivent sa revendication de groupes.",
+      "emptyMembers": "Aucun membre pour le moment — ajoutez-en un ci-dessous, ou laissez la revendication OIDC peupler le groupe à la connexion.",
+      "oidcBadge": "oidc",
+      "oidcBadgeTitle": "Assigné par la revendication de groupes du fournisseur d'identité",
+      "removeAria": "Retirer {email} de {name}",
+      "addMember": "Ajouter un membre",
+      "searchPlaceholder": "Rechercher des utilisateurs…",
+      "emptyMessage": "Aucun utilisateur correspondant.",
+      "usersHeading": "Utilisateurs"
+    },
+    "sourceAccess": {
+      "empty": "Personne n'a encore accès — seuls les administrateurs voient cette source.",
+      "editLabel": "Modifier",
+      "deleteLabel": "Supprimer",
+      "allowEditAria": "Autoriser {name} à modifier",
+      "allowDeleteAria": "Autoriser {name} à supprimer",
+      "revokeAria": "Révoquer l'accès de {name}",
+      "grantAccess": "Accorder l'accès",
+      "searchPlaceholder": "Rechercher des utilisateurs et des groupes…",
+      "emptyMessage": "Aucun utilisateur ou groupe correspondant.",
+      "groupsHeading": "Groupes",
+      "usersHeading": "Utilisateurs"
+    },
+    "settingsPage": {
+      "metaTitle": "Paramètres",
+      "title": "Paramètres",
+      "description": "Options valables pour toute l'instance. Elles s'appliquent immédiatement."
+    },
+    "settingsForm": {
+      "signUpTitle": "Inscription publique",
+      "signUpDescription": "Permet à quiconque possède l'URL de créer un compte email/mot de passe. Les nouveaux comptes ne voient toujours rien tant que vous ne leur avez pas accordé de sources. Désactivé par défaut — les comptes sont alors créés depuis l'onglet Utilisateurs. La connexion OIDC n'est pas affectée : votre fournisseur d'identité décide qui peut l'utiliser.",
+      "signUpEnabledToast": "Inscription publique activée",
+      "signUpDisabledToast": "Inscription publique désactivée",
+      "oidcOnlyTitle": "OIDC uniquement",
+      "oidcOnlyDescriptionConfigured": "Désactive tous les points d'entrée email/mot de passe (connexion, inscription, réinitialisation et changement) — le fournisseur SSO devient le seul moyen d'accéder. Si le fournisseur tombe en panne, la connexion aussi : gardez une session admin ouverte pendant les tests.",
+      "oidcOnlyDescriptionUnconfigured": "Désactive entièrement la connexion par email/mot de passe. Nécessite un fournisseur OIDC (variables d'environnement OIDC_*) — configurez-en un d'abord.",
+      "oidcOnlyEnabledToast": "Mode OIDC uniquement activé",
+      "oidcOnlyDisabledToast": "Mode OIDC uniquement désactivé",
+      "sharingTitle": "Liens publics",
+      "sharingDescription": "Permet aux utilisateurs ayant accès à une source de créer des liens publics vers ses fichiers (révocables, expirables, protégeables par mot de passe). Désactiver ceci bloque la création de nouveaux liens — les liens existants continuent de fonctionner jusqu'à révocation ou expiration.",
+      "sharingEnabledToast": "Liens publics activés",
+      "sharingDisabledToast": "Liens publics désactivés"
+    },
+    "brandingForm": {
+      "title": "Marque blanche",
+      "description": "Personnalisez cette instance : le nom, le logo et la couleur principale s'appliquent à la barre latérale, à la page de connexion, aux pages de partage public et à l'onglet du navigateur.",
+      "appNameLabel": "Nom de l'application",
+      "primaryColorLabel": "Couleur principale",
+      "defaultColor": "Par défaut (ambre)",
+      "useDefault": "Utiliser la valeur par défaut",
+      "logoLabel": "Logo personnalisé",
+      "logoPreviewAlt": "Aperçu du logo",
+      "noLogo": "Aucun — le nom de l'application est affiché à la place.",
+      "logoHelp": "SVG, PNG ou WebP, 512 Ko max. Remplace le nom de l'application dans la barre latérale — un logo horizontal avec le nom de l'entreprise fonctionne le mieux.",
+      "invalidLogoType": "Utilisez une image SVG, PNG ou WebP.",
+      "logoTooLarge": "Le logo doit faire 512 Ko maximum.",
+      "logoReadError": "Impossible de lire ce fichier.",
+      "removeLogo": "Retirer",
+      "resetBranding": "Réinitialiser la marque",
+      "saveBranding": "Enregistrer la marque",
+      "saving": "Enregistrement…",
+      "updatedToast": "Marque mise à jour",
+      "resetToast": "Marque réinitialisée aux valeurs par défaut"
+    },
+    "errors": {
+      "notAuthorized": "Vous n'êtes pas autorisé à administrer cette application.",
+      "settingUpdateFailed": "Impossible de mettre à jour ce paramètre.",
+      "oidcNotConfigured": "Configurez d'abord un fournisseur OIDC — activer ceci maintenant bloquerait tout le monde dehors.",
+      "brandingSaveFailed": "Impossible d'enregistrer les paramètres de marque.",
+      "brandingResetFailed": "Impossible de réinitialiser les paramètres de marque.",
+      "invalidInput": "Entrée invalide.",
+      "createUserFailed": "Impossible de créer ce compte — l'email est peut-être déjà utilisé.",
+      "unknownRole": "Rôle inconnu.",
+      "cannotChangeOwnRole": "Vous ne pouvez pas changer votre propre rôle.",
+      "setRoleFailed": "Impossible de changer le rôle de cet utilisateur.",
+      "cannotBanSelf": "Vous ne pouvez pas vous bannir vous-même.",
+      "banUserFailed": "Impossible de bannir cet utilisateur.",
+      "unbanUserFailed": "Impossible de débannir cet utilisateur.",
+      "cannotRemoveSelf": "Vous ne pouvez pas vous supprimer vous-même.",
+      "removeUserFailed": "Impossible de supprimer cet utilisateur.",
+      "invalidName": "Nom invalide.",
+      "groupNameTaken": "Un groupe avec ce nom existe déjà.",
+      "createGroupFailed": "Impossible de créer ce groupe.",
+      "deleteGroupFailed": "Impossible de supprimer ce groupe.",
+      "addMemberFailed": "Impossible d'ajouter ce membre.",
+      "removeMemberFailed": "Impossible de retirer ce membre.",
+      "invalidGrant": "Droit invalide.",
+      "saveGrantFailed": "Impossible d'enregistrer ce droit.",
+      "removeGrantFailed": "Impossible de retirer ce droit."
+    }
+  },
+  "activity": {
+    "metaTitle": "Activité",
+    "headerTitle": "Activité",
+    "title": "Journal d'activité",
+    "description": "Chaque écriture sur toutes les sources — envois, suppressions, renommages, déplacements et partages. Les lectures ne sont pas enregistrées.",
+    "entryCount": "{count, plural, one {# entrée} other {# entrées}}",
+    "emptyFilteredTitle": "Aucune activité correspondante",
+    "emptyFilteredDescription": "Rien dans le journal ne correspond à ces filtres — effacez-les pour tout voir.",
+    "emptyTitle": "Aucune activité pour le moment",
+    "emptyDescription": "Les envois, suppressions, renommages et déplacements apparaîtront ici au fur et à mesure.",
+    "columns": {
+      "action": "Action",
+      "source": "Source",
+      "target": "Cible",
+      "when": "Quand",
+      "by": "Par"
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher une cible, un détail ou un utilisateur",
+      "searchAria": "Rechercher dans l'activité",
+      "action": "Action",
+      "allActions": "Toutes les actions",
+      "source": "Source",
+      "allSources": "Toutes les sources",
+      "clear": "Effacer"
+    },
+    "operations": {
+      "upload": "Envoyé",
+      "createFolder": "Dossier créé",
+      "delete": "Supprimé",
+      "deleteFolder": "Dossier supprimé",
+      "deleteMany": "Éléments supprimés",
+      "rename": "Renommé",
+      "renameFolder": "Dossier renommé",
+      "move": "Déplacé",
+      "copy": "Dupliqué",
+      "copyTo": "Copié",
+      "migrate": "Source copiée",
+      "shareCreate": "Lien de partage créé",
+      "shareRevoke": "Lien de partage révoqué",
+      "signInFailed": "Échec de connexion"
+    }
+  },
+  "shares": {
+    "metaTitle": "Liens partagés",
+    "headerTitle": "Liens partagés",
+    "title": "Liens partagés",
+    "descriptionAdmin": "Liens publics sur cette instance. Révoquer un lien le tue immédiatement pour tout le monde.",
+    "descriptionUser": "Liens publics que vous avez créés. Révoquer un lien le tue immédiatement pour tout le monde.",
+    "deletedSource": "(source supprimée)",
+    "emptyTitle": "Aucun lien partagé pour le moment",
+    "emptyDescription": "Partagez un fichier depuis le navigateur et le lien apparaîtra ici.",
+    "copiedToast": "Lien copié",
+    "copyFailedToast": "Échec de la copie — ouvrez le lien et copiez-le depuis la barre d'adresse.",
+    "revokedToast": "Lien révoqué",
+    "passwordProtected": "protégé par mot de passe",
+    "never": "Jamais",
+    "columns": {
+      "file": "Fichier",
+      "source": "Source",
+      "created": "Créé",
+      "expires": "Expire",
+      "downloads": "Téléchargements",
+      "status": "Statut"
+    },
+    "status": {
+      "active": "Actif",
+      "expired": "Expiré",
+      "revoked": "Révoqué"
+    },
+    "copyLinkAria": "Copier le lien vers {name}",
+    "copyLinkTitle": "Copier le lien",
+    "revokeLinkAria": "Révoquer le lien vers {name}",
+    "revokeLinkTitle": "Révoquer",
+    "publicViewer": {
+      "metaTitle": "Fichier partagé",
+      "unnamedFile": "fichier",
+      "download": "Télécharger",
+      "passwordProtected": "Ce lien est protégé par mot de passe.",
+      "passwordLabel": "Mot de passe",
+      "unlocking": "Déverrouillage…",
+      "unlock": "Déverrouiller"
+    },
+    "errors": {
+      "linkUnavailable": "Ce lien n'est plus disponible.",
+      "wrongPassword": "Mot de passe incorrect.",
+      "linkNotFound": "Lien introuvable.",
+      "notFound": "Introuvable.",
+      "downloadFailed": "Impossible de télécharger ce fichier."
+    }
+  },
+  "api": {
+    "errors": {
+      "signInRequired": "Connectez-vous pour lister les sources.",
+      "noCustomLogo": "Aucun logo personnalisé n'est configuré.",
+      "missingKey": "Clé manquante.",
+      "detailsLoadFailed": "Impossible de charger les détails de ce fichier.",
+      "fileNotFound": "Fichier introuvable.",
+      "downloadFailed": "Impossible de télécharger ce fichier.",
+      "folderListFailed": "Impossible de lister ce dossier.",
+      "noPreview": "Ce type de fichier n'a pas d'aperçu.",
+      "previewLoadFailed": "Impossible de charger cet aperçu.",
+      "searchTooShort": "Saisissez au moins 2 caractères.",
+      "searchFailed": "Échec de la recherche — réessayez.",
+      "noTextPreview": "Ce type de fichier n'a pas d'aperçu texte.",
+      "textPreviewLoadFailed": "Impossible de charger un aperçu de ce fichier.",
+      "notAnImage": "Ce n'est pas une image.",
+      "thumbnailLoadFailed": "Impossible de charger cette miniature.",
+      "invalidKey": "Clé invalide.",
+      "uploadNotAllowed": "Vous n'êtes pas autorisé à envoyer des fichiers dans cette source.",
+      "missingBody": "Corps manquant.",
+      "uploadTooLarge": "Le fichier est trop volumineux — 5 Go maximum.",
+      "uploadFailed": "Échec de l'envoi.",
+      "folderTooLargeForZip": "Ce dossier contient plus de {max} fichiers — trop volumineux pour une seule archive.",
+      "folderReadFailed": "Impossible de lire ce dossier.",
+      "folderEmpty": "Ce dossier est vide.",
+      "selectionTooLargeEntries": "Cette sélection contient plus de {max} éléments — trop volumineuse pour une seule archive.",
+      "selectionTooLargeFiles": "Cette sélection contient plus de {max} fichiers — trop volumineuse pour une seule archive.",
+      "selectionReadFailed": "Impossible de lire cette sélection.",
+      "selectionEmpty": "Cette sélection est vide."
+    }
+  }
+}

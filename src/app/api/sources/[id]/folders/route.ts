@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { PAGE_SIZE } from "@/features/browser/lib/limits";
 import { partitionListing } from "@/features/browser/lib/listing";
 import { apiError } from "@/lib/api-error";
@@ -16,13 +17,15 @@ export async function GET(
   const { id } = await ctx.params;
   const prefix = request.nextUrl.searchParams.get("prefix") ?? "";
   if (prefix !== "" && !prefix.endsWith("/")) {
-    return apiError(400, "Invalid folder.");
+    const t = await getTranslations("browser.errors");
+    return apiError(400, t("invalidFolder"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
 
   try {
@@ -38,6 +41,7 @@ export async function GET(
       `[folders] listing failed (source=${result.source.id}, prefix="${prefix}"):`,
       error,
     );
-    return apiError(502, "Could not list this folder.");
+    const t = await getTranslations("api.errors");
+    return apiError(502, t("folderListFailed"));
   }
 }

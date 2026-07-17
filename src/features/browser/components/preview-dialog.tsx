@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Download, Share2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +38,7 @@ export function PreviewDialog({
   /** Absent when sharing is disabled — hides the action. */
   onShare?: (file: FileEntry) => void;
 }) {
+  const t = useTranslations("browser.previewDialog");
   const [failedKey, setFailedKey] = useState<string | null>(null);
 
   const kind = file ? previewKindOf(file.name) : undefined;
@@ -97,7 +99,11 @@ export function PreviewDialog({
                 {index >= 0 && files.length > 1 ? (
                   <>
                     {" "}
-                    · {index + 1} of {files.length}
+                    ·{" "}
+                    {t("indexOfTotal", {
+                      index: index + 1,
+                      total: files.length,
+                    })}
                   </>
                 ) : null}
               </DialogDescription>
@@ -106,7 +112,7 @@ export function PreviewDialog({
             <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-md border bg-muted/40">
               {mediaError || !Viewer ? (
                 <p className="p-6 text-sm text-muted-foreground">
-                  Could not load a preview for this file.
+                  {t("noPreview")}
                 </p>
               ) : (
                 <Viewer
@@ -122,8 +128,8 @@ export function PreviewDialog({
                   type="button"
                   onClick={() => onFileChange(previous)}
                   className={`${NAV_BUTTON_CLASS} left-2`}
-                  aria-label={`Previous file: ${previous.name}`}
-                  title="Previous file (←)"
+                  aria-label={t("previousFileAria", { name: previous.name })}
+                  title={t("previousFileTitle")}
                 >
                   <ChevronLeft className="size-4" aria-hidden />
                 </button>
@@ -133,8 +139,8 @@ export function PreviewDialog({
                   type="button"
                   onClick={() => onFileChange(next)}
                   className={`${NAV_BUTTON_CLASS} right-2`}
-                  aria-label={`Next file: ${next.name}`}
-                  title="Next file (→)"
+                  aria-label={t("nextFileAria", { name: next.name })}
+                  title={t("nextFileTitle")}
                 >
                   <ChevronRight className="size-4" aria-hidden />
                 </button>
@@ -149,13 +155,13 @@ export function PreviewDialog({
                   onClick={() => onShare(file)}
                 >
                   <Share2 aria-hidden />
-                  Share
+                  {t("share")}
                 </Button>
               ) : null}
               <Button asChild>
                 <a href={downloadUrl(sourceId, file.key)}>
                   <Download aria-hidden />
-                  Download
+                  {t("download")}
                 </a>
               </Button>
             </DialogFooter>

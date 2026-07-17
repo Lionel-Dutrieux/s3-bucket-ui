@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRightLeft, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MigrateSourceDialog } from "@/features/sources/components/migrate-source-dialog";
@@ -24,6 +25,7 @@ export function SourceCardActions({
   const { requestRemove, pending, dialogs } = useSourceActions(source);
   const [editOpen, setEditOpen] = useState(false);
   const [migrateOpen, setMigrateOpen] = useState(false);
+  const t = useTranslations("sources");
 
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -34,7 +36,7 @@ export function SourceCardActions({
         onClick={() => setEditOpen(true)}
       >
         <Pencil aria-hidden />
-        Edit
+        {t("edit")}
       </Button>
       {otherSources.length > 0 ? (
         <Button
@@ -43,8 +45,8 @@ export function SourceCardActions({
           className="size-8 text-muted-foreground"
           disabled={pending}
           onClick={() => setMigrateOpen(true)}
-          aria-label={`Copy the contents of ${source.name} to another source`}
-          title="Copy contents to another source"
+          aria-label={t("cardActions.migrateAria", { name: source.name })}
+          title={t("migrate.title")}
         >
           <ArrowRightLeft className="size-4" aria-hidden />
         </Button>
@@ -55,7 +57,7 @@ export function SourceCardActions({
         className="size-8 text-muted-foreground hover:text-destructive"
         disabled={pending}
         onClick={requestRemove}
-        aria-label={`Remove ${source.name}`}
+        aria-label={t("removeAria", { name: source.name })}
       >
         <Trash2 className="size-4" aria-hidden />
       </Button>

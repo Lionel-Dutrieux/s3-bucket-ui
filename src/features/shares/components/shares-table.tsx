@@ -2,6 +2,7 @@
 
 import { Copy, Link2, Link2Off } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
@@ -48,14 +49,15 @@ const STATUS_BADGE: Record<ReturnType<typeof statusOf>, string> = {
 };
 
 export function SharesTable({ shares }: { shares: ShareRow[] }) {
+  const t = useTranslations("shares");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   const copy = async (id: string) => {
     if (await copyText(`${window.location.origin}/s/${id}`)) {
-      toast.success("Link copied");
+      toast.success(t("copiedToast"));
     } else {
-      toast.error("Copy failed — open the link and copy the address bar.");
+      toast.error(t("copyFailedToast"));
     }
   };
 
@@ -66,7 +68,7 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
         toast.error(result.error);
         return;
       }
-      toast.success("Link revoked");
+      toast.success(t("revokedToast"));
       router.refresh();
     });
   };
@@ -75,8 +77,8 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
     return (
       <EmptyState
         icon={Link2}
-        title="No shared links yet"
-        description="Share a file from the browser and the link will show up here."
+        title={t("emptyTitle")}
+        description={t("emptyDescription")}
       />
     );
   }
@@ -86,12 +88,14 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>File</TableHead>
-            <TableHead>Source</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Expires</TableHead>
-            <TableHead className="text-right">Downloads</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t("columns.file")}</TableHead>
+            <TableHead>{t("columns.source")}</TableHead>
+            <TableHead>{t("columns.created")}</TableHead>
+            <TableHead>{t("columns.expires")}</TableHead>
+            <TableHead className="text-right">
+              {t("columns.downloads")}
+            </TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
             <TableHead className="w-0" />
           </TableRow>
         </TableHeader>
@@ -110,7 +114,7 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                   </span>
                   {share.hasPassword ? (
                     <span className="text-xs text-muted-foreground">
-                      password-protected
+                      {t("passwordProtected")}
                     </span>
                   ) : null}
                 </TableCell>
@@ -125,7 +129,7 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {share.expiresAt === null ? (
-                    "Never"
+                    t("never")
                   ) : (
                     <span
                       title={formatDate(share.expiresAt)}
@@ -143,7 +147,7 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                     variant={status === "revoked" ? "destructive" : "outline"}
                     className={STATUS_BADGE[status]}
                   >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {t(`status.${status}`)}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -154,8 +158,8 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                       size="icon"
                       onClick={() => copy(share.id)}
                       disabled={status !== "active"}
-                      aria-label={`Copy link to ${name}`}
-                      title="Copy link"
+                      aria-label={t("copyLinkAria", { name })}
+                      title={t("copyLinkTitle")}
                     >
                       <Copy aria-hidden />
                     </Button>
@@ -165,8 +169,8 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                       size="icon"
                       onClick={() => revoke(share.id)}
                       disabled={pending || status === "revoked"}
-                      aria-label={`Revoke link to ${name}`}
-                      title="Revoke"
+                      aria-label={t("revokeLinkAria", { name })}
+                      title={t("revokeLinkTitle")}
                     >
                       <Link2Off aria-hidden />
                     </Button>

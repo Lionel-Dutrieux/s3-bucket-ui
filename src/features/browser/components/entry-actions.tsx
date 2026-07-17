@@ -13,6 +13,7 @@ import {
   Share2,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -56,10 +57,13 @@ interface EntryAction {
   separatorBefore?: boolean;
 }
 
+type EntryActionsT = ReturnType<typeof useTranslations>;
+
 /** One list of actions drives both the kebab menu and the context menu. */
 function entryActions(
   entry: BrowserEntry,
   handlers: EntryActionHandlers,
+  t: EntryActionsT,
 ): EntryAction[] {
   const {
     sourceId,
@@ -76,7 +80,7 @@ function entryActions(
     const actions: EntryAction[] = [
       {
         key: "zip",
-        label: "Download as ZIP",
+        label: t("downloadZip"),
         icon: FolderDown,
         href: zipUrl(sourceId, entry.prefix),
       },
@@ -84,7 +88,7 @@ function entryActions(
     if (onMove) {
       actions.push({
         key: "move",
-        label: "Move to…",
+        label: t("moveTo"),
         icon: FolderInput,
         run: () => onMove(entry),
       });
@@ -92,7 +96,7 @@ function entryActions(
     if (onRename) {
       actions.push({
         key: "rename",
-        label: "Rename",
+        label: t("rename"),
         icon: Pencil,
         run: () => onRename(entry),
       });
@@ -100,7 +104,7 @@ function entryActions(
     if (onDelete) {
       actions.push({
         key: "delete",
-        label: "Delete folder",
+        label: t("deleteFolder"),
         icon: Trash2,
         run: () => onDelete(entry),
         destructive: true,
@@ -114,7 +118,7 @@ function entryActions(
   if (onPreview && isPreviewable(entry.name)) {
     actions.push({
       key: "preview",
-      label: "Preview",
+      label: t("preview"),
       icon: Eye,
       run: () => onPreview(entry),
     });
@@ -122,21 +126,21 @@ function entryActions(
   if (onDetails) {
     actions.push({
       key: "details",
-      label: "Details",
+      label: t("details"),
       icon: Info,
       run: () => onDetails(entry),
     });
   }
   actions.push({
     key: "download",
-    label: "Download",
+    label: t("download"),
     icon: Download,
     href: downloadUrl(sourceId, entry.key),
   });
   if (onShare) {
     actions.push({
       key: "share",
-      label: "Share",
+      label: t("share"),
       icon: Share2,
       run: () => onShare(entry),
     });
@@ -144,7 +148,7 @@ function entryActions(
   if (onDuplicate) {
     actions.push({
       key: "duplicate",
-      label: "Duplicate",
+      label: t("duplicate"),
       icon: Copy,
       run: () => onDuplicate(entry),
     });
@@ -152,7 +156,7 @@ function entryActions(
   if (onMove) {
     actions.push({
       key: "move",
-      label: "Move to…",
+      label: t("moveTo"),
       icon: FolderInput,
       run: () => onMove(entry),
     });
@@ -160,7 +164,7 @@ function entryActions(
   if (onRename) {
     actions.push({
       key: "rename",
-      label: "Rename",
+      label: t("rename"),
       icon: Pencil,
       run: () => onRename(entry),
     });
@@ -168,7 +172,7 @@ function entryActions(
   if (onDelete) {
     actions.push({
       key: "delete",
-      label: "Delete",
+      label: t("delete"),
       icon: Trash2,
       run: () => onDelete(entry),
       destructive: true,
@@ -176,6 +180,47 @@ function entryActions(
     });
   }
   return actions;
+}
+
+interface MenuItemProps {
+  asChild?: boolean;
+  variant?: "destructive" | "default";
+  onSelect?: (event: Event) => void;
+  children?: React.ReactNode;
+}
+
+/** Renders the action list with either menu's primitives — the kebab and the
+ * context menu share everything but the Item/Separator components. */
+function ActionItems({
+  actions,
+  Item,
+  Separator,
+}: {
+  actions: EntryAction[];
+  Item: React.ComponentType<MenuItemProps>;
+  Separator: React.ComponentType;
+}) {
+  return actions.map((action) => (
+    <div key={action.key} className="contents">
+      {action.separatorBefore ? <Separator /> : null}
+      {action.href ? (
+        <Item asChild>
+          <a href={action.href}>
+            <action.icon aria-hidden />
+            {action.label}
+          </a>
+        </Item>
+      ) : (
+        <Item
+          variant={action.destructive ? "destructive" : "default"}
+          onSelect={action.run}
+        >
+          <action.icon aria-hidden />
+          {action.label}
+        </Item>
+      )}
+    </div>
+  ));
 }
 
 /** Kebab (⋮) menu holding every action available on the entry. */
@@ -188,7 +233,8 @@ export function EntryActionsMenu({
   handlers: EntryActionHandlers;
   className?: string;
 }) {
-  const actions = entryActions(entry, handlers);
+  const t = useTranslations("browser.entryActions");
+  const actions = entryActions(entry, handlers, t);
 
   return (
     <DropdownMenu>
@@ -197,35 +243,19 @@ export function EntryActionsMenu({
           "inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground data-open:bg-muted data-open:text-foreground",
           className,
         )}
-        aria-label={`Actions for ${entry.name}`}
-        title="More actions"
+        aria-label={t("actionsFor", { name: entry.name })}
+        title={t("moreActions")}
         // Keep the row/card drag sensor from swallowing the click.
         onPointerDown={(event) => event.stopPropagation()}
       >
         <MoreVertical className="size-4" aria-hidden />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        {actions.map((action) => (
-          <div key={action.key} className="contents">
-            {action.separatorBefore ? <DropdownMenuSeparator /> : null}
-            {action.href ? (
-              <DropdownMenuItem asChild>
-                <a href={action.href}>
-                  <action.icon aria-hidden />
-                  {action.label}
-                </a>
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem
-                variant={action.destructive ? "destructive" : "default"}
-                onSelect={action.run}
-              >
-                <action.icon aria-hidden />
-                {action.label}
-              </DropdownMenuItem>
-            )}
-          </div>
-        ))}
+        <ActionItems
+          actions={actions}
+          Item={DropdownMenuItem}
+          Separator={DropdownMenuSeparator}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -241,33 +271,18 @@ export function EntryContextMenu({
   handlers: EntryActionHandlers;
   children: React.ReactNode;
 }) {
-  const actions = entryActions(entry, handlers);
+  const t = useTranslations("browser.entryActions");
+  const actions = entryActions(entry, handlers, t);
 
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-44">
-        {actions.map((action) => (
-          <div key={action.key} className="contents">
-            {action.separatorBefore ? <ContextMenuSeparator /> : null}
-            {action.href ? (
-              <ContextMenuItem asChild>
-                <a href={action.href}>
-                  <action.icon aria-hidden />
-                  {action.label}
-                </a>
-              </ContextMenuItem>
-            ) : (
-              <ContextMenuItem
-                variant={action.destructive ? "destructive" : "default"}
-                onSelect={action.run}
-              >
-                <action.icon aria-hidden />
-                {action.label}
-              </ContextMenuItem>
-            )}
-          </div>
-        ))}
+        <ActionItems
+          actions={actions}
+          Item={ContextMenuItem}
+          Separator={ContextMenuSeparator}
+        />
       </ContextMenuContent>
     </ContextMenu>
   );

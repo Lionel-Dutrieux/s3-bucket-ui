@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { signUpSchema } from "@/features/auth/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
@@ -17,6 +18,7 @@ interface SignUpFormProps {
 export function SignUpForm({ oidcLabel }: SignUpFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string>();
+  const t = useTranslations("auth.signUp");
 
   const form = useAppForm({
     defaultValues: { name: "", email: "", password: "" },
@@ -31,7 +33,7 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
         password: value.password,
       });
       if (error) {
-        setServerError(error.message ?? "Sign up failed.");
+        setServerError(error.message ?? t("errorFallback"));
         return;
       }
       router.push("/");
@@ -42,12 +44,8 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Create your account
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          New accounts start without access — an admin grants you sources.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <form
@@ -60,9 +58,9 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
         <form.AppField name="name">
           {(field) => (
             <field.TextField
-              label="Name"
+              label={t("nameLabel")}
               autoComplete="name"
-              placeholder="Ada Lovelace"
+              placeholder={t("namePlaceholder")}
               autoFocus
             />
           )}
@@ -70,17 +68,17 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
         <form.AppField name="email">
           {(field) => (
             <field.TextField
-              label="Email"
+              label={t("emailLabel")}
               type="email"
               autoComplete="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
             />
           )}
         </form.AppField>
         <form.AppField name="password">
           {(field) => (
             <field.TextField
-              label="Password"
+              label={t("passwordLabel")}
               type="password"
               autoComplete="new-password"
             />
@@ -92,9 +90,9 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
         <form.AppForm>
           <form.SubmitButton
             className="w-full"
-            pendingLabel="Creating account…"
+            pendingLabel={t("submitPending")}
           >
-            Create account
+            {t("submit")}
           </form.SubmitButton>
         </form.AppForm>
       </form>
@@ -103,7 +101,7 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
         <>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <div className="h-px flex-1 bg-border" />
-            or
+            {t("or")}
             <div className="h-px flex-1 bg-border" />
           </div>
           <OidcButton label={oidcLabel} />
@@ -111,12 +109,12 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
       ) : null}
 
       <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
+        {t("haveAccount")}{" "}
         <Link
           href="/sign-in"
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
-          Sign in
+          {t("signInLink")}
         </Link>
       </p>
     </div>

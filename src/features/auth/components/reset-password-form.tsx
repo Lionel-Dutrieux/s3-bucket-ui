@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { resetPasswordSchema } from "@/features/auth/lib/schema";
@@ -11,6 +12,7 @@ import { authClient } from "@/lib/auth/client";
 export function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string>();
+  const t = useTranslations("auth.resetPassword");
 
   const form = useAppForm({
     defaultValues: { password: "" },
@@ -22,13 +24,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
         token,
       });
       if (error) {
-        setServerError(
-          error.message ??
-            "Could not reset the password — the link may have expired.",
-        );
+        setServerError(error.message ?? t("errorFallback"));
         return;
       }
-      toast.success("Password updated — sign in with the new one");
+      toast.success(t("successToast"));
       router.push("/sign-in");
     },
   });
@@ -36,12 +35,8 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Choose a new password
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Other devices stay signed in until their session expires.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <form
@@ -54,7 +49,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <form.AppField name="password">
           {(field) => (
             <field.TextField
-              label="New password"
+              label={t("newPasswordLabel")}
               type="password"
               autoComplete="new-password"
               autoFocus
@@ -65,8 +60,11 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <FormAlert error={serverError} />
 
         <form.AppForm>
-          <form.SubmitButton className="w-full" pendingLabel="Updating…">
-            Update password
+          <form.SubmitButton
+            className="w-full"
+            pendingLabel={t("submitPending")}
+          >
+            {t("submit")}
           </form.SubmitButton>
         </form.AppForm>
       </form>

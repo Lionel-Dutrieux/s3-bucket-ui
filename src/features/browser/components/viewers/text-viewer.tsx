@@ -2,10 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { browserQueries } from "@/features/browser/api/queries";
 import type { ViewerProps } from "./types";
 
 export function TextViewer({ sourceId, file }: ViewerProps) {
+  const t = useTranslations("browser.viewers");
   const query = useQuery({
     ...browserQueries.textPreview(sourceId, file.key),
     enabled: file.size > 0,
@@ -16,7 +18,7 @@ export function TextViewer({ sourceId, file }: ViewerProps) {
     return (
       <Loader2
         className="size-6 animate-spin text-muted-foreground"
-        aria-label="Loading preview"
+        aria-label={t("loadingPreview")}
       />
     );
   }
@@ -29,17 +31,19 @@ export function TextViewer({ sourceId, file }: ViewerProps) {
 }
 
 export function TruncatedBanner() {
+  const t = useTranslations("browser.viewers");
   return (
     <p className="sticky top-0 border-b bg-muted px-4 py-1.5 text-xs text-muted-foreground">
-      Showing the first 1 MB of this file.
+      {t("truncatedBanner")}
     </p>
   );
 }
 
 function TextBody({ text, truncated }: { text?: string; truncated?: boolean }) {
+  const t = useTranslations("browser.viewers");
   if (text === undefined || text === "") {
     return (
-      <p className="p-6 text-sm text-muted-foreground">This file is empty.</p>
+      <p className="p-6 text-sm text-muted-foreground">{t("emptyFile")}</p>
     );
   }
   return (

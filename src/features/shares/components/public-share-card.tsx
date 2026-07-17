@@ -1,4 +1,5 @@
 import { Download } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { SharePreviewKind } from "@/features/shares/lib/preview";
 import { formatBytes } from "@/lib/format";
@@ -15,6 +16,7 @@ export function PublicShareCard({
   /** null → no inline preview, just the download button. */
   preview: SharePreviewKind | null;
 }) {
+  const t = useTranslations("shares.publicViewer");
   const downloadHref = `/api/s/${token}/download`;
   const inlineSrc = `/api/s/${token}/download?inline=1`;
 
@@ -61,7 +63,7 @@ export function PublicShareCard({
       <Button asChild className="w-full">
         <a href={downloadHref}>
           <Download aria-hidden />
-          Download
+          {t("download")}
         </a>
       </Button>
     </div>

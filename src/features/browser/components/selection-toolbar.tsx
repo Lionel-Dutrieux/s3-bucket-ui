@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy, Download, FolderInput, Trash2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /** Toolbar shown while a selection is active: count, select-all toggle and
@@ -31,6 +32,7 @@ export function SelectionToolbar({
   canDelete: boolean;
   onBulkDelete: () => void;
 }) {
+  const t = useTranslations("browser.selectionToolbar");
   return (
     <div className="flex h-8 items-center gap-2">
       <Button
@@ -38,19 +40,19 @@ export function SelectionToolbar({
         size="icon"
         className="size-7"
         onClick={onClear}
-        aria-label="Clear selection"
+        aria-label={t("clearSelection")}
       >
         <X className="size-4" aria-hidden />
       </Button>
       <span className="text-sm font-medium tabular-nums">
-        {selectedCount} selected
+        {t("selectedCount", { count: selectedCount })}
       </span>
       <button
         type="button"
         onClick={onToggleSelectAll}
         className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
       >
-        {allVisibleSelected ? "Deselect all" : "Select all"}
+        {allVisibleSelected ? t("deselectAll") : t("selectAll")}
       </button>
       <div className="ml-auto flex items-center gap-2">
         <Button
@@ -61,11 +63,11 @@ export function SelectionToolbar({
           disabled={bulkDownloadDisabled}
         >
           <Download aria-hidden />
-          Download
+          {t("download")}
         </Button>
         <Button variant="outline" size="sm" className="h-8" onClick={onCopyTo}>
           <Copy aria-hidden />
-          Copy to…
+          {t("copyTo")}
         </Button>
         {canMove ? (
           <Button
@@ -75,7 +77,7 @@ export function SelectionToolbar({
             onClick={onMoveTo}
           >
             <FolderInput aria-hidden />
-            Move to…
+            {t("moveTo")}
           </Button>
         ) : null}
         {canDelete ? (
@@ -86,7 +88,7 @@ export function SelectionToolbar({
             onClick={onBulkDelete}
           >
             <Trash2 aria-hidden />
-            Delete
+            {t("delete")}
           </Button>
         ) : null}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { KeyRound, Loader2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { authClient } from "@/lib/auth/client";
 /** Starts the generic OIDC flow — rendered only when the provider is configured. */
 export function OidcButton({ label }: { label: string }) {
   const [pending, setPending] = useState(false);
+  const t = useTranslations("auth.oidc");
 
   const handleClick = async () => {
     setPending(true);
@@ -19,7 +21,7 @@ export function OidcButton({ label }: { label: string }) {
     // On success the browser navigates away; only errors land here.
     if (error) {
       setPending(false);
-      toast.error(error.message ?? `Could not reach ${label} — try again.`);
+      toast.error(error.message ?? t("errorFallback", { provider: label }));
     }
   };
 
@@ -36,7 +38,7 @@ export function OidcButton({ label }: { label: string }) {
       ) : (
         <KeyRound aria-hidden />
       )}
-      Continue with {label}
+      {t("continueWith", { provider: label })}
     </Button>
   );
 }

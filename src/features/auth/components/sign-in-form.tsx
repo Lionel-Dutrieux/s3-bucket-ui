@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { signInSchema } from "@/features/auth/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
@@ -28,6 +29,7 @@ export function SignInForm({
 }: SignInFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string>();
+  const t = useTranslations("auth.signIn");
 
   const form = useAppForm({
     defaultValues: { email: "", password: "" },
@@ -39,7 +41,7 @@ export function SignInForm({
         password: value.password,
       });
       if (error) {
-        setServerError(error.message ?? "Sign in failed.");
+        setServerError(error.message ?? t("errorFallback"));
         return;
       }
       router.push("/");
@@ -52,9 +54,11 @@ export function SignInForm({
     return (
       <div className="space-y-6">
         <div className="space-y-1.5">
-          <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {t("title")}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            This instance signs in through {oidcLabel}.
+            {t("oidcOnlySubtitle", { provider: oidcLabel })}
           </p>
         </div>
         <OidcButton label={oidcLabel} />
@@ -65,10 +69,8 @@ export function SignInForm({
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-        <p className="text-sm text-muted-foreground">
-          Welcome back — sign in to browse your sources.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <form
@@ -81,10 +83,10 @@ export function SignInForm({
         <form.AppField name="email">
           {(field) => (
             <field.TextField
-              label="Email"
+              label={t("emailLabel")}
               type="email"
               autoComplete="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               autoFocus
             />
           )}
@@ -92,7 +94,7 @@ export function SignInForm({
         <form.AppField name="password">
           {(field) => (
             <field.TextField
-              label="Password"
+              label={t("passwordLabel")}
               type="password"
               autoComplete="current-password"
             />
@@ -105,7 +107,7 @@ export function SignInForm({
               href="/forgot-password"
               className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
-              Forgot password?
+              {t("forgotPassword")}
             </Link>
           </p>
         ) : null}
@@ -113,8 +115,11 @@ export function SignInForm({
         <FormAlert error={serverError} />
 
         <form.AppForm>
-          <form.SubmitButton className="w-full" pendingLabel="Signing in…">
-            Sign in
+          <form.SubmitButton
+            className="w-full"
+            pendingLabel={t("submitPending")}
+          >
+            {t("submit")}
           </form.SubmitButton>
         </form.AppForm>
       </form>
@@ -123,7 +128,7 @@ export function SignInForm({
         <>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <div className="h-px flex-1 bg-border" />
-            or
+            {t("or")}
             <div className="h-px flex-1 bg-border" />
           </div>
           <OidcButton label={oidcLabel} />
@@ -132,12 +137,12 @@ export function SignInForm({
 
       {showSignUpLink ? (
         <p className="text-center text-sm text-muted-foreground">
-          No account yet?{" "}
+          {t("noAccount")}{" "}
           <Link
             href="/sign-up"
             className="font-medium text-foreground underline-offset-4 hover:underline"
           >
-            Sign up
+            {t("signUpLink")}
           </Link>
         </p>
       ) : null}

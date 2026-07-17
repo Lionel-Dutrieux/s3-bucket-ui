@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Copy, Download, Loader2, Share2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { downloadUrl, thumbnailSrc } from "@/features/browser/api/client";
@@ -29,6 +30,7 @@ export function DetailsPanel({
   /** Absent when sharing is off (instance-wide setting) — hides the action. */
   onShare?: (file: FileEntry) => void;
 }) {
+  const t = useTranslations("browser.detailsPanel");
   const {
     data: details,
     error,
@@ -37,15 +39,15 @@ export function DetailsPanel({
 
   const handleCopyKey = async () => {
     if (await copyText(file.key)) {
-      toast.success("Key copied");
+      toast.success(t("copiedToast"));
     } else {
-      toast.error("Copy failed — your browser blocked clipboard access.");
+      toast.error(t("copyFailedToast"));
     }
   };
 
   return (
     <aside
-      aria-label="File details"
+      aria-label={t("ariaLabel")}
       className="fixed inset-y-0 right-0 z-40 flex w-[85vw] max-w-sm flex-col gap-3 overflow-y-auto border-l bg-background p-4 shadow-lg md:sticky md:top-[4.25rem] md:z-auto md:max-h-[calc(100dvh-5.5rem)] md:w-72 md:shrink-0 md:rounded-lg md:border md:bg-card md:shadow-none"
     >
       <div className="flex items-start justify-between gap-2">
@@ -58,7 +60,7 @@ export function DetailsPanel({
           size="icon-sm"
           className="shrink-0"
           onClick={onClose}
-          aria-label="Close details"
+          aria-label={t("closeAria")}
         >
           <X aria-hidden />
         </Button>
@@ -90,8 +92,8 @@ export function DetailsPanel({
           size="icon"
           className="size-7 shrink-0"
           onClick={handleCopyKey}
-          aria-label="Copy key"
-          title="Copy key"
+          aria-label={t("copyKeyAria")}
+          title={t("copyKeyTitle")}
         >
           <Copy className="size-3.5" aria-hidden />
         </Button>
@@ -101,19 +103,19 @@ export function DetailsPanel({
         <div className="flex justify-center py-6">
           <Loader2
             className="size-5 animate-spin text-muted-foreground"
-            aria-label="Loading details"
+            aria-label={t("loadingAria")}
           />
         </div>
       ) : error || !details ? (
         <p className="py-2 text-sm text-muted-foreground">
-          {error?.message ?? "Could not load the details for this file."}
+          {error?.message ?? t("loadError")}
         </p>
       ) : (
         <dl className="grid gap-y-3 text-sm">
-          <DetailRow label="Size">
+          <DetailRow label={t("size")}>
             <span className="tabular-nums">{formatBytes(details.size)}</span>
           </DetailRow>
-          <DetailRow label="Modified">
+          <DetailRow label={t("modified")}>
             {details.lastModified ? (
               <span
                 title={formatDate(details.lastModified)}
@@ -125,13 +127,13 @@ export function DetailsPanel({
               "—"
             )}
           </DetailRow>
-          <DetailRow label="Content-Type">
+          <DetailRow label={t("contentType")}>
             <span className="font-mono text-xs">
               {details.contentType ?? "—"}
             </span>
           </DetailRow>
           {details.etag ? (
-            <DetailRow label="ETag">
+            <DetailRow label={t("etag")}>
               <span className="break-all font-mono text-xs text-muted-foreground">
                 {details.etag}
               </span>
@@ -154,13 +156,13 @@ export function DetailsPanel({
             onClick={() => onShare(file)}
           >
             <Share2 aria-hidden />
-            Share
+            {t("share")}
           </Button>
         ) : null}
         <Button asChild className="flex-1">
           <a href={downloadUrl(sourceId, file.key)}>
             <Download aria-hidden />
-            Download
+            {t("download")}
           </a>
         </Button>
       </div>

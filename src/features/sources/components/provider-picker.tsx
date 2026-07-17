@@ -1,6 +1,7 @@
 "use client";
 
 import { SearchIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,6 +9,7 @@ import {
   searchProviders,
 } from "@/features/sources/components/provider-catalog";
 import { ProviderPlate } from "@/features/sources/components/provider-logos";
+import { getProvider } from "@/lib/storage/providers";
 
 /**
  * The provider wall: a searchable grid of technology cards, grouped by how
@@ -21,6 +23,7 @@ export function ProviderPicker({
 }) {
   const [query, setQuery] = useState("");
   const groups = searchProviders(query);
+  const t = useTranslations("sources");
 
   return (
     <div className="space-y-3">
@@ -32,8 +35,8 @@ export function ProviderPicker({
         <Input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search providers…"
-          aria-label="Search providers"
+          placeholder={t("picker.searchPlaceholder")}
+          aria-label={t("picker.searchAria")}
           autoFocus
           spellCheck={false}
           className="pl-9"
@@ -43,16 +46,19 @@ export function ProviderPicker({
       <div className="-mr-2 max-h-[55vh] space-y-4 overflow-y-auto pr-2">
         {groups.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">
-            No provider matches “{query}”. Anything speaking the S3 API works
-            with{" "}
-            <button
-              type="button"
-              onClick={() => onSelect("s3-compatible")}
-              className="underline underline-offset-3 hover:text-foreground"
-            >
-              S3-compatible
-            </button>
-            .
+            {t.rich("picker.noProviderMatch", {
+              query,
+              label: getProvider("s3-compatible")?.label ?? "S3-compatible",
+              link: (chunks) => (
+                <button
+                  type="button"
+                  onClick={() => onSelect("s3-compatible")}
+                  className="underline underline-offset-3 hover:text-foreground"
+                >
+                  {chunks}
+                </button>
+              ),
+            })}
           </p>
         ) : (
           groups.map((group) => (

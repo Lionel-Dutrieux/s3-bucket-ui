@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -19,17 +20,15 @@ import { useAppForm } from "@/forms/form";
 
 export function CreateUserDialog({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("admin.createUserDialog");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create user</DialogTitle>
-          <DialogDescription>
-            The account is usable right away — share the password with its owner
-            and grant them sources.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         {open ? <CreateUserForm onSuccess={() => setOpen(false)} /> : null}
       </DialogContent>
@@ -40,6 +39,7 @@ export function CreateUserDialog({ children }: { children: React.ReactNode }) {
 function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
   const [serverError, setServerError] = useState<string>();
   const router = useRouter();
+  const t = useTranslations("admin.createUserDialog");
 
   const form = useAppForm({
     defaultValues: {
@@ -56,7 +56,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
         setServerError(result.error);
         return;
       }
-      toast.success(`Account created for ${value.email}`);
+      toast.success(t("createdToast", { email: value.email }));
       onSuccess();
       router.refresh();
     },
@@ -72,22 +72,26 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
     >
       <form.AppField name="name">
         {(field) => (
-          <field.TextField label="Name" placeholder="Ada Lovelace" autoFocus />
+          <field.TextField
+            label={t("nameLabel")}
+            placeholder={t("namePlaceholder")}
+            autoFocus
+          />
         )}
       </form.AppField>
       <form.AppField name="email">
         {(field) => (
           <field.TextField
-            label="Email"
+            label={t("emailLabel")}
             type="email"
-            placeholder="ada@example.com"
+            placeholder={t("emailPlaceholder")}
           />
         )}
       </form.AppField>
       <form.AppField name="password">
         {(field) => (
           <field.TextField
-            label="Password"
+            label={t("passwordLabel")}
             type="password"
             autoComplete="new-password"
           />
@@ -96,10 +100,10 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
       <form.AppField name="role">
         {(field) => (
           <field.SelectField
-            label="Role"
+            label={t("roleLabel")}
             options={[
-              { value: "user", label: "User — sees only granted sources" },
-              { value: "admin", label: "Admin — full access" },
+              { value: "user", label: t("roleUser") },
+              { value: "admin", label: t("roleAdmin") },
             ]}
           />
         )}
@@ -109,8 +113,8 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
 
       <DialogFooter>
         <form.AppForm>
-          <form.SubmitButton pendingLabel="Creating…">
-            Create user
+          <form.SubmitButton pendingLabel={t("submitPending")}>
+            {t("submit")}
           </form.SubmitButton>
         </form.AppForm>
       </DialogFooter>

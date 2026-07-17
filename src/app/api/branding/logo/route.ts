@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { apiError } from "@/lib/api-error";
 import { getBrandingSettings } from "@/lib/dal/settings";
 
@@ -8,7 +9,10 @@ import { getBrandingSettings } from "@/lib/dal/settings";
  */
 export async function GET() {
   const { logo } = await getBrandingSettings();
-  if (!logo) return apiError(404, "No custom logo is configured.");
+  if (!logo) {
+    const t = await getTranslations("api.errors");
+    return apiError(404, t("noCustomLogo"));
+  }
 
   const mime = logo.slice(5, logo.indexOf(";"));
   const body = Buffer.from(logo.slice(logo.indexOf(",") + 1), "base64");

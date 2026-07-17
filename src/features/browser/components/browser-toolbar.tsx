@@ -2,6 +2,7 @@
 
 import type { OnChangeFn, SortingState } from "@tanstack/react-table";
 import { FileSearch, Search, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export function BrowserToolbar({
   onSearchSource: () => void;
 }) {
   const fileInput = useRef<HTMLInputElement>(null);
+  const t = useTranslations("browser.toolbar");
 
   return (
     <div className="flex items-center gap-3">
@@ -56,14 +58,14 @@ export function BrowserToolbar({
             <Input
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
-              placeholder="Filter by name"
-              aria-label="Filter by name"
+              placeholder={t("filterPlaceholder")}
+              aria-label={t("filterPlaceholder")}
               className="h-8 pl-8"
             />
           </div>
           {query ? (
             <span className="text-xs text-muted-foreground tabular-nums">
-              {matchCount} match{matchCount === 1 ? "" : "es"}
+              {t("matchCount", { count: matchCount })}
             </span>
           ) : null}
         </>
@@ -76,7 +78,7 @@ export function BrowserToolbar({
           onClick={onSearchSource}
         >
           <FileSearch aria-hidden />
-          <span className="max-sm:sr-only">Search source</span>
+          <span className="max-sm:sr-only">{t("searchSource")}</span>
         </Button>
         {view === "grid" && hasEntries ? (
           <GridSortMenu sorting={sorting} onSortingChange={onSortingChange} />
@@ -106,7 +108,7 @@ export function BrowserToolbar({
               onClick={() => fileInput.current?.click()}
             >
               <Upload aria-hidden />
-              Upload
+              {t("upload")}
             </Button>
           </>
         ) : null}

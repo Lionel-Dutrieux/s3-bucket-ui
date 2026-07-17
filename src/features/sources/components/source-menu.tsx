@@ -2,6 +2,7 @@
 
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ export function SourceMenu({
   isActive: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslations("sources");
   const { openEdit, requestRemove, dialogs } = useSourceActions(source, {
     // Removing the source you're currently browsing strands the page.
     onRemoved: () => {
@@ -34,17 +36,17 @@ export function SourceMenu({
           {/* pointer-coarse: hover never happens on touch — keep it reachable. */}
           <SidebarMenuAction showOnHover className="pointer-coarse:opacity-100">
             <MoreHorizontal aria-hidden />
-            <span className="sr-only">Source options</span>
+            <span className="sr-only">{t("menu.optionsAria")}</span>
           </SidebarMenuAction>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="start">
           <DropdownMenuItem onSelect={openEdit}>
             <Pencil aria-hidden />
-            Edit
+            {t("edit")}
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onSelect={requestRemove}>
             <Trash2 aria-hidden />
-            Remove
+            {t("remove")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

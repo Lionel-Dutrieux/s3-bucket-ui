@@ -1,0 +1,849 @@
+{
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "delete": "删除",
+    "loading": "加载中…",
+    "metaDescription": "用于存储桶的文件管理器 — 默认只读。",
+    "errorPage": {
+      "title": "出错了",
+      "description": "发生了意外错误。请重试 — 如果问题持续，请查看服务器日志。",
+      "descriptionWithDigest": "发生了意外错误。请重试 — 如果问题持续，请查看服务器日志（摘要 {digest}）。",
+      "retry": "重试"
+    },
+    "notFound": {
+      "title": "页面未找到",
+      "description": "此页面不存在 — 来源可能已被移除。",
+      "backToSources": "返回来源"
+    },
+    "home": {
+      "headerTitle": "所有来源",
+      "title": "来源",
+      "description": "您有权访问的所有存储桶。选择一个开始浏览。",
+      "sourceCount": "{count, plural, other {# 个来源}}",
+      "emptyTitleAdmin": "暂无来源",
+      "emptyDescriptionAdmin": "连接一个存储桶即可开始浏览文件。",
+      "emptyTitleUser": "暂无可用来源",
+      "emptyDescriptionUser": "需要管理员先授予您访问某个来源的权限。",
+      "addSource": "添加来源"
+    }
+  },
+  "layout": {
+    "sidebar": {
+      "search": "搜索…",
+      "otherGroup": "其他",
+      "sourcesGroup": "来源",
+      "noSourcesAdmin": "暂无来源 — 从 <link>管理 → 来源</link> 添加一个。",
+      "noSourcesUser": "暂无可用来源。需要管理员授予您访问权限。",
+      "sharedLinks": "分享链接",
+      "activity": "活动",
+      "admin": "管理",
+      "theme": "主题"
+    },
+    "commandPalette": {
+      "title": "命令面板",
+      "description": "跳转到某个来源或添加新来源",
+      "searchPlaceholder": "搜索来源…",
+      "noResults": "无结果。",
+      "sourcesHeading": "来源",
+      "administrationHeading": "管理",
+      "addSource": "添加来源",
+      "openAdmin": "打开管理"
+    },
+    "themeToggle": {
+      "light": "浅色主题",
+      "dark": "深色主题",
+      "system": "跟随系统",
+      "groupLabel": "主题"
+    }
+  },
+  "account": {
+    "metaTitle": "账户",
+    "headerTitle": "账户",
+    "title": "您的账户",
+    "description": "已登录为 {email}。",
+    "profileSection": "个人资料",
+    "passwordSection": "密码",
+    "sessionsSection": "会话",
+    "sessionsDescription": "此账户登录的所有位置。撤销某个会话会立即将该设备登出。",
+    "profile": {
+      "nameLabel": "姓名",
+      "saveChanges": "保存更改",
+      "saving": "保存中…",
+      "updateError": "无法更新您的个人资料。",
+      "updateSuccess": "个人资料已更新"
+    },
+    "changePassword": {
+      "currentPasswordLabel": "当前密码",
+      "newPasswordLabel": "新密码",
+      "submit": "修改密码",
+      "submitPending": "修改中…",
+      "changeError": "无法修改密码。",
+      "changeSuccess": "密码已修改 — 其他会话已登出"
+    },
+    "sessions": {
+      "unknownDevice": "未知设备",
+      "unknownOs": "未知系统",
+      "thisDevice": "当前设备",
+      "activeAt": "活跃于 {time}",
+      "revokeAria": "撤销此会话",
+      "revokeError": "无法撤销此会话。",
+      "revokeSuccess": "会话已撤销"
+    }
+  },
+  "auth": {
+    "userMenu": {
+      "language": "语言",
+      "administrator": "管理员",
+      "member": "成员",
+      "account": "账户",
+      "signOut": "登出"
+    },
+    "layout": {
+      "subtitle": "文件管理器"
+    },
+    "signIn": {
+      "metaTitle": "登录",
+      "title": "登录",
+      "oidcOnlySubtitle": "此实例通过 {provider} 登录。",
+      "subtitle": "欢迎回来 — 登录以浏览您的来源。",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "密码",
+      "forgotPassword": "忘记密码？",
+      "submit": "登录",
+      "submitPending": "登录中…",
+      "or": "或",
+      "noAccount": "还没有账户？",
+      "signUpLink": "注册",
+      "errorFallback": "登录失败。"
+    },
+    "signUp": {
+      "metaTitle": "注册",
+      "disabledTitle": "注册已停用",
+      "disabledDescription": "此实例的账户由管理员创建 — 请向管理员索取。",
+      "backToSignIn": "返回登录",
+      "title": "创建您的账户",
+      "subtitle": "新账户初始没有访问权限 — 由管理员授予来源。",
+      "nameLabel": "姓名",
+      "namePlaceholder": "Ada Lovelace",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "密码",
+      "submit": "创建账户",
+      "submitPending": "创建账户中…",
+      "or": "或",
+      "haveAccount": "已有账户？",
+      "signInLink": "登录",
+      "errorFallback": "注册失败。"
+    },
+    "forgotPassword": {
+      "metaTitle": "重置密码",
+      "sentTitle": "请查收邮件",
+      "sentDescription": "如果该地址存在对应账户，重置链接即将发送。链接一小时后失效。",
+      "backToSignIn": "返回登录",
+      "title": "重置您的密码",
+      "subtitle": "输入您的账户邮箱 — 我们会发送重置链接给您。",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "submit": "发送重置链接",
+      "submitPending": "发送中…",
+      "remembered": "想起来了？",
+      "signInLink": "登录",
+      "errorFallback": "无法发送重置邮件。"
+    },
+    "resetPassword": {
+      "metaTitle": "重置密码",
+      "invalidTitle": "此链接已失效",
+      "invalidDescription": "重置链接一小时后过期且仅可使用一次。请重新申请。",
+      "requestNewLink": "申请新链接",
+      "title": "设置新密码",
+      "subtitle": "其他设备在其会话过期前保持登录状态。",
+      "newPasswordLabel": "新密码",
+      "submit": "更新密码",
+      "submitPending": "更新中…",
+      "successToast": "密码已更新 — 请使用新密码登录",
+      "errorFallback": "无法重置密码 — 链接可能已过期。"
+    },
+    "oidc": {
+      "continueWith": "使用 {provider} 继续",
+      "errorFallback": "无法连接 {provider} — 请重试。"
+    }
+  },
+  "browser": {
+    "page": {
+      "metaFallbackTitle": "来源",
+      "itemCount": "{count, plural, other {# 个项目}}",
+      "nextPage": "下一页"
+    },
+    "errors": {
+      "credentialsTitle": "访问被拒绝",
+      "credentialsBody": "存储桶拒绝了此来源的凭据。凭据可能已轮换或撤销 — 请编辑来源以更新。",
+      "bucketMissingTitle": "存储桶未找到",
+      "bucketMissingBody": "此来源指向的存储桶已不存在。它可能已被重命名或删除 — 请编辑来源以修正存储桶名称。",
+      "networkTitle": "端点无法访问",
+      "networkBody": "端点未响应。请检查此来源的端点 URL 或您的网络连接。",
+      "unknownTitle": "无法加载此文件夹",
+      "unknownBody": "存储桶返回了意外错误。详细信息已写入服务器日志。",
+      "editDenied": "您无权编辑此来源。",
+      "addDenied": "您无权向此来源添加文件。",
+      "deleteDenied": "您无权从此来源删除。",
+      "addDeniedOther": "您无权向该来源添加文件。",
+      "invalidName": "名称无效。",
+      "invalidFolder": "文件夹无效。",
+      "invalidFile": "文件无效。",
+      "invalidDestination": "目标无效。",
+      "nothingSelected": "未选择任何内容。",
+      "sourceNotFound": "来源未找到。",
+      "destinationNotFound": "目标未找到。",
+      "nameExists": "此处已存在同名内容。",
+      "folderNameExists": "此处已存在同名文件夹。",
+      "renameFolderFailure": "无法重命名此文件夹 — 部分对象可能已移动，请刷新查看。",
+      "duplicateTooLarge": "此文件过大，无法在此提供商上创建副本（最大 512 MB）。",
+      "tooManyDuplicates": "此处已存在过多此文件的副本 — 请先重命名其中一个。",
+      "selectAtMost": "每次最多选择 {max} 个项目。",
+      "someItemsFailedToDelete": "{count, plural, other {有 # 个项目无法删除。}}",
+      "copyAtMost": "每次最多复制 {max} 个项目。",
+      "moveAtMost": "每次最多移动 {max} 个项目。",
+      "copySelectionFailed": "无法复制所选内容 — 请重试。",
+      "moveFailure": "无法移动全部内容 — 部分项目可能已移动，请刷新查看。",
+      "destinationConflict": "目标位置已存在：{names}。",
+      "selfMove": "无法将文件夹移动到其自身内部。",
+      "invalidShareOptions": "分享选项无效。",
+      "onlyFilesShareable": "只有文件可以分享。",
+      "sharingDisabled": "此实例已停用公开分享链接。",
+      "fileNoLongerExists": "此文件已不存在。",
+      "sourceUnreachable": "无法访问此来源。",
+      "actionFailed": "无法完成此操作 — 请重试。",
+      "folderTooLargeToMove": "此文件夹包含超过 {max} 个对象 — 太大，无法一次移动。",
+      "selectionTooLargeToCopy": "所选内容包含超过 {max} 个对象 — 太大，无法一次复制。",
+      "objectsNotDeleted": "{count, plural, other {有 # 个对象无法删除。}}",
+      "folderTooLargeToDelete": "此文件夹太大，无法一次删除 — 部分对象仍在，请再次运行。"
+    },
+    "filteredEmpty": {
+      "title": "此文件夹中没有{type}",
+      "description": "此层级没有符合筛选条件的内容。",
+      "clearFilter": "清除筛选"
+    },
+    "fileTypes": {
+      "allTypes": "所有类型",
+      "type": "类型",
+      "image": "图片",
+      "video": "视频",
+      "audio": "音频",
+      "document": "文档",
+      "pdf": "PDF",
+      "spreadsheet": "表格",
+      "code": "代码",
+      "archive": "压缩包"
+    },
+    "toolbar": {
+      "filterPlaceholder": "按名称筛选",
+      "matchCount": "{count, plural, other {# 个匹配}}",
+      "searchSource": "搜索来源",
+      "upload": "上传"
+    },
+    "columns": {
+      "name": "名称",
+      "size": "大小",
+      "modified": "修改时间",
+      "selectAll": "全选",
+      "selectEntry": "选择 {name}",
+      "previewFile": "预览 {name}",
+      "detailsOf": "{name} 的详情",
+      "downloadZipTitle": "下载为 ZIP",
+      "downloadZipAria": "将 {name} 下载为 ZIP",
+      "downloadTitle": "下载",
+      "downloadAria": "下载 {name}",
+      "sortByAria": "按{column}排序"
+    },
+    "grid": {
+      "foldersHeading": "文件夹",
+      "filesHeading": "文件",
+      "folderLabel": "文件夹",
+      "openFolder": "打开 {name}",
+      "previewFile": "预览 {name}",
+      "detailsOf": "{name} 的详情",
+      "selectEntry": "选择 {name}"
+    },
+    "fileBrowser": {
+      "noMatchesTitle": "无匹配项",
+      "noMatchesDescription": "此文件夹中没有匹配“{query}”的内容。",
+      "clearFilter": "清除筛选",
+      "emptyFolderTitle": "此文件夹为空",
+      "emptyFolderCanUpload": "将文件拖放到此处，或使用“上传”添加。",
+      "emptyFolderReadOnly": "上传到此位置的文件将显示在这里。",
+      "backToParent": "返回上级文件夹",
+      "deletedToast": "已删除 {name}",
+      "deletedToastBulk": "{count, plural, other {已删除 # 个项目}}",
+      "duplicatedToast": "已创建 {name} 的副本",
+      "deleteConfirmTitle": "删除 {name}？",
+      "deleteConfirmTitleBulk": "{count, plural, other {删除 # 个项目？}}",
+      "deleteFolderDescription": "这将从存储桶中永久删除该文件夹及其中的所有内容。无法撤销。",
+      "deleteFileDescription": "这将从存储桶中永久删除该对象。无法撤销。",
+      "deleteBulkDescription": "这将从存储桶中永久删除所选内容 — 文件夹连同其中所有内容。无法撤销。",
+      "deleteConfirmLabel": "删除",
+      "deletePendingLabel": "删除中…"
+    },
+    "selectionToolbar": {
+      "clearSelection": "清除选择",
+      "selectedCount": "{count, plural, other {已选择 # 个}}",
+      "selectAll": "全选",
+      "deselectAll": "取消全选",
+      "download": "下载",
+      "copyTo": "复制到…",
+      "moveTo": "移动到…",
+      "delete": "删除"
+    },
+    "breadcrumb": {
+      "showParentFolders": "显示上级文件夹"
+    },
+    "sortMenu": {
+      "sort": "排序",
+      "sortColumn": "排序：{column}",
+      "ascending": "升序",
+      "descending": "降序",
+      "clearSorting": "清除排序"
+    },
+    "viewToggle": {
+      "listView": "列表视图",
+      "gridView": "网格视图",
+      "viewMode": "视图模式"
+    },
+    "searchCommand": {
+      "title": "搜索此来源",
+      "description": "匹配所有文件夹中的文件名和路径",
+      "placeholder": "在此来源中搜索文件…",
+      "searching": "搜索中",
+      "minChars": "至少输入 2 个字符进行搜索。",
+      "failed": "搜索失败。",
+      "noResults": "此来源中没有匹配“{query}”的内容。",
+      "truncated": "{count, plural, other {前 # 个匹配 — 请细化以缩小范围}}",
+      "filesHeading": "文件",
+      "loadingResults": "搜索中…"
+    },
+    "inlineRename": {
+      "invalidName": "名称无效",
+      "renamedToast": "已重命名为 {name}",
+      "ariaWithExt": "{name} 的新名称（保留 {ext}）",
+      "ariaPlain": "{name} 的新名称",
+      "renaming": "重命名中"
+    },
+    "dnd": {
+      "dropToParent": "拖放到此处以移动到上级文件夹",
+      "itemsCount": "{count, plural, other {# 个项目}}"
+    },
+    "dropOverlay": {
+      "title": "拖放以上传",
+      "description": "松开以将文件添加到此文件夹"
+    },
+    "entryActions": {
+      "actionsFor": "{name} 的操作",
+      "moreActions": "更多操作",
+      "downloadZip": "下载为 ZIP",
+      "moveTo": "移动到…",
+      "rename": "重命名",
+      "deleteFolder": "删除文件夹",
+      "preview": "预览",
+      "details": "详情",
+      "download": "下载",
+      "share": "分享",
+      "duplicate": "创建副本",
+      "delete": "删除"
+    },
+    "newFolder": {
+      "trigger": "新建文件夹",
+      "label": "新建文件夹",
+      "placeholder": "发票",
+      "creating": "创建中…",
+      "create": "创建文件夹",
+      "createdToast": "已创建 {name}"
+    },
+    "shareDialog": {
+      "title": "分享 {name}",
+      "description": "任何拥有链接的人都可以下载此文件 — 无需账户。可在“分享链接”中管理链接。",
+      "copyLink": "复制链接",
+      "copiedToast": "链接已复制",
+      "copyFailedToast": "复制失败 — 请选中链接手动复制。",
+      "expiresLabel": "过期时间",
+      "passwordLabel": "密码（可选）",
+      "passwordPlaceholder": "留空表示无密码",
+      "createLink": "创建链接",
+      "creating": "创建中…"
+    },
+    "copyToDialog": {
+      "title": "复制 {count, plural, other {# 个项目}} 到…",
+      "description": "选择一个来源和文件夹。目标位置已存在的对象将被跳过；此处不会移除任何内容。",
+      "destinationSourceAria": "目标来源",
+      "loadingSources": "加载来源中…",
+      "chooseSource": "选择一个来源…",
+      "thisSource": "此来源",
+      "copyHere": "复制到此处",
+      "copying": "复制中…",
+      "noWritableSources": "您对任何来源都没有编辑权限。",
+      "copiedToast": "{copied, plural, other {已复制 # 个对象}}{skipped, select, 0 {} other {，跳过 {skipped} 个}} 到 {name}",
+      "copyPartialFailedToast": "{copied, plural, other {已复制 # 个对象}}{skipped, select, 0 {} other {，跳过 {skipped} 个}}，{failed} 个失败 — 请再次运行以重试。"
+    },
+    "moveToDialog": {
+      "title": "移动 {count, plural, other {# 个项目}} 到…",
+      "description": "移动会将每个对象复制到目标位置并删除原件。文件夹会移动其中所有内容。",
+      "moveHere": "移动到此处",
+      "moving": "移动中…",
+      "movedToast": "{count, plural, other {已移动 # 个项目}}"
+    },
+    "moveDialog": {
+      "title": "将 {count, plural, other {# 个项目}} 移动到“{destLabel}”？",
+      "description": "移动会将每个对象复制到目标位置并删除原件。文件夹会移动其中所有内容。",
+      "move": "移动",
+      "moving": "移动中…",
+      "movedToast": "{count, plural, other {已移动 # 个项目}}",
+      "parentFolderLabel": "上级文件夹"
+    },
+    "folderPicker": {
+      "root": "根目录",
+      "loadingFolders": "加载文件夹中…",
+      "listError": "无法列出此文件夹。",
+      "noSubfolders": "没有子文件夹 — 所选内容将直接放在此处。"
+    },
+    "uploadTray": {
+      "ariaLabel": "上传",
+      "uploadingCount": "{count, plural, other {正在上传 # 个文件…}}",
+      "failedCount": "{count, plural, other {# 个上传失败}}",
+      "completeCount": "{count, plural, other {# 个上传完成}}",
+      "queued": "排队中",
+      "collapse": "收起上传",
+      "expand": "展开上传",
+      "dismissAria": "关闭上传",
+      "cancelAria": "取消上传 {name}",
+      "cancelTitle": "取消",
+      "retryAria": "重试上传 {name}",
+      "retryTitle": "重试",
+      "progressAria": "{name} 的上传进度",
+      "uploadFailed": "上传失败（{status}）。",
+      "networkError": "网络错误。"
+    },
+    "previewDialog": {
+      "indexOfTotal": "第 {index} 个，共 {total} 个",
+      "noPreview": "无法加载此文件的预览。",
+      "share": "分享",
+      "download": "下载",
+      "previousFileAria": "上一个文件：{name}",
+      "previousFileTitle": "上一个文件 (←)",
+      "nextFileAria": "下一个文件：{name}",
+      "nextFileTitle": "下一个文件 (→)"
+    },
+    "detailsPanel": {
+      "ariaLabel": "文件详情",
+      "closeAria": "关闭详情",
+      "copyKeyAria": "复制键",
+      "copyKeyTitle": "复制键",
+      "copiedToast": "键已复制",
+      "copyFailedToast": "复制失败 — 您的浏览器阻止了剪贴板访问。",
+      "loadingAria": "加载详情中",
+      "loadError": "无法加载此文件的详情。",
+      "size": "大小",
+      "modified": "修改时间",
+      "contentType": "内容类型",
+      "etag": "ETag",
+      "share": "分享",
+      "download": "下载"
+    },
+    "viewers": {
+      "loadingPreview": "加载预览中",
+      "emptyFile": "此文件为空。",
+      "previewUnavailable": "无法加载此文件的预览。",
+      "truncatedBanner": "显示此文件的前 1 MB。",
+      "csvTruncatedRows": "显示前 {count} 行。",
+      "source": "源代码",
+      "rendered": "渲染视图"
+    }
+  },
+  "sources": {
+    "metaTitle": "来源",
+    "title": "来源",
+    "description": "连接存储桶并决定谁可以使用它们。授权行赋予读取权限；开关可添加编辑（上传、重命名、移动、新建文件夹）和删除权限。",
+    "emptyTitle": "暂无来源",
+    "emptyDescription": "添加一个存储桶即可开始授予访问权限 — 在此之前，除管理员外任何人都看不到它。",
+    "addSource": "添加来源",
+    "edit": "编辑",
+    "remove": "移除",
+    "removeAria": "移除 {name}",
+    "connectionVerifiedNote": "保存时会再次验证连接。",
+    "editPage": {
+      "metaTitle": "编辑来源",
+      "title": "编辑 {name}",
+      "backToSources": "返回来源"
+    },
+    "dialog": {
+      "changeProviderTitle": "更换提供商",
+      "pickProviderDescription": "选择您的文件所在的位置 — 接下来填写连接详情。",
+      "connectTitle": "连接 {provider}",
+      "credentialsEncryptedNote": "凭据在存储前会加密。"
+    },
+    "form": {
+      "changeButton": "更换",
+      "nameLabel": "名称",
+      "namePlaceholder": "团队文档",
+      "endpointLabel": "端点",
+      "accessNote": "谁可以在此来源上浏览、编辑或删除，由管理区域按用户和组管理。",
+      "connectionSuccessful": "连接成功。",
+      "secretPlaceholderEdit": "留空以保留当前值",
+      "testConnection": "测试连接",
+      "testing": "测试中…",
+      "saving": "保存中…",
+      "adding": "添加中…",
+      "saveChanges": "保存更改",
+      "successUpdated": "来源已更新",
+      "successAdded": "来源已添加"
+    },
+    "cardActions": {
+      "migrateAria": "将 {name} 的内容复制到另一个来源"
+    },
+    "menu": {
+      "optionsAria": "来源选项"
+    },
+    "actions": {
+      "removeConfirmTitle": "移除 {name}？",
+      "removeConfirmDescription": "这仅在此处移除该来源 — 您存储桶中的内容不受影响。",
+      "removePendingLabel": "移除中…",
+      "removedToast": "来源已移除"
+    },
+    "migrate": {
+      "title": "将内容复制到另一个来源",
+      "description": "<bold>{name}</bold> 中的每个对象都会被复制到目标 — 如有需要可跨提供商。目标中已存在的对象将被跳过，此来源中不会移除任何内容。",
+      "destinationAria": "目标来源",
+      "choosePlaceholder": "选择一个目标…",
+      "copyingStatus": "复制中 — 大型来源可能需要一些时间，请保持此页面打开。",
+      "copyingButton": "复制中…",
+      "copyEverything": "复制全部",
+      "copiedToast": "{transferred, plural, other {已复制 # 个对象}}{skipped, select, 0 {} other {，跳过 {skipped} 个}} 到 {name}",
+      "partialFailedToast": "{transferred, plural, other {已复制 # 个对象}}{skipped, select, 0 {} other {，跳过 {skipped} 个}}，{failed} 个失败 — 请再次运行以重试。"
+    },
+    "picker": {
+      "searchPlaceholder": "搜索提供商…",
+      "searchAria": "搜索提供商",
+      "noProviderMatch": "没有匹配“{query}”的提供商。任何支持 S3 API 的服务都可与 <link>{label}</link> 配合使用。"
+    },
+    "errors": {
+      "notAuthorized": "您无权管理来源。",
+      "invalidInput": "输入无效。",
+      "sourceNotFound": "来源未找到。",
+      "connectionFailed": "连接失败 — 请检查端点、存储桶名称和凭据。",
+      "invalidSource": "来源无效。",
+      "sameSourceDestination": "请选择另一个来源作为目标。",
+      "migrationFailed": "迁移失败 — 请检查两个来源的连接后重试。",
+      "removeFailed": "无法移除此来源。"
+    }
+  },
+  "admin": {
+    "layout": {
+      "headerTitle": "管理"
+    },
+    "nav": {
+      "users": "用户",
+      "groups": "组",
+      "sources": "来源",
+      "settings": "设置"
+    },
+    "usersPage": {
+      "metaTitle": "用户",
+      "title": "用户",
+      "description": "账户可自行注册或在此创建。新用户在您授予来源之前看不到任何内容。",
+      "createUser": "创建用户",
+      "accountsLabel": "账户",
+      "adminsLabel": "管理员",
+      "adminsDetail": "对每个来源拥有完全访问权限",
+      "groupsLabel": "组",
+      "groupsDetail": "共享的来源访问权限",
+      "bannedDetail": "{count, plural, other {# 个已封禁}}",
+      "noneBannedDetail": "无封禁"
+    },
+    "usersTable": {
+      "userColumn": "用户",
+      "roleColumn": "角色",
+      "groupsColumn": "组",
+      "joinedColumn": "加入时间",
+      "you": "（您）",
+      "banned": "已封禁",
+      "admin": "管理员",
+      "user": "用户",
+      "actionsFor": "{email} 的操作",
+      "makeUser": "设为用户",
+      "makeAdmin": "设为管理员",
+      "unban": "解除封禁",
+      "ban": "封禁",
+      "delete": "删除",
+      "confirmRemoveAdminTitle": "撤销 {email} 的管理员权限？",
+      "confirmRemoveAdminDescription": "他们保留账户，但只能看到自己被授权的来源。",
+      "confirmMakeAdminTitle": "将 {email} 设为管理员？",
+      "confirmMakeAdminDescription": "管理员可查看每个来源、管理账户和授权，并读取审计日志。",
+      "confirmRoleUpdating": "更新中…",
+      "confirmBanTitle": "封禁 {email}？",
+      "confirmBanDescription": "他们将在所有位置被登出，且在解除封禁前无法登录。",
+      "confirmBanLabel": "封禁用户",
+      "confirmBanning": "封禁中…",
+      "confirmDeleteTitle": "删除 {email}？",
+      "confirmDeleteDescription": "他们的账户、会话和授权将被永久删除。其过往活动仍保留在审计日志中。",
+      "confirmDeleteLabel": "删除用户",
+      "confirmDeleting": "删除中…"
+    },
+    "groupsPage": {
+      "metaTitle": "组",
+      "title": "组",
+      "description": "组用于捆绑来源访问权限。OIDC 登录时，与组名完全匹配的声明值会被自动分配 — 在此手动添加的成员关系不受该同步影响。",
+      "createGroup": "创建组",
+      "emptyTitle": "暂无组",
+      "emptyDescription": "创建一个组即可一次性向多人授予相同的来源 — 以身份提供商的组名命名可自动填充。"
+    },
+    "groupsTable": {
+      "groupColumn": "组",
+      "membersColumn": "成员",
+      "createdColumn": "创建时间",
+      "memberCount": "{count, plural, other {# 名成员}}",
+      "members": "成员",
+      "deleteAria": "删除组 {name}",
+      "confirmDeleteTitle": "删除“{name}”组？",
+      "confirmDeleteDescription": "其成员关系和来源授权将被移除 — 成员将失去来自此组的所有访问权限。",
+      "confirmDeleteLabel": "删除组",
+      "confirmDeleting": "删除中…"
+    },
+    "createUserDialog": {
+      "title": "创建用户",
+      "description": "账户立即可用 — 请将密码分享给其所有者并授予来源。",
+      "nameLabel": "姓名",
+      "namePlaceholder": "Ada Lovelace",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "ada@example.com",
+      "passwordLabel": "密码",
+      "roleLabel": "角色",
+      "roleUser": "用户 — 仅查看被授权的来源",
+      "roleAdmin": "管理员 — 完全访问",
+      "createdToast": "已为 {email} 创建账户",
+      "submit": "创建用户",
+      "submitPending": "创建中…"
+    },
+    "createGroupDialog": {
+      "title": "创建组",
+      "description": "成员共享该组的来源访问权限。如果名称与您身份提供商 groups 声明的某个值完全匹配，成员将在登录时自动分配。",
+      "nameLabel": "名称",
+      "namePlaceholder": "开发者",
+      "createdToast": "已创建“{name}”组",
+      "submit": "创建组",
+      "submitPending": "创建中…"
+    },
+    "groupMembersDialog": {
+      "description": "成员共享授予此组的每项来源授权。标记为 oidc 的成员关系由身份提供商分配并遵循其 groups 声明。",
+      "emptyMembers": "暂无成员 — 在下方添加，或让 OIDC 声明在登录时填充该组。",
+      "oidcBadge": "oidc",
+      "oidcBadgeTitle": "由身份提供商的 groups 声明分配",
+      "removeAria": "将 {email} 从 {name} 中移除",
+      "addMember": "添加成员",
+      "searchPlaceholder": "搜索用户…",
+      "emptyMessage": "无匹配的用户。",
+      "usersHeading": "用户"
+    },
+    "sourceAccess": {
+      "empty": "尚无人拥有访问权限 — 只有管理员能看到此来源。",
+      "editLabel": "编辑",
+      "deleteLabel": "删除",
+      "allowEditAria": "允许 {name} 编辑",
+      "allowDeleteAria": "允许 {name} 删除",
+      "revokeAria": "撤销 {name} 的访问权限",
+      "grantAccess": "授予访问权限",
+      "searchPlaceholder": "搜索用户和组…",
+      "emptyMessage": "无匹配的用户或组。",
+      "groupsHeading": "组",
+      "usersHeading": "用户"
+    },
+    "settingsPage": {
+      "metaTitle": "设置",
+      "title": "设置",
+      "description": "实例级选项。立即生效。"
+    },
+    "settingsForm": {
+      "signUpTitle": "公开注册",
+      "signUpDescription": "允许任何拥有该 URL 的人创建邮箱/密码账户。新账户在您授予来源之前仍看不到任何内容。默认关闭 — 届时账户从“用户”标签页创建。OIDC 登录不受影响：由您的身份提供商决定谁可以使用。",
+      "signUpEnabledToast": "公开注册已启用",
+      "signUpDisabledToast": "公开注册已停用",
+      "oidcOnlyTitle": "仅 OIDC",
+      "oidcOnlyDescriptionConfigured": "停用所有邮箱/密码入口（登录、注册、密码重置和修改）— SSO 提供商将成为唯一的登录方式。如果提供商宕机，登录也会随之中断：测试时请保持一个管理员会话打开。",
+      "oidcOnlyDescriptionUnconfigured": "完全停用邮箱/密码登录。需要 OIDC 提供商（OIDC_* 环境变量）— 请先配置一个。",
+      "oidcOnlyEnabledToast": "仅 OIDC 模式已启用",
+      "oidcOnlyDisabledToast": "仅 OIDC 模式已停用",
+      "sharingTitle": "公开分享链接",
+      "sharingDescription": "允许有权访问某来源的用户为其文件创建公开链接（可撤销、可设过期、可选密码保护）。关闭此项会阻止创建新链接 — 现有链接在被撤销或过期前仍可使用。",
+      "sharingEnabledToast": "公开分享链接已启用",
+      "sharingDisabledToast": "公开分享链接已停用"
+    },
+    "brandingForm": {
+      "title": "白标定制",
+      "description": "为此实例重新品牌化：名称、徽标和主色将应用于侧边栏、登录页、公开分享页和浏览器标签页。",
+      "appNameLabel": "应用名称",
+      "primaryColorLabel": "主色",
+      "defaultColor": "默认（琥珀色）",
+      "useDefault": "使用默认",
+      "logoLabel": "自定义徽标",
+      "logoPreviewAlt": "徽标预览",
+      "noLogo": "无 — 改为显示应用名称。",
+      "logoHelp": "SVG、PNG 或 WebP，最大 512 KB。在侧边栏中替换应用名称 — 带公司名称的横向标识效果最佳。",
+      "invalidLogoType": "请使用 SVG、PNG 或 WebP 图像。",
+      "logoTooLarge": "徽标必须不超过 512 KB。",
+      "logoReadError": "无法读取此文件。",
+      "removeLogo": "移除",
+      "resetBranding": "重置品牌",
+      "saveBranding": "保存品牌",
+      "saving": "保存中…",
+      "updatedToast": "品牌已更新",
+      "resetToast": "品牌已重置为默认值"
+    },
+    "errors": {
+      "notAuthorized": "您无权管理此应用。",
+      "settingUpdateFailed": "无法更新此设置。",
+      "oidcNotConfigured": "请先配置 OIDC 提供商 — 现在启用会将所有人锁在门外。",
+      "brandingSaveFailed": "无法保存品牌设置。",
+      "brandingResetFailed": "无法重置品牌设置。",
+      "invalidInput": "输入无效。",
+      "createUserFailed": "无法创建此账户 — 该邮箱可能已被使用。",
+      "unknownRole": "未知角色。",
+      "cannotChangeOwnRole": "您无法更改自己的角色。",
+      "setRoleFailed": "无法更改此用户的角色。",
+      "cannotBanSelf": "您无法封禁自己。",
+      "banUserFailed": "无法封禁此用户。",
+      "unbanUserFailed": "无法解除此用户的封禁。",
+      "cannotRemoveSelf": "您无法移除自己。",
+      "removeUserFailed": "无法移除此用户。",
+      "invalidName": "名称无效。",
+      "groupNameTaken": "已存在同名的组。",
+      "createGroupFailed": "无法创建此组。",
+      "deleteGroupFailed": "无法删除此组。",
+      "addMemberFailed": "无法添加此成员。",
+      "removeMemberFailed": "无法移除此成员。",
+      "invalidGrant": "授权无效。",
+      "saveGrantFailed": "无法保存此授权。",
+      "removeGrantFailed": "无法移除此授权。"
+    }
+  },
+  "activity": {
+    "metaTitle": "活动",
+    "headerTitle": "活动",
+    "title": "活动日志",
+    "description": "所有来源上的每一次写入 — 上传、删除、重命名、移动和分享。读取不会被记录。",
+    "entryCount": "{count, plural, other {# 条记录}}",
+    "emptyFilteredTitle": "无匹配的活动",
+    "emptyFilteredDescription": "日志中没有符合这些筛选条件的内容 — 清除筛选以查看全部。",
+    "emptyTitle": "暂无活动",
+    "emptyDescription": "上传、删除、重命名和移动将在发生时显示在这里。",
+    "columns": {
+      "action": "操作",
+      "source": "来源",
+      "target": "目标",
+      "when": "时间",
+      "by": "操作者"
+    },
+    "filters": {
+      "searchPlaceholder": "搜索目标、详情或用户",
+      "searchAria": "搜索活动",
+      "action": "操作",
+      "allActions": "所有操作",
+      "source": "来源",
+      "allSources": "所有来源",
+      "clear": "清除"
+    },
+    "operations": {
+      "upload": "已上传",
+      "createFolder": "已创建文件夹",
+      "delete": "已删除",
+      "deleteFolder": "已删除文件夹",
+      "deleteMany": "已删除项目",
+      "rename": "已重命名",
+      "renameFolder": "已重命名文件夹",
+      "move": "已移动",
+      "copy": "已创建副本",
+      "copyTo": "已复制",
+      "migrate": "已复制来源",
+      "shareCreate": "已创建分享链接",
+      "shareRevoke": "已撤销分享链接",
+      "signInFailed": "登录失败"
+    }
+  },
+  "shares": {
+    "metaTitle": "分享链接",
+    "headerTitle": "分享链接",
+    "title": "分享链接",
+    "descriptionAdmin": "此实例上的公开链接。撤销某个链接会立即对所有人失效。",
+    "descriptionUser": "您创建的公开链接。撤销某个链接会立即对所有人失效。",
+    "deletedSource": "（已删除的来源）",
+    "emptyTitle": "暂无分享链接",
+    "emptyDescription": "从浏览器分享文件后，链接将显示在这里。",
+    "copiedToast": "链接已复制",
+    "copyFailedToast": "复制失败 — 请打开链接并从地址栏复制。",
+    "revokedToast": "链接已撤销",
+    "passwordProtected": "密码保护",
+    "never": "永不",
+    "columns": {
+      "file": "文件",
+      "source": "来源",
+      "created": "创建时间",
+      "expires": "过期时间",
+      "downloads": "下载次数",
+      "status": "状态"
+    },
+    "status": {
+      "active": "有效",
+      "expired": "已过期",
+      "revoked": "已撤销"
+    },
+    "copyLinkAria": "复制 {name} 的链接",
+    "copyLinkTitle": "复制链接",
+    "revokeLinkAria": "撤销 {name} 的链接",
+    "revokeLinkTitle": "撤销",
+    "publicViewer": {
+      "metaTitle": "分享的文件",
+      "unnamedFile": "文件",
+      "download": "下载",
+      "passwordProtected": "此链接受密码保护。",
+      "passwordLabel": "密码",
+      "unlocking": "解锁中…",
+      "unlock": "解锁"
+    },
+    "errors": {
+      "linkUnavailable": "此链接已不可用。",
+      "wrongPassword": "密码错误。",
+      "linkNotFound": "链接未找到。",
+      "notFound": "未找到。",
+      "downloadFailed": "无法下载此文件。"
+    }
+  },
+  "api": {
+    "errors": {
+      "signInRequired": "请登录以列出来源。",
+      "noCustomLogo": "未配置自定义徽标。",
+      "missingKey": "缺少键。",
+      "detailsLoadFailed": "无法加载此文件的详情。",
+      "fileNotFound": "文件未找到。",
+      "downloadFailed": "无法下载此文件。",
+      "folderListFailed": "无法列出此文件夹。",
+      "noPreview": "此文件类型无预览。",
+      "previewLoadFailed": "无法加载此预览。",
+      "searchTooShort": "请至少输入 2 个字符。",
+      "searchFailed": "搜索失败 — 请重试。",
+      "noTextPreview": "此文件类型无文本预览。",
+      "textPreviewLoadFailed": "无法加载此文件的预览。",
+      "notAnImage": "不是图像。",
+      "thumbnailLoadFailed": "无法加载此缩略图。",
+      "invalidKey": "键无效。",
+      "uploadNotAllowed": "您无权上传到此来源。",
+      "missingBody": "缺少主体。",
+      "uploadTooLarge": "文件过大 — 最大 5 GiB。",
+      "uploadFailed": "上传失败。",
+      "folderTooLargeForZip": "此文件夹包含超过 {max} 个文件 — 太大，无法打包为单个压缩包。",
+      "folderReadFailed": "无法读取此文件夹。",
+      "folderEmpty": "此文件夹为空。",
+      "selectionTooLargeEntries": "所选内容包含超过 {max} 个条目 — 太大，无法打包为单个压缩包。",
+      "selectionTooLargeFiles": "所选内容包含超过 {max} 个文件 — 太大，无法打包为单个压缩包。",
+      "selectionReadFailed": "无法读取所选内容。",
+      "selectionEmpty": "所选内容为空。"
+    }
+  }
+}

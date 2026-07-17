@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Folder, Loader2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { browserQueries } from "@/features/browser/api/queries";
 import { buildCrumbs } from "@/features/browser/lib/listing";
 
@@ -24,6 +25,7 @@ export function FolderPicker({
   onPrefixChange: (prefix: string) => void;
   disabled?: boolean;
 }) {
+  const t = useTranslations("browser.folderPicker");
   const folders = useQuery(browserQueries.folders(sourceId, prefix));
 
   return (
@@ -67,17 +69,17 @@ export function FolderPicker({
         {folders.isPending ? (
           <p className="flex items-center gap-2 px-3 py-4 text-sm text-muted-foreground">
             <Loader2Icon className="size-4 animate-spin" aria-hidden />
-            Loading folders…
+            {t("loadingFolders")}
           </p>
         ) : folders.isError ? (
           <p role="alert" className="px-3 py-4 text-sm text-destructive">
             {folders.error instanceof Error
               ? folders.error.message
-              : "Could not list this folder."}
+              : t("listError")}
           </p>
         ) : folders.data.length === 0 ? (
           <p className="px-3 py-4 text-sm text-muted-foreground">
-            No subfolders — the selection lands right here.
+            {t("noSubfolders")}
           </p>
         ) : (
           <ul className="divide-y">

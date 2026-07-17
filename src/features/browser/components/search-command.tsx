@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   Command,
@@ -40,6 +41,7 @@ export function SearchCommand({
   initialQuery?: string;
 }) {
   const router = useRouter();
+  const t = useTranslations("browser.searchCommand");
   const [input, setInput] = useState(initialQuery);
   const [query, setQuery] = useState(initialQuery);
 
@@ -79,8 +81,8 @@ export function SearchCommand({
     <CommandDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Search this source"
-      description="Matches file names and paths across every folder"
+      title={t("title")}
+      description={t("description")}
     >
       {/* Results come filtered from the server — cmdk must not re-filter. */}
       <Command shouldFilter={false}>
@@ -88,37 +90,37 @@ export function SearchCommand({
           <CommandInput
             value={input}
             onValueChange={setInput}
-            placeholder="Search files in this source…"
+            placeholder={t("placeholder")}
           />
           {isFetching ? (
             <Loader2Icon
               className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground"
-              aria-label="Searching"
+              aria-label={t("searching")}
             />
           ) : null}
         </div>
         <CommandList>
           {!enabled ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              Type at least 2 characters to search.
+              {t("minChars")}
             </p>
           ) : error ? (
             <p
               role="alert"
               className="py-6 text-center text-sm text-destructive"
             >
-              {error instanceof Error ? error.message : "Search failed."}
+              {error instanceof Error ? error.message : t("failed")}
             </p>
           ) : data && data.hits.length === 0 && !isFetching ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              Nothing matches &ldquo;{query}&rdquo; in this source.
+              {t("noResults", { query })}
             </p>
           ) : data ? (
             <CommandGroup
               heading={
                 data.truncated
-                  ? `First ${data.hits.length} matches — refine to narrow down`
-                  : "Files"
+                  ? t("truncated", { count: data.hits.length })
+                  : t("filesHeading")
               }
             >
               {data.hits.map((hit) => {
@@ -146,7 +148,7 @@ export function SearchCommand({
             </CommandGroup>
           ) : (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              Searching…
+              {t("loadingResults")}
             </p>
           )}
         </CommandList>

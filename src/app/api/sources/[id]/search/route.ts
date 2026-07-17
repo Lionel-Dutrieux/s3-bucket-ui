@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import {
   SEARCH_MAX_RESULTS,
   SEARCH_TIMEOUT_MS,
@@ -26,13 +27,15 @@ export async function GET(
   const { id } = await ctx.params;
   const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   if (q.length < 2 || q.length > 256) {
-    return apiError(400, "Enter at least 2 characters.");
+    const t = await getTranslations("api.errors");
+    return apiError(400, t("searchTooShort"));
   }
 
   // 404 whether the source is missing or the user has no read grant.
   const result = await requireSourceAccess(id);
   if (!result) {
-    return apiError(404, "Source not found.");
+    const t = await getTranslations("browser.errors");
+    return apiError(404, t("sourceNotFound"));
   }
 
   const files = getFilesClient(result.source);
@@ -63,7 +66,8 @@ export async function GET(
         `[search] failed (source=${result.source.id}, provider=${result.source.provider}):`,
         error,
       );
-      return apiError(502, "Search failed — try again.");
+      const t = await getTranslations("api.errors");
+      return apiError(502, t("searchFailed"));
     }
     truncated = true; // deadline hit: partial results are still useful
   } finally {

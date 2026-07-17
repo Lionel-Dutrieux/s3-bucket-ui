@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { getSession, isAdmin } from "@/lib/auth/session";
 import { recordOperation } from "@/lib/dal/operations";
@@ -19,14 +20,15 @@ export async function unlockShare(
   token: string,
   password: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations("shares.errors");
   const share = await getActiveShare(token);
   if (!share?.passwordHash) {
-    return actionError("This link is no longer available.");
+    return actionError(t("linkUnavailable"));
   }
   if (!verifySharePassword(password, share.passwordHash)) {
     // Blunt brute-force damper — enough for a share-link password.
     await new Promise((resolve) => setTimeout(resolve, 500));
-    return actionError("Wrong password.");
+    return actionError(t("wrongPassword"));
   }
   await grantUnlock(token);
   return actionOk();
@@ -34,14 +36,15 @@ export async function unlockShare(
 
 /** Owners revoke their own links; admins revoke anyone's. Uniform error. */
 export async function revokeShareLink(id: string): Promise<ActionResult> {
+  const t = await getTranslations("shares.errors");
   const session = await getSession();
-  if (!session) return actionError("Link not found.");
+  if (!session) return actionError(t("linkNotFound"));
   const share = await getShareWithSource(id);
   if (
     !share ||
     (share.createdById !== session.user.id && !isAdmin(session.user))
   ) {
-    return actionError("Link not found.");
+    return actionError(t("linkNotFound"));
   }
   if (!share.revokedAt) {
     await revokeShare(id);

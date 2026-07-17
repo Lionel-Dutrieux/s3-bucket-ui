@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import { AppHeader, PageContainer } from "@/components/layout/app-header";
 import { PageHeader } from "@/components/page-header";
 import { ChangePasswordForm } from "@/features/auth/components/change-password-form";
@@ -12,10 +13,14 @@ import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/session";
 import { isOidcOnly } from "@/lib/dal/settings";
 
-export const metadata: Metadata = { title: "Account" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("account");
+  return { title: t("metaTitle") };
+}
 
 export default async function AccountPage() {
   const session = await requireSession();
+  const t = await getTranslations("account");
   const requestHeaders = await headers();
   const [sessions, accounts, oidcOnly] = await Promise.all([
     auth.api.listSessions({ headers: requestHeaders }),
@@ -41,34 +46,35 @@ export default async function AccountPage() {
 
   return (
     <>
-      <AppHeader title="Account" />
+      <AppHeader title={t("headerTitle")} />
 
       <PageContainer>
         {/* "Your account", not "Account": the sticky header above already
               carries the nav label — stacking the same word twice reads odd.
               Sections are h3, one level under this h2. */}
         <PageHeader
-          title="Your account"
-          description={`Signed in as ${session.user.email}.`}
+          title={t("title")}
+          description={t("description", { email: session.user.email })}
         />
 
         <section className="rounded-xl border bg-card p-4 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold">Profile</h3>
+          <h3 className="mb-3 text-sm font-semibold">{t("profileSection")}</h3>
           <ProfileForm name={session.user.name} />
         </section>
 
         {hasPassword && !oidcOnly ? (
           <section className="rounded-xl border bg-card p-4 shadow-sm">
-            <h3 className="mb-3 text-sm font-semibold">Password</h3>
+            <h3 className="mb-3 text-sm font-semibold">
+              {t("passwordSection")}
+            </h3>
             <ChangePasswordForm />
           </section>
         ) : null}
 
         <section className="rounded-xl border bg-card p-4 shadow-sm">
-          <h3 className="text-sm font-semibold">Sessions</h3>
+          <h3 className="text-sm font-semibold">{t("sessionsSection")}</h3>
           <p className="mt-0.5 mb-1 text-xs text-muted-foreground">
-            Everywhere this account is signed in. Revoking a session signs that
-            device out immediately.
+            {t("sessionsDescription")}
           </p>
           <SessionsList sessions={sessionRows} />
         </section>

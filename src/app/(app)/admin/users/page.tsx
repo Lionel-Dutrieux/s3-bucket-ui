@@ -1,5 +1,6 @@
 import { UserRoundPlus } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { CreateUserDialog } from "@/features/admin/components/create-user-dialog";
@@ -9,43 +10,48 @@ import { requireAdmin } from "@/lib/auth/session";
 import { listGroups } from "@/lib/dal/groups";
 import { listUsers } from "@/lib/dal/users";
 
-export const metadata: Metadata = { title: "Users" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.usersPage");
+  return { title: t("metaTitle") };
+}
 
 export default async function AdminUsersPage() {
   const session = await requireAdmin();
+  const t = await getTranslations("admin.usersPage");
   const [users, groups] = await Promise.all([listUsers(), listGroups()]);
   const admins = users.filter((user) => user.role === "admin").length;
   const banned = users.filter((user) => user.banned).length;
 
   return (
     <>
-      <PageHeader
-        title="Users"
-        description="Accounts sign up themselves or are created here. New users see nothing until you grant them sources."
-      >
+      <PageHeader title={t("title")} description={t("description")}>
         <CreateUserDialog>
           <Button size="sm">
             <UserRoundPlus aria-hidden />
-            Create user
+            {t("createUser")}
           </Button>
         </CreateUserDialog>
       </PageHeader>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <StatCard
-          label="Accounts"
+          label={t("accountsLabel")}
           value={users.length}
-          detail={banned > 0 ? `${banned} banned` : "none banned"}
+          detail={
+            banned > 0
+              ? t("bannedDetail", { count: banned })
+              : t("noneBannedDetail")
+          }
         />
         <StatCard
-          label="Admins"
+          label={t("adminsLabel")}
           value={admins}
-          detail="full access to every source"
+          detail={t("adminsDetail")}
         />
         <StatCard
-          label="Groups"
+          label={t("groupsLabel")}
           value={groups.length}
-          detail="shared source access"
+          detail={t("groupsDetail")}
         />
       </div>
 
