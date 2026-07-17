@@ -6,6 +6,7 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 import { CornerLeftUp, Folder } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import type { EntryTarget } from "@/features/browser/lib/move";
@@ -81,6 +82,7 @@ export function useEntryDnd(opts: {
  * easy target.
  */
 export function ParentDropZone({ parentPrefix }: { parentPrefix: string }) {
+  const t = useTranslations("browser.dnd");
   const { setNodeRef, isOver } = useDroppable({
     id: "drop:parent",
     data: { prefix: parentPrefix },
@@ -96,7 +98,7 @@ export function ParentDropZone({ parentPrefix }: { parentPrefix: string }) {
       )}
     >
       <CornerLeftUp className="size-4" aria-hidden />
-      Drop here to move to the parent folder
+      {t("dropToParent")}
     </div>
   );
 }
@@ -114,6 +116,7 @@ export function DragPreview({
   count: number;
   kind: "file" | "folder";
 }) {
+  const t = useTranslations("browser.dnd");
   return (
     <div className="pointer-events-none relative w-max">
       {count > 1 ? (
@@ -129,7 +132,7 @@ export function DragPreview({
           <FileIcon name={label} className="size-4 shrink-0" />
         )}
         <span className="max-w-44 truncate text-sm font-medium">
-          {count > 1 ? `${count} items` : label}
+          {count > 1 ? t("itemsCount", { count }) : label}
         </span>
       </div>
     </div>

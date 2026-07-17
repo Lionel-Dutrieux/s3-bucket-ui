@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Fragment } from "react";
 import {
   Breadcrumb,
@@ -38,12 +39,13 @@ function CrumbMenu({
   entries: PathEntry[];
   className?: string;
 }) {
+  const t = useTranslations("browser.breadcrumb");
   return (
     <BreadcrumbItem className={className}>
       <DropdownMenu>
         <DropdownMenuTrigger
           className="flex items-center rounded-md px-0.5 hover:text-foreground"
-          aria-label="Show parent folders"
+          aria-label={t("showParentFolders")}
         >
           <BreadcrumbEllipsis className="size-5" />
         </DropdownMenuTrigger>

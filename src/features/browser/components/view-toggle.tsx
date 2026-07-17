@@ -2,12 +2,13 @@
 
 import { LayoutGrid, List } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { VIEW_COOKIE, type ViewMode } from "@/features/browser/lib/view";
 import { cn } from "@/lib/utils";
 
 const MODES = [
-  { mode: "list", label: "List view", icon: List },
-  { mode: "grid", label: "Grid view", icon: LayoutGrid },
+  { mode: "list", labelKey: "listView", icon: List },
+  { mode: "grid", labelKey: "gridView", icon: LayoutGrid },
 ] as const;
 
 function persistView(mode: ViewMode) {
@@ -17,6 +18,7 @@ function persistView(mode: ViewMode) {
 
 export function ViewToggle({ view }: { view: ViewMode }) {
   const router = useRouter();
+  const t = useTranslations("browser.viewToggle");
 
   const select = (mode: ViewMode) => {
     if (mode === view) return;
@@ -28,27 +30,30 @@ export function ViewToggle({ view }: { view: ViewMode }) {
     // biome-ignore lint/a11y/useSemanticElements: segmented control, not a form fieldset
     <div
       role="group"
-      aria-label="View mode"
+      aria-label={t("viewMode")}
       className="flex items-center gap-0.5 rounded-md border p-0.5"
     >
-      {MODES.map(({ mode, label, icon: Icon }) => (
-        <button
-          key={mode}
-          type="button"
-          onClick={() => select(mode)}
-          aria-pressed={view === mode}
-          aria-label={label}
-          title={label}
-          className={cn(
-            "flex size-6.5 items-center justify-center rounded-sm text-muted-foreground transition-colors",
-            view === mode
-              ? "bg-muted text-foreground"
-              : "hover:text-foreground",
-          )}
-        >
-          <Icon className="size-4" aria-hidden />
-        </button>
-      ))}
+      {MODES.map(({ mode, labelKey, icon: Icon }) => {
+        const label = t(labelKey);
+        return (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => select(mode)}
+            aria-pressed={view === mode}
+            aria-label={label}
+            title={label}
+            className={cn(
+              "flex size-6.5 items-center justify-center rounded-sm text-muted-foreground transition-colors",
+              view === mode
+                ? "bg-muted text-foreground"
+                : "hover:text-foreground",
+            )}
+          >
+            <Icon className="size-4" aria-hidden />
+          </button>
+        );
+      })}
     </div>
   );
 }

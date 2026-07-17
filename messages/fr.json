@@ -168,5 +168,161 @@
       "continueWith": "Continuer avec {provider}",
       "errorFallback": "Impossible de joindre {provider} — réessayez."
     }
+  },
+  "browser": {
+    "page": {
+      "metaFallbackTitle": "Source",
+      "itemCount": "{count, plural, one {# élément} other {# éléments}}",
+      "nextPage": "Page suivante"
+    },
+    "errors": {
+      "credentialsTitle": "Accès refusé",
+      "credentialsBody": "Le bucket a rejeté les identifiants de cette source. Ils ont peut-être été renouvelés ou révoqués — modifiez la source pour les mettre à jour.",
+      "bucketMissingTitle": "Bucket introuvable",
+      "bucketMissingBody": "Le bucket auquel pointe cette source n'existe plus. Il a peut-être été renommé ou supprimé — modifiez la source pour corriger le nom du bucket.",
+      "networkTitle": "Point de terminaison injoignable",
+      "networkBody": "Le point de terminaison n'a pas répondu. Vérifiez son URL sur cette source, ou votre connexion réseau.",
+      "unknownTitle": "Impossible de charger ce dossier",
+      "unknownBody": "Le bucket a renvoyé une erreur inattendue. Les détails ont été écrits dans les journaux du serveur."
+    },
+    "filteredEmpty": {
+      "title": "Aucun élément « {type} » dans ce dossier",
+      "description": "Rien à ce niveau ne correspond au filtre.",
+      "clearFilter": "Effacer le filtre"
+    },
+    "fileTypes": {
+      "allTypes": "Tous les types",
+      "type": "Type",
+      "image": "Images",
+      "video": "Vidéos",
+      "audio": "Audio",
+      "document": "Documents",
+      "pdf": "PDF",
+      "spreadsheet": "Tableurs",
+      "code": "Code",
+      "archive": "Archives"
+    },
+    "toolbar": {
+      "filterPlaceholder": "Filtrer par nom",
+      "matchCount": "{count, plural, one {# résultat} other {# résultats}}",
+      "searchSource": "Rechercher dans la source",
+      "upload": "Envoyer"
+    },
+    "columns": {
+      "name": "Nom",
+      "size": "Taille",
+      "modified": "Modifié",
+      "selectAll": "Tout sélectionner",
+      "selectEntry": "Sélectionner {name}",
+      "previewFile": "Aperçu de {name}",
+      "detailsOf": "Détails de {name}",
+      "downloadZipTitle": "Télécharger en ZIP",
+      "downloadZipAria": "Télécharger {name} en ZIP",
+      "downloadTitle": "Télécharger",
+      "downloadAria": "Télécharger {name}",
+      "sortByAria": "Trier par {column}"
+    },
+    "grid": {
+      "foldersHeading": "Dossiers",
+      "filesHeading": "Fichiers",
+      "folderLabel": "Dossier",
+      "openFolder": "Ouvrir {name}",
+      "previewFile": "Aperçu de {name}",
+      "detailsOf": "Détails de {name}",
+      "selectEntry": "Sélectionner {name}"
+    },
+    "fileBrowser": {
+      "noMatchesTitle": "Aucun résultat",
+      "noMatchesDescription": "Rien dans ce dossier ne correspond à « {query} ».",
+      "clearFilter": "Effacer le filtre",
+      "emptyFolderTitle": "Ce dossier est vide",
+      "emptyFolderCanUpload": "Déposez des fichiers ici, ou utilisez Envoyer pour en ajouter.",
+      "emptyFolderReadOnly": "Les fichiers envoyés à cet endroit apparaîtront ici.",
+      "backToParent": "Retour au dossier parent",
+      "deletedToast": "{name} supprimé",
+      "deletedToastBulk": "{count, plural, one {# élément supprimé} other {# éléments supprimés}}",
+      "duplicatedToast": "{name} dupliqué",
+      "deleteConfirmTitle": "Supprimer {name} ?",
+      "deleteConfirmTitleBulk": "{count, plural, one {Supprimer # élément ?} other {Supprimer # éléments ?}}",
+      "deleteFolderDescription": "Cette action supprime définitivement le dossier et tout son contenu du bucket. Il n'y a pas d'annulation possible.",
+      "deleteFileDescription": "Cette action supprime définitivement l'objet du bucket. Il n'y a pas d'annulation possible.",
+      "deleteBulkDescription": "Cette action supprime définitivement la sélection du bucket — dossiers avec tout leur contenu. Il n'y a pas d'annulation possible.",
+      "deleteConfirmLabel": "Supprimer",
+      "deletePendingLabel": "Suppression…"
+    },
+    "selectionToolbar": {
+      "clearSelection": "Effacer la sélection",
+      "selectedCount": "{count} sélectionné(s)",
+      "selectAll": "Tout sélectionner",
+      "deselectAll": "Tout désélectionner",
+      "download": "Télécharger",
+      "copyTo": "Copier vers…",
+      "moveTo": "Déplacer vers…",
+      "delete": "Supprimer"
+    },
+    "breadcrumb": {
+      "showParentFolders": "Afficher les dossiers parents"
+    },
+    "sortMenu": {
+      "sort": "Trier",
+      "sortColumn": "Tri : {column}",
+      "ascending": "Croissant",
+      "descending": "Décroissant",
+      "clearSorting": "Effacer le tri"
+    },
+    "viewToggle": {
+      "listView": "Vue liste",
+      "gridView": "Vue grille",
+      "viewMode": "Mode d'affichage"
+    },
+    "searchCommand": {
+      "title": "Rechercher dans cette source",
+      "description": "Recherche parmi les noms et chemins de fichiers de tous les dossiers",
+      "placeholder": "Rechercher des fichiers dans cette source…",
+      "searching": "Recherche en cours",
+      "minChars": "Saisissez au moins 2 caractères pour lancer la recherche.",
+      "failed": "Échec de la recherche.",
+      "noResults": "Rien ne correspond à « {query} » dans cette source.",
+      "truncated": "{count} premiers résultats — affinez la recherche pour préciser",
+      "filesHeading": "Fichiers",
+      "loadingResults": "Recherche…"
+    },
+    "inlineRename": {
+      "invalidName": "Nom invalide",
+      "renamedToast": "Renommé en {name}",
+      "ariaWithExt": "Nouveau nom pour {name} (conserve {ext})",
+      "ariaPlain": "Nouveau nom pour {name}",
+      "renaming": "Renommage en cours"
+    },
+    "dnd": {
+      "dropToParent": "Déposer ici pour déplacer vers le dossier parent",
+      "itemsCount": "{count, plural, one {# élément} other {# éléments}}"
+    },
+    "dropOverlay": {
+      "title": "Déposer pour envoyer",
+      "description": "Relâchez pour ajouter des fichiers à ce dossier"
+    },
+    "entryActions": {
+      "actionsFor": "Actions pour {name}",
+      "moreActions": "Plus d'actions",
+      "downloadZip": "Télécharger en ZIP",
+      "moveTo": "Déplacer vers…",
+      "rename": "Renommer",
+      "deleteFolder": "Supprimer le dossier",
+      "preview": "Aperçu",
+      "details": "Détails",
+      "download": "Télécharger",
+      "share": "Partager",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer"
+    },
+    "newFolder": {
+      "trigger": "Nouveau dossier",
+      "label": "Nouveau dossier",
+      "placeholder": "Factures",
+      "creating": "Création…",
+      "create": "Créer le dossier",
+      "createdToast": "{name} créé"
+    }
   }
 }

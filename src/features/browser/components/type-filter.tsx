@@ -2,6 +2,7 @@
 
 import { ListFilter } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ export function TypeFilter({ active }: { active?: FileCategory }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslations("browser.fileTypes");
 
   const select = (value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -34,7 +36,7 @@ export function TypeFilter({ active }: { active?: FileCategory }) {
     router.push(query ? `${pathname}?${query}` : pathname);
   };
 
-  const activeLabel = FILE_CATEGORIES.find((c) => c.id === active)?.label;
+  const activeLabel = active ? t(active) : undefined;
 
   return (
     <DropdownMenu>
@@ -50,16 +52,18 @@ export function TypeFilter({ active }: { active?: FileCategory }) {
           )}
         >
           <ListFilter className="size-3.5" aria-hidden />
-          {activeLabel ?? "Type"}
+          {activeLabel ?? t("type")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup value={active ?? "all"} onValueChange={select}>
-          <DropdownMenuRadioItem value="all">All types</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="all">
+            {t("allTypes")}
+          </DropdownMenuRadioItem>
           <DropdownMenuSeparator />
           {FILE_CATEGORIES.map((category) => (
             <DropdownMenuRadioItem key={category.id} value={category.id}>
-              {category.label}
+              {t(category.id)}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

@@ -2,6 +2,7 @@
 
 import { Folder } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { thumbnailSrc } from "@/features/browser/api/client";
 import { useEntryDnd } from "@/features/browser/components/dnd";
@@ -78,12 +79,13 @@ export function FileGrid({
   /** Ends the inline rename; true when a rename actually happened. */
   onRenameEnd?: (renamed: boolean) => void;
 }) {
+  const t = useTranslations("browser.grid");
   return (
     <div className="space-y-6">
       {folders.length > 0 ? (
         <section>
           <h3 className="mb-3 px-1 text-xs font-medium text-muted-foreground">
-            Folders
+            {t("foldersHeading")}
           </h3>
           <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))]">
             {folders.map((folder) => (
@@ -107,7 +109,7 @@ export function FileGrid({
       {files.length > 0 ? (
         <section>
           <h3 className="mb-3 px-1 text-xs font-medium text-muted-foreground">
-            Files
+            {t("filesHeading")}
           </h3>
           <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(13rem,1fr))]">
             {files.map((file) => (
@@ -156,6 +158,7 @@ function FolderCard({
   renaming?: boolean;
   onRenameEnd?: (renamed: boolean) => void;
 }) {
+  const t = useTranslations("browser.grid");
   const dnd = useEntryDnd({
     rowId: folder.prefix,
     data: {
@@ -202,7 +205,7 @@ function FolderCard({
                   event.preventDefault();
                   selection.toggle(folder.prefix, event.shiftKey);
                 }}
-                aria-label={`Select ${folder.name}`}
+                aria-label={t("selectEntry", { name: folder.name })}
                 className={cn(
                   "bg-background",
                   selection.active || selection.isSelected(folder.prefix)
@@ -229,7 +232,7 @@ function FolderCard({
           ) : (
             <p className="truncate text-sm font-medium">{folder.name}</p>
           )}
-          <p className="text-xs text-muted-foreground">Folder</p>
+          <p className="text-xs text-muted-foreground">{t("folderLabel")}</p>
         </div>
         {/* Overlay link keeps the whole card clickable without
           nesting the delete button inside it. */}
@@ -241,7 +244,9 @@ function FolderCard({
           title={folder.name}
           className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="sr-only">Open {folder.name}</span>
+          <span className="sr-only">
+            {t("openFolder", { name: folder.name })}
+          </span>
         </Link>
         <EntryActionsMenu
           entry={entry}
@@ -282,6 +287,7 @@ function FileCard({
   renaming?: boolean;
   onRenameEnd?: (renamed: boolean) => void;
 }) {
+  const t = useTranslations("browser.grid");
   const dnd = useEntryDnd({
     rowId: file.key,
     data: {
@@ -358,19 +364,23 @@ function FileCard({
           <button
             type="button"
             onClick={() => onPreview(file)}
-            title={`Preview ${file.name}`}
+            title={t("previewFile", { name: file.name })}
             className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span className="sr-only">Preview {file.name}</span>
+            <span className="sr-only">
+              {t("previewFile", { name: file.name })}
+            </span>
           </button>
         ) : (
           <button
             type="button"
             onClick={() => onDetails(file)}
-            title={`Details of ${file.name}`}
+            title={t("detailsOf", { name: file.name })}
             className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span className="sr-only">Details of {file.name}</span>
+            <span className="sr-only">
+              {t("detailsOf", { name: file.name })}
+            </span>
           </button>
         )}
 
@@ -381,7 +391,7 @@ function FileCard({
               event.preventDefault();
               selection.toggle(file.key, event.shiftKey);
             }}
-            aria-label={`Select ${file.name}`}
+            aria-label={t("selectEntry", { name: file.name })}
             className={cn(
               "absolute left-2 top-2 z-10 bg-background/90 shadow-sm backdrop-blur transition-opacity",
               selection.active || selection.isSelected(file.key)

@@ -13,6 +13,7 @@ import {
 import { ArrowLeft, FolderOpen, SearchX } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -27,8 +28,8 @@ import {
 } from "@/features/browser/actions";
 import { downloadUrl, zipSelectionUrl } from "@/features/browser/api/client";
 import {
-  browserColumns,
-  selectColumn,
+  createBrowserColumns,
+  createSelectColumn,
 } from "@/features/browser/components/browser-columns";
 import { BrowserToolbar } from "@/features/browser/components/browser-toolbar";
 import { CopyToDialog } from "@/features/browser/components/copy-to-dialog";
@@ -107,6 +108,8 @@ export function FileBrowser({
   canShare?: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslations("browser.fileBrowser");
+  const columnsT = useTranslations("browser.columns");
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
   const [sorting, setSorting] = useQueryState(
     "sort",
@@ -173,7 +176,7 @@ export function FileBrowser({
       toast.error(result.error);
       return;
     }
-    toast.success(`Deleted ${deleteTarget.name}`);
+    toast.success(t("deletedToast", { name: deleteTarget.name }));
     dialogs.close();
     router.refresh();
   };
@@ -189,14 +192,17 @@ export function FileBrowser({
       toast.error(result.error);
       return;
     }
-    toast.success(`Duplicated ${file.name}`);
+    toast.success(t("duplicatedToast", { name: file.name }));
     router.refresh();
   };
 
   const entries = useMemo(() => buildEntries(folders, files), [folders, files]);
   // Selection serves bulk download too, so it's on regardless of
   // permissions — only the bulk Delete button is permission-gated.
-  const columns = useMemo(() => [selectColumn, ...browserColumns], []);
+  const columns = useMemo(
+    () => [createSelectColumn(columnsT), ...createBrowserColumns(columnsT)],
+    [columnsT],
+  );
 
   const table = useReactTable({
     data: entries,
@@ -357,9 +363,7 @@ export function FileBrowser({
     if (!result.ok) {
       toast.error(result.error);
     } else {
-      toast.success(
-        `Deleted ${targets.length} item${targets.length === 1 ? "" : "s"}`,
-      );
+      toast.success(t("deletedToastBulk", { count: targets.length }));
     }
   };
   // Previewable files in display order — the dialog's ←/→ walk this list.
@@ -429,10 +433,8 @@ export function FileBrowser({
           {noMatches ? (
             <EmptyState
               icon={SearchX}
-              title="No matches"
-              description={
-                <>Nothing in this folder matches &ldquo;{query}&rdquo;.</>
-              }
+              title={t("noMatchesTitle")}
+              description={t("noMatchesDescription", { query })}
             >
               <Button
                 variant="outline"
@@ -440,7 +442,7 @@ export function FileBrowser({
                 className="mt-1"
                 onClick={() => table.setGlobalFilter("")}
               >
-                Clear filter
+                {t("clearFilter")}
               </Button>
             </EmptyState>
           ) : entries.length === 0 ? (
@@ -544,15 +546,15 @@ export function FileBrowser({
         onOpenChange={(open) => {
           if (!open && !deleting) dialogs.close();
         }}
-        title={`Delete ${deleteTarget?.name}?`}
+        title={t("deleteConfirmTitle", { name: deleteTarget?.name ?? "" })}
         titleClassName="break-all"
         description={
           deleteTarget?.kind === "folder"
-            ? "This permanently deletes the folder and everything inside it from the bucket. There is no undo."
-            : "This permanently deletes the object from the bucket. There is no undo."
+            ? t("deleteFolderDescription")
+            : t("deleteFileDescription")
         }
-        confirmLabel="Delete"
-        pendingLabel="Deleting…"
+        confirmLabel={t("deleteConfirmLabel")}
+        pendingLabel={t("deletePendingLabel")}
         pending={deleting}
         onConfirm={handleDelete}
       />
@@ -562,10 +564,10 @@ export function FileBrowser({
         onOpenChange={(open) => {
           if (!open && !deleting) dialogs.close();
         }}
-        title={`Delete ${selectedCount} item${selectedCount === 1 ? "" : "s"}?`}
-        description="This permanently deletes the selection from the bucket — folders with everything inside them. There is no undo."
-        confirmLabel="Delete"
-        pendingLabel="Deleting…"
+        title={t("deleteConfirmTitleBulk", { count: selectedCount })}
+        description={t("deleteBulkDescription")}
+        confirmLabel={t("deleteConfirmLabel")}
+        pendingLabel={t("deletePendingLabel")}
         pending={deleting}
         onConfirm={handleBulkDelete}
       />
@@ -643,17 +645,16 @@ function EmptyFolder({
   prefix: string;
   canUpload: boolean;
 }) {
+  const t = useTranslations("browser.fileBrowser");
   // At the bucket root there is no parent to go back to.
   const parent = prefix ? (parentPrefixOf(prefix) ?? "") : null;
 
   return (
     <EmptyState
       icon={FolderOpen}
-      title="This folder is empty"
+      title={t("emptyFolderTitle")}
       description={
-        canUpload
-          ? "Drop files here, or use Upload to add some."
-          : "Files uploaded to this location will show up here."
+        canUpload ? t("emptyFolderCanUpload") : t("emptyFolderReadOnly")
       }
     >
       {parent !== null ? (
@@ -665,7 +666,7 @@ function EmptyFolder({
             }}
           >
             <ArrowLeft aria-hidden />
-            Back to parent folder
+            {t("backToParent")}
           </Link>
         </Button>
       ) : null}

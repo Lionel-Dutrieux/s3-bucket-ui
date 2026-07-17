@@ -2,6 +2,7 @@
 
 import type { SortingState } from "@tanstack/react-table";
 import { ArrowDownUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,11 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const COLUMNS = [
-  { id: "name", label: "Name" },
-  { id: "size", label: "Size" },
-  { id: "modified", label: "Modified" },
-] as const;
+const COLUMN_IDS = ["name", "size", "modified"] as const;
 
 /**
  * Sort control for the grid view — the list view sorts via its column
@@ -31,15 +28,18 @@ export function GridSortMenu({
   sorting: SortingState;
   onSortingChange: (sorting: SortingState) => void;
 }) {
+  const t = useTranslations("browser.sortMenu");
+  const columnsT = useTranslations("browser.columns");
   const active = sorting[0];
-  const activeLabel = COLUMNS.find((c) => c.id === active?.id)?.label;
+  const activeColumnId = COLUMN_IDS.find((id) => id === active?.id);
+  const activeLabel = activeColumnId ? columnsT(activeColumnId) : undefined;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="h-8">
           <ArrowDownUp aria-hidden />
-          {activeLabel ? `Sort: ${activeLabel}` : "Sort"}
+          {activeLabel ? t("sortColumn", { column: activeLabel }) : t("sort")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
@@ -49,9 +49,9 @@ export function GridSortMenu({
             onSortingChange([{ id, desc: active?.id === id && active.desc }])
           }
         >
-          {COLUMNS.map((column) => (
-            <DropdownMenuRadioItem key={column.id} value={column.id}>
-              {column.label}
+          {COLUMN_IDS.map((id) => (
+            <DropdownMenuRadioItem key={id} value={id}>
+              {columnsT(id)}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
@@ -65,15 +65,15 @@ export function GridSortMenu({
               }
             >
               <DropdownMenuRadioItem value="asc">
-                Ascending
+                {t("ascending")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="desc">
-                Descending
+                {t("descending")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => onSortingChange([])}>
-              Clear sorting
+              {t("clearSorting")}
             </DropdownMenuItem>
           </>
         ) : null}

@@ -13,6 +13,7 @@ import {
   Share2,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -56,10 +57,13 @@ interface EntryAction {
   separatorBefore?: boolean;
 }
 
+type EntryActionsT = ReturnType<typeof useTranslations>;
+
 /** One list of actions drives both the kebab menu and the context menu. */
 function entryActions(
   entry: BrowserEntry,
   handlers: EntryActionHandlers,
+  t: EntryActionsT,
 ): EntryAction[] {
   const {
     sourceId,
@@ -76,7 +80,7 @@ function entryActions(
     const actions: EntryAction[] = [
       {
         key: "zip",
-        label: "Download as ZIP",
+        label: t("downloadZip"),
         icon: FolderDown,
         href: zipUrl(sourceId, entry.prefix),
       },
@@ -84,7 +88,7 @@ function entryActions(
     if (onMove) {
       actions.push({
         key: "move",
-        label: "Move to…",
+        label: t("moveTo"),
         icon: FolderInput,
         run: () => onMove(entry),
       });
@@ -92,7 +96,7 @@ function entryActions(
     if (onRename) {
       actions.push({
         key: "rename",
-        label: "Rename",
+        label: t("rename"),
         icon: Pencil,
         run: () => onRename(entry),
       });
@@ -100,7 +104,7 @@ function entryActions(
     if (onDelete) {
       actions.push({
         key: "delete",
-        label: "Delete folder",
+        label: t("deleteFolder"),
         icon: Trash2,
         run: () => onDelete(entry),
         destructive: true,
@@ -114,7 +118,7 @@ function entryActions(
   if (onPreview && isPreviewable(entry.name)) {
     actions.push({
       key: "preview",
-      label: "Preview",
+      label: t("preview"),
       icon: Eye,
       run: () => onPreview(entry),
     });
@@ -122,21 +126,21 @@ function entryActions(
   if (onDetails) {
     actions.push({
       key: "details",
-      label: "Details",
+      label: t("details"),
       icon: Info,
       run: () => onDetails(entry),
     });
   }
   actions.push({
     key: "download",
-    label: "Download",
+    label: t("download"),
     icon: Download,
     href: downloadUrl(sourceId, entry.key),
   });
   if (onShare) {
     actions.push({
       key: "share",
-      label: "Share",
+      label: t("share"),
       icon: Share2,
       run: () => onShare(entry),
     });
@@ -144,7 +148,7 @@ function entryActions(
   if (onDuplicate) {
     actions.push({
       key: "duplicate",
-      label: "Duplicate",
+      label: t("duplicate"),
       icon: Copy,
       run: () => onDuplicate(entry),
     });
@@ -152,7 +156,7 @@ function entryActions(
   if (onMove) {
     actions.push({
       key: "move",
-      label: "Move to…",
+      label: t("moveTo"),
       icon: FolderInput,
       run: () => onMove(entry),
     });
@@ -160,7 +164,7 @@ function entryActions(
   if (onRename) {
     actions.push({
       key: "rename",
-      label: "Rename",
+      label: t("rename"),
       icon: Pencil,
       run: () => onRename(entry),
     });
@@ -168,7 +172,7 @@ function entryActions(
   if (onDelete) {
     actions.push({
       key: "delete",
-      label: "Delete",
+      label: t("delete"),
       icon: Trash2,
       run: () => onDelete(entry),
       destructive: true,
@@ -229,7 +233,8 @@ export function EntryActionsMenu({
   handlers: EntryActionHandlers;
   className?: string;
 }) {
-  const actions = entryActions(entry, handlers);
+  const t = useTranslations("browser.entryActions");
+  const actions = entryActions(entry, handlers, t);
 
   return (
     <DropdownMenu>
@@ -238,8 +243,8 @@ export function EntryActionsMenu({
           "inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground data-open:bg-muted data-open:text-foreground",
           className,
         )}
-        aria-label={`Actions for ${entry.name}`}
-        title="More actions"
+        aria-label={t("actionsFor", { name: entry.name })}
+        title={t("moreActions")}
         // Keep the row/card drag sensor from swallowing the click.
         onPointerDown={(event) => event.stopPropagation()}
       >
@@ -266,7 +271,8 @@ export function EntryContextMenu({
   handlers: EntryActionHandlers;
   children: React.ReactNode;
 }) {
-  const actions = entryActions(entry, handlers);
+  const t = useTranslations("browser.entryActions");
+  const actions = entryActions(entry, handlers, t);
 
   return (
     <ContextMenu>

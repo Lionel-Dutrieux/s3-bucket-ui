@@ -2,6 +2,7 @@
 
 import { useStore } from "@tanstack/react-form";
 import { FolderPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -28,6 +29,7 @@ export function NewFolderPopover({
   onCreated: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("browser.newFolder");
   const form = useAppForm({
     defaultValues: { name: "" },
     validators: {
@@ -40,7 +42,7 @@ export function NewFolderPopover({
         toast.error(result.error);
         return;
       }
-      toast.success(`Created ${value.name.trim()}`);
+      toast.success(t("createdToast", { name: value.name.trim() }));
       form.reset();
       setOpen(false);
       onCreated();
@@ -61,7 +63,7 @@ export function NewFolderPopover({
       <PopoverTrigger asChild>
         <Button size="sm" variant="outline" className="h-8">
           <FolderPlus aria-hidden />
-          New folder
+          {t("trigger")}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-72">
@@ -75,8 +77,8 @@ export function NewFolderPopover({
           <form.AppField name="name">
             {(field) => (
               <field.TextField
-                label="New folder"
-                placeholder="Invoices"
+                label={t("label")}
+                placeholder={t("placeholder")}
                 autoFocus
               />
             )}
@@ -85,11 +87,11 @@ export function NewFolderPopover({
             {(name) => (
               <form.AppForm>
                 <form.SubmitButton
-                  pendingLabel="Creating…"
+                  pendingLabel={t("creating")}
                   disabled={name.trim() === ""}
                   className="w-full"
                 >
-                  Create folder
+                  {t("create")}
                 </form.SubmitButton>
               </form.AppForm>
             )}

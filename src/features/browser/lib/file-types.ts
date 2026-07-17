@@ -1,15 +1,16 @@
 // File categorization by extension — single source of truth for icons
-// (file-icon.tsx) and the type filter (?type= search param).
-
+// (file-icon.tsx) and the type filter (?type= search param). Display labels
+// live in messages/*.json under browser.fileTypes, keyed by id — this module
+// is pure and exposes ids only, translation resolves at the render site.
 export const FILE_CATEGORIES = [
-  { id: "image", label: "Images" },
-  { id: "video", label: "Videos" },
-  { id: "audio", label: "Audio" },
-  { id: "document", label: "Documents" },
-  { id: "pdf", label: "PDFs" },
-  { id: "spreadsheet", label: "Spreadsheets" },
-  { id: "code", label: "Code" },
-  { id: "archive", label: "Archives" },
+  { id: "image" },
+  { id: "video" },
+  { id: "audio" },
+  { id: "document" },
+  { id: "pdf" },
+  { id: "spreadsheet" },
+  { id: "code" },
+  { id: "archive" },
 ] as const;
 
 export type FileCategory = (typeof FILE_CATEGORIES)[number]["id"];

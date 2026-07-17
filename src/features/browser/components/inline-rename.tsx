@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { renameFolder, renameObject } from "@/features/browser/actions";
@@ -30,6 +31,7 @@ export function InlineRenameInput({
   onEnd: (renamed: boolean) => void;
   className?: string;
 }) {
+  const t = useTranslations("browser.inlineRename");
   const { stem, ext } =
     entry.kind === "file"
       ? splitFileName(entry.name)
@@ -46,7 +48,7 @@ export function InlineRenameInput({
     }
     const parsed = entryNameSchema.safeParse(trimmed);
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Invalid name");
+      toast.error(parsed.error.issues[0]?.message ?? t("invalidName"));
       return;
     }
     setPending(true);
@@ -59,7 +61,7 @@ export function InlineRenameInput({
       toast.error(result.error);
       return;
     }
-    toast.success(`Renamed to ${trimmed}`);
+    toast.success(t("renamedToast", { name: trimmed }));
     onEnd(true);
   };
 
@@ -94,8 +96,8 @@ export function InlineRenameInput({
           disabled={pending}
           aria-label={
             ext
-              ? `New name for ${entry.name} (keeps ${ext})`
-              : `New name for ${entry.name}`
+              ? t("ariaWithExt", { name: entry.name, ext })
+              : t("ariaPlain", { name: entry.name })
           }
           className="h-full w-full min-w-0 flex-1 bg-transparent px-2 text-sm outline-none"
         />
@@ -115,7 +117,7 @@ export function InlineRenameInput({
       {pending ? (
         <Loader2
           className="size-4 shrink-0 animate-spin text-muted-foreground"
-          aria-label="Renaming"
+          aria-label={t("renaming")}
         />
       ) : null}
     </div>

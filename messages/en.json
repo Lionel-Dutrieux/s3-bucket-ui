@@ -168,5 +168,161 @@
       "continueWith": "Continue with {provider}",
       "errorFallback": "Could not reach {provider} — try again."
     }
+  },
+  "browser": {
+    "page": {
+      "metaFallbackTitle": "Source",
+      "itemCount": "{count, plural, one {# item} other {# items}}",
+      "nextPage": "Next page"
+    },
+    "errors": {
+      "credentialsTitle": "Access denied",
+      "credentialsBody": "The bucket rejected the credentials for this source. They may have been rotated or revoked — edit the source to update them.",
+      "bucketMissingTitle": "Bucket not found",
+      "bucketMissingBody": "The bucket this source points to doesn't exist anymore. It may have been renamed or deleted — edit the source to fix the bucket name.",
+      "networkTitle": "Endpoint unreachable",
+      "networkBody": "The endpoint didn't respond. Check the endpoint URL on this source, or your network connection.",
+      "unknownTitle": "Couldn't load this folder",
+      "unknownBody": "The bucket returned an unexpected error. Details were written to the server logs."
+    },
+    "filteredEmpty": {
+      "title": "No {type} in this folder",
+      "description": "Nothing at this level matches the filter.",
+      "clearFilter": "Clear filter"
+    },
+    "fileTypes": {
+      "allTypes": "All types",
+      "type": "Type",
+      "image": "Images",
+      "video": "Videos",
+      "audio": "Audio",
+      "document": "Documents",
+      "pdf": "PDFs",
+      "spreadsheet": "Spreadsheets",
+      "code": "Code",
+      "archive": "Archives"
+    },
+    "toolbar": {
+      "filterPlaceholder": "Filter by name",
+      "matchCount": "{count, plural, one {# match} other {# matches}}",
+      "searchSource": "Search source",
+      "upload": "Upload"
+    },
+    "columns": {
+      "name": "Name",
+      "size": "Size",
+      "modified": "Modified",
+      "selectAll": "Select all",
+      "selectEntry": "Select {name}",
+      "previewFile": "Preview {name}",
+      "detailsOf": "Details of {name}",
+      "downloadZipTitle": "Download as ZIP",
+      "downloadZipAria": "Download {name} as ZIP",
+      "downloadTitle": "Download",
+      "downloadAria": "Download {name}",
+      "sortByAria": "Sort by {column}"
+    },
+    "grid": {
+      "foldersHeading": "Folders",
+      "filesHeading": "Files",
+      "folderLabel": "Folder",
+      "openFolder": "Open {name}",
+      "previewFile": "Preview {name}",
+      "detailsOf": "Details of {name}",
+      "selectEntry": "Select {name}"
+    },
+    "fileBrowser": {
+      "noMatchesTitle": "No matches",
+      "noMatchesDescription": "Nothing in this folder matches “{query}”.",
+      "clearFilter": "Clear filter",
+      "emptyFolderTitle": "This folder is empty",
+      "emptyFolderCanUpload": "Drop files here, or use Upload to add some.",
+      "emptyFolderReadOnly": "Files uploaded to this location will show up here.",
+      "backToParent": "Back to parent folder",
+      "deletedToast": "Deleted {name}",
+      "deletedToastBulk": "{count, plural, one {Deleted # item} other {Deleted # items}}",
+      "duplicatedToast": "Duplicated {name}",
+      "deleteConfirmTitle": "Delete {name}?",
+      "deleteConfirmTitleBulk": "{count, plural, one {Delete # item?} other {Delete # items?}}",
+      "deleteFolderDescription": "This permanently deletes the folder and everything inside it from the bucket. There is no undo.",
+      "deleteFileDescription": "This permanently deletes the object from the bucket. There is no undo.",
+      "deleteBulkDescription": "This permanently deletes the selection from the bucket — folders with everything inside them. There is no undo.",
+      "deleteConfirmLabel": "Delete",
+      "deletePendingLabel": "Deleting…"
+    },
+    "selectionToolbar": {
+      "clearSelection": "Clear selection",
+      "selectedCount": "{count} selected",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "download": "Download",
+      "copyTo": "Copy to…",
+      "moveTo": "Move to…",
+      "delete": "Delete"
+    },
+    "breadcrumb": {
+      "showParentFolders": "Show parent folders"
+    },
+    "sortMenu": {
+      "sort": "Sort",
+      "sortColumn": "Sort: {column}",
+      "ascending": "Ascending",
+      "descending": "Descending",
+      "clearSorting": "Clear sorting"
+    },
+    "viewToggle": {
+      "listView": "List view",
+      "gridView": "Grid view",
+      "viewMode": "View mode"
+    },
+    "searchCommand": {
+      "title": "Search this source",
+      "description": "Matches file names and paths across every folder",
+      "placeholder": "Search files in this source…",
+      "searching": "Searching",
+      "minChars": "Type at least 2 characters to search.",
+      "failed": "Search failed.",
+      "noResults": "Nothing matches “{query}” in this source.",
+      "truncated": "First {count} matches — refine to narrow down",
+      "filesHeading": "Files",
+      "loadingResults": "Searching…"
+    },
+    "inlineRename": {
+      "invalidName": "Invalid name",
+      "renamedToast": "Renamed to {name}",
+      "ariaWithExt": "New name for {name} (keeps {ext})",
+      "ariaPlain": "New name for {name}",
+      "renaming": "Renaming"
+    },
+    "dnd": {
+      "dropToParent": "Drop here to move to the parent folder",
+      "itemsCount": "{count, plural, one {# item} other {# items}}"
+    },
+    "dropOverlay": {
+      "title": "Drop to upload",
+      "description": "Release to add files to this folder"
+    },
+    "entryActions": {
+      "actionsFor": "Actions for {name}",
+      "moreActions": "More actions",
+      "downloadZip": "Download as ZIP",
+      "moveTo": "Move to…",
+      "rename": "Rename",
+      "deleteFolder": "Delete folder",
+      "preview": "Preview",
+      "details": "Details",
+      "download": "Download",
+      "share": "Share",
+      "duplicate": "Duplicate",
+      "delete": "Delete"
+    },
+    "newFolder": {
+      "trigger": "New folder",
+      "label": "New folder",
+      "placeholder": "Invoices",
+      "creating": "Creating…",
+      "create": "Create folder",
+      "createdToast": "Created {name}"
+    }
   }
 }

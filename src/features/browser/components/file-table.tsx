@@ -7,6 +7,7 @@ import {
   type Table as TableInstance,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
@@ -129,6 +130,7 @@ function BrowserRow({
 }
 
 function SortButton({ header }: { header: Header<BrowserEntry, unknown> }) {
+  const t = useTranslations("browser.columns");
   const sorted = header.column.getIsSorted();
   const Icon = !sorted
     ? ChevronsUpDown
@@ -148,7 +150,12 @@ function SortButton({ header }: { header: Header<BrowserEntry, unknown> }) {
         alignRight && "justify-end",
         sorted && "text-foreground",
       )}
-      aria-label={`Sort by ${header.column.id}`}
+      aria-label={t("sortByAria", {
+        column:
+          typeof header.column.columnDef.header === "string"
+            ? header.column.columnDef.header
+            : header.column.id,
+      })}
     >
       {label}
       <Icon className={cn("size-3.5", !sorted && "opacity-40")} aria-hidden />
