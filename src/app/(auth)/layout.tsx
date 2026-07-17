@@ -1,5 +1,6 @@
 import { Cylinder } from "lucide-react";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { getSession } from "@/lib/auth/session";
 import { getBranding } from "@/lib/branding/branding";
@@ -11,6 +12,7 @@ export default async function AuthLayout({
 }>) {
   if (await getSession()) redirect("/");
   const branding = await getBranding();
+  const t = await getTranslations("auth.layout");
 
   return (
     <main className="grid min-h-svh flex-1 lg:grid-cols-[1.1fr_1fr]">
@@ -38,14 +40,14 @@ export default async function AuthLayout({
         />
 
         <div className="relative p-10">
-          <BrandMark branding={branding} subtitle="File manager" />
+          <BrandMark branding={branding} subtitle={t("subtitle")} />
         </div>
       </section>
 
       {/* Form panel. */}
       <section className="flex flex-col items-center justify-center gap-8 p-6">
         <div className="lg:hidden">
-          <BrandMark branding={branding} subtitle="File manager" />
+          <BrandMark branding={branding} subtitle={t("subtitle")} />
         </div>
         <div className="w-full max-w-sm">{children}</div>
       </section>

@@ -59,6 +59,76 @@
   "auth": {
     "userMenu": {
       "language": "Language"
+    },
+    "layout": {
+      "subtitle": "File manager"
+    },
+    "signIn": {
+      "metaTitle": "Sign in",
+      "title": "Sign in",
+      "oidcOnlySubtitle": "This instance signs in through {provider}.",
+      "subtitle": "Welcome back — sign in to browse your sources.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitPending": "Signing in…",
+      "or": "or",
+      "noAccount": "No account yet?",
+      "signUpLink": "Sign up",
+      "errorFallback": "Sign in failed."
+    },
+    "signUp": {
+      "metaTitle": "Sign up",
+      "disabledTitle": "Sign-up is disabled",
+      "disabledDescription": "Accounts are created by an administrator on this instance — ask them for yours.",
+      "backToSignIn": "Back to sign in",
+      "title": "Create your account",
+      "subtitle": "New accounts start without access — an admin grants you sources.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Ada Lovelace",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "submit": "Create account",
+      "submitPending": "Creating account…",
+      "or": "or",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in",
+      "errorFallback": "Sign up failed."
+    },
+    "forgotPassword": {
+      "metaTitle": "Reset password",
+      "sentTitle": "Check your inbox",
+      "sentDescription": "If an account exists for that address, a reset link is on its way. It expires in one hour.",
+      "backToSignIn": "Back to sign in",
+      "title": "Reset your password",
+      "subtitle": "Enter your account email — we'll send you a reset link.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Send reset link",
+      "submitPending": "Sending…",
+      "remembered": "Remembered it?",
+      "signInLink": "Sign in",
+      "errorFallback": "Could not send the reset email."
+    },
+    "resetPassword": {
+      "metaTitle": "Reset password",
+      "invalidTitle": "This link is no longer valid",
+      "invalidDescription": "Reset links expire after one hour and work only once. Request a fresh one.",
+      "requestNewLink": "Request a new link",
+      "title": "Choose a new password",
+      "subtitle": "Other devices stay signed in until their session expires.",
+      "newPasswordLabel": "New password",
+      "submit": "Update password",
+      "submitPending": "Updating…",
+      "successToast": "Password updated — sign in with the new one",
+      "errorFallback": "Could not reset the password — the link may have expired."
+    },
+    "oidc": {
+      "continueWith": "Continue with {provider}",
+      "errorFallback": "Could not reach {provider} — try again."
     }
   }
 }

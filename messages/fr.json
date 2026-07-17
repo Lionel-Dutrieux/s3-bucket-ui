@@ -59,6 +59,76 @@
   "auth": {
     "userMenu": {
       "language": "Langue"
+    },
+    "layout": {
+      "subtitle": "Gestionnaire de fichiers"
+    },
+    "signIn": {
+      "metaTitle": "Connexion",
+      "title": "Connexion",
+      "oidcOnlySubtitle": "Cette instance utilise la connexion via {provider}.",
+      "subtitle": "Bon retour — connectez-vous pour parcourir vos sources.",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "submitPending": "Connexion…",
+      "or": "ou",
+      "noAccount": "Pas encore de compte ?",
+      "signUpLink": "S'inscrire",
+      "errorFallback": "Échec de la connexion."
+    },
+    "signUp": {
+      "metaTitle": "Inscription",
+      "disabledTitle": "Les inscriptions sont désactivées",
+      "disabledDescription": "Les comptes sont créés par un administrateur sur cette instance — demandez-lui de créer le vôtre.",
+      "backToSignIn": "Retour à la connexion",
+      "title": "Créer votre compte",
+      "subtitle": "Les nouveaux comptes démarrent sans accès — un administrateur doit vous donner accès à des sources.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Ada Lovelace",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Mot de passe",
+      "submit": "Créer le compte",
+      "submitPending": "Création du compte…",
+      "or": "ou",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signInLink": "Se connecter",
+      "errorFallback": "Échec de l'inscription."
+    },
+    "forgotPassword": {
+      "metaTitle": "Réinitialiser le mot de passe",
+      "sentTitle": "Consultez votre boîte de réception",
+      "sentDescription": "Si un compte existe pour cette adresse, un lien de réinitialisation est en route. Il expire dans une heure.",
+      "backToSignIn": "Retour à la connexion",
+      "title": "Réinitialisez votre mot de passe",
+      "subtitle": "Indiquez l'e-mail de votre compte — nous vous enverrons un lien de réinitialisation.",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Envoyer le lien",
+      "submitPending": "Envoi…",
+      "remembered": "Vous vous en souvenez ?",
+      "signInLink": "Se connecter",
+      "errorFallback": "Impossible d'envoyer l'e-mail de réinitialisation."
+    },
+    "resetPassword": {
+      "metaTitle": "Réinitialiser le mot de passe",
+      "invalidTitle": "Ce lien n'est plus valide",
+      "invalidDescription": "Les liens de réinitialisation expirent au bout d'une heure et ne fonctionnent qu'une fois. Demandez-en un nouveau.",
+      "requestNewLink": "Demander un nouveau lien",
+      "title": "Choisissez un nouveau mot de passe",
+      "subtitle": "Les autres appareils restent connectés jusqu'à l'expiration de leur session.",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "submit": "Mettre à jour le mot de passe",
+      "submitPending": "Mise à jour…",
+      "successToast": "Mot de passe mis à jour — connectez-vous avec le nouveau",
+      "errorFallback": "Impossible de réinitialiser le mot de passe — le lien a peut-être expiré."
+    },
+    "oidc": {
+      "continueWith": "Continuer avec {provider}",
+      "errorFallback": "Impossible de joindre {provider} — réessayez."
     }
   }
 }
