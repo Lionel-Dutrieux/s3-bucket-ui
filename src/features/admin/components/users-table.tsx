@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  KeyRound,
   MoreHorizontal,
   ShieldCheck,
   ShieldOff,
@@ -148,6 +149,15 @@ export function UsersTable({
                       {user.banned ? (
                         <span className="ml-1.5 rounded-md border border-destructive/20 bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
                           {t("banned")}
+                        </span>
+                      ) : null}
+                      {user.twoFactorEnabled ? (
+                        <span
+                          className="ml-1.5 inline-flex items-center gap-1 rounded-md border bg-muted/50 px-1.5 py-0.5 align-middle text-xs font-medium text-muted-foreground"
+                          title={t("twoFactorEnabledLabel")}
+                        >
+                          <KeyRound className="size-3" aria-hidden />
+                          {t("twoFactor")}
                         </span>
                       ) : null}
                     </span>

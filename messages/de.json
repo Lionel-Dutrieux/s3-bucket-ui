@@ -65,6 +65,7 @@
     "description": "Angemeldet als {email}.",
     "profileSection": "Profil",
     "passwordSection": "Passwort",
+    "twoFactorSection": "Zwei-Faktor-Authentifizierung",
     "sessionsSection": "Sitzungen",
     "sessionsDescription": "Überall, wo dieses Konto angemeldet ist. Das Widerrufen einer Sitzung meldet dieses Gerät sofort ab.",
     "profile": {
@@ -169,6 +170,51 @@
     "oidc": {
       "continueWith": "Weiter mit {provider}",
       "errorFallback": "{provider} konnte nicht erreicht werden — versuchen Sie es erneut."
+    }
+  },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "Zwei-Faktor-Authentifizierung",
+      "title": "Zwei-Faktor-Authentifizierung",
+      "description": "Geben Sie den Code aus Ihrer Authenticator-App ein.",
+      "codeLabel": "Authentifizierungscode",
+      "backupLabel": "Wiederherstellungscode",
+      "trustLabel": "Diesem Gerät vertrauen",
+      "trustDescription": "2FA auf diesem Gerät für 30 Tage überspringen.",
+      "useBackup": "Wiederherstellungscode verwenden",
+      "useTotp": "Authenticator-App verwenden",
+      "submit": "Bestätigen",
+      "submitPending": "Wird geprüft…",
+      "error": "Dieser Code ist falsch oder abgelaufen."
+    },
+    "setup": {
+      "disabledHelp": "Fügen Sie beim Anmelden einen zweiten Schritt mit einer Authenticator-App hinzu.",
+      "enabledHelp": "Die Zwei-Faktor-Authentifizierung ist aktiviert. Geben Sie Ihr Passwort ein, um sie zu deaktivieren.",
+      "passwordLabel": "Aktuelles Passwort",
+      "enableSubmit": "Aktivieren",
+      "enablePending": "Wird aktiviert…",
+      "enableError": "Einrichtung konnte nicht gestartet werden. Überprüfen Sie Ihr Passwort.",
+      "scanHelp": "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App oder geben Sie den Schlüssel manuell ein.",
+      "manualKeyLabel": "Oder geben Sie diesen Schlüssel manuell ein",
+      "backupHelp": "Bewahren Sie diese Wiederherstellungscodes sicher auf — jeder funktioniert einmal, falls Sie Ihr Gerät verlieren.",
+      "confirmLabel": "Geben Sie den 6-stelligen Code zur Bestätigung ein",
+      "confirmSubmit": "Bestätigen",
+      "confirmPending": "Wird bestätigt…",
+      "confirmError": "Dieser Code ist falsch. Versuchen Sie es erneut.",
+      "enabledToast": "Zwei-Faktor-Authentifizierung aktiviert.",
+      "disableSubmit": "Deaktivieren",
+      "disablePending": "Wird deaktiviert…",
+      "disableError": "Deaktivierung fehlgeschlagen. Überprüfen Sie Ihr Passwort.",
+      "disabledToast": "Zwei-Faktor-Authentifizierung deaktiviert.",
+      "copyCodes": "Codes kopieren",
+      "codesCopiedToast": "Wiederherstellungscodes kopiert.",
+      "copyError": "Kopieren in die Zwischenablage fehlgeschlagen.",
+      "regenerateHeading": "Wiederherstellungscodes",
+      "regenerateHelp": "Einen neuen Satz erzeugen — dadurch werden Ihre alten Codes ungültig.",
+      "regenerateSubmit": "Wiederherstellungscodes neu generieren",
+      "regeneratePending": "Wird neu generiert…",
+      "regenerateError": "Neu generieren fehlgeschlagen. Überprüfen Sie Ihr Passwort.",
+      "regeneratedToast": "Neue Wiederherstellungscodes generiert."
     }
   },
   "browser": {
@@ -573,6 +619,8 @@
       "joinedColumn": "Beigetreten",
       "you": "(Sie)",
       "banned": "gesperrt",
+      "twoFactor": "2FA",
+      "twoFactorEnabledLabel": "Zwei-Faktor-Authentifizierung aktiviert",
       "admin": "Admin",
       "user": "Benutzer",
       "actionsFor": "Aktionen für {email}",

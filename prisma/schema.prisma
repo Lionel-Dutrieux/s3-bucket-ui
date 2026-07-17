@@ -61,13 +61,31 @@ model User {
   /// Snapshot of the IdP `groups` claim at the last OIDC sign-in — drives the
   /// name-matching sync into GroupMember (via = "oidc").
   oidcGroups    String[]  @default([]) @map("oidc_groups")
+  // two-factor plugin
+  twoFactorEnabled Boolean? @default(false) @map("two_factor_enabled")
 
   sessions    Session[]
   accounts    Account[]
   memberships GroupMember[]
   grants      SourcePermission[]
+  twoFactors  TwoFactor[]
 
   @@map("users")
+}
+
+model TwoFactor {
+  id                      String    @id
+  userId                  String    @map("user_id")
+  secret                  String
+  backupCodes             String    @map("backup_codes")
+  verified                Boolean   @default(true)
+  failedVerificationCount Int       @default(0) @map("failed_verification_count")
+  lockedUntil             DateTime? @map("locked_until") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("two_factor")
 }
 
 model Session {

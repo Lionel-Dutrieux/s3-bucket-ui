@@ -3,7 +3,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { admin, genericOAuth } from "better-auth/plugins";
+import { admin, genericOAuth, twoFactor } from "better-auth/plugins";
 import { normalizeGroupsClaim } from "@/lib/authz/oidc-groups";
 import { getOidcConfig, type OidcConfig } from "@/lib/config";
 import { syncOidcMemberships } from "@/lib/dal/groups";
@@ -26,6 +26,9 @@ async function syncGroupsFromOidcCallback(
   if (!ctxPath?.includes("/oauth2/callback")) return;
   await syncOidcMemberships(user.id, normalizeGroupsClaim(user.oidcGroups));
 }
+
+/** Label shown in users' authenticator apps for TOTP entries. */
+const TWO_FACTOR_ISSUER = "Bucket UI";
 
 /** Email/password endpoints refused when the instance runs OIDC-only. */
 const PASSWORD_ENDPOINTS = new Set([
@@ -63,6 +66,17 @@ function buildAuth(oidcConfig: OidcConfig | null) {
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : [],
+    session: {
+      // Disable better-auth's session-freshness gate (default freshAge: 24h).
+      // The gate is keyed on session *createdAt*, so once a session crosses 24h
+      // the freshness-guarded endpoints throw SESSION_NOT_FRESH — including the
+      // read-only /list-sessions that /account renders, which then 500s the
+      // whole page. It also blocks stale-session profile-name updates. Our
+      // genuinely sensitive operations are gated by password re-entry instead
+      // (change-password, 2FA enable/disable) or an authoritative re-read
+      // (revoke-session), so freshness buys us nothing here.
+      freshAge: 0,
+    },
     // On by default in production. In-memory counters fit the single-container
     // deployment (they reset on restart — acceptable for brute-force slowdown).
     // The global default (100 req / 10 s) stays untouched so session lookups
@@ -165,6 +179,11 @@ function buildAuth(oidcConfig: OidcConfig | null) {
     },
     plugins: [
       admin(),
+      // twoFactor() must come before the conditional genericOAuth spread:
+      // a conditional array spread widens the plugins tuple type for every
+      // element after it, which silently drops twoFactorEnabled from the
+      // inferred session user type.
+      twoFactor({ issuer: TWO_FACTOR_ISSUER }),
       ...(oidcConfig
         ? [genericOAuth({ config: [buildOidcProvider(oidcConfig)] })]
         : []),

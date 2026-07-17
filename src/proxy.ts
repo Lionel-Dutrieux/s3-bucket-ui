@@ -18,7 +18,11 @@ export function proxy(request: NextRequest) {
 export const config = {
   // Everything except the public endpoints (auth flow, health probe, public
   // share links), the auth pages themselves, and static assets.
+  // `two-factor` MUST stay excluded: during a 2FA challenge better-auth has
+  // already deleted the session cookie (only a short-lived 2FA cookie exists),
+  // so the optimistic session-cookie check below would bounce the challenge
+  // page straight back to /sign-in and the code prompt would never show.
   matcher: [
-    "/((?!api/auth|api/health|api/s/|s/|sign-in|sign-up|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|api/health|api/s/|s/|sign-in|sign-up|two-factor|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)",
   ],
 };

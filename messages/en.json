@@ -65,6 +65,7 @@
     "description": "Signed in as {email}.",
     "profileSection": "Profile",
     "passwordSection": "Password",
+    "twoFactorSection": "Two-factor authentication",
     "sessionsSection": "Sessions",
     "sessionsDescription": "Everywhere this account is signed in. Revoking a session signs that device out immediately.",
     "profile": {
@@ -169,6 +170,51 @@
     "oidc": {
       "continueWith": "Continue with {provider}",
       "errorFallback": "Could not reach {provider} — try again."
+    }
+  },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "Two-factor authentication",
+      "title": "Two-factor authentication",
+      "description": "Enter the code from your authenticator app.",
+      "codeLabel": "Authentication code",
+      "backupLabel": "Backup code",
+      "trustLabel": "Trust this device",
+      "trustDescription": "Skip 2FA on this device for 30 days.",
+      "useBackup": "Use a backup code",
+      "useTotp": "Use your authenticator app",
+      "submit": "Verify",
+      "submitPending": "Verifying…",
+      "error": "That code is incorrect or expired."
+    },
+    "setup": {
+      "disabledHelp": "Add a second step at sign-in with an authenticator app.",
+      "enabledHelp": "Two-factor authentication is on. Enter your password to turn it off.",
+      "passwordLabel": "Current password",
+      "enableSubmit": "Enable",
+      "enablePending": "Enabling…",
+      "enableError": "Couldn't start setup. Check your password.",
+      "scanHelp": "Scan this QR code with your authenticator app, or enter the key manually.",
+      "manualKeyLabel": "Or enter this key manually",
+      "backupHelp": "Save these backup codes somewhere safe — each works once if you lose your device.",
+      "confirmLabel": "Enter the 6-digit code to confirm",
+      "confirmSubmit": "Confirm",
+      "confirmPending": "Confirming…",
+      "confirmError": "That code is incorrect. Try again.",
+      "enabledToast": "Two-factor authentication enabled.",
+      "disableSubmit": "Disable",
+      "disablePending": "Disabling…",
+      "disableError": "Couldn't disable. Check your password.",
+      "disabledToast": "Two-factor authentication disabled.",
+      "copyCodes": "Copy codes",
+      "codesCopiedToast": "Backup codes copied.",
+      "copyError": "Couldn't copy to clipboard.",
+      "regenerateHeading": "Backup codes",
+      "regenerateHelp": "Generate a new set — this invalidates your old codes.",
+      "regenerateSubmit": "Regenerate backup codes",
+      "regeneratePending": "Regenerating…",
+      "regenerateError": "Couldn't regenerate. Check your password.",
+      "regeneratedToast": "New backup codes generated."
     }
   },
   "browser": {
@@ -573,6 +619,8 @@
       "joinedColumn": "Joined",
       "you": "(you)",
       "banned": "banned",
+      "twoFactor": "2FA",
+      "twoFactorEnabledLabel": "Two-factor authentication enabled",
       "admin": "Admin",
       "user": "User",
       "actionsFor": "Actions for {email}",

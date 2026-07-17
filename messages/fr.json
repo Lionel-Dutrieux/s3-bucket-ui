@@ -65,6 +65,7 @@
     "description": "Connecté en tant que {email}.",
     "profileSection": "Profil",
     "passwordSection": "Mot de passe",
+    "twoFactorSection": "Authentification à deux facteurs",
     "sessionsSection": "Sessions",
     "sessionsDescription": "Tous les endroits où ce compte est connecté. Révoquer une session déconnecte immédiatement cet appareil.",
     "profile": {
@@ -169,6 +170,51 @@
     "oidc": {
       "continueWith": "Continuer avec {provider}",
       "errorFallback": "Impossible de joindre {provider} — réessayez."
+    }
+  },
+  "twoFactor": {
+    "challenge": {
+      "metaTitle": "Authentification à deux facteurs",
+      "title": "Authentification à deux facteurs",
+      "description": "Saisissez le code de votre application d'authentification.",
+      "codeLabel": "Code d'authentification",
+      "backupLabel": "Code de secours",
+      "trustLabel": "Faire confiance à cet appareil",
+      "trustDescription": "Ne plus demander le 2FA sur cet appareil pendant 30 jours.",
+      "useBackup": "Utiliser un code de secours",
+      "useTotp": "Utiliser votre application d'authentification",
+      "submit": "Vérifier",
+      "submitPending": "Vérification…",
+      "error": "Ce code est incorrect ou expiré."
+    },
+    "setup": {
+      "disabledHelp": "Ajoutez une seconde étape à la connexion avec une application d'authentification.",
+      "enabledHelp": "L'authentification à deux facteurs est activée. Saisissez votre mot de passe pour la désactiver.",
+      "passwordLabel": "Mot de passe actuel",
+      "enableSubmit": "Activer",
+      "enablePending": "Activation…",
+      "enableError": "Impossible de démarrer la configuration. Vérifiez votre mot de passe.",
+      "scanHelp": "Scannez ce QR code avec votre application d'authentification, ou saisissez la clé manuellement.",
+      "manualKeyLabel": "Ou saisissez cette clé manuellement",
+      "backupHelp": "Conservez ces codes de secours en lieu sûr — chacun fonctionne une fois si vous perdez votre appareil.",
+      "confirmLabel": "Saisissez le code à 6 chiffres pour confirmer",
+      "confirmSubmit": "Confirmer",
+      "confirmPending": "Confirmation…",
+      "confirmError": "Ce code est incorrect. Réessayez.",
+      "enabledToast": "Authentification à deux facteurs activée.",
+      "disableSubmit": "Désactiver",
+      "disablePending": "Désactivation…",
+      "disableError": "Impossible de désactiver. Vérifiez votre mot de passe.",
+      "disabledToast": "Authentification à deux facteurs désactivée.",
+      "copyCodes": "Copier les codes",
+      "codesCopiedToast": "Codes de secours copiés.",
+      "copyError": "Impossible de copier dans le presse-papiers.",
+      "regenerateHeading": "Codes de secours",
+      "regenerateHelp": "Générer un nouveau jeu — vos anciens codes seront invalidés.",
+      "regenerateSubmit": "Régénérer les codes de secours",
+      "regeneratePending": "Régénération…",
+      "regenerateError": "Impossible de régénérer. Vérifiez votre mot de passe.",
+      "regeneratedToast": "Nouveaux codes de secours générés."
     }
   },
   "browser": {
@@ -573,6 +619,8 @@
       "joinedColumn": "Inscrit",
       "you": "(vous)",
       "banned": "banni",
+      "twoFactor": "2FA",
+      "twoFactorEnabledLabel": "Authentification à deux facteurs activée",
       "admin": "Admin",
       "user": "Utilisateur",
       "actionsFor": "Actions pour {email}",
