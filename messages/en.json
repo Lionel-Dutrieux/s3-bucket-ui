@@ -56,9 +56,47 @@
       "groupLabel": "Theme"
     }
   },
+  "account": {
+    "metaTitle": "Account",
+    "headerTitle": "Account",
+    "title": "Your account",
+    "description": "Signed in as {email}.",
+    "profileSection": "Profile",
+    "passwordSection": "Password",
+    "sessionsSection": "Sessions",
+    "sessionsDescription": "Everywhere this account is signed in. Revoking a session signs that device out immediately.",
+    "profile": {
+      "nameLabel": "Name",
+      "saveChanges": "Save changes",
+      "saving": "Saving…",
+      "updateError": "Could not update your profile.",
+      "updateSuccess": "Profile updated"
+    },
+    "changePassword": {
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "submit": "Change password",
+      "submitPending": "Changing…",
+      "changeError": "Could not change the password.",
+      "changeSuccess": "Password changed — other sessions were signed out"
+    },
+    "sessions": {
+      "unknownDevice": "Unknown device",
+      "unknownOs": "unknown OS",
+      "thisDevice": "this device",
+      "activeAt": "active {time}",
+      "revokeAria": "Revoke this session",
+      "revokeError": "Could not revoke this session.",
+      "revokeSuccess": "Session revoked"
+    }
+  },
   "auth": {
     "userMenu": {
-      "language": "Language"
+      "language": "Language",
+      "administrator": "Administrator",
+      "member": "Member",
+      "account": "Account",
+      "signOut": "Sign out"
     },
     "layout": {
       "subtitle": "File manager"

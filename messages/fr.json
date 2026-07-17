@@ -56,9 +56,47 @@
       "groupLabel": "Thème"
     }
   },
+  "account": {
+    "metaTitle": "Compte",
+    "headerTitle": "Compte",
+    "title": "Votre compte",
+    "description": "Connecté en tant que {email}.",
+    "profileSection": "Profil",
+    "passwordSection": "Mot de passe",
+    "sessionsSection": "Sessions",
+    "sessionsDescription": "Tous les endroits où ce compte est connecté. Révoquer une session déconnecte immédiatement cet appareil.",
+    "profile": {
+      "nameLabel": "Nom",
+      "saveChanges": "Enregistrer les modifications",
+      "saving": "Enregistrement…",
+      "updateError": "Impossible de mettre à jour votre profil.",
+      "updateSuccess": "Profil mis à jour"
+    },
+    "changePassword": {
+      "currentPasswordLabel": "Mot de passe actuel",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "submit": "Changer le mot de passe",
+      "submitPending": "Modification…",
+      "changeError": "Impossible de changer le mot de passe.",
+      "changeSuccess": "Mot de passe modifié — les autres sessions ont été déconnectées"
+    },
+    "sessions": {
+      "unknownDevice": "Appareil inconnu",
+      "unknownOs": "OS inconnu",
+      "thisDevice": "cet appareil",
+      "activeAt": "actif {time}",
+      "revokeAria": "Révoquer cette session",
+      "revokeError": "Impossible de révoquer cette session.",
+      "revokeSuccess": "Session révoquée"
+    }
+  },
   "auth": {
     "userMenu": {
-      "language": "Langue"
+      "language": "Langue",
+      "administrator": "Administrateur",
+      "member": "Membre",
+      "account": "Compte",
+      "signOut": "Se déconnecter"
     },
     "layout": {
       "subtitle": "Gestionnaire de fichiers"

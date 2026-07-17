@@ -84,17 +84,17 @@ export function UserMenu({ user }: { user: SidebarUser }) {
           {user.role === "admin" ? (
             <>
               <ShieldCheck className="size-4 text-primary" aria-hidden />
-              Administrator
+              {t("userMenu.administrator")}
             </>
           ) : (
-            "Member"
+            t("userMenu.member")
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/account">
             <UserRoundCog aria-hidden />
-            Account
+            {t("userMenu.account")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSub>
@@ -122,7 +122,7 @@ export function UserMenu({ user }: { user: SidebarUser }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={handleSignOut}>
           <LogOut aria-hidden />
-          Sign out
+          {t("userMenu.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

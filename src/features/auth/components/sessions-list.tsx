@@ -2,6 +2,7 @@
 
 import { MonitorSmartphone, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,8 +27,12 @@ function describeIp(ip: string | null): string | null {
 }
 
 /** Compact "Chrome · Windows"-style summary out of a raw user agent. */
-function describeAgent(userAgent: string | null): string {
-  if (!userAgent) return "Unknown device";
+function describeAgent(
+  userAgent: string | null,
+  unknownDeviceLabel: string,
+  unknownOsLabel: string,
+): string {
+  if (!userAgent) return unknownDeviceLabel;
   const browser =
     ["Edg", "OPR", "Firefox", "Chrome", "Safari"].find((name) =>
       userAgent.includes(name),
@@ -35,7 +40,7 @@ function describeAgent(userAgent: string | null): string {
   const os =
     ["Windows", "Mac OS X", "Android", "iPhone", "iPad", "Linux"].find((name) =>
       userAgent.includes(name),
-    ) ?? "unknown OS";
+    ) ?? unknownOsLabel;
   const names: Record<string, string> = { Edg: "Edge", OPR: "Opera" };
   return `${names[browser] ?? browser} · ${os.replace("Mac OS X", "macOS")}`;
 }
@@ -43,15 +48,16 @@ function describeAgent(userAgent: string | null): string {
 export function SessionsList({ sessions }: { sessions: SessionRow[] }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("account.sessions");
 
   const revoke = (token: string) => {
     startTransition(async () => {
       const { error } = await authClient.revokeSession({ token });
       if (error) {
-        toast.error(error.message ?? "Could not revoke this session.");
+        toast.error(error.message ?? t("revokeError"));
         return;
       }
-      toast.success("Session revoked");
+      toast.success(t("revokeSuccess"));
       router.refresh();
     });
   };
@@ -65,10 +71,14 @@ export function SessionsList({ sessions }: { sessions: SessionRow[] }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">
-              {describeAgent(session.userAgent)}
+              {describeAgent(
+                session.userAgent,
+                t("unknownDevice"),
+                t("unknownOs"),
+              )}
               {session.current ? (
                 <span className="ml-1.5 rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
-                  this device
+                  {t("thisDevice")}
                 </span>
               ) : null}
             </p>
@@ -77,7 +87,7 @@ export function SessionsList({ sessions }: { sessions: SessionRow[] }) {
                 const ip = describeIp(session.ipAddress);
                 return ip ? `${ip} · ` : "";
               })()}
-              active {formatDateTime(session.updatedAt)}
+              {t("activeAt", { time: formatDateTime(session.updatedAt) })}
             </p>
           </div>
           {session.current ? null : (
@@ -87,7 +97,7 @@ export function SessionsList({ sessions }: { sessions: SessionRow[] }) {
               className="size-7 text-muted-foreground hover:text-destructive"
               disabled={pending}
               onClick={() => revoke(session.token)}
-              aria-label="Revoke this session"
+              aria-label={t("revokeAria")}
             >
               <X className="size-4" aria-hidden />
             </Button>
