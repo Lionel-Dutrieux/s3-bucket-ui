@@ -20,7 +20,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # version pinned by package.json#packageManager
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+        env:
+          # The build never touches the database or secrets; env is validated
+          # at runtime (instrumentation.ts), not at build time.
+          SKIP_ENV_VALIDATION: "1"
+
   release:
+    needs: checks
     runs-on: ubuntu-latest
     permissions:
       contents: write
