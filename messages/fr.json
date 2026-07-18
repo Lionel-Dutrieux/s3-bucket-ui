@@ -293,7 +293,7 @@
       "filterPlaceholder": "Filtrer par nom",
       "matchCount": "{count, plural, one {# résultat} other {# résultats}}",
       "searchSource": "Rechercher dans la source",
-      "upload": "Envoyer"
+      "upload": "Importer"
     },
     "columns": {
       "name": "Nom",
@@ -312,7 +312,6 @@
     "grid": {
       "foldersHeading": "Dossiers",
       "filesHeading": "Fichiers",
-      "folderLabel": "Dossier",
       "openFolder": "Ouvrir {name}",
       "previewFile": "Aperçu de {name}",
       "detailsOf": "Détails de {name}",
@@ -323,7 +322,7 @@
       "noMatchesDescription": "Rien dans ce dossier ne correspond à « {query} ».",
       "clearFilter": "Effacer le filtre",
       "emptyFolderTitle": "Ce dossier est vide",
-      "emptyFolderCanUpload": "Déposez des fichiers ici, ou utilisez Envoyer pour en ajouter.",
+      "emptyFolderCanUpload": "Déposez des fichiers ici, ou utilisez Importer pour en ajouter.",
       "emptyFolderReadOnly": "Les fichiers envoyés à cet endroit apparaîtront ici.",
       "backToParent": "Retour au dossier parent",
       "deletedToast": "{name} supprimé",
@@ -502,6 +501,7 @@
       "loadError": "Impossible de charger les détails de ce fichier.",
       "size": "Taille",
       "modified": "Modifié",
+      "technical": "Détails techniques",
       "contentType": "Content-Type",
       "etag": "ETag",
       "share": "Partager",

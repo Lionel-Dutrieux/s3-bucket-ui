@@ -2,7 +2,7 @@
 
 import { Trash2, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -32,6 +32,7 @@ export function GroupsTable({
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const t = useTranslations("admin.groupsTable");
+  const locale = useLocale();
 
   return (
     <>
@@ -64,7 +65,7 @@ export function GroupsTable({
                 {t("memberCount", { count: group.members.length })}
               </TableCell>
               <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
-                {formatDateTime(group.createdAt)}
+                {formatDateTime(group.createdAt, locale)}
               </TableCell>
               <TableCell>
                 <span className="flex justify-end gap-1">

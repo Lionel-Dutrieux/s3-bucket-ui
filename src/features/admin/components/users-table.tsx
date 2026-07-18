@@ -9,7 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -103,6 +103,7 @@ export function UsersTable({
   const router = useRouter();
   const t = useTranslations("admin.usersTable");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
 
   const run = (work: () => Promise<ActionResult>, done?: () => void) => {
     startTransition(async () => {
@@ -197,7 +198,7 @@ export function UsersTable({
                 )}
               </TableCell>
               <TableCell className="text-xs text-muted-foreground tabular-nums max-md:hidden">
-                {formatDateTime(user.createdAt)}
+                {formatDateTime(user.createdAt, locale)}
               </TableCell>
               <TableCell>
                 {user.id === selfId ? null : (

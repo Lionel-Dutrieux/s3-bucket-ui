@@ -67,6 +67,7 @@ export function FileTable({
             row={row}
             canMove={canMove}
             handlers={table.options.meta}
+            active={table.options.meta?.activeId === row.id}
           />
         ))}
       </TableBody>
@@ -78,10 +79,13 @@ function BrowserRow({
   row,
   canMove,
   handlers,
+  active = false,
 }: {
   row: Row<BrowserEntry>;
   canMove: boolean;
   handlers?: EntryActionHandlers;
+  /** True while this row's details panel is open. */
+  active?: boolean;
 }) {
   const entry = row.original;
   const dnd = useEntryDnd({
@@ -106,6 +110,8 @@ function BrowserRow({
         canMove && "cursor-grab",
         dnd.isDragging && "opacity-40",
         dnd.isOver && "bg-primary/10 outline outline-2 outline-primary",
+        // Keeps the visual link with the open details panel.
+        active && "bg-muted/60",
       )}
       {...(canMove ? dnd.attributes : {})}
       {...(canMove ? dnd.listeners : {})}

@@ -312,7 +312,6 @@
     "grid": {
       "foldersHeading": "Carpetas",
       "filesHeading": "Archivos",
-      "folderLabel": "Carpeta",
       "openFolder": "Abrir {name}",
       "previewFile": "Vista previa de {name}",
       "detailsOf": "Detalles de {name}",
@@ -502,6 +501,7 @@
       "loadError": "No se pudieron cargar los detalles de este archivo.",
       "size": "Tamaño",
       "modified": "Modificado",
+      "technical": "Detalles técnicos",
       "contentType": "Content-Type",
       "etag": "ETag",
       "share": "Compartir",

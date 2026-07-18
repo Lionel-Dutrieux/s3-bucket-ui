@@ -2,7 +2,7 @@
 
 import { Copy, Link2, Link2Off } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
@@ -50,6 +50,7 @@ const STATUS_BADGE: Record<ReturnType<typeof statusOf>, string> = {
 
 export function SharesTable({ shares }: { shares: ShareRow[] }) {
   const t = useTranslations("shares");
+  const locale = useLocale();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -121,10 +122,10 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                 <TableCell>{share.sourceName}</TableCell>
                 <TableCell className="text-muted-foreground">
                   <span
-                    title={formatDate(share.createdAt)}
+                    title={formatDate(share.createdAt, locale)}
                     suppressHydrationWarning
                   >
-                    {formatRelative(share.createdAt)}
+                    {formatRelative(share.createdAt, locale)}
                   </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
@@ -132,10 +133,10 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                     t("never")
                   ) : (
                     <span
-                      title={formatDate(share.expiresAt)}
+                      title={formatDate(share.expiresAt, locale)}
                       suppressHydrationWarning
                     >
-                      {formatRelative(share.expiresAt)}
+                      {formatRelative(share.expiresAt, locale)}
                     </span>
                   )}
                 </TableCell>

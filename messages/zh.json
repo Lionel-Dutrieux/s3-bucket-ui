@@ -312,7 +312,6 @@
     "grid": {
       "foldersHeading": "文件夹",
       "filesHeading": "文件",
-      "folderLabel": "文件夹",
       "openFolder": "打开 {name}",
       "previewFile": "预览 {name}",
       "detailsOf": "{name} 的详情",
@@ -502,6 +501,7 @@
       "loadError": "无法加载此文件的详情。",
       "size": "大小",
       "modified": "修改时间",
+      "technical": "技术详情",
       "contentType": "内容类型",
       "etag": "ETag",
       "share": "分享",

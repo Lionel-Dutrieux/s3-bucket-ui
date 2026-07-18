@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Download, Share2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +39,7 @@ export function PreviewDialog({
   onShare?: (file: FileEntry) => void;
 }) {
   const t = useTranslations("browser.previewDialog");
+  const locale = useLocale();
   const [failedKey, setFailedKey] = useState<string | null>(null);
 
   const kind = file ? previewKindOf(file.name) : undefined;
@@ -94,7 +95,7 @@ export function PreviewDialog({
               <DialogDescription>
                 {formatBytes(file.size)}
                 {file.lastModified ? (
-                  <> · {formatDate(file.lastModified)}</>
+                  <> · {formatDate(file.lastModified, locale)}</>
                 ) : null}
                 {index >= 0 && files.length > 1 ? (
                   <>

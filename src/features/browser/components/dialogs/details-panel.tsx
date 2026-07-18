@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Download, Loader2, Share2, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { ChevronRight, Copy, Download, Loader2, Share2, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { downloadUrl, thumbnailSrc } from "@/features/browser/api/client";
@@ -10,8 +10,13 @@ import { browserQueries } from "@/features/browser/api/queries";
 import { FileIcon } from "@/features/browser/components/file-icon";
 import { categoryOf } from "@/features/browser/lib/file-types";
 import type { FileEntry } from "@/features/browser/lib/listing";
+import {
+  CHECKERBOARD_CLASS,
+  isVectorImage,
+} from "@/features/browser/lib/thumbs";
 import { copyText } from "@/lib/clipboard";
-import { formatBytes, formatDate, formatRelative } from "@/lib/format";
+import { formatBytes, formatDateTime, formatRelative } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 /**
  * Object metadata (HEAD request) in a non-blocking side panel: an inline
@@ -31,6 +36,7 @@ export function DetailsPanel({
   onShare?: (file: FileEntry) => void;
 }) {
   const t = useTranslations("browser.detailsPanel");
+  const locale = useLocale();
   const {
     data: details,
     error,
@@ -68,14 +74,24 @@ export function DetailsPanel({
 
       {/* Visual anchor: the image itself when there is one, the type icon
           otherwise — the Drive panel pattern. */}
-      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md border bg-muted/40">
+      <div
+        className={cn(
+          "flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md border",
+          categoryOf(file.name) === "image"
+            ? CHECKERBOARD_CLASS
+            : "bg-muted/40",
+        )}
+      >
         {categoryOf(file.name) === "image" ? (
           // biome-ignore lint/performance/noImgElement: redirects to a presigned bucket URL, not optimizable
           <img
             src={thumbnailSrc(sourceId, file.key)}
             alt=""
             loading="lazy"
-            className="h-full w-full object-cover"
+            className={cn(
+              "h-full w-full",
+              isVectorImage(file.name) ? "object-contain p-4" : "object-cover",
+            )}
           />
         ) : (
           <FileIcon name={file.name} className="size-14" />
@@ -111,40 +127,55 @@ export function DetailsPanel({
           {error?.message ?? t("loadError")}
         </p>
       ) : (
-        <dl className="grid gap-y-3 text-sm">
-          <DetailRow label={t("size")}>
-            <span className="tabular-nums">{formatBytes(details.size)}</span>
-          </DetailRow>
-          <DetailRow label={t("modified")}>
-            {details.lastModified ? (
-              <span
-                title={formatDate(details.lastModified)}
-                suppressHydrationWarning
-              >
-                {formatRelative(details.lastModified)}
-              </span>
-            ) : (
-              "—"
-            )}
-          </DetailRow>
-          <DetailRow label={t("contentType")}>
-            <span className="font-mono text-xs">
-              {details.contentType ?? "—"}
-            </span>
-          </DetailRow>
-          {details.etag ? (
-            <DetailRow label={t("etag")}>
-              <span className="break-all font-mono text-xs text-muted-foreground">
-                {details.etag}
-              </span>
+        <>
+          <dl className="grid gap-y-3 text-sm">
+            <DetailRow label={t("size")}>
+              <span className="tabular-nums">{formatBytes(details.size)}</span>
             </DetailRow>
-          ) : null}
-          {Object.entries(details.metadata ?? {}).map(([name, value]) => (
-            <DetailRow key={name} label={name}>
-              <span className="break-all font-mono text-xs">{value}</span>
+            <DetailRow label={t("modified")}>
+              {details.lastModified ? (
+                <span
+                  title={formatDateTime(new Date(details.lastModified), locale)}
+                  suppressHydrationWarning
+                >
+                  {formatRelative(details.lastModified, locale)}
+                </span>
+              ) : (
+                "—"
+              )}
             </DetailRow>
-          ))}
-        </dl>
+          </dl>
+          {/* Content-Type, ETag and custom metadata are developer-facing —
+              useful, but folded away so they don't compete with size/date. */}
+          <details className="group/tech">
+            <summary className="flex cursor-pointer select-none items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+              <ChevronRight
+                className="size-3 transition-transform group-open/tech:rotate-90"
+                aria-hidden
+              />
+              {t("technical")}
+            </summary>
+            <dl className="mt-2 grid gap-y-3 pl-4 text-sm">
+              <DetailRow label={t("contentType")}>
+                <span className="font-mono text-xs">
+                  {details.contentType ?? "—"}
+                </span>
+              </DetailRow>
+              {details.etag ? (
+                <DetailRow label={t("etag")}>
+                  <span className="break-all font-mono text-xs text-muted-foreground">
+                    {details.etag}
+                  </span>
+                </DetailRow>
+              ) : null}
+              {Object.entries(details.metadata ?? {}).map(([name, value]) => (
+                <DetailRow key={name} label={name}>
+                  <span className="break-all font-mono text-xs">{value}</span>
+                </DetailRow>
+              ))}
+            </dl>
+          </details>
+        </>
       )}
 
       <div className="mt-auto flex gap-2 pt-2">

@@ -312,7 +312,6 @@
     "grid": {
       "foldersHeading": "Ordner",
       "filesHeading": "Dateien",
-      "folderLabel": "Ordner",
       "openFolder": "{name} öffnen",
       "previewFile": "Vorschau von {name}",
       "detailsOf": "Details zu {name}",
@@ -502,6 +501,7 @@
       "loadError": "Die Details dieser Datei konnten nicht geladen werden.",
       "size": "Größe",
       "modified": "Geändert",
+      "technical": "Technische Details",
       "contentType": "Content-Type",
       "etag": "ETag",
       "share": "Teilen",
