@@ -2,17 +2,16 @@
 
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
-import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
-import { requireSourceAccess } from "@/lib/auth/access";
+import { sourceAccessMiddleware } from "@/features/browser/server/source-access";
 import { getSession } from "@/lib/auth/session";
 import { recordOperation } from "@/lib/dal/operations";
 import { getSharePolicy, isPublicSharingEnabled } from "@/lib/dal/settings";
 import { createShare } from "@/lib/dal/shares";
-import { expiresAtFrom, type ShareExpiry } from "@/lib/shares/expiry";
+import { ActionError, actionClient } from "@/lib/safe-action";
+import { expiresAtFrom } from "@/lib/shares/expiry";
 import { hashSharePassword } from "@/lib/shares/password";
 import { capExpiresAt } from "@/lib/shares/policy";
 import { generateShareToken } from "@/lib/shares/token";
-import { getFilesClient } from "@/lib/storage/client";
 
 const shareOptionsSchema = z.object({
   expiresIn: z.enum(["1d", "7d", "30d", "never"]),
@@ -29,94 +28,105 @@ const shareOptionsSchema = z.object({
 /**
  * Mints a public share link for one object or a whole folder prefix. A read
  * grant is enough — sharing exposes nothing the creator couldn't already
- * download — but the instance-wide switch (Admin → Settings) can turn the
- * feature off entirely. For kind="prefix" the key is the folder prefix (ends
- * with "/") and the public viewer lists every object beneath it.
+ * download, so `sourceAccessMiddleware({})` only re-checks read access — but
+ * the instance-wide switch (Admin → Settings) can turn the feature off
+ * entirely. For kind="prefix" the key is the folder prefix (ends with "/") and
+ * the public viewer lists every object beneath it.
  */
-export async function createShareLink(
-  sourceId: string,
-  key: string,
-  options: {
-    expiresIn: ShareExpiry;
-    password?: string;
-    maxDownloads?: number;
-    kind?: "file" | "prefix";
-  },
-): Promise<ActionResult<{ token: string }>> {
-  const t = await getTranslations("browser.errors");
-  const parsed = shareOptionsSchema.safeParse(options);
-  if (!parsed.success) return actionError(t("invalidShareOptions"));
-  const isPrefix = parsed.data.kind === "prefix";
-  if (isPrefix) {
-    if (!key.endsWith("/")) return actionError(t("onlyFoldersShareable"));
-  } else if (!key || key.endsWith("/")) {
-    return actionError(t("onlyFilesShareable"));
-  }
-
-  if (!(await isPublicSharingEnabled())) {
-    return actionError(t("sharingDisabled"));
-  }
-  const session = await getSession();
-  const result = await requireSourceAccess(sourceId);
-  if (!session || !result) return actionError(t("sourceNotFound"));
-  const { source } = result;
-
-  // This source may have public sharing switched off individually.
-  if (!source.allowPublicShares) {
-    return actionError(t("sharingDisabledForSource"));
-  }
-
-  // Org-wide policy: a password may be mandatory, and the lifetime capped
-  // (an over-long or "never" expiry is pulled back to the ceiling). The server
-  // is the real guard — the dialog only pre-constrains the inputs.
-  const policy = await getSharePolicy();
-  const password = parsed.data.password || undefined;
-  if (policy.requirePassword && !password) {
-    return actionError(t("sharePasswordRequired"));
-  }
-
-  const files = getFilesClient(source);
-  try {
+export const createShareLink = actionClient
+  .metadata({
+    actionName: "browser.createShareLink",
+    failureKey: "browser.errors.actionFailed",
+  })
+  .inputSchema(
+    z.object({
+      sourceId: z.string().min(1),
+      key: z.string(),
+      options: shareOptionsSchema,
+    }),
+  )
+  .useValidated(sourceAccessMiddleware({}))
+  .action(async ({ parsedInput: { key, options }, ctx: { source, files } }) => {
+    const t = await getTranslations("browser.errors");
+    const isPrefix = options.kind === "prefix";
     if (isPrefix) {
-      // A folder is virtual — confirm at least one object lives under it.
-      const listing = await files.list({ prefix: key, limit: 1 });
-      if (listing.items.length === 0 && (listing.prefixes ?? []).length === 0) {
-        return actionError(t("folderNoLongerExists"));
-      }
-    } else if (!(await files.exists(key))) {
-      return actionError(t("fileNoLongerExists"));
+      if (!key.endsWith("/")) throw new ActionError(t("onlyFoldersShareable"));
+    } else if (!key || key.endsWith("/")) {
+      throw new ActionError(t("onlyFilesShareable"));
     }
-  } catch (error) {
-    console.error(`[share] exists check failed (source=${source.id}):`, error);
-    return actionError(t("sourceUnreachable"));
-  }
 
-  const token = generateShareToken();
-  const now = new Date();
-  const expiresAt = capExpiresAt(
-    expiresAtFrom(parsed.data.expiresIn, now),
-    policy.maxExpiryDays,
-    now,
-  );
-  await createShare({
-    id: token,
-    sourceId: source.id,
-    kind: parsed.data.kind,
-    key,
-    createdById: session.user.id,
-    expiresAt,
-    passwordHash: password ? hashSharePassword(password) : null,
-    // Folder links are uncapped by design (see maxDownloads note above).
-    maxDownloads: isPrefix ? null : (parsed.data.maxDownloads ?? null),
+    if (!(await isPublicSharingEnabled())) {
+      throw new ActionError(t("sharingDisabled"));
+    }
+
+    // This source may have public sharing switched off individually.
+    if (!source.allowPublicShares) {
+      throw new ActionError(t("sharingDisabledForSource"));
+    }
+
+    // The middleware validated the session while re-checking source access;
+    // fetch it for the owner id.
+    const session = await getSession();
+    if (!session) throw new ActionError(t("sourceNotFound"));
+
+    // Org-wide policy: a password may be mandatory, and the lifetime capped
+    // (an over-long or "never" expiry is pulled back to the ceiling). The server
+    // is the real guard — the dialog only pre-constrains the inputs.
+    const policy = await getSharePolicy();
+    const password = options.password || undefined;
+    if (policy.requirePassword && !password) {
+      throw new ActionError(t("sharePasswordRequired"));
+    }
+
+    try {
+      if (isPrefix) {
+        // A folder is virtual — confirm at least one object lives under it.
+        const listing = await files.list({ prefix: key, limit: 1 });
+        if (
+          listing.items.length === 0 &&
+          (listing.prefixes ?? []).length === 0
+        ) {
+          throw new ActionError(t("folderNoLongerExists"));
+        }
+      } else if (!(await files.exists(key))) {
+        throw new ActionError(t("fileNoLongerExists"));
+      }
+    } catch (error) {
+      // Missing target is a clean, translated verdict — let it through.
+      if (error instanceof ActionError) throw error;
+      console.error(
+        `[share] exists check failed (source=${source.id}):`,
+        error,
+      );
+      throw new ActionError(t("sourceUnreachable"));
+    }
+
+    const token = generateShareToken();
+    const now = new Date();
+    const expiresAt = capExpiresAt(
+      expiresAtFrom(options.expiresIn, now),
+      policy.maxExpiryDays,
+      now,
+    );
+    await createShare({
+      id: token,
+      sourceId: source.id,
+      kind: options.kind,
+      key,
+      createdById: session.user.id,
+      expiresAt,
+      passwordHash: password ? hashSharePassword(password) : null,
+      // Folder links are uncapped by design (see maxDownloads note above).
+      maxDownloads: isPrefix ? null : (options.maxDownloads ?? null),
+    });
+    await recordOperation({
+      action: "share-create",
+      sourceId: source.id,
+      sourceName: source.name,
+      target: key,
+      detail: expiresAt
+        ? `expires ${expiresAt.toISOString().slice(0, 10)}`
+        : "no expiry",
+    });
+    return { token };
   });
-  await recordOperation({
-    action: "share-create",
-    sourceId: source.id,
-    sourceName: source.name,
-    target: key,
-    detail: expiresAt
-      ? `expires ${expiresAt.toISOString().slice(0, 10)}`
-      : "no expiry",
-  });
-  return actionOk({ token });
-}
