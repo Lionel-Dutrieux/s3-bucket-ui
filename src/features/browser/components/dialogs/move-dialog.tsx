@@ -43,10 +43,14 @@ export function MoveDialog({
   const handleMove = async () => {
     if (!request) return;
     const result = await track(() =>
-      moveEntries(sourceId, request.targets, request.destPrefix),
+      moveEntries({
+        sourceId,
+        targets: request.targets,
+        destPrefix: request.destPrefix,
+      }),
     );
-    if (!result.ok) {
-      toast.error(result.error);
+    if (result.serverError) {
+      toast.error(result.serverError);
       return;
     }
     toast.success(t("movedToast", { count: request.count }));

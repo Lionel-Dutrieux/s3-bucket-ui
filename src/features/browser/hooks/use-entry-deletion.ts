@@ -32,6 +32,7 @@ export function useEntryDeletion({
   onBulkSettled: () => void;
 }) {
   const t = useTranslations("browser.fileBrowser");
+  const tCommon = useTranslations("common");
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -39,11 +40,11 @@ export function useEntryDeletion({
     setDeleting(true);
     const result =
       deleteTarget.kind === "folder"
-        ? await deleteFolder(sourceId, deleteTarget.prefix)
-        : await deleteObject(sourceId, deleteTarget.key);
+        ? await deleteFolder({ sourceId, prefix: deleteTarget.prefix })
+        : await deleteObject({ sourceId, key: deleteTarget.key });
     setDeleting(false);
-    if (!result.ok) {
-      toast.error(result.error);
+    if (result.serverError || result.validationErrors) {
+      toast.error(result.serverError ?? tCommon("actionFailed"));
       return;
     }
     toast.success(t("deletedToast", { name: deleteTarget.name }));
@@ -53,12 +54,12 @@ export function useEntryDeletion({
   const handleBulkDelete = async () => {
     const targets = selectedRows.map((row) => toTarget(row.original));
     setDeleting(true);
-    const result = await deleteEntries(sourceId, targets);
+    const result = await deleteEntries({ sourceId, targets });
     setDeleting(false);
     onBulkSettled();
     // Partial failures still deleted some objects — the caller refreshed.
-    if (!result.ok) {
-      toast.error(result.error);
+    if (result.serverError || result.validationErrors) {
+      toast.error(result.serverError ?? tCommon("actionFailed"));
     } else {
       toast.success(t("deletedToastBulk", { count: targets.length }));
     }

@@ -68,10 +68,10 @@ export function MoveToDialog({
     if (isSameSource) {
       if (!plan || plan.error || intraMoveCount === 0) return;
       const result = await track(() =>
-        moveEntries(sourceId, targets, destPrefix),
+        moveEntries({ sourceId, targets, destPrefix }),
       );
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       toast.success(t("movedToast", { count: intraMoveCount }));
@@ -80,12 +80,13 @@ export function MoveToDialog({
     }
 
     const result = await track(() =>
-      moveEntriesToSource(sourceId, destSourceId, targets, destPrefix),
+      moveEntriesToSource({ sourceId, destSourceId, targets, destPrefix }),
     );
-    if (!result.ok) {
-      toast.error(result.error);
+    if (result.serverError) {
+      toast.error(result.serverError);
       return;
     }
+    if (!result.data) return;
     const { moved, skipped, failed } = result.data;
     if (failed > 0) {
       toast.warning(t("movePartialFailedToast", { moved, skipped, failed }));

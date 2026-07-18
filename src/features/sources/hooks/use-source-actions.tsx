@@ -30,9 +30,9 @@ export function useSourceActions(
 
   const handleRemove = () => {
     startTransition(async () => {
-      const result = await removeSource(source.id);
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await removeSource({ id: source.id });
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       setConfirmOpen(false);

@@ -41,6 +41,7 @@ export function SmtpSettingsForm({
   const router = useRouter();
   const t = useTranslations("admin.runtimeConfig");
   const tCommon = useTranslations("common");
+  const tErrors = useTranslations("admin.errors");
   const [resetting, startReset] = useTransition();
   const [sendingTest, startSendTest] = useTransition();
   const [confirmingReset, setConfirmingReset] = useState(false);
@@ -64,8 +65,18 @@ export function SmtpSettingsForm({
         password: value.password === "" ? null : value.password,
         from: value.from,
       });
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+      if (result.validationErrors) {
+        toast.error(
+          result.validationErrors.formErrors?.[0] ??
+            Object.values(result.validationErrors.fieldErrors ?? {})
+              .flat()
+              .find(Boolean) ??
+            tErrors("invalidInput"),
+        );
         return;
       }
       form.setFieldValue("password", "");
@@ -76,9 +87,9 @@ export function SmtpSettingsForm({
 
   const reset = () =>
     startReset(async () => {
-      const result = await resetSmtpSettings();
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await resetSmtpSettings({});
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       setConfirmingReset(false);
@@ -88,9 +99,9 @@ export function SmtpSettingsForm({
 
   const sendTest = () =>
     startSendTest(async () => {
-      const result = await sendTestEmail();
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await sendTestEmail({});
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       toast.success(t("smtp.testSent", { email: adminEmail }));

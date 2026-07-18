@@ -51,6 +51,17 @@ export function SourceForm({
   const [test, setTest] = useState<TestStatus>({ state: "idle" });
   const t = useTranslations("sources");
 
+  // next-safe-action flattens zod issues; surface the first available message.
+  const firstValidationError = (errors: {
+    formErrors?: string[];
+    fieldErrors?: Record<string, string[] | undefined>;
+  }): string =>
+    errors.formErrors?.[0] ??
+    Object.values(errors.fieldErrors ?? {})
+      .flat()
+      .find(Boolean) ??
+    t("errors.invalidInput");
+
   const form = useAppForm({
     defaultValues: edit?.initialValues ?? {
       name: "",
@@ -72,10 +83,14 @@ export function SourceForm({
     onSubmit: async ({ value }) => {
       setServerError(undefined);
       const result = edit
-        ? await updateSource(edit.sourceId, value)
-        : await createSource(value);
-      if (!result.ok) {
-        setServerError(result.error);
+        ? await updateSource({ sourceId: edit.sourceId, input: value })
+        : await createSource({ input: value });
+      if (result.serverError) {
+        setServerError(result.serverError);
+        return;
+      }
+      if (result.validationErrors) {
+        setServerError(firstValidationError(result.validationErrors));
         return;
       }
       toast.success(edit ? t("form.successUpdated") : t("form.successAdded"));
@@ -94,13 +109,22 @@ export function SourceForm({
   const handleTest = async () => {
     setServerError(undefined);
     setTest({ state: "testing" });
-    const result = await testSourceConnection(
-      form.state.values,
-      edit?.sourceId,
-    );
-    setTest(
-      result.ok ? { state: "ok" } : { state: "failed", message: result.error },
-    );
+    const result = await testSourceConnection({
+      input: form.state.values,
+      sourceId: edit?.sourceId,
+    });
+    if (result.serverError) {
+      setTest({ state: "failed", message: result.serverError });
+      return;
+    }
+    if (result.validationErrors) {
+      setTest({
+        state: "failed",
+        message: firstValidationError(result.validationErrors),
+      });
+      return;
+    }
+    setTest({ state: "ok" });
   };
 
   const definition = getProvider(provider) ?? PROVIDERS[0];

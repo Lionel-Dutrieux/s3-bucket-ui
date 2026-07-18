@@ -98,17 +98,23 @@ export function ShareDialog({
     onSubmit: async ({ value }) => {
       if (!target) return;
       const trimmedMax = value.maxDownloads.trim();
-      const result = await createShareLink(sourceId, target.key, {
-        kind: target.kind,
-        expiresIn: value.expiresIn,
-        password: value.password.trim() || undefined,
-        // A folder link is uncapped — the field is hidden for prefixes.
-        maxDownloads: isPrefix || !trimmedMax ? undefined : Number(trimmedMax),
+      const result = await createShareLink({
+        sourceId,
+        key: target.key,
+        options: {
+          kind: target.kind,
+          expiresIn: value.expiresIn,
+          password: value.password.trim() || undefined,
+          // A folder link is uncapped — the field is hidden for prefixes.
+          maxDownloads:
+            isPrefix || !trimmedMax ? undefined : Number(trimmedMax),
+        },
       });
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
+      if (!result.data) return;
       setCreatedUrl(`${window.location.origin}/s/${result.data.token}`);
     },
   });

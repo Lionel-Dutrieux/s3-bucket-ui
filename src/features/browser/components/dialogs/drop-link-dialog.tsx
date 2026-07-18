@@ -95,17 +95,22 @@ export function DropLinkDialog({
       if (!target) return;
       const maxFiles = value.maxFiles.trim();
       const maxSizeMb = value.maxSizeMb.trim();
-      const result = await createDropLink(sourceId, target.prefix, {
-        expiresIn: value.expiresIn,
-        password: value.password.trim() || undefined,
-        maxFiles: maxFiles ? Number(maxFiles) : undefined,
-        maxSizeMb: maxSizeMb ? Number(maxSizeMb) : undefined,
-        note: value.note.trim() || undefined,
+      const result = await createDropLink({
+        sourceId,
+        prefix: target.prefix,
+        options: {
+          expiresIn: value.expiresIn,
+          password: value.password.trim() || undefined,
+          maxFiles: maxFiles ? Number(maxFiles) : undefined,
+          maxSizeMb: maxSizeMb ? Number(maxSizeMb) : undefined,
+          note: value.note.trim() || undefined,
+        },
       });
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
+      if (!result.data) return;
       setCreatedUrl(`${window.location.origin}/d/${result.data.token}`);
     },
   });

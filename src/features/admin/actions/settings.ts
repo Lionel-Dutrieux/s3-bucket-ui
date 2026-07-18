@@ -3,13 +3,9 @@
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import {
-  type SharePolicyValues,
-  type SmtpSettingsValues,
   sharePolicySchema,
   smtpSettingsSchema,
 } from "@/features/admin/lib/schema";
-import { withAdmin } from "@/features/admin/server/guard";
-import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { getSmtpConfig } from "@/lib/config";
 import {
   clearConfigOverrides,
@@ -23,6 +19,7 @@ import {
 } from "@/lib/dal/settings";
 import { hasSsoProviders } from "@/lib/dal/sso";
 import { sendMail } from "@/lib/mail";
+import { ActionError, adminActionClient } from "@/lib/safe-action";
 
 const twoFactorPolicySchema = z.enum(["off", "admins", "all"]);
 const auditRetentionSchema = z.union([
@@ -33,197 +30,137 @@ const auditRetentionSchema = z.union([
   z.literal(365),
 ]);
 
-// Every action runs through withAdmin (features/admin/server/guard.ts), which
+// Every action runs through adminActionClient (src/lib/safe-action.ts), which
 // re-checks the admin role server-side — the /admin layout guard protects
-// pages only, never these POST endpoints.
+// pages only, never these POST endpoints — and revalidates the root layout on
+// success unless the metadata opts out.
 
-export async function setSignUpEnabled(
-  enabled: boolean,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "toggle sign-up",
-      failureMessage: t("settingUpdateFailed"),
-    },
-    async () => {
-      await setPublicSignUpEnabled(enabled === true);
-      return actionOk();
-    },
-  );
-}
+export const setSignUpEnabled = adminActionClient
+  .metadata({
+    actionName: "admin.setSignUpEnabled",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(z.object({ enabled: z.boolean() }))
+  .action(async ({ parsedInput }) => {
+    await setPublicSignUpEnabled(parsedInput.enabled);
+  });
 
-export async function setPublicSharing(
-  enabled: boolean,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "toggle public sharing",
-      failureMessage: t("settingUpdateFailed"),
-      revalidate: false,
-    },
-    async () => {
-      await setPublicSharingEnabled(enabled === true);
-      return actionOk();
-    },
-  );
-}
+export const setPublicSharing = adminActionClient
+  .metadata({
+    actionName: "admin.setPublicSharing",
+    failureKey: "admin.errors.settingUpdateFailed",
+    revalidate: false,
+  })
+  .inputSchema(z.object({ enabled: z.boolean() }))
+  .action(async ({ parsedInput }) => {
+    await setPublicSharingEnabled(parsedInput.enabled);
+  });
 
-export async function setOidcOnlyEnabled(
-  enabled: boolean,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "toggle oidc-only",
-      failureMessage: t("settingUpdateFailed"),
-    },
-    async () => {
-      // Refuse to lock the door when there is no other way in.
-      if (enabled === true && !(await hasSsoProviders())) {
-        return actionError(t("oidcNotConfigured"));
-      }
-      await setOidcOnly(enabled === true);
-      return actionOk();
-    },
-  );
-}
+export const setOidcOnlyEnabled = adminActionClient
+  .metadata({
+    actionName: "admin.setOidcOnlyEnabled",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(z.object({ enabled: z.boolean() }))
+  .action(async ({ parsedInput }) => {
+    // Refuse to lock the door when there is no other way in.
+    if (parsedInput.enabled && !(await hasSsoProviders())) {
+      const t = await getTranslations("admin.errors");
+      throw new ActionError(t("oidcNotConfigured"));
+    }
+    await setOidcOnly(parsedInput.enabled);
+  });
 
-export async function setTwoFactorPolicy(
-  policy: string,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "set 2FA policy",
-      failureMessage: t("settingUpdateFailed"),
-    },
-    async () => {
-      const parsed = twoFactorPolicySchema.safeParse(policy);
-      if (!parsed.success) {
-        return actionError(t("invalidInput"));
-      }
-      await dalSetTwoFactorPolicy(parsed.data);
-      return actionOk();
-    },
-  );
-}
+export const setTwoFactorPolicy = adminActionClient
+  .metadata({
+    actionName: "admin.setTwoFactorPolicy",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(z.object({ policy: twoFactorPolicySchema }))
+  .action(async ({ parsedInput }) => {
+    await dalSetTwoFactorPolicy(parsedInput.policy);
+  });
 
-export async function setSharePolicy(
-  input: SharePolicyValues,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "set share policy",
-      failureMessage: t("settingUpdateFailed"),
-      // The source pages read this on render — a new setting takes effect on
-      // the next navigation, no path revalidation needed.
-      revalidate: false,
-    },
-    async () => {
-      const parsed = sharePolicySchema.safeParse(input);
-      if (!parsed.success) {
-        return actionError(t("invalidInput"));
-      }
-      await dalSetSharePolicy({
-        maxExpiryDays:
-          parsed.data.maxExpiryDays > 0 ? parsed.data.maxExpiryDays : null,
-        requirePassword: parsed.data.requirePassword,
-      });
-      return actionOk();
-    },
-  );
-}
+export const setSharePolicy = adminActionClient
+  .metadata({
+    actionName: "admin.setSharePolicy",
+    failureKey: "admin.errors.settingUpdateFailed",
+    // The source pages read this on render — a new setting takes effect on
+    // the next navigation, no path revalidation needed.
+    revalidate: false,
+  })
+  .inputSchema(sharePolicySchema)
+  .action(async ({ parsedInput }) => {
+    await dalSetSharePolicy({
+      maxExpiryDays:
+        parsedInput.maxExpiryDays > 0 ? parsedInput.maxExpiryDays : null,
+      requirePassword: parsedInput.requirePassword,
+    });
+  });
 
-export async function setAuditRetention(days: number): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "set audit retention",
-      failureMessage: t("settingUpdateFailed"),
-    },
-    async () => {
-      const parsed = auditRetentionSchema.safeParse(days);
-      if (!parsed.success) {
-        return actionError(t("invalidInput"));
-      }
-      await dalSetAuditRetentionDays(parsed.data);
-      return actionOk();
-    },
-  );
-}
+export const setAuditRetention = adminActionClient
+  .metadata({
+    actionName: "admin.setAuditRetention",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(z.object({ days: auditRetentionSchema }))
+  .action(async ({ parsedInput }) => {
+    await dalSetAuditRetentionDays(parsedInput.days);
+  });
 
 // --- runtime config (SMTP / OIDC) ---
 
-export async function updateSmtpSettings(
-  input: SmtpSettingsValues,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "update smtp settings",
-      failureMessage: t("settingUpdateFailed"),
-    },
-    async () => {
-      const parsed = smtpSettingsSchema.safeParse(input);
-      if (!parsed.success) {
-        return actionError(
-          parsed.error.issues[0]?.message ?? t("invalidInput"),
-        );
-      }
-      const { host, port, secure, user, password, from } = parsed.data;
-      await setConfigOverrides("smtp", {
-        host,
-        port: String(port),
-        secure: String(secure),
-        user: user || null,
-        // null = keep the currently stored secret — don't write the key.
-        ...(password !== null ? { password } : {}),
-        from,
-      });
-      return actionOk();
-    },
-  );
-}
+export const updateSmtpSettings = adminActionClient
+  .metadata({
+    actionName: "admin.updateSmtpSettings",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(smtpSettingsSchema)
+  .action(async ({ parsedInput }) => {
+    const { host, port, secure, user, password, from } = parsedInput;
+    await setConfigOverrides("smtp", {
+      host,
+      port: String(port),
+      secure: String(secure),
+      user: user || null,
+      // null = keep the currently stored secret — don't write the key.
+      ...(password !== null ? { password } : {}),
+      from,
+    });
+  });
 
-export async function resetSmtpSettings(): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    { action: "reset smtp settings", failureMessage: t("settingUpdateFailed") },
-    async () => {
-      await clearConfigOverrides("smtp");
-      return actionOk();
-    },
-  );
-}
+export const resetSmtpSettings = adminActionClient
+  .metadata({
+    actionName: "admin.resetSmtpSettings",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(z.object({}))
+  .action(async () => {
+    await clearConfigOverrides("smtp");
+  });
 
 /** Sends a test email to the connected admin using the effective config. */
-export async function sendTestEmail(): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "send test email",
-      failureMessage: t("testEmailFailed"),
-      revalidate: false,
-    },
-    async (admin) => {
-      if (!(await getSmtpConfig())) {
-        return actionError(t("smtpNotConfigured"));
-      }
-      const tMail = await getTranslations("admin.runtimeConfig");
-      try {
-        await sendMail({
-          to: admin.email,
-          subject: tMail("testEmailSubject"),
-          text: tMail("testEmailBody"),
-        });
-      } catch (error) {
-        const detail = error instanceof Error ? error.message : String(error);
-        return actionError(`${t("testEmailFailed")} ${detail}`);
-      }
-      return actionOk();
-    },
-  );
-}
+export const sendTestEmail = adminActionClient
+  .metadata({
+    actionName: "admin.sendTestEmail",
+    failureKey: "admin.errors.testEmailFailed",
+    revalidate: false,
+  })
+  .inputSchema(z.object({}))
+  .action(async ({ ctx }) => {
+    const t = await getTranslations("admin.errors");
+    if (!(await getSmtpConfig())) {
+      throw new ActionError(t("smtpNotConfigured"));
+    }
+    const tMail = await getTranslations("admin.runtimeConfig");
+    try {
+      await sendMail({
+        to: ctx.admin.email,
+        subject: tMail("testEmailSubject"),
+        text: tMail("testEmailBody"),
+      });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new ActionError(`${t("testEmailFailed")} ${detail}`);
+    }
+  });

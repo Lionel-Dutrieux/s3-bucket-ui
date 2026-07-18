@@ -1,5 +1,7 @@
 {
   "common": {
+    "actionFailed": "Une erreur est survenue. Veuillez réessayer.",
+    "notAuthenticated": "Vous devez être connecté pour faire cela.",
     "cancel": "Annuler",
     "confirm": "Confirmer",
     "save": "Enregistrer",

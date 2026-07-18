@@ -15,3 +15,16 @@ function nameSchema(label: string) {
 export const entryNameSchema = nameSchema("Name");
 
 export const folderNameSchema = nameSchema("Folder name");
+
+// Mirrors the `EntryTarget` union in lib/move.ts, with the folder invariant
+// (a prefix always ends with "/") baked in — the server-side gate for a
+// bulk selection passed to the delete/move actions.
+export const entryTargetSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("file"), key: z.string().min(1) }),
+  z.object({
+    kind: z.literal("folder"),
+    prefix: z
+      .string()
+      .refine((value) => value.endsWith("/"), "Invalid folder."),
+  }),
+]);

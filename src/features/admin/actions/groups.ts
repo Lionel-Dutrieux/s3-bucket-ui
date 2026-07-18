@@ -1,9 +1,8 @@
 "use server";
 
 import { getTranslations } from "next-intl/server";
+import { z } from "zod";
 import { grantInputSchema, groupNameSchema } from "@/features/admin/lib/schema";
-import { withAdmin } from "@/features/admin/server/guard";
-import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import {
   addGroupMember as dalAddGroupMember,
   createGroup as dalCreateGroup,
@@ -11,122 +10,80 @@ import {
   removeGroupMember as dalRemoveGroupMember,
 } from "@/lib/dal/groups";
 import { deleteGrant, upsertGrant } from "@/lib/dal/permissions";
+import { ActionError, adminActionClient } from "@/lib/safe-action";
 
-// Every action runs through withAdmin (features/admin/server/guard.ts), which
+// Every action runs through adminActionClient (src/lib/safe-action.ts), which
 // re-checks the admin role server-side — the /admin layout guard protects
-// pages only, never these POST endpoints.
+// pages only, never these POST endpoints — and revalidates the root layout on
+// success.
 
 // --- groups ---
 
-export async function createGroup(name: string): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "create this group",
-      context: name,
-      failureMessage: t("createGroupFailed"),
-    },
-    async () => {
-      const parsed = groupNameSchema.safeParse(name);
-      if (!parsed.success) {
-        return actionError(parsed.error.issues[0]?.message ?? t("invalidName"));
-      }
-      if ((await dalCreateGroup(parsed.data)) === "name-taken") {
-        return actionError(t("groupNameTaken"));
-      }
-      return actionOk();
-    },
-  );
-}
+export const createGroup = adminActionClient
+  .metadata({
+    actionName: "admin.createGroup",
+    failureKey: "admin.errors.createGroupFailed",
+  })
+  .inputSchema(z.object({ name: groupNameSchema }))
+  .action(async ({ parsedInput }) => {
+    const t = await getTranslations("admin.errors");
+    if ((await dalCreateGroup(parsedInput.name)) === "name-taken") {
+      throw new ActionError(t("groupNameTaken"));
+    }
+  });
 
-export async function deleteGroup(groupId: string): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "delete this group",
-      context: `group=${groupId}`,
-      failureMessage: t("deleteGroupFailed"),
-    },
-    async () => {
-      await dalDeleteGroup(groupId);
-      return actionOk();
-    },
-  );
-}
+export const deleteGroup = adminActionClient
+  .metadata({
+    actionName: "admin.deleteGroup",
+    failureKey: "admin.errors.deleteGroupFailed",
+  })
+  .inputSchema(z.object({ groupId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    await dalDeleteGroup(parsedInput.groupId);
+  });
 
-export async function addGroupMember(
-  groupId: string,
-  userId: string,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "add this member",
-      context: `group=${groupId}`,
-      failureMessage: t("addMemberFailed"),
-    },
-    async () => {
-      await dalAddGroupMember(groupId, userId);
-      return actionOk();
-    },
-  );
-}
+export const addGroupMember = adminActionClient
+  .metadata({
+    actionName: "admin.addGroupMember",
+    failureKey: "admin.errors.addMemberFailed",
+  })
+  .inputSchema(
+    z.object({ groupId: z.string().min(1), userId: z.string().min(1) }),
+  )
+  .action(async ({ parsedInput }) => {
+    await dalAddGroupMember(parsedInput.groupId, parsedInput.userId);
+  });
 
-export async function removeGroupMember(
-  groupId: string,
-  userId: string,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "remove this member",
-      context: `group=${groupId}`,
-      failureMessage: t("removeMemberFailed"),
-    },
-    async () => {
-      await dalRemoveGroupMember(groupId, userId);
-      return actionOk();
-    },
-  );
-}
+export const removeGroupMember = adminActionClient
+  .metadata({
+    actionName: "admin.removeGroupMember",
+    failureKey: "admin.errors.removeMemberFailed",
+  })
+  .inputSchema(
+    z.object({ groupId: z.string().min(1), userId: z.string().min(1) }),
+  )
+  .action(async ({ parsedInput }) => {
+    await dalRemoveGroupMember(parsedInput.groupId, parsedInput.userId);
+  });
 
 // --- source grants ---
 
-export async function upsertSourceGrant(input: {
-  sourceId: string;
-  subject: { type: "user" | "group"; id: string };
-  canEdit: boolean;
-  canDelete: boolean;
-}): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "save this grant",
-      context: `source=${input.sourceId}`,
-      failureMessage: t("saveGrantFailed"),
-    },
-    async () => {
-      const parsed = grantInputSchema.safeParse(input);
-      if (!parsed.success) return actionError(t("invalidGrant"));
-      await upsertGrant(parsed.data);
-      return actionOk();
-    },
-  );
-}
+export const upsertSourceGrant = adminActionClient
+  .metadata({
+    actionName: "admin.upsertSourceGrant",
+    failureKey: "admin.errors.saveGrantFailed",
+  })
+  .inputSchema(grantInputSchema)
+  .action(async ({ parsedInput }) => {
+    await upsertGrant(parsedInput);
+  });
 
-export async function removeSourceGrant(
-  grantId: string,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "remove this grant",
-      context: `grant=${grantId}`,
-      failureMessage: t("removeGrantFailed"),
-    },
-    async () => {
-      await deleteGrant(grantId);
-      return actionOk();
-    },
-  );
-}
+export const removeSourceGrant = adminActionClient
+  .metadata({
+    actionName: "admin.removeSourceGrant",
+    failureKey: "admin.errors.removeGrantFailed",
+  })
+  .inputSchema(z.object({ grantId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    await deleteGrant(parsedInput.grantId);
+  });

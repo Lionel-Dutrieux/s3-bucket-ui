@@ -38,6 +38,7 @@ export function SsoProvidersForm({
 }) {
   const router = useRouter();
   const t = useTranslations("admin.sso");
+  const tErrors = useTranslations("admin.errors");
   const [presetId, setPresetId] = useState<SsoPresetId>("pocket-id");
   const [removing, startRemove] = useTransition();
   const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
@@ -56,8 +57,18 @@ export function SsoProvidersForm({
     },
     onSubmit: async ({ value, formApi }) => {
       const result = await registerSsoProvider(value);
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+      if (result.validationErrors) {
+        toast.error(
+          result.validationErrors.formErrors?.[0] ??
+            Object.values(result.validationErrors.fieldErrors ?? {})
+              .flat()
+              .find(Boolean) ??
+            tErrors("invalidInput"),
+        );
         return;
       }
       toast.success(t("added"));
@@ -76,9 +87,9 @@ export function SsoProvidersForm({
 
   const remove = (providerId: string) =>
     startRemove(async () => {
-      const result = await removeSsoProvider(providerId);
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await removeSsoProvider({ providerId });
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       setPendingRemoval(null);

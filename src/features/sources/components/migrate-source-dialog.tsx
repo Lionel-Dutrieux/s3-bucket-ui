@@ -48,12 +48,16 @@ export function MigrateSourceDialog({
   const run = async () => {
     if (!dest) return;
     setPending(true);
-    const result = await copySourceContents(source.id, dest.id);
+    const result = await copySourceContents({
+      sourceId: source.id,
+      destId: dest.id,
+    });
     setPending(false);
-    if (!result.ok) {
-      toast.error(result.error);
+    if (result.serverError) {
+      toast.error(result.serverError);
       return;
     }
+    if (!result.data) return;
     const { transferred, skipped, failed } = result.data;
     if (failed > 0) {
       toast.warning(

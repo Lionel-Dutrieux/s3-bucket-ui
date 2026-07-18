@@ -25,7 +25,6 @@ import {
   SHARE_MAX_EXPIRY_OPTIONS,
   type SharePolicyValues,
 } from "@/features/admin/lib/schema";
-import type { ActionResult } from "@/lib/action-result";
 import type { TwoFactorPolicy } from "@/lib/dal/settings";
 
 // Stricter-than ordering — used to decide whether tightening the policy
@@ -72,11 +71,14 @@ export function SettingsForm({
   const t = useTranslations("admin.settingsForm");
   const tCommon = useTranslations("common");
 
-  const run = (work: () => Promise<ActionResult>, success: string) => {
+  const run = (
+    work: () => Promise<{ serverError?: string; validationErrors?: unknown }>,
+    success: string,
+  ) => {
     startTransition(async () => {
       const result = await work();
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError || result.validationErrors) {
+        toast.error(result.serverError ?? tCommon("actionFailed"));
         return;
       }
       toast.success(success);
@@ -85,7 +87,7 @@ export function SettingsForm({
   };
 
   const applyTwoFactorPolicy = (policy: TwoFactorPolicy) =>
-    run(() => setTwoFactorPolicy(policy), t("twoFactorPolicyToast"));
+    run(() => setTwoFactorPolicy({ policy }), t("twoFactorPolicyToast"));
 
   // The share policy is two controls saved as one row — merge the change onto
   // the current values and persist both together.
@@ -111,7 +113,7 @@ export function SettingsForm({
         disabled={pending}
         onChange={(enabled) =>
           run(
-            () => setSignUpEnabled(enabled),
+            () => setSignUpEnabled({ enabled }),
             enabled ? t("signUpEnabledToast") : t("signUpDisabledToast"),
           )
         }
@@ -127,7 +129,7 @@ export function SettingsForm({
         disabled={pending || (!oidcConfigured && !oidcOnly)}
         onChange={(enabled) =>
           run(
-            () => setOidcOnlyEnabled(enabled),
+            () => setOidcOnlyEnabled({ enabled }),
             enabled ? t("oidcOnlyEnabledToast") : t("oidcOnlyDisabledToast"),
           )
         }
@@ -139,7 +141,7 @@ export function SettingsForm({
         disabled={pending}
         onChange={(enabled) =>
           run(
-            () => setPublicSharing(enabled),
+            () => setPublicSharing({ enabled }),
             enabled ? t("sharingEnabledToast") : t("sharingDisabledToast"),
           )
         }
@@ -192,7 +194,13 @@ export function SettingsForm({
         value={String(auditRetentionDays)}
         disabled={pending}
         onChange={(value) =>
-          run(() => setAuditRetention(Number(value)), t("auditRetentionToast"))
+          run(
+            () =>
+              setAuditRetention({
+                days: Number(value) as 0 | 30 | 90 | 180 | 365,
+              }),
+            t("auditRetentionToast"),
+          )
         }
         options={AUDIT_RETENTION_OPTIONS.map((days) => ({
           value: String(days),

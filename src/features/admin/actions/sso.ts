@@ -2,12 +2,8 @@
 
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
-import {
-  type SsoProviderValues,
-  ssoProviderSchema,
-} from "@/features/admin/lib/schema";
-import { withAdmin } from "@/features/admin/server/guard";
-import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
+import { z } from "zod";
+import { ssoProviderSchema } from "@/features/admin/lib/schema";
 import { getAuth } from "@/lib/auth/auth";
 import {
   addSsoTrustedOrigin,
@@ -18,6 +14,12 @@ import {
   setProviderGroupsClaim,
   ssoOriginOf,
 } from "@/lib/dal/sso";
+import { ActionError, adminActionClient } from "@/lib/safe-action";
+
+// Every action runs through adminActionClient (src/lib/safe-action.ts), which
+// re-checks the admin role server-side — the /admin layout guard protects
+// pages only, never these POST endpoints — and revalidates the root layout on
+// success.
 
 /**
  * Registers an SSO identity provider through the better-auth SSO plugin.
@@ -29,88 +31,75 @@ import {
  * first registration any accounts left by the legacy genericOAuth provider
  * ("oidc") are repointed at the new provider id so nobody loses their account.
  */
-export async function registerSsoProvider(
-  input: SsoProviderValues,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "register sso provider",
-      failureMessage: t("settingUpdateFailed"),
-    },
-    async () => {
-      const parsed = ssoProviderSchema.safeParse(input);
-      if (!parsed.success) {
-        return actionError(
-          parsed.error.issues[0]?.message ?? t("invalidInput"),
-        );
-      }
-      const {
-        providerId,
-        issuer,
-        clientId,
-        clientSecret,
-        domain,
-        scopes,
-        groupsClaim,
-      } = parsed.data;
+export const registerSsoProvider = adminActionClient
+  .metadata({
+    actionName: "admin.registerSsoProvider",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(ssoProviderSchema)
+  .action(async ({ parsedInput }) => {
+    const t = await getTranslations("admin.errors");
+    const {
+      providerId,
+      issuer,
+      clientId,
+      clientSecret,
+      domain,
+      scopes,
+      groupsClaim,
+    } = parsedInput;
 
-      const origin = ssoOriginOf(issuer);
-      if (!origin) return actionError(t("ssoInvalidIssuer"));
+    const origin = ssoOriginOf(issuer);
+    if (!origin) throw new ActionError(t("ssoInvalidIssuer"));
 
-      // Trust the origin before discovery runs, and remember whether this is
-      // the first provider (drives the legacy-account relink).
-      const isFirstProvider = (await countSsoProviders()) === 0;
-      await addSsoTrustedOrigin(origin);
+    // Trust the origin before discovery runs, and remember whether this is
+    // the first provider (drives the legacy-account relink).
+    const isFirstProvider = (await countSsoProviders()) === 0;
+    await addSsoTrustedOrigin(origin);
 
-      const auth = await getAuth();
-      try {
-        await auth.api.registerSSOProvider({
-          headers: await headers(),
-          body: {
-            providerId,
-            issuer,
-            domain,
-            overrideUserInfo: true,
-            oidcConfig: {
-              clientId,
-              clientSecret,
-              scopes: scopes.split(" ").filter(Boolean),
-              pkce: true,
-            },
+    const auth = await getAuth();
+    try {
+      await auth.api.registerSSOProvider({
+        headers: await headers(),
+        body: {
+          providerId,
+          issuer,
+          domain,
+          overrideUserInfo: true,
+          oidcConfig: {
+            clientId,
+            clientSecret,
+            scopes: scopes.split(" ").filter(Boolean),
+            pkce: true,
           },
-        });
-      } catch (error) {
-        // Registration failed (discovery unreachable, duplicate id, …) — undo
-        // the origin we optimistically trusted, then surface the reason.
-        await pruneSsoTrustedOrigin(origin);
-        const message =
-          error instanceof Error && error.message
-            ? error.message
-            : t("ssoRegisterFailed");
-        return actionError(message);
-      }
+        },
+      });
+    } catch (error) {
+      // Registration failed (discovery unreachable, duplicate id, …) — undo
+      // the origin we optimistically trusted, then surface the reason.
+      await pruneSsoTrustedOrigin(origin);
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : t("ssoRegisterFailed");
+      throw new ActionError(message);
+    }
 
-      await setProviderGroupsClaim(providerId, groupsClaim);
-      if (isFirstProvider) {
-        await relinkLegacyOidcAccounts(providerId);
-      }
-      return actionOk();
-    },
-  );
-}
+    await setProviderGroupsClaim(providerId, groupsClaim);
+    if (isFirstProvider) {
+      await relinkLegacyOidcAccounts(providerId);
+    }
+  });
 
 /** Removes a registered SSO provider (config only — accounts are untouched). */
-export async function removeSsoProvider(
-  providerId: string,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    { action: "remove sso provider", failureMessage: t("settingUpdateFailed") },
-    async () => {
-      const removed = await deleteSsoProvider(providerId);
-      if (!removed) return actionError(t("ssoProviderNotFound"));
-      return actionOk();
-    },
-  );
-}
+export const removeSsoProvider = adminActionClient
+  .metadata({
+    actionName: "admin.removeSsoProvider",
+    failureKey: "admin.errors.settingUpdateFailed",
+  })
+  .inputSchema(z.object({ providerId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const t = await getTranslations("admin.errors");
+    const removed = await deleteSsoProvider(parsedInput.providerId);
+    if (!removed) throw new ActionError(t("ssoProviderNotFound"));
+  });

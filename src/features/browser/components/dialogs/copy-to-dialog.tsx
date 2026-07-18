@@ -51,12 +51,18 @@ export function CopyToDialog({
   const run = async () => {
     if (!targets || !dest) return;
     const result = await track(() =>
-      copyEntriesToSource(sourceId, dest.id, targets, destPrefix),
+      copyEntriesToSource({
+        sourceId,
+        destSourceId: dest.id,
+        targets,
+        destPrefix,
+      }),
     );
-    if (!result.ok) {
-      toast.error(result.error);
+    if (result.serverError) {
+      toast.error(result.serverError);
       return;
     }
+    if (!result.data) return;
     const { copied, skipped, failed } = result.data;
     if (failed > 0) {
       toast.warning(t("copyPartialFailedToast", { copied, skipped, failed }));

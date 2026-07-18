@@ -54,11 +54,15 @@ export function InlineRenameInput({
     setPending(true);
     const result =
       entry.kind === "folder"
-        ? await renameFolder(sourceId, entry.prefix, trimmed)
-        : await renameObject(sourceId, entry.key, trimmed);
+        ? await renameFolder({
+            sourceId,
+            prefix: entry.prefix,
+            newName: trimmed,
+          })
+        : await renameObject({ sourceId, key: entry.key, newName: trimmed });
     setPending(false);
-    if (!result.ok) {
-      toast.error(result.error);
+    if (result.serverError) {
+      toast.error(result.serverError);
       return;
     }
     toast.success(t("renamedToast", { name: trimmed }));

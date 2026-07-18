@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import {
@@ -9,12 +8,7 @@ import {
   sourceUpdateSchema,
 } from "@/features/sources/lib/schema";
 import { testConnection } from "@/features/sources/server/connection";
-import {
-  type MigrationSummary,
-  transferSourceContents,
-} from "@/features/sources/server/transfer";
-import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
-import { currentAdmin } from "@/lib/auth/session";
+import { transferSourceContents } from "@/features/sources/server/transfer";
 import {
   createSource as dalCreateSource,
   deleteSource as dalDeleteSource,
@@ -22,6 +16,7 @@ import {
   updateSource as dalUpdateSource,
   type SourceInput,
 } from "@/lib/dal/sources";
+import { ActionError, adminActionClient } from "@/lib/safe-action";
 import { checkLocalRoot } from "@/lib/storage/local-roots";
 import { getProvider } from "@/lib/storage/providers";
 
@@ -29,26 +24,25 @@ type SourceErrorsT = Awaited<ReturnType<typeof getTranslations>>;
 
 /**
  * Resolves edit-mode input into a full SourceInput: a blank secret falls back
- * to the one already stored for `sourceId`.
+ * to the one already stored for `sourceId`. Throws a translated ActionError on
+ * any failure so callers can let it surface as the action's serverError.
  */
 async function resolveUpdateInput(
   sourceId: string,
   input: SourceFormValues,
   t: SourceErrorsT,
-): Promise<{ data?: SourceInput; error?: string }> {
+): Promise<SourceInput> {
   const parsed = sourceUpdateSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? t("invalidInput") };
+    throw new ActionError(parsed.error.issues[0]?.message ?? t("invalidInput"));
   }
 
   const existing = await dalGetSource(sourceId);
-  if (!existing) return { error: t("sourceNotFound") };
+  if (!existing) throw new ActionError(t("sourceNotFound"));
 
   return {
-    data: {
-      ...parsed.data,
-      secretAccessKey: parsed.data.secretAccessKey || existing.secretAccessKey,
-    },
+    ...parsed.data,
+    secretAccessKey: parsed.data.secretAccessKey || existing.secretAccessKey,
   };
 }
 
@@ -56,13 +50,13 @@ async function resolveUpdateInput(
  * Local (fs) sources only: re-validates the root path against the
  * LOCAL_FS_ROOTS allowlist and swaps in its canonical realpath — the client
  * never gets to pick an arbitrary server directory. Other providers pass
- * through untouched.
+ * through untouched. Throws a translated ActionError when the root is rejected.
  */
 async function guardLocalSource(
   data: SourceInput,
   t: SourceErrorsT,
-): Promise<{ data?: SourceInput; error?: string }> {
-  if (getProvider(data.provider)?.adapter !== "fs") return { data };
+): Promise<SourceInput> {
+  if (getProvider(data.provider)?.adapter !== "fs") return data;
   const check = await checkLocalRoot(data.bucket);
   if (!check.ok) {
     const messages = {
@@ -70,130 +64,130 @@ async function guardLocalSource(
       outside: t("localRootNotAllowed"),
       unreachable: t("localRootUnreachable"),
     } as const;
-    return { error: messages[check.reason] };
+    throw new ActionError(messages[check.reason]);
   }
-  return { data: { ...data, bucket: check.value } };
+  return { ...data, bucket: check.value };
 }
 
-export async function testSourceConnection(
-  input: SourceFormValues,
-  sourceId?: string,
-): Promise<ActionResult> {
-  const t = await getTranslations("sources.errors");
-  if (!(await currentAdmin())) return actionError(t("notAuthorized"));
+export const testSourceConnection = adminActionClient
+  .metadata({
+    actionName: "sources.testSourceConnection",
+    // Read-only probe; legacy never revalidated here.
+    revalidate: false,
+  })
+  // sourceUpdateSchema is the more permissive of the two (a blank secret is
+  // allowed), so it types both paths; the body refines exactly as before —
+  // edit re-injects the stored secret, create re-parses with the strict schema.
+  .inputSchema(
+    z.object({
+      sourceId: z.string().optional(),
+      input: sourceUpdateSchema,
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const t = await getTranslations("sources.errors");
 
-  let data: SourceInput;
-  if (sourceId) {
-    const resolved = await resolveUpdateInput(sourceId, input, t);
-    if (!resolved.data) {
-      return actionError(resolved.error ?? t("invalidInput"));
+    let data: SourceInput;
+    if (parsedInput.sourceId) {
+      data = await resolveUpdateInput(
+        parsedInput.sourceId,
+        parsedInput.input,
+        t,
+      );
+    } else {
+      const parsed = sourceInputSchema.safeParse(parsedInput.input);
+      if (!parsed.success) {
+        throw new ActionError(
+          parsed.error.issues[0]?.message ?? t("invalidInput"),
+        );
+      }
+      data = parsed.data;
     }
-    data = resolved.data;
-  } else {
-    const parsed = sourceInputSchema.safeParse(input);
-    if (!parsed.success) {
-      return actionError(parsed.error.issues[0]?.message ?? t("invalidInput"));
+
+    const guarded = await guardLocalSource(data, t);
+
+    if (!(await testConnection(guarded))) {
+      throw new ActionError(t("connectionFailed"));
     }
-    data = parsed.data;
-  }
+  });
 
-  const guarded = await guardLocalSource(data, t);
-  if (!guarded.data) return actionError(guarded.error ?? t("invalidInput"));
+export const createSource = adminActionClient
+  .metadata({ actionName: "sources.createSource" })
+  .inputSchema(z.object({ input: sourceInputSchema }))
+  .action(async ({ parsedInput }) => {
+    const t = await getTranslations("sources.errors");
 
-  return (await testConnection(guarded.data))
-    ? actionOk()
-    : actionError(t("connectionFailed"));
-}
+    const guarded = await guardLocalSource(parsedInput.input, t);
 
-export async function createSource(
-  input: SourceFormValues,
-): Promise<ActionResult> {
-  const t = await getTranslations("sources.errors");
-  if (!(await currentAdmin())) return actionError(t("notAuthorized"));
+    if (!(await testConnection(guarded))) {
+      throw new ActionError(t("connectionFailed"));
+    }
 
-  const parsed = sourceInputSchema.safeParse(input);
-  if (!parsed.success) {
-    return actionError(parsed.error.issues[0]?.message ?? t("invalidInput"));
-  }
+    await dalCreateSource(guarded);
+  });
 
-  const guarded = await guardLocalSource(parsed.data, t);
-  if (!guarded.data) return actionError(guarded.error ?? t("invalidInput"));
+export const updateSource = adminActionClient
+  .metadata({ actionName: "sources.updateSource" })
+  .inputSchema(
+    z.object({
+      sourceId: z.string().min(1),
+      input: sourceUpdateSchema,
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const t = await getTranslations("sources.errors");
 
-  if (!(await testConnection(guarded.data))) {
-    return actionError(t("connectionFailed"));
-  }
+    const resolved = await resolveUpdateInput(
+      parsedInput.sourceId,
+      parsedInput.input,
+      t,
+    );
+    const guarded = await guardLocalSource(resolved, t);
 
-  await dalCreateSource(guarded.data);
-  revalidatePath("/", "layout");
-  return actionOk();
-}
+    if (!(await testConnection(guarded))) {
+      throw new ActionError(t("connectionFailed"));
+    }
 
-export async function updateSource(
-  sourceId: string,
-  input: SourceFormValues,
-): Promise<ActionResult> {
-  const t = await getTranslations("sources.errors");
-  if (!(await currentAdmin())) return actionError(t("notAuthorized"));
-
-  const resolved = await resolveUpdateInput(sourceId, input, t);
-  if (!resolved.data) return actionError(resolved.error ?? t("invalidInput"));
-
-  const guarded = await guardLocalSource(resolved.data, t);
-  if (!guarded.data) return actionError(guarded.error ?? t("invalidInput"));
-
-  if (!(await testConnection(guarded.data))) {
-    return actionError(t("connectionFailed"));
-  }
-
-  await dalUpdateSource(sourceId, guarded.data);
-  revalidatePath("/", "layout");
-  return actionOk();
-}
+    await dalUpdateSource(parsedInput.sourceId, guarded);
+  });
 
 const migrationInputSchema = z.object({
   sourceId: z.uuid(),
   destId: z.uuid(),
 });
 
-export async function copySourceContents(
-  sourceId: string,
-  destId: string,
-): Promise<ActionResult<MigrationSummary>> {
-  const t = await getTranslations("sources.errors");
-  if (!(await currentAdmin())) return actionError(t("notAuthorized"));
-  const parsed = migrationInputSchema.safeParse({ sourceId, destId });
-  if (!parsed.success) return actionError(t("invalidSource"));
-  if (sourceId === destId) {
-    return actionError(t("sameSourceDestination"));
-  }
+export const copySourceContents = adminActionClient
+  .metadata({
+    actionName: "sources.copySourceContents",
+    // Data transfer only; legacy never revalidated here.
+    revalidate: false,
+    failureKey: "sources.errors.migrationFailed",
+  })
+  .inputSchema(migrationInputSchema)
+  .action(async ({ parsedInput }) => {
+    const t = await getTranslations("sources.errors");
+    const { sourceId, destId } = parsedInput;
 
-  const [from, to] = await Promise.all([
-    dalGetSource(sourceId),
-    dalGetSource(destId),
-  ]);
-  if (!from || !to) return actionError(t("sourceNotFound"));
+    if (sourceId === destId) {
+      throw new ActionError(t("sameSourceDestination"));
+    }
 
-  try {
-    return actionOk(await transferSourceContents(from, to));
-  } catch (error) {
-    console.error(
-      `[sources] migration failed (${from.name} → ${to.name}):`,
-      error,
-    );
-    return actionError(t("migrationFailed"));
-  }
-}
+    const [from, to] = await Promise.all([
+      dalGetSource(sourceId),
+      dalGetSource(destId),
+    ]);
+    if (!from || !to) throw new ActionError(t("sourceNotFound"));
 
-export async function removeSource(id: string): Promise<ActionResult> {
-  const t = await getTranslations("sources.errors");
-  if (!(await currentAdmin())) return actionError(t("notAuthorized"));
+    // Any unexpected transfer failure surfaces via metadata.failureKey.
+    return transferSourceContents(from, to);
+  });
 
-  try {
-    await dalDeleteSource(id);
-  } catch (error) {
-    console.error(`[sources] remove failed (source=${id}):`, error);
-    return actionError(t("removeFailed"));
-  }
-  revalidatePath("/", "layout");
-  return actionOk();
-}
+export const removeSource = adminActionClient
+  .metadata({
+    actionName: "sources.removeSource",
+    failureKey: "sources.errors.removeFailed",
+  })
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    await dalDeleteSource(parsedInput.id);
+  });

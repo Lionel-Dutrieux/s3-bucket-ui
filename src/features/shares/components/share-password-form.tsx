@@ -18,9 +18,9 @@ export function SharePasswordForm({ token }: { token: string }) {
     defaultValues: { password: "" },
     validators: { onChange: schema },
     onSubmit: async ({ value }) => {
-      const result = await unlockShare(token, value.password);
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await unlockShare({ token, password: value.password });
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       // The cookie is set — re-render the page server-side, now unlocked.
