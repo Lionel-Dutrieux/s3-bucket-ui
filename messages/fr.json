@@ -273,7 +273,9 @@
       "folderTooLargeToMove": "Ce dossier contient plus de {max} objets — trop volumineux pour être déplacé en une fois.",
       "selectionTooLargeToCopy": "Cette sélection contient plus de {max} objets — trop volumineuse pour être copiée en une fois.",
       "objectsNotDeleted": "{count, plural, one {# objet n'a pas pu être supprimé} other {# objets n'ont pas pu être supprimés}}.",
-      "folderTooLargeToDelete": "Ce dossier est trop volumineux pour être supprimé en une fois — des objets restent, relancez l'opération."
+      "folderTooLargeToDelete": "Ce dossier est trop volumineux pour être supprimé en une fois — des objets restent, relancez l'opération.",
+      "onlyFoldersShareable": "Seuls les dossiers peuvent être partagés ainsi.",
+      "folderNoLongerExists": "Ce dossier n'existe plus."
     },
     "filteredEmpty": {
       "title": "Aucun élément « {type} » dans ce dossier",
@@ -428,7 +430,9 @@
       "maxDownloadsLabel": "Nombre max de téléchargements (optionnel)",
       "maxDownloadsPlaceholder": "Laisser vide pour illimité",
       "createLink": "Créer le lien",
-      "creating": "Création…"
+      "creating": "Création…",
+      "titleFolder": "Partager {name}",
+      "descriptionFolder": "Toute personne disposant du lien peut parcourir et télécharger ce dossier — aucun compte n'est nécessaire. Gérez les liens depuis Liens partagés."
     },
     "copyToDialog": {
       "title": "Copier {count, plural, one {# élément} other {# éléments}} vers…",
@@ -820,7 +824,10 @@
       "testEmailFailed": "Impossible d'envoyer l'email de test."
     },
     "runtimeConfig": {
-      "provenance": { "env": "env.", "custom": "personnalisé" },
+      "provenance": {
+        "env": "env.",
+        "custom": "personnalisé"
+      },
       "resetToEnv": "Restaurer les valeurs d'environnement",
       "resetConfirm": "Cela supprime toutes les valeurs enregistrées ici et revient aux variables d'environnement. Continuer ?",
       "saved": "Paramètres enregistrés.",
@@ -953,6 +960,22 @@
       "linkNotFound": "Lien introuvable.",
       "notFound": "Introuvable.",
       "downloadFailed": "Impossible de télécharger ce fichier."
+    },
+    "fileLink": "Lien fichier",
+    "folderLink": "Lien dossier",
+    "gallery": {
+      "breadcrumbAria": "Fil d'Ariane",
+      "empty": "Ce dossier est vide.",
+      "foldersHeading": "Dossiers",
+      "filesHeading": "Fichiers",
+      "previewFile": "Aperçu de {name}",
+      "download": "Télécharger",
+      "downloadFileAria": "Télécharger {name}",
+      "indexOfTotal": "{index} sur {total}",
+      "previousFileAria": "Fichier précédent : {name}",
+      "previousFileTitle": "Fichier précédent (←)",
+      "nextFileAria": "Fichier suivant : {name}",
+      "nextFileTitle": "Fichier suivant (→)"
     }
   },
   "api": {

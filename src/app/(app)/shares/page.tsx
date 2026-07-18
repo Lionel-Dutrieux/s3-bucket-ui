@@ -21,6 +21,7 @@ export default async function SharesPage() {
   const rows: ShareRow[] = shares.map((share) => ({
     id: share.id,
     key: share.key,
+    kind: share.kind,
     sourceName: share.source?.name ?? t("deletedSource"),
     createdAt: share.createdAt.getTime(),
     expiresAt: share.expiresAt?.getTime() ?? null,

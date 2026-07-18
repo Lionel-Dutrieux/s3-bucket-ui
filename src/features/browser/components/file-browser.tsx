@@ -201,6 +201,7 @@ export function FileBrowser({
       sourceId,
       onPreview: openPreview,
       onShare: canShare ? dialogs.openShare : undefined,
+      onShareFolder: canShare ? dialogs.openShareFolder : undefined,
       onDetails: setDetails,
       onDelete: permissions.delete ? dialogs.openDelete : undefined,
       // Rename moves the object (write + delete), so it needs both.
@@ -399,6 +400,7 @@ export function FileBrowser({
                     .filter((entry) => entry.kind === "file")}
                   onPreview={openPreview}
                   onShare={canShare ? dialogs.openShare : undefined}
+                  onShareFolder={canShare ? dialogs.openShareFolder : undefined}
                   onDetails={setDetails}
                   onDelete={permissions.delete ? dialogs.openDelete : undefined}
                   onRename={canRename ? setRenameTarget : undefined}

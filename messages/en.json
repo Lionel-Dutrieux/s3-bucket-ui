@@ -273,7 +273,9 @@
       "folderTooLargeToMove": "This folder holds more than {max} objects — too large to move in one go.",
       "selectionTooLargeToCopy": "This selection holds more than {max} objects — too large to copy in one go.",
       "objectsNotDeleted": "{count, plural, one {# object} other {# objects}} could not be deleted.",
-      "folderTooLargeToDelete": "This folder is too large to delete in one go — some objects remain, run it again."
+      "folderTooLargeToDelete": "This folder is too large to delete in one go — some objects remain, run it again.",
+      "onlyFoldersShareable": "Only folders can be shared this way.",
+      "folderNoLongerExists": "This folder no longer exists."
     },
     "filteredEmpty": {
       "title": "No {type} in this folder",
@@ -428,7 +430,9 @@
       "maxDownloadsLabel": "Max downloads (optional)",
       "maxDownloadsPlaceholder": "Leave empty for unlimited",
       "createLink": "Create link",
-      "creating": "Creating…"
+      "creating": "Creating…",
+      "titleFolder": "Share {name}",
+      "descriptionFolder": "Anyone with the link can browse and download this folder — no account needed. Manage links from Shared links."
     },
     "copyToDialog": {
       "title": "Copy {count, plural, one {# item} other {# items}} to…",
@@ -820,7 +824,10 @@
       "testEmailFailed": "Could not send the test email."
     },
     "runtimeConfig": {
-      "provenance": { "env": "env", "custom": "custom" },
+      "provenance": {
+        "env": "env",
+        "custom": "custom"
+      },
       "resetToEnv": "Restore environment values",
       "resetConfirm": "This removes every value saved here and falls back to the environment variables. Continue?",
       "saved": "Settings saved.",
@@ -953,6 +960,22 @@
       "linkNotFound": "Link not found.",
       "notFound": "Not found.",
       "downloadFailed": "Could not download this file."
+    },
+    "fileLink": "File link",
+    "folderLink": "Folder link",
+    "gallery": {
+      "breadcrumbAria": "Breadcrumb",
+      "empty": "This folder is empty.",
+      "foldersHeading": "Folders",
+      "filesHeading": "Files",
+      "previewFile": "Preview {name}",
+      "download": "Download",
+      "downloadFileAria": "Download {name}",
+      "indexOfTotal": "{index} of {total}",
+      "previousFileAria": "Previous file: {name}",
+      "previousFileTitle": "Previous file (←)",
+      "nextFileAria": "Next file: {name}",
+      "nextFileTitle": "Next file (→)"
     }
   },
   "api": {

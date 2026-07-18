@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { downloadUrl, zipUrl } from "@/features/browser/api/client";
 import type { BrowserEntry } from "@/features/browser/lib/entries";
-import type { FileEntry } from "@/features/browser/lib/listing";
+import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,8 @@ export interface EntryActionHandlers {
   sourceId: string;
   onPreview?: (file: FileEntry) => void;
   onShare?: (file: FileEntry) => void;
+  /** Share a whole folder as one public link — absent hides the action. */
+  onShareFolder?: (folder: FolderEntry) => void;
   onDetails?: (file: FileEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
   onRename?: (entry: BrowserEntry) => void;
@@ -69,6 +71,7 @@ function entryActions(
     sourceId,
     onPreview,
     onShare,
+    onShareFolder,
     onDetails,
     onDelete,
     onRename,
@@ -85,6 +88,14 @@ function entryActions(
         href: zipUrl(sourceId, entry.prefix),
       },
     ];
+    if (onShareFolder) {
+      actions.push({
+        key: "share",
+        label: t("share"),
+        icon: Share2,
+        run: () => onShareFolder(entry),
+      });
+    }
     if (onMove) {
       actions.push({
         key: "move",

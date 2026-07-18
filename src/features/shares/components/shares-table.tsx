@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Link2, Link2Off } from "lucide-react";
+import { Copy, File, Folder, Link2, Link2Off } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
@@ -23,6 +23,8 @@ import { formatDate, formatRelative } from "@/lib/format";
 export interface ShareRow {
   id: string;
   key: string;
+  /** "file" or "prefix" (a whole folder). */
+  kind: string;
   sourceName: string;
   createdAt: number;
   expiresAt: number | null;
@@ -111,21 +113,34 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
         <TableBody>
           {shares.map((share) => {
             const status = statusOf(share);
-            const name = share.key.split("/").pop() || share.key;
+            const isFolder = share.kind === "prefix";
+            // A folder key ends with "/", so pop() would be empty — trim it
+            // first, then take the last segment.
+            const name =
+              share.key.replace(/\/$/, "").split("/").pop() || share.key;
             return (
               <TableRow key={share.id}>
                 <TableCell className="max-w-64">
-                  <span
-                    className="block truncate font-medium"
-                    title={share.key}
-                  >
-                    {name}
-                  </span>
-                  {share.hasPassword ? (
-                    <span className="text-xs text-muted-foreground">
-                      {t("passwordProtected")}
+                  <div className="flex items-center gap-2">
+                    {isFolder ? (
+                      <Folder
+                        className="size-4 shrink-0 fill-amber-400/80 text-primary"
+                        aria-hidden
+                      />
+                    ) : (
+                      <File
+                        className="size-4 shrink-0 text-muted-foreground"
+                        aria-hidden
+                      />
+                    )}
+                    <span className="truncate font-medium" title={share.key}>
+                      {name}
                     </span>
-                  ) : null}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {isFolder ? t("folderLink") : t("fileLink")}
+                    {share.hasPassword ? ` · ${t("passwordProtected")}` : null}
+                  </span>
                 </TableCell>
                 <TableCell>{share.sourceName}</TableCell>
                 <TableCell className="text-muted-foreground">

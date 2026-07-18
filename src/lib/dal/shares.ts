@@ -6,6 +6,8 @@ export interface ShareInput {
   /** The public token (generateShareToken()). */
   id: string;
   sourceId: string;
+  /** "file" (single object) or "prefix" (a whole folder). */
+  kind: string;
   key: string;
   createdById: string;
   expiresAt: Date | null;

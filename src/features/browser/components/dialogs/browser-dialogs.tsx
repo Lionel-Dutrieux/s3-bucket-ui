@@ -71,7 +71,7 @@ export function BrowserDialogs({
       />
       <ShareDialog
         sourceId={sourceId}
-        file={dialogs.dialog?.kind === "share" ? dialogs.dialog.file : null}
+        target={dialogs.dialog?.kind === "share" ? dialogs.dialog.target : null}
         policy={sharePolicy}
         onOpenChange={(open) => {
           if (!open) dialogs.close();

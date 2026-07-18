@@ -6,6 +6,7 @@ import { apiError } from "@/lib/api-error";
 import { recordOperation } from "@/lib/dal/operations";
 import { countShareDownload, getActiveShare } from "@/lib/dal/shares";
 import { getSource } from "@/lib/dal/sources";
+import { isPrefixShare, resolveObjectWithinPrefix } from "@/lib/shares/scope";
 import { isUnlocked } from "@/lib/shares/unlock";
 import { getFilesClient } from "@/lib/storage/client";
 import { streamObject } from "@/lib/storage/stream";
@@ -40,7 +41,21 @@ export async function GET(
     return apiError(404, t("notFound"));
   }
 
-  const filename = share.key.split("/").pop() || "file";
+  // File shares serve share.key; prefix shares serve any object under it, so the
+  // requested key is validated against the prefix — the security boundary that
+  // keeps a visitor from reading outside the shared folder (uniform 404).
+  let targetKey = share.key;
+  if (isPrefixShare(share.kind)) {
+    const requested = request.nextUrl.searchParams.get("key") ?? "";
+    const resolved = resolveObjectWithinPrefix(share.key, requested);
+    if (!resolved) {
+      const t = await getTranslations("shares.errors");
+      return apiError(404, t("notFound"));
+    }
+    targetKey = resolved;
+  }
+
+  const filename = targetKey.split("/").pop() || "file";
   const category = categoryOf(filename);
   const inline =
     request.nextUrl.searchParams.get("inline") === "1" &&
@@ -60,7 +75,7 @@ export async function GET(
       action: "share-download",
       sourceId: source.id,
       sourceName: source.name,
-      target: share.key,
+      target: targetKey,
       detail: "share-link",
     });
   }
@@ -76,16 +91,16 @@ export async function GET(
       const safeInline =
         inline &&
         /^(?:image\/(?!svg)|video\/|audio\/|application\/pdf$)/i.test(
-          (await files.head(share.key)).type || "",
+          (await files.head(targetKey)).type || "",
         );
       const signedDisposition = safeInline ? "inline" : "attachment";
-      const url = await files.url(share.key, {
+      const url = await files.url(targetKey, {
         expiresIn: REDIRECT_TTL_SECONDS,
         responseContentDisposition: `${signedDisposition}; filename*=UTF-8''${encodeURIComponent(filename)}`,
       });
       return NextResponse.redirect(url);
     }
-    return await streamObject(files, share.key, {
+    return await streamObject(files, targetKey, {
       filename,
       disposition,
       rangeHeader: request.headers.get("range"),

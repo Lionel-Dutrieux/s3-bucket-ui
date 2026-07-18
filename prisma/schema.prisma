@@ -211,6 +211,9 @@ model SourcePermission {
 model Share {
   id           String    @id
   sourceId     String    @map("source_id") @db.Uuid
+  /// "file" — key is a single object; "prefix" — key is a folder prefix
+  /// (ends with "/") and the link exposes every object under it.
+  kind         String    @default("file")
   key          String
   createdById  String    @map("created_by_id")
   expiresAt    DateTime? @map("expires_at") @db.Timestamptz(3)

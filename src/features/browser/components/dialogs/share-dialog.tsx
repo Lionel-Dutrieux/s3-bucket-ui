@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { createShareLink } from "@/features/browser/actions/share";
-import type { FileEntry } from "@/features/browser/lib/listing";
+import type { ShareTarget } from "@/features/browser/hooks/use-browser-dialogs";
 import { useAppForm } from "@/forms/form";
 import { copyText } from "@/lib/clipboard";
 import type { ShareExpiry } from "@/lib/shares/expiry";
@@ -54,17 +54,19 @@ function makeShareSchema(
 
 export function ShareDialog({
   sourceId,
-  file,
+  target,
   policy,
   onOpenChange,
 }: {
   sourceId: string;
-  file: FileEntry | null;
+  /** The file or folder to mint a link for — null keeps the dialog closed. */
+  target: ShareTarget | null;
   /** Org-wide constraints — pre-constrains expiry and password inputs. */
   policy?: SharePolicy;
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("browser.shareDialog");
+  const isPrefix = target?.kind === "prefix";
   // Once minted, the dialog switches to the copy view until closed.
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -94,12 +96,14 @@ export function ShareDialog({
     },
     validators: { onChange: shareSchema },
     onSubmit: async ({ value }) => {
-      if (!file) return;
+      if (!target) return;
       const trimmedMax = value.maxDownloads.trim();
-      const result = await createShareLink(sourceId, file.key, {
+      const result = await createShareLink(sourceId, target.key, {
+        kind: target.kind,
         expiresIn: value.expiresIn,
         password: value.password.trim() || undefined,
-        maxDownloads: trimmedMax ? Number(trimmedMax) : undefined,
+        // A folder link is uncapped — the field is hidden for prefixes.
+        maxDownloads: isPrefix || !trimmedMax ? undefined : Number(trimmedMax),
       });
       if (!result.ok) {
         toast.error(result.error);
@@ -131,13 +135,17 @@ export function ShareDialog({
   };
 
   return (
-    <Dialog open={file !== null} onOpenChange={close}>
+    <Dialog open={target !== null} onOpenChange={close}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="truncate pr-6">
-            {t("title", { name: file?.name ?? "" })}
+            {t(isPrefix ? "titleFolder" : "title", {
+              name: target?.name ?? "",
+            })}
           </DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
+          <DialogDescription>
+            {t(isPrefix ? "descriptionFolder" : "description")}
+          </DialogDescription>
         </DialogHeader>
 
         {createdUrl ? (
@@ -182,16 +190,20 @@ export function ShareDialog({
                 />
               )}
             </form.AppField>
-            <form.AppField name="maxDownloads">
-              {(field) => (
-                <field.TextField
-                  label={t("maxDownloadsLabel")}
-                  type="number"
-                  autoComplete="off"
-                  placeholder={t("maxDownloadsPlaceholder")}
-                />
-              )}
-            </form.AppField>
+            {/* A download cap has no clean meaning across a whole folder —
+              hidden for prefix links, which stay uncapped. */}
+            {isPrefix ? null : (
+              <form.AppField name="maxDownloads">
+                {(field) => (
+                  <field.TextField
+                    label={t("maxDownloadsLabel")}
+                    type="number"
+                    autoComplete="off"
+                    placeholder={t("maxDownloadsPlaceholder")}
+                  />
+                )}
+              </form.AppField>
+            )}
             <DialogFooter>
               <form.AppForm>
                 <form.SubmitButton pendingLabel={t("creating")}>
