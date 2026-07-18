@@ -39,6 +39,9 @@ export const env = createEnv({
     SMTP_PASSWORD: z.string().optional(),
     /** Sender, e.g. "Bucket UI <bucket-ui@example.com>". */
     SMTP_FROM: z.string().optional(),
+    /** Comma-separated directory allowlist for "Local folder" sources.
+     *  Unset = the local provider is hidden and rejected. */
+    LOCAL_FS_ROOTS: z.string().optional(),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -51,6 +54,7 @@ export const env = createEnv({
     SMTP_USER: process.env.SMTP_USER,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
     SMTP_FROM: process.env.SMTP_FROM,
+    LOCAL_FS_ROOTS: process.env.LOCAL_FS_ROOTS,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
