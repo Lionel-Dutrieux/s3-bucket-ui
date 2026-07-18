@@ -1,5 +1,6 @@
 {
   "common": {
+    "notAuthenticated": "Sie müssen angemeldet sein, um dies zu tun.",
     "cancel": "Abbrechen",
     "confirm": "Bestätigen",
     "save": "Speichern",

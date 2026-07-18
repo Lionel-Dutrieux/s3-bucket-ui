@@ -35,12 +35,15 @@ export function GroupMembersDialog({
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const t = useTranslations("admin.groupMembersDialog");
+  const tCommon = useTranslations("common");
 
-  const run = (work: () => Promise<{ serverError?: string }>) => {
+  const run = (
+    work: () => Promise<{ serverError?: string; validationErrors?: unknown }>,
+  ) => {
     startTransition(async () => {
       const result = await work();
-      if (result.serverError) {
-        toast.error(result.serverError);
+      if (result.serverError || result.validationErrors) {
+        toast.error(result.serverError ?? tCommon("actionFailed"));
         return;
       }
       router.refresh();

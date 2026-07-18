@@ -105,13 +105,13 @@ export function UsersTable({
   const locale = useLocale();
 
   const run = (
-    work: () => Promise<{ serverError?: string }>,
+    work: () => Promise<{ serverError?: string; validationErrors?: unknown }>,
     done?: () => void,
   ) => {
     startTransition(async () => {
       const result = await work();
-      if (result.serverError) {
-        toast.error(result.serverError);
+      if (result.serverError || result.validationErrors) {
+        toast.error(result.serverError ?? tCommon("actionFailed"));
         return;
       }
       done?.();

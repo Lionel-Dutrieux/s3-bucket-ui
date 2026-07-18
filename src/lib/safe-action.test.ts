@@ -144,7 +144,7 @@ describe("authActionClient", () => {
       .metadata({ actionName: "auth.test" })
       .inputSchema(z.object({}))
       .action(async () => "ok");
-    expect((await action({})).serverError).toBe("admin.errors.notAuthorized");
+    expect((await action({})).serverError).toBe("common.notAuthenticated");
   });
 
   it("exposes the user on ctx", async () => {

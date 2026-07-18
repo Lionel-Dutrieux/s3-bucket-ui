@@ -1,6 +1,7 @@
 {
   "common": {
     "actionFailed": "Something went wrong. Please try again.",
+    "notAuthenticated": "You must be signed in to do this.",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "save": "Save",

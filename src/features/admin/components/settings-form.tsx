@@ -72,13 +72,13 @@ export function SettingsForm({
   const tCommon = useTranslations("common");
 
   const run = (
-    work: () => Promise<{ serverError?: string }>,
+    work: () => Promise<{ serverError?: string; validationErrors?: unknown }>,
     success: string,
   ) => {
     startTransition(async () => {
       const result = await work();
-      if (result.serverError) {
-        toast.error(result.serverError);
+      if (result.serverError || result.validationErrors) {
+        toast.error(result.serverError ?? tCommon("actionFailed"));
         return;
       }
       toast.success(success);

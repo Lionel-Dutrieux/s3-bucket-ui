@@ -8,9 +8,9 @@ import { currentAdmin, currentUser } from "@/lib/auth/session";
 /** Error whose message is already translated and safe to show in the UI. */
 export class ActionError extends Error {}
 
-// getTranslations is typed against the known message keys; resolveKey builds
-// its namespace/key from a runtime string (metadata.failureKey), so it needs a
-// loosened view of the function.
+// getTranslations is typed against the known message keys; resolveActionMessage
+// builds its namespace/key from a runtime string (metadata.failureKey), so it
+// needs a loosened view of the function.
 const getTranslationsLoose = getTranslations as (
   namespace: string,
 ) => Promise<(key: string) => string>;
@@ -48,8 +48,8 @@ export const actionClient = createSafeActionClient({
 export const authActionClient = actionClient.use(async ({ next }) => {
   const user = await currentUser();
   if (!user) {
-    const t = await getTranslations("admin.errors");
-    throw new ActionError(t("notAuthorized"));
+    const t = await getTranslations("common");
+    throw new ActionError(t("notAuthenticated"));
   }
   return next({ ctx: { user } });
 });
