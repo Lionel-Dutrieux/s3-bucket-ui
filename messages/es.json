@@ -46,6 +46,7 @@
       "description": "Ir a una fuente o añadir una nueva",
       "searchPlaceholder": "Buscar fuentes…",
       "noResults": "Sin resultados.",
+      "searchThisSource": "Buscar archivos en esta fuente…",
       "sourcesHeading": "Fuentes",
       "administrationHeading": "Administración",
       "addSource": "Añadir fuente",
@@ -290,9 +291,9 @@
       "archive": "Archivos comprimidos"
     },
     "toolbar": {
-      "filterPlaceholder": "Filtrar por nombre",
+      "filterPlaceholder": "Filtrar esta carpeta…",
       "matchCount": "{count, plural, one {# coincidencia} other {# coincidencias}}",
-      "searchSource": "Buscar en la fuente",
+      "searchEverywhere": "Buscar en toda la fuente",
       "upload": "Subir"
     },
     "columns": {
@@ -321,6 +322,7 @@
       "noMatchesTitle": "Sin coincidencias",
       "noMatchesDescription": "Nada en esta carpeta coincide con «{query}».",
       "clearFilter": "Borrar filtro",
+      "searchEverywhere": "Buscar en toda la fuente",
       "emptyFolderTitle": "Esta carpeta está vacía",
       "emptyFolderCanUpload": "Suelta archivos aquí, o usa Subir para añadir algunos.",
       "emptyFolderReadOnly": "Los archivos subidos a esta ubicación aparecerán aquí.",

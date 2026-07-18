@@ -7,9 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { FileBrowser } from "@/features/browser/components/file-browser";
-import { TypeFilter } from "@/features/browser/components/menus/type-filter";
 import { SourceBreadcrumb } from "@/features/browser/components/source-breadcrumb";
-import { ViewToggle } from "@/features/browser/components/view-toggle";
 import { categoryOf, FILE_CATEGORIES } from "@/features/browser/lib/file-types";
 import { VIEW_COOKIE, type ViewMode } from "@/features/browser/lib/view";
 import {
@@ -78,16 +76,15 @@ export default async function SourcePage({
           sourceName={source.name}
           prefix={prefix}
         />
-        <div className="ml-auto flex items-center gap-2">
-          {itemCount > 0 ? (
-            <span className="text-xs text-muted-foreground tabular-nums max-sm:hidden">
-              {t("itemCount", { count: itemCount })}
-              {listing.ok && listing.nextCursor ? "+" : ""}
-            </span>
-          ) : null}
-          {listing.ok ? <TypeFilter active={activeType} /> : null}
-          <ViewToggle view={view} />
-        </div>
+        {/* Display controls (type / sort / view) live in the browser toolbar,
+            next to each other — the header only states where you are and how
+            much is here. */}
+        {itemCount > 0 ? (
+          <span className="ml-auto text-xs text-muted-foreground tabular-nums max-sm:hidden">
+            {t("itemCount", { count: itemCount })}
+            {listing.ok && listing.nextCursor ? "+" : ""}
+          </span>
+        ) : null}
       </header>
 
       <main className="flex-1">

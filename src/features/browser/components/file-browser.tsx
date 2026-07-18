@@ -10,7 +10,7 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowLeft, FolderOpen, SearchX } from "lucide-react";
+import { ArrowLeft, FileSearch, FolderOpen, SearchX } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -48,6 +48,7 @@ import {
 import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 import { toTarget } from "@/features/browser/lib/move";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
+import { OPEN_SOURCE_SEARCH_EVENT } from "@/features/browser/lib/search-event";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
@@ -116,6 +117,15 @@ export function FileBrowser({
   const dialogs = useBrowserDialogs();
   const selection = useEntrySelection();
   const { rowSelection, setRowSelection } = selection;
+
+  // The Ctrl/Cmd+K palette asks for the source-wide search through a window
+  // event — it lives in the layout tree, not under this component.
+  const { openSearch } = dialogs;
+  useEffect(() => {
+    window.addEventListener(OPEN_SOURCE_SEARCH_EVENT, openSearch);
+    return () =>
+      window.removeEventListener(OPEN_SOURCE_SEARCH_EVENT, openSearch);
+  }, [openSearch]);
 
   // A selection belongs to one folder — navigating away discards it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is intentionally keyed on the folder change
@@ -339,14 +349,21 @@ export function FileBrowser({
               title={t("noMatchesTitle")}
               description={t("noMatchesDescription", { query })}
             >
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-1"
-                onClick={() => table.setGlobalFilter("")}
-              >
-                {t("clearFilter")}
-              </Button>
+              <div className="mt-1 flex flex-wrap justify-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.setGlobalFilter("")}
+                >
+                  {t("clearFilter")}
+                </Button>
+                {/* The name might simply live in another folder — offer the
+                    wider net right where the narrow one came up empty. */}
+                <Button variant="outline" size="sm" onClick={openSearch}>
+                  <FileSearch aria-hidden />
+                  {t("searchEverywhere")}
+                </Button>
+              </div>
             </EmptyState>
           ) : entries.length === 0 ? (
             <EmptyFolder

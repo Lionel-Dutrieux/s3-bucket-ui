@@ -46,6 +46,7 @@
       "description": "Zu einer Quelle springen oder eine neue hinzufügen",
       "searchPlaceholder": "Quellen suchen…",
       "noResults": "Keine Ergebnisse.",
+      "searchThisSource": "Dateien in dieser Quelle suchen…",
       "sourcesHeading": "Quellen",
       "administrationHeading": "Verwaltung",
       "addSource": "Quelle hinzufügen",
@@ -290,9 +291,9 @@
       "archive": "Archive"
     },
     "toolbar": {
-      "filterPlaceholder": "Nach Namen filtern",
+      "filterPlaceholder": "Diesen Ordner filtern…",
       "matchCount": "{count, plural, one {# Treffer} other {# Treffer}}",
-      "searchSource": "Quelle durchsuchen",
+      "searchEverywhere": "Gesamte Quelle durchsuchen",
       "upload": "Hochladen"
     },
     "columns": {
@@ -321,6 +322,7 @@
       "noMatchesTitle": "Keine Treffer",
       "noMatchesDescription": "Nichts in diesem Ordner entspricht „{query}“.",
       "clearFilter": "Filter zurücksetzen",
+      "searchEverywhere": "Gesamte Quelle durchsuchen",
       "emptyFolderTitle": "Dieser Ordner ist leer",
       "emptyFolderCanUpload": "Legen Sie Dateien hier ab, oder verwenden Sie Hochladen, um welche hinzuzufügen.",
       "emptyFolderReadOnly": "Hierhin hochgeladene Dateien werden hier angezeigt.",

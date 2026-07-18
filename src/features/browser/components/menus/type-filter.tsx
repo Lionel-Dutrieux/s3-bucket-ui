@@ -12,17 +12,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  FILE_CATEGORIES,
-  type FileCategory,
-} from "@/features/browser/lib/file-types";
+import { FILE_CATEGORIES } from "@/features/browser/lib/file-types";
 import { cn } from "@/lib/utils";
 
-export function TypeFilter({ active }: { active?: FileCategory }) {
+export function TypeFilter() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("browser.fileTypes");
+  // Self-contained: the active category lives in the URL (?type=), so the
+  // control can sit anywhere without threading server state down to it.
+  const active = FILE_CATEGORIES.find(
+    (category) => category.id === searchParams.get("type"),
+  )?.id;
 
   const select = (value: string) => {
     const params = new URLSearchParams(searchParams);

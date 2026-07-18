@@ -1,7 +1,7 @@
 "use client";
 
-import { Plus, Settings2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { FileSearch, Plus, Settings2 } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
@@ -14,6 +14,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { OPEN_SOURCE_SEARCH_EVENT } from "@/features/browser/lib/search-event";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import type { SourceSummary } from "@/lib/dal/sources";
 
@@ -30,7 +31,11 @@ export function CommandPalette({
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations("layout.commandPalette");
+  // File search only makes sense while browsing a source — the palette
+  // handles navigation, the browser handles its own content.
+  const onSourcePage = /^\/source\//.test(pathname);
 
   const go = (path: string) => {
     setOpen(false);
@@ -67,6 +72,19 @@ export function CommandPalette({
         <CommandInput placeholder={t("searchPlaceholder")} />
         <CommandList>
           <CommandEmpty>{t("noResults")}</CommandEmpty>
+          {onSourcePage ? (
+            <CommandGroup>
+              <CommandItem
+                onSelect={() => {
+                  setOpen(false);
+                  window.dispatchEvent(new Event(OPEN_SOURCE_SEARCH_EVENT));
+                }}
+              >
+                <FileSearch aria-hidden />
+                {t("searchThisSource")}
+              </CommandItem>
+            </CommandGroup>
+          ) : null}
           {sources.length > 0 ? (
             <CommandGroup heading={t("sourcesHeading")}>
               {sources.map((source) => {

@@ -46,6 +46,7 @@
       "description": "Accéder à une source ou en ajouter une nouvelle",
       "searchPlaceholder": "Rechercher des sources…",
       "noResults": "Aucun résultat.",
+      "searchThisSource": "Rechercher des fichiers dans cette source…",
       "sourcesHeading": "Sources",
       "administrationHeading": "Administration",
       "addSource": "Ajouter une source",
@@ -290,9 +291,9 @@
       "archive": "Archives"
     },
     "toolbar": {
-      "filterPlaceholder": "Filtrer par nom",
+      "filterPlaceholder": "Filtrer ce dossier…",
       "matchCount": "{count, plural, one {# résultat} other {# résultats}}",
-      "searchSource": "Rechercher dans la source",
+      "searchEverywhere": "Chercher dans toute la source",
       "upload": "Importer"
     },
     "columns": {
@@ -321,6 +322,7 @@
       "noMatchesTitle": "Aucun résultat",
       "noMatchesDescription": "Rien dans ce dossier ne correspond à « {query} ».",
       "clearFilter": "Effacer le filtre",
+      "searchEverywhere": "Chercher dans toute la source",
       "emptyFolderTitle": "Ce dossier est vide",
       "emptyFolderCanUpload": "Déposez des fichiers ici, ou utilisez Importer pour en ajouter.",
       "emptyFolderReadOnly": "Les fichiers envoyés à cet endroit apparaîtront ici.",

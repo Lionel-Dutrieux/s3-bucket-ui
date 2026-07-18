@@ -46,6 +46,7 @@
       "description": "跳转到某个来源或添加新来源",
       "searchPlaceholder": "搜索来源…",
       "noResults": "无结果。",
+      "searchThisSource": "在此来源中搜索文件…",
       "sourcesHeading": "来源",
       "administrationHeading": "管理",
       "addSource": "添加来源",
@@ -290,9 +291,9 @@
       "archive": "压缩包"
     },
     "toolbar": {
-      "filterPlaceholder": "按名称筛选",
+      "filterPlaceholder": "筛选此文件夹…",
       "matchCount": "{count, plural, other {# 个匹配}}",
-      "searchSource": "搜索来源",
+      "searchEverywhere": "搜索整个来源",
       "upload": "上传"
     },
     "columns": {
@@ -321,6 +322,7 @@
       "noMatchesTitle": "无匹配项",
       "noMatchesDescription": "此文件夹中没有匹配“{query}”的内容。",
       "clearFilter": "清除筛选",
+      "searchEverywhere": "搜索整个来源",
       "emptyFolderTitle": "此文件夹为空",
       "emptyFolderCanUpload": "将文件拖放到此处，或使用“上传”添加。",
       "emptyFolderReadOnly": "上传到此位置的文件将显示在这里。",

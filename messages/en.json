@@ -46,6 +46,7 @@
       "description": "Jump to a source or add a new one",
       "searchPlaceholder": "Search sources…",
       "noResults": "No results.",
+      "searchThisSource": "Search files in this source…",
       "sourcesHeading": "Sources",
       "administrationHeading": "Administration",
       "addSource": "Add source",
@@ -290,9 +291,9 @@
       "archive": "Archives"
     },
     "toolbar": {
-      "filterPlaceholder": "Filter by name",
+      "filterPlaceholder": "Filter this folder…",
       "matchCount": "{count, plural, one {# match} other {# matches}}",
-      "searchSource": "Search source",
+      "searchEverywhere": "Search the entire source",
       "upload": "Upload"
     },
     "columns": {
@@ -321,6 +322,7 @@
       "noMatchesTitle": "No matches",
       "noMatchesDescription": "Nothing in this folder matches “{query}”.",
       "clearFilter": "Clear filter",
+      "searchEverywhere": "Search the entire source",
       "emptyFolderTitle": "This folder is empty",
       "emptyFolderCanUpload": "Drop files here, or use Upload to add some.",
       "emptyFolderReadOnly": "Files uploaded to this location will show up here.",
