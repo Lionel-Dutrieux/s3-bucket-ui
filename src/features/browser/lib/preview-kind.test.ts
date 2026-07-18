@@ -9,6 +9,12 @@ describe("previewKindOf", () => {
     expect(previewKindOf("song.flac")).toBe("audio");
   });
 
+  it("video containers browsers can't decode have no preview", () => {
+    expect(previewKindOf("movie.avi")).toBeUndefined();
+    expect(previewKindOf("movie.mkv")).toBeUndefined();
+    expect(isPreviewable("movie.avi")).toBe(false);
+  });
+
   it("markdown and csv get their own viewers", () => {
     expect(previewKindOf("README.md")).toBe("markdown");
     expect(previewKindOf("notes.markdown")).toBe("markdown");

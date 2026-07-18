@@ -13,12 +13,17 @@ export type PreviewKind =
   | "csv"
   | "text";
 
+// Containers no browser <video> decodes — categorized "video" for icons and
+// the type filter, but offering a preview would only error after the click.
+const UNDECODABLE_VIDEO = new Set(["avi", "mkv"]);
+
 export function previewKindOf(name: string): PreviewKind | undefined {
   const extension = name.split(".").pop()?.toLowerCase() ?? "";
   // Before the category lookup: md sits in "document", csv in "spreadsheet",
   // but both have richer viewers than their category suggests.
   if (extension === "md" || extension === "markdown") return "markdown";
   if (extension === "csv") return "csv";
+  if (UNDECODABLE_VIDEO.has(extension)) return undefined;
 
   const category = categoryOf(name);
   if (
