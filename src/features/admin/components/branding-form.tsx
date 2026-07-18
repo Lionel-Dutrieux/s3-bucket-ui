@@ -29,6 +29,7 @@ export function BrandingForm({
   const router = useRouter();
   const [resetting, startReset] = useTransition();
   const t = useTranslations("admin.brandingForm");
+  const tErrors = useTranslations("admin.errors");
 
   const form = useAppForm({
     defaultValues: {
@@ -44,8 +45,18 @@ export function BrandingForm({
         primaryColor: value.primaryColor || null,
         logo: value.logo,
       });
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
+        return;
+      }
+      if (result.validationErrors) {
+        toast.error(
+          result.validationErrors.formErrors?.[0] ??
+            Object.values(result.validationErrors.fieldErrors ?? {})
+              .flat()
+              .find(Boolean) ??
+            tErrors("invalidInput"),
+        );
         return;
       }
       // Clear the pending upload so an unrelated later save doesn't
@@ -58,9 +69,9 @@ export function BrandingForm({
 
   const reset = () =>
     startReset(async () => {
-      const result = await resetBranding();
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await resetBranding({});
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       form.reset({
