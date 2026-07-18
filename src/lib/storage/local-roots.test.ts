@@ -1,4 +1,11 @@
-import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -41,18 +48,22 @@ describe("checkLocalRoot", () => {
     });
   });
 
-  it("accepts an allowed root itself and returns its real path", async () => {
+  it("accepts an allowed root itself and returns its canonical real path", async () => {
     process.env.LOCAL_FS_ROOTS = base;
-    const check = await checkLocalRoot(base);
-    expect(check).toMatchObject({ ok: true });
+    expect(await checkLocalRoot(base)).toEqual({
+      ok: true,
+      value: await realpath(base),
+    });
   });
 
-  it("accepts a subdirectory of an allowed root", async () => {
+  it("rejects a subdirectory of an allowed root — only exact roots are pickable", async () => {
     process.env.LOCAL_FS_ROOTS = base;
     const sub = path.join(base, "team", "photos");
     await mkdir(sub, { recursive: true });
-    const check = await checkLocalRoot(sub);
-    expect(check).toMatchObject({ ok: true });
+    expect(await checkLocalRoot(sub)).toEqual({
+      ok: false,
+      reason: "outside",
+    });
   });
 
   it("rejects a path outside every allowed root", async () => {

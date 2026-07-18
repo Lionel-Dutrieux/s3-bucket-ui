@@ -591,7 +591,8 @@
       "namePlaceholder": "Documentos del equipo",
       "endpointLabel": "Endpoint",
       "accessNote": "Quién puede explorar, editar o eliminar en esta fuente se gestiona por usuario y por grupo desde el área de administración.",
-      "localRootsHint": "La ruta debe ser uno de los directorios permitidos del servidor ({roots}) o una carpeta dentro de uno de ellos.",
+      "localRootsHint": "Las carpetas ofrecidas aquí las define el operador del servidor (LOCAL_FS_ROOTS).",
+      "localRootPlaceholder": "Elegir una carpeta",
       "allowPublicSharesLabel": "Permitir enlaces de compartición pública",
       "allowPublicSharesDescription": "Cuando está desactivado, nadie puede crear enlaces públicos para esta fuente y cualquier enlace existente deja de funcionar hasta que se vuelva a activar.",
       "connectionSuccessful": "Conexión correcta.",
@@ -642,7 +643,7 @@
       "migrationFailed": "Error en la migración — revisa la conectividad de ambas fuentes e inténtalo de nuevo.",
       "removeFailed": "No se pudo eliminar esta fuente.",
       "localDisabled": "Las fuentes de carpeta local están desactivadas — define LOCAL_FS_ROOTS en el servidor para activarlas.",
-      "localRootNotAllowed": "Esta ruta no está bajo ninguna raíz permitida (LOCAL_FS_ROOTS).",
+      "localRootNotAllowed": "Esta ruta no es una de las carpetas permitidas (LOCAL_FS_ROOTS).",
       "localRootUnreachable": "Este directorio no existe o no se puede leer en el servidor."
     }
   },

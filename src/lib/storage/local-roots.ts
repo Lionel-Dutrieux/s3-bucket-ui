@@ -20,10 +20,12 @@ export type LocalRootCheck =
   | { ok: false; reason: "disabled" | "outside" | "unreachable" };
 
 /**
- * Validates a "Local folder" root path against LOCAL_FS_ROOTS. Resolves
- * symlinks on both sides (realpath) so `../` tricks and links pointing out
- * of an allowed root are caught; on success returns the canonical path to
- * store, so every later adapter call starts from a vetted directory.
+ * Validates a "Local folder" root path against LOCAL_FS_ROOTS. A source may
+ * only be exactly one of the configured roots — never a subdirectory — so
+ * the admin UI offers a pick list, not a path input. Both sides resolve
+ * through realpath, so `../` tricks and symlinks pointing elsewhere are
+ * caught; on success returns the canonical path to store, so every later
+ * adapter call starts from a vetted directory.
  */
 export async function checkLocalRoot(
   rootPath: string,
@@ -45,7 +47,7 @@ export async function checkLocalRoot(
     } catch {
       continue; // configured root missing on disk — never matches
     }
-    if (resolved === realRoot || resolved.startsWith(realRoot + path.sep)) {
+    if (resolved === realRoot) {
       return { ok: true, value: resolved };
     }
   }

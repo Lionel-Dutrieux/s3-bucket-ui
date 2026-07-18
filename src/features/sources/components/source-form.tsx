@@ -107,6 +107,19 @@ export function SourceForm({
   const isLocal = definition.adapter === "fs";
   const { bucket, accessKeyId, secretAccessKey } = definition.fieldLabels;
 
+  // Local sources pick their root from the operator allowlist — never a free
+  // path. A stored root that has since left LOCAL_FS_ROOTS stays listed so
+  // the edit form can display it; the server re-validates on save anyway.
+  const storedLocalRoot =
+    edit && getProvider(edit.initialValues.provider)?.adapter === "fs"
+      ? edit.initialValues.bucket
+      : undefined;
+  const localRootOptions = (
+    storedLocalRoot && !localFsRoots.includes(storedLocalRoot)
+      ? [storedLocalRoot, ...localFsRoots]
+      : localFsRoots
+  ).map((root) => ({ value: root, label: root }));
+
   return (
     <form
       onSubmit={(event) => {
@@ -159,10 +172,10 @@ export function SourceForm({
       {isLocal ? (
         <form.AppField name="bucket">
           {(field) => (
-            <field.TextField
+            <field.SelectField
               label={bucket}
-              placeholder={localFsRoots[0] ?? "/data"}
-              mono
+              placeholder={t("form.localRootPlaceholder")}
+              options={localRootOptions}
             />
           )}
         </form.AppField>
@@ -193,9 +206,7 @@ export function SourceForm({
       )}
 
       <p className="text-xs text-muted-foreground">
-        {isLocal
-          ? t("form.localRootsHint", { roots: localFsRoots.join(", ") })
-          : t("form.accessNote")}
+        {isLocal ? t("form.localRootsHint") : t("form.accessNote")}
       </p>
 
       <div className="rounded-lg border p-3">

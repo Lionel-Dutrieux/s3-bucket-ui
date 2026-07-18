@@ -170,7 +170,7 @@ pnpm dev
 | `OIDC_GROUPS_CLAIM` | *(optional)* Claim carrying group names (default `groups`). |
 | `SMTP_HOST` / `SMTP_FROM` | *(optional, set together)* SMTP relay and sender — enables "Forgot password?" reset emails. |
 | `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASSWORD` | *(optional)* Relay port (default 587), implicit TLS, and credentials if the relay requires auth. |
-| `LOCAL_FS_ROOTS` | *(optional)* Comma-separated allowlist of directories that "Local folder" sources may expose (e.g. volumes mounted into the container, such as `/data`). Unset = the provider is hidden from the admin UI and rejected server-side. Every source root must be one of these directories or live under one. |
+| `LOCAL_FS_ROOTS` | *(optional)* Comma-separated allowlist of directories that "Local folder" sources may expose (e.g. volumes mounted into the container, such as `/data`). Unset = the provider is hidden from the admin UI and rejected server-side. Each source exposes exactly one of these directories, picked from a list in the admin UI. |
 
 <details>
 <summary><b>Example: OIDC with Pocket ID</b></summary>
