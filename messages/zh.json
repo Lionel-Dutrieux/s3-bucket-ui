@@ -39,7 +39,12 @@
       "sharedLinks": "分享链接",
       "activity": "活动",
       "admin": "管理",
-      "theme": "主题"
+      "theme": "主题",
+      "health": {
+        "reachable": "数据源可访问",
+        "unreachable": "数据源不可访问",
+        "checking": "正在检查数据源…"
+      }
     },
     "commandPalette": {
       "title": "命令面板",
@@ -530,6 +535,11 @@
     "remove": "移除",
     "removeAria": "移除 {name}",
     "connectionVerifiedNote": "保存时会再次验证连接。",
+    "health": {
+      "reachable": "可访问",
+      "unreachable": "不可访问",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "编辑来源",
       "title": "编辑 {name}",

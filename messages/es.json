@@ -39,7 +39,12 @@
       "sharedLinks": "Enlaces compartidos",
       "activity": "Actividad",
       "admin": "Administración",
-      "theme": "Tema"
+      "theme": "Tema",
+      "health": {
+        "reachable": "Origen accesible",
+        "unreachable": "Origen inaccesible",
+        "checking": "Comprobando el origen…"
+      }
     },
     "commandPalette": {
       "title": "Paleta de comandos",
@@ -530,6 +535,11 @@
     "remove": "Eliminar",
     "removeAria": "Eliminar {name}",
     "connectionVerifiedNote": "La conexión se vuelve a verificar al guardar.",
+    "health": {
+      "reachable": "Accesible",
+      "unreachable": "Inaccesible",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "Editar fuente",
       "title": "Editar {name}",

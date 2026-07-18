@@ -26,6 +26,7 @@ import {
 } from "@/features/auth/components/user-menu";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { ProviderPlate } from "@/features/sources/components/provider-logos";
+import { SourceHealthDot } from "@/features/sources/components/source-health-dot";
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { getProvider, PROVIDERS } from "@/lib/storage/providers";
@@ -118,8 +119,11 @@ export function AppSidebar({
                             className="size-8"
                           />
                           <div className="grid min-w-0 flex-1 leading-tight">
-                            <span className="truncate text-sm font-medium">
-                              {source.name}
+                            <span className="flex min-w-0 items-center gap-1.5">
+                              <span className="truncate text-sm font-medium">
+                                {source.name}
+                              </span>
+                              <SourceHealthDot sourceId={source.id} />
                             </span>
                             {/* The bucket only helps when it differs from
                                 the display name. */}

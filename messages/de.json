@@ -39,7 +39,12 @@
       "sharedLinks": "Geteilte Links",
       "activity": "Aktivität",
       "admin": "Admin",
-      "theme": "Design"
+      "theme": "Design",
+      "health": {
+        "reachable": "Quelle erreichbar",
+        "unreachable": "Quelle nicht erreichbar",
+        "checking": "Quelle wird geprüft…"
+      }
     },
     "commandPalette": {
       "title": "Befehlspalette",
@@ -530,6 +535,11 @@
     "remove": "Entfernen",
     "removeAria": "{name} entfernen",
     "connectionVerifiedNote": "Die Verbindung wird beim Speichern erneut geprüft.",
+    "health": {
+      "reachable": "Erreichbar",
+      "unreachable": "Nicht erreichbar",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "Quelle bearbeiten",
       "title": "{name} bearbeiten",

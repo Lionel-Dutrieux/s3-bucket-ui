@@ -39,7 +39,12 @@
       "sharedLinks": "Liens partagés",
       "activity": "Activité",
       "admin": "Administration",
-      "theme": "Thème"
+      "theme": "Thème",
+      "health": {
+        "reachable": "Source joignable",
+        "unreachable": "Source injoignable",
+        "checking": "Vérification de la source…"
+      }
     },
     "commandPalette": {
       "title": "Palette de commandes",
@@ -564,6 +569,11 @@
     "remove": "Supprimer",
     "removeAria": "Supprimer {name}",
     "connectionVerifiedNote": "La connexion est revérifiée lors de l'enregistrement.",
+    "health": {
+      "reachable": "Joignable",
+      "unreachable": "Injoignable",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "Modifier la source",
       "title": "Modifier {name}",

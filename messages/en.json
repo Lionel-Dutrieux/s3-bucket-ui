@@ -39,7 +39,12 @@
       "sharedLinks": "Shared links",
       "activity": "Activity",
       "admin": "Admin",
-      "theme": "Theme"
+      "theme": "Theme",
+      "health": {
+        "reachable": "Source reachable",
+        "unreachable": "Source unreachable",
+        "checking": "Checking source…"
+      }
     },
     "commandPalette": {
       "title": "Command palette",
@@ -564,6 +569,11 @@
     "remove": "Remove",
     "removeAria": "Remove {name}",
     "connectionVerifiedNote": "The connection is verified again when you save.",
+    "health": {
+      "reachable": "Reachable",
+      "unreachable": "Unreachable",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "Edit source",
       "title": "Edit {name}",
