@@ -591,6 +591,7 @@
       "namePlaceholder": "团队文档",
       "endpointLabel": "端点",
       "accessNote": "谁可以在此来源上浏览、编辑或删除，由管理区域按用户和组管理。",
+      "localRootsHint": "路径必须是服务器允许的目录之一（{roots}），或其中的子文件夹。",
       "allowPublicSharesLabel": "允许公开分享链接",
       "allowPublicSharesDescription": "关闭后，任何人都无法为此来源创建公开链接，且所有现有链接将停止工作，直到重新开启。",
       "connectionSuccessful": "连接成功。",

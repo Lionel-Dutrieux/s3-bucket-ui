@@ -591,6 +591,7 @@
       "namePlaceholder": "Documents d'équipe",
       "endpointLabel": "Point de terminaison",
       "accessNote": "Qui peut parcourir, modifier ou supprimer sur cette source se gère par utilisateur et par groupe depuis l'administration.",
+      "localRootsHint": "Le chemin doit être l'un des dossiers autorisés du serveur ({roots}) ou un sous-dossier de l'un d'eux.",
       "allowPublicSharesLabel": "Autoriser les liens de partage publics",
       "allowPublicSharesDescription": "Une fois désactivé, plus personne ne peut créer de liens publics pour cette source et tout lien existant cesse de fonctionner jusqu'à réactivation.",
       "connectionSuccessful": "Connexion réussie.",

@@ -591,6 +591,7 @@
       "namePlaceholder": "Team documents",
       "endpointLabel": "Endpoint",
       "accessNote": "Who can browse, edit or delete on this source is managed per user and group from the admin area.",
+      "localRootsHint": "The path must be one of the allowed server directories ({roots}) or a folder inside one.",
       "allowPublicSharesLabel": "Allow public share links",
       "allowPublicSharesDescription": "When off, no one can mint public links for this source and any existing link stops working until it's turned back on.",
       "connectionSuccessful": "Connection successful.",

@@ -26,11 +26,14 @@ export function SourceDialog({
   open,
   onOpenChange,
   edit,
+  localFsRoots = [],
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** When set, the dialog edits an existing source (opens on the form). */
   edit?: { sourceId: string; initialValues: SourceFormValues };
+  /** LOCAL_FS_ROOTS allowlist, threaded from the RSC page ([] = disabled). */
+  localFsRoots?: string[];
 }) {
   const router = useRouter();
   const t = useTranslations("sources");
@@ -87,6 +90,7 @@ export function SourceDialog({
 
         {showPicker ? (
           <ProviderPicker
+            localFsEnabled={localFsRoots.length > 0}
             onSelect={(id) => {
               setProvider(id);
               setPicking(false);
@@ -98,6 +102,7 @@ export function SourceDialog({
           <div className={showPicker ? "hidden" : undefined}>
             <SourceForm
               provider={provider}
+              localFsRoots={localFsRoots}
               onChangeProvider={() => setPicking(true)}
               edit={edit}
               onSuccess={() => {

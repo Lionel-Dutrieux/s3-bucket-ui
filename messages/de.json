@@ -591,6 +591,7 @@
       "namePlaceholder": "Team-Dokumente",
       "endpointLabel": "Endpunkt",
       "accessNote": "Wer diese Quelle durchsuchen, bearbeiten oder löschen darf, wird pro Benutzer und Gruppe im Admin-Bereich verwaltet.",
+      "localRootsHint": "Der Pfad muss eines der erlaubten Serververzeichnisse ({roots}) oder ein Unterordner davon sein.",
       "allowPublicSharesLabel": "Öffentliche Freigabelinks zulassen",
       "allowPublicSharesDescription": "Wenn deaktiviert, kann niemand öffentliche Links für diese Quelle erstellen und alle bestehenden Links funktionieren erst nach erneuter Aktivierung wieder.",
       "connectionSuccessful": "Verbindung erfolgreich.",

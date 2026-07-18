@@ -15,12 +15,15 @@ export function SourceCardActions({
   source,
   editValues,
   otherSources,
+  localFsRoots = [],
 }: {
   source: SourceSummary;
   /** Current connection values (secret blank) — feeds the edit dialog. */
   editValues: SourceFormValues;
   /** Migration destinations — every source except this one. */
   otherSources: SourceSummary[];
+  /** LOCAL_FS_ROOTS allowlist, threaded from the RSC page ([] = disabled). */
+  localFsRoots?: string[];
 }) {
   const { requestRemove, pending, dialogs } = useSourceActions(source);
   const [editOpen, setEditOpen] = useState(false);
@@ -66,6 +69,7 @@ export function SourceCardActions({
         open={editOpen}
         onOpenChange={setEditOpen}
         edit={{ sourceId: source.id, initialValues: editValues }}
+        localFsRoots={localFsRoots}
       />
       <MigrateSourceDialog
         source={source}

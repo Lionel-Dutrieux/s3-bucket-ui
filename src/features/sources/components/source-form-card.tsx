@@ -25,6 +25,7 @@ export function SourceFormCard({
     <div className="max-w-xl rounded-xl border bg-card p-4 shadow-sm">
       {picking ? (
         <ProviderPicker
+          localFsEnabled={false}
           onSelect={(id) => {
             setProvider(id);
             setPicking(false);

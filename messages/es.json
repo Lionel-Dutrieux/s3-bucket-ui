@@ -591,6 +591,7 @@
       "namePlaceholder": "Documentos del equipo",
       "endpointLabel": "Endpoint",
       "accessNote": "Quién puede explorar, editar o eliminar en esta fuente se gestiona por usuario y por grupo desde el área de administración.",
+      "localRootsHint": "La ruta debe ser uno de los directorios permitidos del servidor ({roots}) o una carpeta dentro de uno de ellos.",
       "allowPublicSharesLabel": "Permitir enlaces de compartición pública",
       "allowPublicSharesDescription": "Cuando está desactivado, nadie puede crear enlaces públicos para esta fuente y cualquier enlace existente deja de funcionar hasta que se vuelva a activar.",
       "connectionSuccessful": "Conexión correcta.",

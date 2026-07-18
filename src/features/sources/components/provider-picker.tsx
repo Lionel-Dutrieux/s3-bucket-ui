@@ -18,11 +18,13 @@ import { getProvider } from "@/lib/storage/providers";
  */
 export function ProviderPicker({
   onSelect,
+  localFsEnabled,
 }: {
   onSelect: (providerId: string) => void;
+  localFsEnabled: boolean;
 }) {
   const [query, setQuery] = useState("");
-  const groups = searchProviders(query);
+  const groups = searchProviders(query, { localFsEnabled });
   const t = useTranslations("sources");
 
   return (
