@@ -77,6 +77,7 @@ export function FileBrowser({
   view,
   permissions,
   canShare = true,
+  canDrop = false,
   sharePolicy,
 }: {
   sourceId: string;
@@ -87,6 +88,9 @@ export function FileBrowser({
   permissions: BrowserPermissions;
   /** False when the admin switched public share links off. */
   canShare?: boolean;
+  /** True when the viewer may mint deposit (drop) links: public sharing on for
+   * this source AND the edit capability (depositing is writing). */
+  canDrop?: boolean;
   /** Org-wide share constraints reflected in the share dialog. */
   sharePolicy?: SharePolicy;
 }) {
@@ -202,6 +206,7 @@ export function FileBrowser({
       onPreview: openPreview,
       onShare: canShare ? dialogs.openShare : undefined,
       onShareFolder: canShare ? dialogs.openShareFolder : undefined,
+      onCreateDrop: canDrop ? dialogs.openDropFolder : undefined,
       onDetails: setDetails,
       onDelete: permissions.delete ? dialogs.openDelete : undefined,
       // Rename moves the object (write + delete), so it needs both.
@@ -340,6 +345,15 @@ export function FileBrowser({
               sorting={sorting}
               onSortingChange={handleSortingChange}
               canUpload={permissions.upload}
+              canDrop={canDrop}
+              onCreateDropHere={() =>
+                dialogs.openDropHere(
+                  prefix,
+                  prefix === ""
+                    ? ""
+                    : (prefix.replace(/\/$/, "").split("/").pop() ?? ""),
+                )
+              }
               sourceId={sourceId}
               prefix={prefix}
               onFolderCreated={refresh}
@@ -401,6 +415,7 @@ export function FileBrowser({
                   onPreview={openPreview}
                   onShare={canShare ? dialogs.openShare : undefined}
                   onShareFolder={canShare ? dialogs.openShareFolder : undefined}
+                  onCreateDrop={canDrop ? dialogs.openDropFolder : undefined}
                   onDetails={setDetails}
                   onDelete={permissions.delete ? dialogs.openDelete : undefined}
                   onRename={canRename ? setRenameTarget : undefined}

@@ -275,7 +275,8 @@
       "objectsNotDeleted": "{count, plural, one {# object} other {# objects}} could not be deleted.",
       "folderTooLargeToDelete": "This folder is too large to delete in one go — some objects remain, run it again.",
       "onlyFoldersShareable": "Only folders can be shared this way.",
-      "folderNoLongerExists": "This folder no longer exists."
+      "folderNoLongerExists": "This folder no longer exists.",
+      "invalidDropOptions": "These drop-link options are invalid."
     },
     "filteredEmpty": {
       "title": "No {type} in this folder",
@@ -298,7 +299,8 @@
       "filterPlaceholder": "Filter this folder…",
       "matchCount": "{count, plural, one {# match} other {# matches}}",
       "searchEverywhere": "Search the entire source",
-      "upload": "Upload"
+      "upload": "Upload",
+      "dropLink": "Drop link"
     },
     "columns": {
       "name": "Name",
@@ -405,6 +407,7 @@
       "details": "Details",
       "download": "Download",
       "share": "Share",
+      "createDropLink": "Create drop link",
       "duplicate": "Duplicate",
       "delete": "Delete"
     },
@@ -433,6 +436,27 @@
       "creating": "Creating…",
       "titleFolder": "Share {name}",
       "descriptionFolder": "Anyone with the link can browse and download this folder — no account needed. Manage links from Shared links."
+    },
+    "dropDialog": {
+      "title": "Drop link for {name}",
+      "titleRoot": "Drop link for this source",
+      "description": "Anyone with the link can upload files into this folder — no account needed. They never see what is already there. Manage links from Shared links.",
+      "copyLink": "Copy link",
+      "copiedToast": "Link copied",
+      "copyFailedToast": "Copy failed — select the link and copy it manually.",
+      "expiresLabel": "Expires",
+      "passwordLabel": "Password (optional)",
+      "passwordPlaceholder": "Leave empty for none",
+      "passwordRequiredLabel": "Password (required)",
+      "passwordRequiredPlaceholder": "Set a password for this link",
+      "maxFilesLabel": "Max files (optional)",
+      "maxFilesPlaceholder": "Unlimited",
+      "maxSizeLabel": "Max MB / file",
+      "maxSizePlaceholder": "No limit",
+      "noteLabel": "Note for the guest (optional)",
+      "notePlaceholder": "e.g. Please upload your signed contract",
+      "createLink": "Create link",
+      "creating": "Creating…"
     },
     "copyToDialog": {
       "title": "Copy {count, plural, one {# item} other {# items}} to…",
@@ -907,7 +931,8 @@
       "signInFailed": "Sign-in failed",
       "download": "Downloaded",
       "downloadZip": "Downloaded as ZIP",
-      "shareDownload": "Downloaded via shared link"
+      "shareDownload": "Downloaded via shared link",
+      "dropUpload": "Uploaded via drop link"
     },
     "exportCsv": "Export CSV",
     "exportJson": "Export JSON"
@@ -976,6 +1001,68 @@
       "previousFileTitle": "Previous file (←)",
       "nextFileAria": "Next file: {name}",
       "nextFileTitle": "Next file (→)"
+    }
+  },
+  "drops": {
+    "publicUploader": {
+      "metaTitle": "Upload files",
+      "title": "Upload files",
+      "subtitle": "Add files below. They are sent straight to the owner — you won't see anything already here.",
+      "passwordProtected": "This link is password-protected.",
+      "passwordLabel": "Password",
+      "unlocking": "Unlocking…",
+      "unlock": "Unlock",
+      "dropHint": "Drag and drop files here, or",
+      "chooseFiles": "Choose files",
+      "limitSize": "Up to {max} MB per file",
+      "limitRemaining": "{count, plural, one {# upload left} other {# uploads left}}",
+      "full": "This link has reached its upload limit.",
+      "uploaded": "Uploaded",
+      "uploadError": "Upload failed — try again.",
+      "networkError": "Network error — check your connection and retry.",
+      "tooLargeClient": "Too large — {max} MB max per file.",
+      "dismiss": "Dismiss {name}",
+      "successSummary": "{count, plural, one {# file uploaded} other {# files uploaded}}"
+    },
+    "errors": {
+      "notFound": "This link is unavailable.",
+      "passwordRequired": "This link is password-protected.",
+      "missingBody": "No file was received.",
+      "tooLarge": "File is too large for this link.",
+      "limitReached": "This link has reached its upload limit.",
+      "nameConflict": "Too many files with that name — rename it and retry.",
+      "uploadFailed": "Upload failed — try again."
+    },
+    "management": {
+      "sectionTitle": "Drop links",
+      "sectionDescriptionAdmin": "Every reverse-share link where guests upload files without an account.",
+      "sectionDescriptionUser": "Reverse-share links where guests upload files into your folders without an account.",
+      "root": "Source root",
+      "dropLink": "Drop link",
+      "passwordProtected": "Password-protected",
+      "never": "Never",
+      "copiedToast": "Link copied",
+      "copyFailedToast": "Copy failed — select the link and copy it manually.",
+      "revokedToast": "Link revoked",
+      "emptyTitle": "No drop links yet",
+      "emptyDescription": "Create one from a folder's menu, or the Drop link button in the toolbar.",
+      "copyLinkAria": "Copy link for {name}",
+      "copyLinkTitle": "Copy link",
+      "revokeLinkAria": "Revoke link for {name}",
+      "revokeLinkTitle": "Revoke link",
+      "columns": {
+        "destination": "Destination",
+        "source": "Source",
+        "created": "Created",
+        "expires": "Expires",
+        "deposits": "Deposits",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      }
     }
   },
   "api": {

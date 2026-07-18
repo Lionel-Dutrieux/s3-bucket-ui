@@ -1,7 +1,7 @@
 "use client";
 
 import type { OnChangeFn, SortingState } from "@tanstack/react-table";
-import { Search, Upload } from "lucide-react";
+import { Inbox, Search, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ export function BrowserToolbar({
   sorting,
   onSortingChange,
   canUpload,
+  canDrop = false,
+  onCreateDropHere,
   sourceId,
   prefix,
   onFolderCreated,
@@ -41,6 +43,10 @@ export function BrowserToolbar({
   sorting: SortingState;
   onSortingChange: OnChangeFn<SortingState>;
   canUpload: boolean;
+  /** True when the viewer may mint a deposit link for the current folder. */
+  canDrop?: boolean;
+  /** Opens the drop-link dialog targeting the current folder (or root). */
+  onCreateDropHere?: () => void;
   sourceId: string;
   prefix: string;
   onFolderCreated: () => void;
@@ -104,6 +110,20 @@ export function BrowserToolbar({
           <GridSortMenu sorting={sorting} onSortingChange={onSortingChange} />
         ) : null}
         <ViewToggle view={view} />
+        {canDrop && onCreateDropHere ? (
+          <>
+            <Separator orientation="vertical" className="mx-1 !h-5" />
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8"
+              onClick={onCreateDropHere}
+            >
+              <Inbox aria-hidden />
+              <span className="max-sm:sr-only">{t("dropLink")}</span>
+            </Button>
+          </>
+        ) : null}
         {canUpload ? (
           <>
             <Separator orientation="vertical" className="mx-1 !h-5" />

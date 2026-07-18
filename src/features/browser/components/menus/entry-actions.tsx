@@ -6,6 +6,7 @@ import {
   Eye,
   FolderDown,
   FolderInput,
+  Inbox,
   Info,
   type LucideIcon,
   MoreVertical,
@@ -41,6 +42,8 @@ export interface EntryActionHandlers {
   onShare?: (file: FileEntry) => void;
   /** Share a whole folder as one public link — absent hides the action. */
   onShareFolder?: (folder: FolderEntry) => void;
+  /** Mint a public drop (deposit) link for a folder — absent hides the action. */
+  onCreateDrop?: (folder: FolderEntry) => void;
   onDetails?: (file: FileEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
   onRename?: (entry: BrowserEntry) => void;
@@ -72,6 +75,7 @@ function entryActions(
     onPreview,
     onShare,
     onShareFolder,
+    onCreateDrop,
     onDetails,
     onDelete,
     onRename,
@@ -94,6 +98,14 @@ function entryActions(
         label: t("share"),
         icon: Share2,
         run: () => onShareFolder(entry),
+      });
+    }
+    if (onCreateDrop) {
+      actions.push({
+        key: "drop",
+        label: t("createDropLink"),
+        icon: Inbox,
+        run: () => onCreateDrop(entry),
       });
     }
     if (onMove) {

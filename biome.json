@@ -85,7 +85,8 @@
                       "@/features/admin/**",
                       "@/features/auth/**",
                       "@/features/activity/**",
-                      "@/features/shares/**"
+                      "@/features/shares/**",
+                      "@/features/drops/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/storage/) or src/components/."
                   }
@@ -119,7 +120,8 @@
                       "@/features/admin/**",
                       "@/features/auth/**",
                       "@/features/activity/**",
-                      "@/features/shares/**"
+                      "@/features/shares/**",
+                      "@/features/drops/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/storage/) or src/components/."
                   }
@@ -153,7 +155,8 @@
                       "@/features/sources/**",
                       "@/features/auth/**",
                       "@/features/activity/**",
-                      "@/features/shares/**"
+                      "@/features/shares/**",
+                      "@/features/drops/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
                   }
@@ -187,7 +190,8 @@
                       "@/features/sources/**",
                       "@/features/admin/**",
                       "@/features/activity/**",
-                      "@/features/shares/**"
+                      "@/features/shares/**",
+                      "@/features/drops/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
                   }
@@ -221,7 +225,8 @@
                       "@/features/sources/**",
                       "@/features/admin/**",
                       "@/features/auth/**",
-                      "@/features/shares/**"
+                      "@/features/shares/**",
+                      "@/features/drops/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ or src/components/."
                   }
@@ -255,9 +260,45 @@
                       "@/features/sources/**",
                       "@/features/admin/**",
                       "@/features/auth/**",
-                      "@/features/activity/**"
+                      "@/features/activity/**",
+                      "@/features/drops/**"
                     ],
                     "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/shares/) or src/components/."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/drops/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/generated/prisma/**", "@/lib/prisma"],
+                    "message": "Only the DAL (src/lib/dal/) touches Prisma."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "app/ is the routing layer — nothing imports from it."
+                  },
+                  {
+                    "group": [
+                      "@/features/browser/**",
+                      "@/features/sources/**",
+                      "@/features/admin/**",
+                      "@/features/auth/**",
+                      "@/features/activity/**",
+                      "@/features/shares/**"
+                    ],
+                    "message": "No cross-feature imports. Shared code belongs in src/lib/ (e.g. lib/drops/) or src/components/."
                   }
                 ]
               }

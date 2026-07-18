@@ -27,7 +27,8 @@ export type OperationAction =
   | "share-revoke"
   | "download"
   | "download-zip"
-  | "share-download";
+  | "share-download"
+  | "drop-upload";
 
 export interface OperationRecord {
   id: string;
@@ -52,6 +53,9 @@ export async function recordOperation(input: {
   sourceName: string;
   target: string;
   detail?: string;
+  /** Explicit actor for entries with no session (e.g. a public drop upload,
+   *  logged as "drop:<token>"). Overrides the session email when set. */
+  actor?: string;
 }): Promise<void> {
   try {
     const session = await getSession();
@@ -62,7 +66,7 @@ export async function recordOperation(input: {
         sourceName: input.sourceName,
         target: input.target,
         detail: input.detail,
-        actor: session?.user.email ?? null,
+        actor: input.actor ?? session?.user.email ?? null,
         userId: session?.user.id ?? null,
       },
     });

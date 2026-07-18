@@ -31,20 +31,20 @@ interface WriteGuard {
  * error logging. The callback receives the decrypted source and a ready
  * storage client, and owns the write and its audit-log entry.
  */
-export async function withWriteAccess(
+export async function withWriteAccess<T = undefined>(
   sourceId: string,
   guard: WriteGuard,
-  run: (ctx: WriteContext) => Promise<ActionResult>,
-): Promise<ActionResult> {
+  run: (ctx: WriteContext) => Promise<ActionResult<T>>,
+): Promise<ActionResult<T>> {
   const t = await getTranslations("browser.errors");
   const result = await requireSourceAccess(sourceId);
-  if (!result) return actionError(t("sourceNotFound"));
+  if (!result) return actionError<T>(t("sourceNotFound"));
   const { source, access } = result;
   if (guard.need.edit && !access.canEdit) {
-    return actionError(guard.denied);
+    return actionError<T>(guard.denied);
   }
   if (guard.need.delete && !access.canDelete) {
-    return actionError(guard.denied);
+    return actionError<T>(guard.denied);
   }
 
   try {
@@ -54,6 +54,6 @@ export async function withWriteAccess(
       `[browser] ${guard.action} failed (source=${source.id}, provider=${source.provider}):`,
       error,
     );
-    return actionError(guard.failureMessage ?? t("actionFailed"));
+    return actionError<T>(guard.failureMessage ?? t("actionFailed"));
   }
 }

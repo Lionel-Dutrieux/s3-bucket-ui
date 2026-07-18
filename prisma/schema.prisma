@@ -22,8 +22,9 @@ model Source {
   allowPublicShares Boolean @default(true) @map("allow_public_shares")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  grants SourcePermission[]
-  shares Share[]
+  grants    SourcePermission[]
+  shares    Share[]
+  dropLinks DropLink[]
 
   @@map("sources")
 }
@@ -230,4 +231,38 @@ model Share {
   @@index([sourceId])
   @@index([createdById])
   @@map("shares")
+}
+
+/// Public reverse-share ("drop") link — the app-minted token (the row id) is
+/// the capability: anyone holding the URL may DEPOSIT files into `prefix`
+/// without an account, but never see what is already there. Expiry, revocation
+/// and an optional password gate it, exactly like Share. `maxFiles` caps how
+/// many objects may ever be dropped (enforced race-free with a conditional
+/// updateMany, mirroring Share.maxDownloads) and `maxSizeMb` the size of each.
+/// Deleting a source cascades and kills its links; createdById has no FK so
+/// links survive account deletion (mirrors Operation.userId / Share).
+model DropLink {
+  id           String    @id
+  sourceId     String    @map("source_id") @db.Uuid
+  /// Destination prefix — "" is the bucket root, otherwise ends with "/".
+  prefix       String
+  createdById  String    @map("created_by_id")
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz(3)
+  passwordHash String?   @map("password_hash")
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
+  /// Cap on the number of deposits — null means unlimited. Enforced race-free
+  /// with a conditional updateMany (uploadsCount < maxFiles).
+  maxFiles     Int?      @map("max_files")
+  /// Per-file size cap in mebibytes — null means only the global upload ceiling.
+  maxSizeMb    Int?      @map("max_size_mb")
+  /// Free-text instruction shown to the guest on the deposit page.
+  note         String?
+  uploadsCount Int       @default(0) @map("uploads_count")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+  @@index([createdById])
+  @@map("drop_links")
 }

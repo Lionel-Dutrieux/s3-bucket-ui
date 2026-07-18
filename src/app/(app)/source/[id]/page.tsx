@@ -60,6 +60,9 @@ export default async function SourcePage({
     getSharePolicy(),
   ]);
   const canShare = sharingEnabled && source.allowPublicShares;
+  // Depositing into a drop link is a write, so minting one needs the edit
+  // capability on top of public sharing being on for this source.
+  const canDrop = canShare && access.canEdit;
 
   const listing = await listFolder(source, prefix, cursor);
   // An active type filter hides folders and keeps only matching files.
@@ -114,6 +117,7 @@ export default async function SourcePage({
                 delete: access.canDelete,
               }}
               canShare={canShare}
+              canDrop={canDrop}
               sharePolicy={sharePolicy}
             />
             {listing.nextCursor ? (

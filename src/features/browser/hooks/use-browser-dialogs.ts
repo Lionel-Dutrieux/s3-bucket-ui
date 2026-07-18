@@ -14,11 +14,20 @@ export type ShareTarget = {
   name: string;
 };
 
+/** What a drop-link dialog is minting a deposit link for: a folder prefix (or
+ * the bucket root). `prefix` is "" at the root, else ends in "/". */
+export type DropTarget = {
+  prefix: string;
+  name: string;
+  isRoot: boolean;
+};
+
 /** The browser's overlays are mutually exclusive — one union instead of one
  * open-state per dialog. The details panel and the inline rename are not in
  * here: they coexist with these dialogs. */
 export type BrowserDialog =
   | { kind: "share"; target: ShareTarget }
+  | { kind: "drop"; target: DropTarget }
   | { kind: "delete"; entry: BrowserEntry }
   | { kind: "bulk-delete" }
   | { kind: "search" }
@@ -46,6 +55,22 @@ export function useBrowserDialogs() {
         setDialog({
           kind: "share",
           target: { kind: "prefix", key: folder.prefix, name: folder.name },
+        }),
+      [],
+    ),
+    openDropFolder: useCallback(
+      (folder: FolderEntry) =>
+        setDialog({
+          kind: "drop",
+          target: { prefix: folder.prefix, name: folder.name, isRoot: false },
+        }),
+      [],
+    ),
+    openDropHere: useCallback(
+      (prefix: string, name: string) =>
+        setDialog({
+          kind: "drop",
+          target: { prefix, name, isRoot: prefix === "" },
         }),
       [],
     ),

@@ -29,6 +29,8 @@ declare module "@tanstack/react-table" {
     onShare?: (file: FileEntry) => void;
     /** Share a whole folder — absent when sharing is off. */
     onShareFolder?: (folder: FolderEntry) => void;
+    /** Mint a deposit link for a folder — absent when drop links are off. */
+    onCreateDrop?: (folder: FolderEntry) => void;
     onDetails: (file: FileEntry) => void;
     /** Only set when the source allows deletions — absent hides the action.
      * Folders delete recursively (every object under the prefix). */

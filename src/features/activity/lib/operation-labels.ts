@@ -5,6 +5,7 @@ import {
   FileArchive,
   FolderInput,
   FolderPlus,
+  Inbox,
   Link2,
   Link2Off,
   type LucideIcon,
@@ -33,7 +34,8 @@ export type OperationLabelKey =
   | "signInFailed"
   | "download"
   | "downloadZip"
-  | "shareDownload";
+  | "shareDownload"
+  | "dropUpload";
 
 // Presentation for each audited action. `destructive` tints the icon so a
 // delete reads differently from an upload at a glance. `labelKey` resolves
@@ -72,6 +74,7 @@ const LABELS: Record<string, OperationLabel> = {
   download: { labelKey: "download", icon: Download },
   "download-zip": { labelKey: "downloadZip", icon: FileArchive },
   "share-download": { labelKey: "shareDownload", icon: Link2 },
+  "drop-upload": { labelKey: "dropUpload", icon: Inbox },
 };
 
 /**

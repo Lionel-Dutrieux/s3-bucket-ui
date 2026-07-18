@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { CopyToDialog } from "@/features/browser/components/dialogs/copy-to-dialog";
+import { DropLinkDialog } from "@/features/browser/components/dialogs/drop-link-dialog";
 import { MoveDialog } from "@/features/browser/components/dialogs/move-dialog";
 import { MoveToDialog } from "@/features/browser/components/dialogs/move-to-dialog";
 import { PreviewDialog } from "@/features/browser/components/dialogs/preview-dialog";
@@ -72,6 +73,14 @@ export function BrowserDialogs({
       <ShareDialog
         sourceId={sourceId}
         target={dialogs.dialog?.kind === "share" ? dialogs.dialog.target : null}
+        policy={sharePolicy}
+        onOpenChange={(open) => {
+          if (!open) dialogs.close();
+        }}
+      />
+      <DropLinkDialog
+        sourceId={sourceId}
+        target={dialogs.dialog?.kind === "drop" ? dialogs.dialog.target : null}
         policy={sharePolicy}
         onOpenChange={(open) => {
           if (!open) dialogs.close();

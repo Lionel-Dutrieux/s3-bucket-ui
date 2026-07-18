@@ -275,7 +275,8 @@
       "objectsNotDeleted": "{count, plural, one {# objet n'a pas pu être supprimé} other {# objets n'ont pas pu être supprimés}}.",
       "folderTooLargeToDelete": "Ce dossier est trop volumineux pour être supprimé en une fois — des objets restent, relancez l'opération.",
       "onlyFoldersShareable": "Seuls les dossiers peuvent être partagés ainsi.",
-      "folderNoLongerExists": "Ce dossier n'existe plus."
+      "folderNoLongerExists": "Ce dossier n'existe plus.",
+      "invalidDropOptions": "Options de lien de dépôt invalides."
     },
     "filteredEmpty": {
       "title": "Aucun élément « {type} » dans ce dossier",
@@ -298,7 +299,8 @@
       "filterPlaceholder": "Filtrer ce dossier…",
       "matchCount": "{count, plural, one {# résultat} other {# résultats}}",
       "searchEverywhere": "Chercher dans toute la source",
-      "upload": "Importer"
+      "upload": "Importer",
+      "dropLink": "Lien de dépôt"
     },
     "columns": {
       "name": "Nom",
@@ -405,6 +407,7 @@
       "details": "Détails",
       "download": "Télécharger",
       "share": "Partager",
+      "createDropLink": "Créer un lien de dépôt",
       "duplicate": "Dupliquer",
       "delete": "Supprimer"
     },
@@ -433,6 +436,27 @@
       "creating": "Création…",
       "titleFolder": "Partager {name}",
       "descriptionFolder": "Toute personne disposant du lien peut parcourir et télécharger ce dossier — aucun compte n'est nécessaire. Gérez les liens depuis Liens partagés."
+    },
+    "dropDialog": {
+      "title": "Lien de dépôt pour {name}",
+      "titleRoot": "Lien de dépôt pour cette source",
+      "description": "Toute personne disposant du lien peut y déposer des fichiers — aucun compte n'est nécessaire. Elle ne voit jamais ce qui s'y trouve déjà. Gérez les liens depuis Liens partagés.",
+      "copyLink": "Copier le lien",
+      "copiedToast": "Lien copié",
+      "copyFailedToast": "Échec de la copie — sélectionnez le lien et copiez-le manuellement.",
+      "expiresLabel": "Expire",
+      "passwordLabel": "Mot de passe (optionnel)",
+      "passwordPlaceholder": "Laisser vide pour aucun",
+      "passwordRequiredLabel": "Mot de passe (obligatoire)",
+      "passwordRequiredPlaceholder": "Définissez un mot de passe pour ce lien",
+      "maxFilesLabel": "Fichiers max (optionnel)",
+      "maxFilesPlaceholder": "Illimité",
+      "maxSizeLabel": "Mo max / fichier",
+      "maxSizePlaceholder": "Sans limite",
+      "noteLabel": "Note pour l'invité (optionnel)",
+      "notePlaceholder": "ex. Merci de déposer votre contrat signé",
+      "createLink": "Créer le lien",
+      "creating": "Création…"
     },
     "copyToDialog": {
       "title": "Copier {count, plural, one {# élément} other {# éléments}} vers…",
@@ -907,7 +931,8 @@
       "signInFailed": "Échec de connexion",
       "download": "Téléchargé",
       "downloadZip": "Téléchargé en ZIP",
-      "shareDownload": "Téléchargé via un lien de partage"
+      "shareDownload": "Téléchargé via un lien de partage",
+      "dropUpload": "Déposé via un lien de dépôt"
     },
     "exportCsv": "Exporter en CSV",
     "exportJson": "Exporter en JSON"
@@ -976,6 +1001,68 @@
       "previousFileTitle": "Fichier précédent (←)",
       "nextFileAria": "Fichier suivant : {name}",
       "nextFileTitle": "Fichier suivant (→)"
+    }
+  },
+  "drops": {
+    "publicUploader": {
+      "metaTitle": "Déposer des fichiers",
+      "title": "Déposer des fichiers",
+      "subtitle": "Ajoutez vos fichiers ci-dessous. Ils sont envoyés directement au propriétaire — vous ne voyez rien de ce qui s'y trouve déjà.",
+      "passwordProtected": "Ce lien est protégé par mot de passe.",
+      "passwordLabel": "Mot de passe",
+      "unlocking": "Déverrouillage…",
+      "unlock": "Déverrouiller",
+      "dropHint": "Glissez-déposez vos fichiers ici, ou",
+      "chooseFiles": "Choisir des fichiers",
+      "limitSize": "Jusqu'à {max} Mo par fichier",
+      "limitRemaining": "{count, plural, one {# dépôt restant} other {# dépôts restants}}",
+      "full": "Ce lien a atteint sa limite de dépôts.",
+      "uploaded": "Déposé",
+      "uploadError": "Échec du dépôt — réessayez.",
+      "networkError": "Erreur réseau — vérifiez votre connexion et réessayez.",
+      "tooLargeClient": "Trop volumineux — {max} Mo max par fichier.",
+      "dismiss": "Ignorer {name}",
+      "successSummary": "{count, plural, one {# fichier déposé} other {# fichiers déposés}}"
+    },
+    "errors": {
+      "notFound": "Ce lien n'est pas disponible.",
+      "passwordRequired": "Ce lien est protégé par mot de passe.",
+      "missingBody": "Aucun fichier n'a été reçu.",
+      "tooLarge": "Fichier trop volumineux pour ce lien.",
+      "limitReached": "Ce lien a atteint sa limite de dépôts.",
+      "nameConflict": "Trop de fichiers portent ce nom — renommez-le et réessayez.",
+      "uploadFailed": "Échec du dépôt — réessayez."
+    },
+    "management": {
+      "sectionTitle": "Liens de dépôt",
+      "sectionDescriptionAdmin": "Tous les liens de dépôt inversé où des invités déposent des fichiers sans compte.",
+      "sectionDescriptionUser": "Liens de dépôt inversé où des invités déposent des fichiers dans vos dossiers sans compte.",
+      "root": "Racine de la source",
+      "dropLink": "Lien de dépôt",
+      "passwordProtected": "Protégé par mot de passe",
+      "never": "Jamais",
+      "copiedToast": "Lien copié",
+      "copyFailedToast": "Échec de la copie — sélectionnez le lien et copiez-le manuellement.",
+      "revokedToast": "Lien révoqué",
+      "emptyTitle": "Aucun lien de dépôt",
+      "emptyDescription": "Créez-en un depuis le menu d'un dossier, ou le bouton Lien de dépôt de la barre d'outils.",
+      "copyLinkAria": "Copier le lien pour {name}",
+      "copyLinkTitle": "Copier le lien",
+      "revokeLinkAria": "Révoquer le lien pour {name}",
+      "revokeLinkTitle": "Révoquer le lien",
+      "columns": {
+        "destination": "Destination",
+        "source": "Source",
+        "created": "Créé",
+        "expires": "Expire",
+        "deposits": "Dépôts",
+        "status": "Statut"
+      },
+      "status": {
+        "active": "Actif",
+        "expired": "Expiré",
+        "revoked": "Révoqué"
+      }
     }
   },
   "api": {
