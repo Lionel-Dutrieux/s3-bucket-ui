@@ -421,6 +421,8 @@
       "expiresLabel": "Expire",
       "passwordLabel": "Mot de passe (optionnel)",
       "passwordPlaceholder": "Laisser vide pour aucun",
+      "maxDownloadsLabel": "Nombre max de téléchargements (optionnel)",
+      "maxDownloadsPlaceholder": "Laisser vide pour illimité",
       "createLink": "Créer le lien",
       "creating": "Création…"
     },
@@ -904,6 +906,7 @@
     "revokedToast": "Lien révoqué",
     "passwordProtected": "protégé par mot de passe",
     "never": "Jamais",
+    "downloadsOfMax": "{count} téléchargements sur {max} utilisés",
     "columns": {
       "file": "Fichier",
       "source": "Source",
@@ -915,6 +918,7 @@
     "status": {
       "active": "Actif",
       "expired": "Expiré",
+      "exhausted": "Épuisé",
       "revoked": "Révoqué"
     },
     "copyLinkAria": "Copier le lien vers {name}",

@@ -214,6 +214,9 @@ model Share {
   passwordHash String?   @map("password_hash")
   revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
   downloads    Int       @default(0)
+  /// Download cap — null means unlimited. Enforced race-free with a conditional
+  /// updateMany (downloads < maxDownloads); an exhausted link reads as expired.
+  maxDownloads Int?      @map("max_downloads")
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)

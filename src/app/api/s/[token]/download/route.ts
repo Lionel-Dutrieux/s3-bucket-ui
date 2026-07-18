@@ -50,7 +50,12 @@ export async function GET(
   // Count real downloads once — not the landing page's inline preview, and
   // not every Range request a seeking <video> fires.
   if (!inline && !request.headers.get("range")) {
-    await countShareDownload(share.id);
+    // Atomic + conditional: a link that just hit its cap on a concurrent
+    // request counts as expired here (uniform 404), never over-serving.
+    if (!(await countShareDownload(share.id))) {
+      const t = await getTranslations("shares.errors");
+      return apiError(404, t("notFound"));
+    }
     await recordOperation({
       action: "share-download",
       sourceId: source.id,

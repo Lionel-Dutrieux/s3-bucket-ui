@@ -25,6 +25,13 @@ import { SHARE_EXPIRY_OPTIONS, type ShareExpiry } from "@/lib/shares/expiry";
 const shareSchema = z.object({
   expiresIn: z.enum(["1d", "7d", "30d", "never"]),
   password: z.string().max(128),
+  // Kept as a string (the input value); empty means unlimited. Validated as an
+  // optional whole number ≥ 1 — zod messages are out of i18n scope by design.
+  maxDownloads: z
+    .string()
+    .refine((value) => value.trim() === "" || /^[1-9]\d*$/.test(value.trim()), {
+      message: "Enter a whole number of 1 or more, or leave it empty.",
+    }),
 });
 
 export function ShareDialog({
@@ -42,13 +49,19 @@ export function ShareDialog({
   const [copied, setCopied] = useState(false);
 
   const form = useAppForm({
-    defaultValues: { expiresIn: "7d" as ShareExpiry, password: "" },
+    defaultValues: {
+      expiresIn: "7d" as ShareExpiry,
+      password: "",
+      maxDownloads: "",
+    },
     validators: { onChange: shareSchema },
     onSubmit: async ({ value }) => {
       if (!file) return;
+      const trimmedMax = value.maxDownloads.trim();
       const result = await createShareLink(sourceId, file.key, {
         expiresIn: value.expiresIn,
         password: value.password.trim() || undefined,
+        maxDownloads: trimmedMax ? Number(trimmedMax) : undefined,
       });
       if (!result.ok) {
         toast.error(result.error);
@@ -120,6 +133,16 @@ export function ShareDialog({
                   type="password"
                   autoComplete="off"
                   placeholder={t("passwordPlaceholder")}
+                />
+              )}
+            </form.AppField>
+            <form.AppField name="maxDownloads">
+              {(field) => (
+                <field.TextField
+                  label={t("maxDownloadsLabel")}
+                  type="number"
+                  autoComplete="off"
+                  placeholder={t("maxDownloadsPlaceholder")}
                 />
               )}
             </form.AppField>

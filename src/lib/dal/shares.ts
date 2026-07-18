@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { isShareLive } from "@/lib/shares/validity";
 
 export interface ShareInput {
   /** The public token (generateShareToken()). */
@@ -9,6 +10,8 @@ export interface ShareInput {
   createdById: string;
   expiresAt: Date | null;
   passwordHash: string | null;
+  /** Download cap — null means unlimited. */
+  maxDownloads: number | null;
 }
 
 export async function createShare(input: ShareInput): Promise<void> {
@@ -22,8 +25,7 @@ export async function createShare(input: ShareInput): Promise<void> {
 export async function getActiveShare(token: string) {
   const share = await prisma.share.findUnique({ where: { id: token } });
   if (!share) return null;
-  if (share.revokedAt) return null;
-  if (share.expiresAt && share.expiresAt.getTime() <= Date.now()) return null;
+  if (!isShareLive(share, new Date())) return null;
   return share;
 }
 
@@ -54,9 +56,22 @@ export async function revokeShare(id: string): Promise<void> {
   });
 }
 
-export async function countShareDownload(id: string): Promise<void> {
-  await prisma.share.update({
-    where: { id },
+/**
+ * Atomically records one download. Race-free: the conditional updateMany only
+ * increments while the link is under its cap (or uncapped), so two simultaneous
+ * downloads can never push past the limit. Returns false when the cap was
+ * already reached — the caller then answers 404, same as an expired link.
+ */
+export async function countShareDownload(id: string): Promise<boolean> {
+  const { count } = await prisma.share.updateMany({
+    where: {
+      id,
+      OR: [
+        { maxDownloads: null },
+        { downloads: { lt: prisma.share.fields.maxDownloads } },
+      ],
+    },
     data: { downloads: { increment: 1 } },
   });
+  return count > 0;
 }

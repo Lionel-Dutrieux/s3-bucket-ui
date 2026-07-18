@@ -28,23 +28,31 @@ export interface ShareRow {
   expiresAt: number | null;
   revoked: boolean;
   downloads: number;
+  maxDownloads: number | null;
   hasPassword: boolean;
 }
 
-function statusOf(share: ShareRow): "active" | "expired" | "revoked" {
+function statusOf(
+  share: ShareRow,
+): "active" | "expired" | "exhausted" | "revoked" {
   if (share.revoked) return "revoked";
   if (share.expiresAt !== null && share.expiresAt <= Date.now()) {
     return "expired";
   }
+  if (share.maxDownloads !== null && share.downloads >= share.maxDownloads) {
+    return "exhausted";
+  }
   return "active";
 }
 
-// A live link reads green, a lapsed one grey, a killed one red — the status
-// is scannable without reading the words.
+// A live link reads green, a lapsed one grey, an exhausted one amber, a killed
+// one red — the status is scannable without reading the words.
 const STATUS_BADGE: Record<ReturnType<typeof statusOf>, string> = {
   active:
     "border-transparent bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
   expired: "border-transparent bg-muted text-muted-foreground",
+  exhausted:
+    "border-transparent bg-amber-500/15 text-amber-700 dark:text-amber-400",
   revoked: "",
 };
 
@@ -141,7 +149,23 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                   )}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {share.downloads}
+                  {share.maxDownloads === null ? (
+                    share.downloads
+                  ) : (
+                    <span
+                      className={
+                        status === "exhausted"
+                          ? "font-medium text-amber-700 dark:text-amber-400"
+                          : undefined
+                      }
+                      title={t("downloadsOfMax", {
+                        count: share.downloads,
+                        max: share.maxDownloads,
+                      })}
+                    >
+                      {share.downloads} / {share.maxDownloads}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge

@@ -17,6 +17,8 @@ const shareOptionsSchema = z.object({
   expiresIn: z.enum(["1d", "7d", "30d", "never"]),
   // Trimmed; empty means "no password".
   password: z.string().trim().max(128).optional(),
+  // Download cap — omitted means unlimited.
+  maxDownloads: z.number().int().min(1).optional(),
 });
 
 /**
@@ -27,7 +29,7 @@ const shareOptionsSchema = z.object({
 export async function createShareLink(
   sourceId: string,
   key: string,
-  options: { expiresIn: ShareExpiry; password?: string },
+  options: { expiresIn: ShareExpiry; password?: string; maxDownloads?: number },
 ): Promise<ActionResult<{ token: string }>> {
   const t = await getTranslations("browser.errors");
   const parsed = shareOptionsSchema.safeParse(options);
@@ -62,6 +64,7 @@ export async function createShareLink(
     createdById: session.user.id,
     expiresAt,
     passwordHash: password ? hashSharePassword(password) : null,
+    maxDownloads: parsed.data.maxDownloads ?? null,
   });
   await recordOperation({
     action: "share-create",

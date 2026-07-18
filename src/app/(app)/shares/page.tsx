@@ -26,6 +26,7 @@ export default async function SharesPage() {
     expiresAt: share.expiresAt?.getTime() ?? null,
     revoked: share.revokedAt !== null,
     downloads: share.downloads,
+    maxDownloads: share.maxDownloads,
     hasPassword: share.passwordHash !== null,
   }));
   const isAdminViewer = session.user.role === "admin";
