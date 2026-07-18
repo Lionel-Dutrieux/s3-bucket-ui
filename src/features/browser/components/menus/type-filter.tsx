@@ -46,6 +46,7 @@ export function TypeFilter() {
         <Button
           variant="ghost"
           size="sm"
+          title={activeLabel ?? t("type")}
           className={cn(
             "h-7 gap-1.5 px-2 text-xs",
             active
@@ -54,7 +55,9 @@ export function TypeFilter() {
           )}
         >
           <ListFilter className="size-3.5" aria-hidden />
-          {activeLabel ?? t("type")}
+          {/* Icon-only on phones; the active state stays readable through
+              the bg-muted highlight. */}
+          <span className="max-sm:sr-only">{activeLabel ?? t("type")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

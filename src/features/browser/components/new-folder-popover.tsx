@@ -61,9 +61,14 @@ export function NewFolderPopover({
       }}
     >
       <PopoverTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8">
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8"
+          title={t("trigger")}
+        >
           <FolderPlus aria-hidden />
-          {t("trigger")}
+          <span className="max-sm:sr-only">{t("trigger")}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-72">

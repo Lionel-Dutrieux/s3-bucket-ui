@@ -37,9 +37,11 @@ export function GridSortMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8">
+        <Button variant="outline" size="sm" className="h-8" title={t("sort")}>
           <ArrowDownUp aria-hidden />
-          {activeLabel ? t("sortColumn", { column: activeLabel }) : t("sort")}
+          <span className="max-sm:sr-only">
+            {activeLabel ? t("sortColumn", { column: activeLabel }) : t("sort")}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">

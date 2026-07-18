@@ -52,10 +52,12 @@ export function BrowserToolbar({
   const t = useTranslations("browser.toolbar");
 
   return (
-    <div className="flex items-center gap-3">
+    // Wraps on narrow screens: the input takes the full first line, the
+    // controls regroup on a second one instead of crushing each other.
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
       {hasEntries ? (
         <>
-          <div className="relative w-full max-w-xs">
+          <div className="relative w-full max-w-xs max-sm:max-w-none">
             <Search
               className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
@@ -128,7 +130,7 @@ export function BrowserToolbar({
               onClick={() => fileInput.current?.click()}
             >
               <Upload aria-hidden />
-              {t("upload")}
+              <span className="max-sm:sr-only">{t("upload")}</span>
             </Button>
           </>
         ) : null}
