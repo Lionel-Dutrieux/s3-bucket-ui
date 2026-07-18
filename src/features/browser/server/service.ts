@@ -6,6 +6,7 @@ import {
 } from "@/features/browser/lib/listing";
 import type { Source } from "@/lib/dal/sources";
 import { getFilesClient } from "@/lib/storage/client";
+import { usesKeepFileMarkers } from "@/lib/storage/providers";
 
 export type ListErrorReason =
   | "credentials"
@@ -93,7 +94,12 @@ export async function listFolder(
       cursor,
       limit: PAGE_SIZE,
     });
-    return { ok: true, ...partitionListing(result, prefix) };
+    return {
+      ok: true,
+      ...partitionListing(result, prefix, {
+        hideKeepMarkers: usesKeepFileMarkers(source.provider),
+      }),
+    };
   } catch (error) {
     console.error(
       `[browser] listing failed (source=${source.id}, provider=${source.provider}, prefix="${prefix}"):`,

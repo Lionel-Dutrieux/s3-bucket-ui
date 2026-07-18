@@ -9,6 +9,7 @@ import {
   Database,
   Droplets,
   Flame,
+  FolderOpen,
   Globe,
   HardDrive,
   type LucideIcon,
@@ -48,6 +49,7 @@ const PROVIDER_ICONS: Record<string, LucideIcon> = {
   sftp: SquareTerminal,
   ftp: Cable,
   webdav: Cloudy,
+  local: FolderOpen,
 };
 
 export function providerIcon(providerId: string): LucideIcon {

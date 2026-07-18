@@ -591,6 +591,8 @@
       "namePlaceholder": "Documents d'équipe",
       "endpointLabel": "Point de terminaison",
       "accessNote": "Qui peut parcourir, modifier ou supprimer sur cette source se gère par utilisateur et par groupe depuis l'administration.",
+      "localRootsHint": "Les dossiers proposés ici sont définis par l'opérateur du serveur (LOCAL_FS_ROOTS).",
+      "localRootPlaceholder": "Choisir un dossier",
       "allowPublicSharesLabel": "Autoriser les liens de partage publics",
       "allowPublicSharesDescription": "Une fois désactivé, plus personne ne peut créer de liens publics pour cette source et tout lien existant cesse de fonctionner jusqu'à réactivation.",
       "connectionSuccessful": "Connexion réussie.",
@@ -639,7 +641,10 @@
       "invalidSource": "Source invalide.",
       "sameSourceDestination": "Choisissez une source différente comme destination.",
       "migrationFailed": "Échec de la migration — vérifiez la connectivité des deux sources et réessayez.",
-      "removeFailed": "Impossible de supprimer cette source."
+      "removeFailed": "Impossible de supprimer cette source.",
+      "localDisabled": "Les sources de type dossier local sont désactivées — définissez LOCAL_FS_ROOTS sur le serveur pour les activer.",
+      "localRootNotAllowed": "Ce chemin ne fait pas partie des dossiers autorisés (LOCAL_FS_ROOTS).",
+      "localRootUnreachable": "Ce dossier n'existe pas ou n'est pas lisible sur le serveur."
     }
   },
   "admin": {

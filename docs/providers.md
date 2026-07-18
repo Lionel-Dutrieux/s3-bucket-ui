@@ -38,6 +38,23 @@ again when the source is saved.
 > walk the directory tree per request, so very large trees browse slower
 > than an object store.
 
+## Local folders
+
+| Provider | Credentials | Root path |
+|---|---|---|
+| **Local folder** | None | Picked from the `LOCAL_FS_ROOTS` allowlist — the card only appears when the operator sets that variable |
+
+The server operator decides what is exposable: set
+`LOCAL_FS_ROOTS=/data,/srv/media` (comma-separated, container-side paths for
+Docker) and each "Local folder" source exposes exactly one of those
+directories. Files are stored as plain files — no sidecar or metadata files —
+so other tools can read and write the same directory; files they drop in show
+up in the app with previews. Content types derive from file extensions.
+Deleting or moving the last file of a folder also removes the emptied
+directory on disk. Like protocol sources, local folders stream through the
+app (no presigned URLs, no **Copy link**), and an empty folder created
+through the app is materialized by a hidden `.keep` file.
+
 ## Adding a new provider
 
 Providers live in `src/lib/storage/providers.ts` — an S3-compatible provider

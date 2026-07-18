@@ -7,7 +7,7 @@
 export interface ProviderDefinition {
   id: string;
   label: string;
-  adapter: "s3" | "azure" | "sftp" | "ftp" | "webdav";
+  adapter: "s3" | "azure" | "sftp" | "ftp" | "webdav" | "fs";
   /**
    * Region used to sign S3 requests. "from-endpoint" extracts it from the
    * endpoint hostname (AWS, Wasabi, Backblaze, DigitalOcean encode it there).
@@ -292,10 +292,40 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
       "https://cloud.example.com/remote.php/dav/files/<user>",
     fieldLabels: SYSTEM_FIELD_LABELS,
   },
+  {
+    // Server filesystem folder (Docker volume, mounted share). No endpoint,
+    // no credentials — "bucket" holds the root path, which the source
+    // actions validate against the LOCAL_FS_ROOTS allowlist (server-only,
+    // lib/storage/local-roots.ts). Hidden from the picker when unset.
+    id: "local",
+    label: "Local folder",
+    adapter: "fs",
+    endpointPlaceholder: "",
+    fieldLabels: {
+      bucket: "Root path",
+      accessKeyId: "Username",
+      secretAccessKey: "Password",
+    },
+  },
 ];
 
 export function getProvider(id: string): ProviderDefinition | undefined {
   return PROVIDERS.find((provider) => provider.id === id);
+}
+
+/** Marker file that materializes an empty folder on keep-file providers. */
+export const KEEP_FILE_NAME = ".keep";
+
+/**
+ * Object stores represent an empty folder as a zero-byte `prefix/` marker
+ * object. Filesystem-backed adapters (fs, sftp, ftp, webdav) cannot store a
+ * key ending in "/" — the fs adapter would write a plain file named like the
+ * folder, which then blocks every upload under it — so they get a real
+ * `.keep` file inside the directory instead (hidden from listings).
+ */
+export function usesKeepFileMarkers(providerId: string): boolean {
+  const adapter = getProvider(providerId)?.adapter ?? "s3";
+  return adapter !== "s3" && adapter !== "azure";
 }
 
 export type EndpointCheck =
@@ -307,12 +337,17 @@ export type EndpointCheck =
  * family. HTTP object stores normalize to the origin; WebDAV keeps its path
  * (endpoints live under one, e.g. /remote.php/dav/files/<user>); SFTP/FTP
  * reduce to scheme + host[:port] — `URL.origin` is "null" for non-special
- * schemes, hence the manual rebuild.
+ * schemes, hence the manual rebuild. Local (fs) sources have no endpoint at
+ * all, so whatever was typed is discarded before any URL parsing.
  */
 export function normalizeEndpoint(
   providerId: string,
   raw: string,
 ): EndpointCheck {
+  const adapter = getProvider(providerId)?.adapter ?? "s3";
+  // Local sources have no endpoint; whatever was typed is discarded.
+  if (adapter === "fs") return { ok: true, value: "" };
+
   let url: URL;
   try {
     url = new URL(raw);
@@ -321,7 +356,7 @@ export function normalizeEndpoint(
   }
 
   const hostPort = `${url.hostname}${url.port ? `:${url.port}` : ""}`;
-  switch (getProvider(providerId)?.adapter ?? "s3") {
+  switch (adapter) {
     case "webdav": {
       if (url.protocol !== "https:" && url.protocol !== "http:") {
         return { ok: false, message: "Must be an http(s):// URL." };

@@ -22,6 +22,8 @@ import {
   updateSource as dalUpdateSource,
   type SourceInput,
 } from "@/lib/dal/sources";
+import { checkLocalRoot } from "@/lib/storage/local-roots";
+import { getProvider } from "@/lib/storage/providers";
 
 type SourceErrorsT = Awaited<ReturnType<typeof getTranslations>>;
 
@@ -50,6 +52,29 @@ async function resolveUpdateInput(
   };
 }
 
+/**
+ * Local (fs) sources only: re-validates the root path against the
+ * LOCAL_FS_ROOTS allowlist and swaps in its canonical realpath — the client
+ * never gets to pick an arbitrary server directory. Other providers pass
+ * through untouched.
+ */
+async function guardLocalSource(
+  data: SourceInput,
+  t: SourceErrorsT,
+): Promise<{ data?: SourceInput; error?: string }> {
+  if (getProvider(data.provider)?.adapter !== "fs") return { data };
+  const check = await checkLocalRoot(data.bucket);
+  if (!check.ok) {
+    const messages = {
+      disabled: t("localDisabled"),
+      outside: t("localRootNotAllowed"),
+      unreachable: t("localRootUnreachable"),
+    } as const;
+    return { error: messages[check.reason] };
+  }
+  return { data: { ...data, bucket: check.value } };
+}
+
 export async function testSourceConnection(
   input: SourceFormValues,
   sourceId?: string,
@@ -72,7 +97,10 @@ export async function testSourceConnection(
     data = parsed.data;
   }
 
-  return (await testConnection(data))
+  const guarded = await guardLocalSource(data, t);
+  if (!guarded.data) return actionError(guarded.error ?? t("invalidInput"));
+
+  return (await testConnection(guarded.data))
     ? actionOk()
     : actionError(t("connectionFailed"));
 }
@@ -88,11 +116,14 @@ export async function createSource(
     return actionError(parsed.error.issues[0]?.message ?? t("invalidInput"));
   }
 
-  if (!(await testConnection(parsed.data))) {
+  const guarded = await guardLocalSource(parsed.data, t);
+  if (!guarded.data) return actionError(guarded.error ?? t("invalidInput"));
+
+  if (!(await testConnection(guarded.data))) {
     return actionError(t("connectionFailed"));
   }
 
-  await dalCreateSource(parsed.data);
+  await dalCreateSource(guarded.data);
   revalidatePath("/", "layout");
   return actionOk();
 }
@@ -107,11 +138,14 @@ export async function updateSource(
   const resolved = await resolveUpdateInput(sourceId, input, t);
   if (!resolved.data) return actionError(resolved.error ?? t("invalidInput"));
 
-  if (!(await testConnection(resolved.data))) {
+  const guarded = await guardLocalSource(resolved.data, t);
+  if (!guarded.data) return actionError(guarded.error ?? t("invalidInput"));
+
+  if (!(await testConnection(guarded.data))) {
     return actionError(t("connectionFailed"));
   }
 
-  await dalUpdateSource(sourceId, resolved.data);
+  await dalUpdateSource(sourceId, guarded.data);
   revalidatePath("/", "layout");
   return actionOk();
 }

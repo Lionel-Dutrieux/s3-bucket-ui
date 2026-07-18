@@ -591,6 +591,8 @@
       "namePlaceholder": "Team-Dokumente",
       "endpointLabel": "Endpunkt",
       "accessNote": "Wer diese Quelle durchsuchen, bearbeiten oder löschen darf, wird pro Benutzer und Gruppe im Admin-Bereich verwaltet.",
+      "localRootsHint": "Die hier angebotenen Ordner werden vom Serverbetreiber festgelegt (LOCAL_FS_ROOTS).",
+      "localRootPlaceholder": "Ordner auswählen",
       "allowPublicSharesLabel": "Öffentliche Freigabelinks zulassen",
       "allowPublicSharesDescription": "Wenn deaktiviert, kann niemand öffentliche Links für diese Quelle erstellen und alle bestehenden Links funktionieren erst nach erneuter Aktivierung wieder.",
       "connectionSuccessful": "Verbindung erfolgreich.",
@@ -639,7 +641,10 @@
       "invalidSource": "Ungültige Quelle.",
       "sameSourceDestination": "Wählen Sie eine andere Quelle als Ziel.",
       "migrationFailed": "Migration fehlgeschlagen — prüfen Sie die Erreichbarkeit beider Quellen und versuchen Sie es erneut.",
-      "removeFailed": "Diese Quelle konnte nicht entfernt werden."
+      "removeFailed": "Diese Quelle konnte nicht entfernt werden.",
+      "localDisabled": "Lokale Ordnerquellen sind deaktiviert — setzen Sie LOCAL_FS_ROOTS auf dem Server, um sie zu aktivieren.",
+      "localRootNotAllowed": "Dieser Pfad gehört nicht zu den erlaubten Ordnern (LOCAL_FS_ROOTS).",
+      "localRootUnreachable": "Dieses Verzeichnis existiert nicht oder ist auf dem Server nicht lesbar."
     }
   },
   "admin": {

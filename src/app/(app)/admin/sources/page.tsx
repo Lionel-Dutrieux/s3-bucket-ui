@@ -13,6 +13,7 @@ import { listGroupOptions } from "@/lib/dal/groups";
 import { listGrantsForSource } from "@/lib/dal/permissions";
 import { getSource, listSources } from "@/lib/dal/sources";
 import { listUserOptions } from "@/lib/dal/users";
+import { localFsRoots } from "@/lib/storage/local-roots";
 import { getProvider } from "@/lib/storage/providers";
 import { cn } from "@/lib/utils";
 
@@ -34,11 +35,12 @@ export default async function AdminSourcesPage() {
     Promise.all(sources.map((source) => getSource(source.id))),
     Promise.all(sources.map((source) => getSourceHealth(source.id))),
   ]);
+  const fsRoots = localFsRoots();
 
   return (
     <>
       <PageHeader title={t("title")} description={t("description")}>
-        <AddSourceButton />
+        <AddSourceButton localFsRoots={fsRoots} />
       </PageHeader>
 
       {sources.length === 0 ? (
@@ -101,6 +103,7 @@ export default async function AdminSourcesPage() {
                   </div>
                   <SourceCardActions
                     source={source}
+                    localFsRoots={fsRoots}
                     editValues={{
                       name: source.name,
                       provider: source.provider,

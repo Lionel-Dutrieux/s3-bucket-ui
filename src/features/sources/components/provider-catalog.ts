@@ -39,6 +39,10 @@ const CATALOG: Record<string, { hint: string; keywords?: string }> = {
   sftp: { hint: "Any server over SSH", keywords: "ssh" },
   ftp: { hint: "Plain FTP or over TLS", keywords: "ftps" },
   webdav: { hint: "Nextcloud, ownCloud…", keywords: "nextcloud owncloud dav" },
+  local: {
+    hint: "Server filesystem folder",
+    keywords: "local filesystem folder directory disk volume mount fs",
+  },
 };
 
 export function providerHint(providerId: string): string {
@@ -54,9 +58,13 @@ export interface ProviderGroup {
  * Providers matching a search, grouped the way they behave: object stores
  * hand out presigned links, servers & protocols stream through the app.
  */
-export function searchProviders(query: string): ProviderGroup[] {
+export function searchProviders(
+  query: string,
+  opts?: { localFsEnabled?: boolean },
+): ProviderGroup[] {
   const q = query.trim().toLowerCase();
   const matches = PROVIDERS.filter((def) => {
+    if (def.adapter === "fs" && !opts?.localFsEnabled) return false;
     if (!q) return true;
     const { hint = "", keywords = "" } = CATALOG[def.id] ?? {};
     return `${def.label} ${def.id} ${hint} ${keywords}`

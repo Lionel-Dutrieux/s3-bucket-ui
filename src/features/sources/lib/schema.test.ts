@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { sourceInputSchema } from "@/features/sources/lib/schema";
+import {
+  sourceInputSchema,
+  sourceUpdateSchema,
+} from "@/features/sources/lib/schema";
 
 const validInput = {
   name: "Team documents",
@@ -62,5 +65,77 @@ describe("sourceInputSchema", () => {
   it("rejects blank required fields", () => {
     const result = sourceInputSchema.safeParse({ ...validInput, name: "   " });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("local (fs) sources", () => {
+  const localInput = {
+    name: "Media",
+    provider: "local",
+    endpoint: "",
+    bucket: "/data/media",
+    accessKeyId: "",
+    secretAccessKey: "",
+    allowPublicShares: true,
+  };
+
+  it("accepts a local source without endpoint or credentials", () => {
+    const parsed = sourceInputSchema.safeParse(localInput);
+    expect(parsed.success).toBe(true);
+  });
+
+  it("still requires the root path", () => {
+    const parsed = sourceInputSchema.safeParse({ ...localInput, bucket: " " });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("blanks a stray endpoint on parse", () => {
+    const parsed = sourceInputSchema.safeParse({
+      ...localInput,
+      endpoint: "https://stray.example.com",
+    });
+    expect(parsed.success && parsed.data.endpoint).toBe("");
+  });
+
+  it("blanks stray credentials on parse", () => {
+    const parsed = sourceInputSchema.safeParse({
+      ...localInput,
+      accessKeyId: "stray",
+      secretAccessKey: "stray",
+    });
+    expect(parsed.success && parsed.data.accessKeyId).toBe("");
+    expect(parsed.success && parsed.data.secretAccessKey).toBe("");
+  });
+
+  it("update schema accepts the same shape", () => {
+    const parsed = sourceUpdateSchema.safeParse(localInput);
+    expect(parsed.success).toBe(true);
+  });
+});
+
+describe("non-local sources keep their requirements", () => {
+  const s3Input = {
+    name: "Bucket",
+    provider: "minio",
+    endpoint: "https://minio.example.com",
+    bucket: "files",
+    accessKeyId: "",
+    secretAccessKey: "",
+    allowPublicShares: true,
+  };
+
+  it("still requires the access key", () => {
+    const parsed = sourceInputSchema.safeParse(s3Input);
+    expect(parsed.success).toBe(false);
+    expect(
+      !parsed.success &&
+        parsed.error.issues.some((i) => i.path[0] === "accessKeyId"),
+    ).toBe(true);
+  });
+
+  it("still requires the secret on create but not on update", () => {
+    const withKey = { ...s3Input, accessKeyId: "minioadmin" };
+    expect(sourceInputSchema.safeParse(withKey).success).toBe(false);
+    expect(sourceUpdateSchema.safeParse(withKey).success).toBe(true);
   });
 });

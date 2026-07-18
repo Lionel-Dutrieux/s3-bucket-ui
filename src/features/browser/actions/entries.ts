@@ -15,6 +15,7 @@ import { withWriteAccess } from "@/features/browser/server/guards";
 import { deletePrefix, movePrefix } from "@/features/browser/server/mutations";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { recordOperation } from "@/lib/dal/operations";
+import { KEEP_FILE_NAME, usesKeepFileMarkers } from "@/lib/storage/providers";
 
 /**
  * Creates a folder by writing the zero-byte `prefix/` marker object — the
@@ -41,7 +42,13 @@ export async function createFolder(
       action: "create the folder",
     },
     async ({ source, files }) => {
-      await files.upload(`${prefix}${trimmed}/`, "");
+      // Filesystem-backed adapters can't store a `prefix/` marker key (the
+      // fs adapter would write a plain file named like the folder); a hidden
+      // .keep file inside creates the real directory instead.
+      const markerKey = usesKeepFileMarkers(source.provider)
+        ? `${prefix}${trimmed}/${KEEP_FILE_NAME}`
+        : `${prefix}${trimmed}/`;
+      await files.upload(markerKey, "");
       await recordOperation({
         action: "create-folder",
         sourceId: source.id,

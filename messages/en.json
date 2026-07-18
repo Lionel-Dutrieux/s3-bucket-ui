@@ -591,6 +591,8 @@
       "namePlaceholder": "Team documents",
       "endpointLabel": "Endpoint",
       "accessNote": "Who can browse, edit or delete on this source is managed per user and group from the admin area.",
+      "localRootsHint": "The folders offered here are defined by the server operator (LOCAL_FS_ROOTS).",
+      "localRootPlaceholder": "Choose a folder",
       "allowPublicSharesLabel": "Allow public share links",
       "allowPublicSharesDescription": "When off, no one can mint public links for this source and any existing link stops working until it's turned back on.",
       "connectionSuccessful": "Connection successful.",
@@ -639,7 +641,10 @@
       "invalidSource": "Invalid source.",
       "sameSourceDestination": "Pick a different source as the destination.",
       "migrationFailed": "Migration failed — check both sources' connectivity and try again.",
-      "removeFailed": "Could not remove this source."
+      "removeFailed": "Could not remove this source.",
+      "localDisabled": "Local folder sources are disabled — set LOCAL_FS_ROOTS on the server to enable them.",
+      "localRootNotAllowed": "This path is not one of the allowed folders (LOCAL_FS_ROOTS).",
+      "localRootUnreachable": "This directory does not exist or cannot be read on the server."
     }
   },
   "admin": {

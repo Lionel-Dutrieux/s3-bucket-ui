@@ -36,6 +36,8 @@ interface SourceFormProps {
   onSuccess: () => void;
   /** When set, the form edits an existing source instead of creating one. */
   edit?: { sourceId: string; initialValues: SourceFormValues };
+  /** LOCAL_FS_ROOTS allowlist ([] when the feature is disabled). */
+  localFsRoots?: string[];
 }
 
 export function SourceForm({
@@ -43,6 +45,7 @@ export function SourceForm({
   onChangeProvider,
   onSuccess,
   edit,
+  localFsRoots = [],
 }: SourceFormProps) {
   const [serverError, setServerError] = useState<string>();
   const [test, setTest] = useState<TestStatus>({ state: "idle" });
@@ -101,7 +104,21 @@ export function SourceForm({
   };
 
   const definition = getProvider(provider) ?? PROVIDERS[0];
+  const isLocal = definition.adapter === "fs";
   const { bucket, accessKeyId, secretAccessKey } = definition.fieldLabels;
+
+  // Local sources pick their root from the operator allowlist — never a free
+  // path. A stored root that has since left LOCAL_FS_ROOTS stays listed so
+  // the edit form can display it; the server re-validates on save anyway.
+  const storedLocalRoot =
+    edit && getProvider(edit.initialValues.provider)?.adapter === "fs"
+      ? edit.initialValues.bucket
+      : undefined;
+  const localRootOptions = (
+    storedLocalRoot && !localFsRoots.includes(storedLocalRoot)
+      ? [storedLocalRoot, ...localFsRoots]
+      : localFsRoots
+  ).map((root) => ({ value: root, label: root }));
 
   return (
     <form
@@ -139,40 +156,58 @@ export function SourceForm({
         )}
       </form.AppField>
 
-      <form.AppField name="endpoint">
-        {(field) => (
-          <field.TextField
-            label={t("form.endpointLabel")}
-            placeholder={definition.endpointPlaceholder}
-            mono
-          />
-        )}
-      </form.AppField>
+      {isLocal ? null : (
+        <form.AppField name="endpoint">
+          {(field) => (
+            <field.TextField
+              label={t("form.endpointLabel")}
+              placeholder={definition.endpointPlaceholder}
+              mono
+            />
+          )}
+        </form.AppField>
+      )}
 
       {/* Credential fields use the selected provider's vocabulary. */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      {isLocal ? (
         <form.AppField name="bucket">
-          {(field) => <field.TextField label={bucket} mono />}
+          {(field) => (
+            <field.SelectField
+              label={bucket}
+              placeholder={t("form.localRootPlaceholder")}
+              options={localRootOptions}
+            />
+          )}
         </form.AppField>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <form.AppField name="bucket">
+            {(field) => <field.TextField label={bucket} mono />}
+          </form.AppField>
 
-        <form.AppField name="accessKeyId">
-          {(field) => <field.TextField label={accessKeyId} mono />}
+          <form.AppField name="accessKeyId">
+            {(field) => <field.TextField label={accessKeyId} mono />}
+          </form.AppField>
+        </div>
+      )}
+
+      {isLocal ? null : (
+        <form.AppField name="secretAccessKey">
+          {(field) => (
+            <field.TextField
+              label={secretAccessKey}
+              type="password"
+              autoComplete="new-password"
+              placeholder={edit ? t("form.secretPlaceholderEdit") : undefined}
+              mono
+            />
+          )}
         </form.AppField>
-      </div>
+      )}
 
-      <form.AppField name="secretAccessKey">
-        {(field) => (
-          <field.TextField
-            label={secretAccessKey}
-            type="password"
-            autoComplete="new-password"
-            placeholder={edit ? t("form.secretPlaceholderEdit") : undefined}
-            mono
-          />
-        )}
-      </form.AppField>
-
-      <p className="text-xs text-muted-foreground">{t("form.accessNote")}</p>
+      <p className="text-xs text-muted-foreground">
+        {isLocal ? t("form.localRootsHint") : t("form.accessNote")}
+      </p>
 
       <div className="rounded-lg border p-3">
         <form.AppField name="allowPublicShares">

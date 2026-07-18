@@ -3,6 +3,7 @@ import {
   getProvider,
   normalizeEndpoint,
   PROVIDERS,
+  usesKeepFileMarkers,
 } from "@/lib/storage/providers";
 
 describe("normalizeEndpoint", () => {
@@ -101,5 +102,33 @@ describe("new S3-compatible providers", () => {
     expect(
       normalizeEndpoint("tencent-cos", "https://cos.ap-guangzhou.myqcloud.com"),
     ).toEqual({ ok: true, value: "https://cos.ap-guangzhou.myqcloud.com" });
+  });
+});
+
+describe("local provider", () => {
+  it("is registered with the fs adapter", () => {
+    expect(getProvider("local")?.adapter).toBe("fs");
+  });
+
+  it("normalizeEndpoint accepts an empty endpoint and blanks it", () => {
+    expect(normalizeEndpoint("local", "")).toEqual({ ok: true, value: "" });
+  });
+
+  it("normalizeEndpoint blanks a stray non-empty endpoint", () => {
+    expect(normalizeEndpoint("local", "https://ignored.example.com")).toEqual({
+      ok: true,
+      value: "",
+    });
+  });
+});
+
+describe("usesKeepFileMarkers", () => {
+  it("is true for filesystem-backed adapters, false for object stores", () => {
+    expect(usesKeepFileMarkers("local")).toBe(true);
+    expect(usesKeepFileMarkers("sftp")).toBe(true);
+    expect(usesKeepFileMarkers("webdav")).toBe(true);
+    expect(usesKeepFileMarkers("aws-s3")).toBe(false);
+    expect(usesKeepFileMarkers("azure-blob")).toBe(false);
+    expect(usesKeepFileMarkers("unknown-id")).toBe(false); // s3 fallback
   });
 });

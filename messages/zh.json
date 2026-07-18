@@ -591,6 +591,8 @@
       "namePlaceholder": "团队文档",
       "endpointLabel": "端点",
       "accessNote": "谁可以在此来源上浏览、编辑或删除，由管理区域按用户和组管理。",
+      "localRootsHint": "此处提供的文件夹由服务器运维者定义（LOCAL_FS_ROOTS）。",
+      "localRootPlaceholder": "选择文件夹",
       "allowPublicSharesLabel": "允许公开分享链接",
       "allowPublicSharesDescription": "关闭后，任何人都无法为此来源创建公开链接，且所有现有链接将停止工作，直到重新开启。",
       "connectionSuccessful": "连接成功。",
@@ -639,7 +641,10 @@
       "invalidSource": "来源无效。",
       "sameSourceDestination": "请选择另一个来源作为目标。",
       "migrationFailed": "迁移失败 — 请检查两个来源的连接后重试。",
-      "removeFailed": "无法移除此来源。"
+      "removeFailed": "无法移除此来源。",
+      "localDisabled": "本地文件夹源已禁用 — 在服务器上设置 LOCAL_FS_ROOTS 以启用。",
+      "localRootNotAllowed": "该路径不属于允许的文件夹（LOCAL_FS_ROOTS）。",
+      "localRootUnreachable": "该目录不存在，或服务器无法读取。"
     }
   },
   "admin": {

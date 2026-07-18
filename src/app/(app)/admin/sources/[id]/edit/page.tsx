@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SourceFormCard } from "@/features/sources/components/source-form-card";
 import { requireAdmin } from "@/lib/auth/session";
 import { getSource } from "@/lib/dal/sources";
+import { localFsRoots } from "@/lib/storage/local-roots";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("sources.editPage");
@@ -24,6 +25,7 @@ export default async function EditSourcePage({
   const { id } = await params;
   const source = await getSource(id);
   if (!source) notFound();
+  const fsRoots = localFsRoots();
 
   return (
     <>
@@ -40,6 +42,7 @@ export default async function EditSourcePage({
       </PageHeader>
 
       <SourceFormCard
+        localFsRoots={fsRoots}
         edit={{
           sourceId: source.id,
           initialValues: {

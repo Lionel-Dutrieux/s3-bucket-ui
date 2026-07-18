@@ -6,6 +6,7 @@ import { s3 } from "files-sdk/s3";
 import { sftp } from "files-sdk/sftp";
 import { webdav } from "files-sdk/webdav";
 import { zip } from "files-sdk/zip";
+import { localFs } from "@/lib/storage/fs-adapter";
 import { getProvider } from "@/lib/storage/providers";
 import { regionFromEndpoint } from "@/lib/storage/region";
 
@@ -60,6 +61,13 @@ function buildAdapter(credentials: StorageCredentials): Adapter {
       password: credentials.secretAccessKey,
       root: credentials.bucket,
     });
+  }
+
+  // Local sources: "bucket" holds a root directory already vetted against
+  // LOCAL_FS_ROOTS by the source actions (lib/storage/local-roots.ts).
+  // The adapter itself re-fences: keys resolving outside root throw.
+  if (provider?.adapter === "fs") {
+    return localFs({ root: credentials.bucket });
   }
 
   const region =

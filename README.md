@@ -97,6 +97,10 @@ SeaweedFS, Ceph RGW, …)
 **Protocols:** SFTP · FTP / FTPS · WebDAV (Nextcloud, ownCloud, NAS boxes) —
 same UI, downloads and previews stream through the app.
 
+**Local folders:** expose directories of the server itself (e.g. Docker
+volumes) — opt-in via the `LOCAL_FS_ROOTS` allowlist, no credentials, files
+stored as plain files so other tools can read and write the same directory.
+
 → Endpoints and credentials per provider: **[docs/providers.md](docs/providers.md)**
 
 ## 🚀 Quick start
@@ -170,6 +174,7 @@ pnpm dev
 | `OIDC_GROUPS_CLAIM` | *(optional)* Claim carrying group names (default `groups`). |
 | `SMTP_HOST` / `SMTP_FROM` | *(optional, set together)* SMTP relay and sender — enables "Forgot password?" reset emails. |
 | `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASSWORD` | *(optional)* Relay port (default 587), implicit TLS, and credentials if the relay requires auth. |
+| `LOCAL_FS_ROOTS` | *(optional)* Comma-separated allowlist of directories that "Local folder" sources may expose (e.g. volumes mounted into the container, such as `/data`). Unset = the provider is hidden from the admin UI and rejected server-side. Each source exposes exactly one of these directories, picked from a list in the admin UI. |
 
 <details>
 <summary><b>Example: OIDC with Pocket ID</b></summary>
