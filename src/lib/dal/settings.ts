@@ -212,7 +212,7 @@ export async function clearBrandingSettings(): Promise<void> {
 // --- runtime config (SMTP / OIDC overrides + version) ---
 
 const CONFIG_VERSION_KEY = "configVersion";
-const SECRET_KEYS = new Set(["smtp.password", "oidc.clientSecret"]);
+const SECRET_KEYS = new Set(["smtp.password"]);
 
 export async function getConfigVersion(): Promise<number> {
   const row = await prisma.setting.findUnique({
@@ -232,7 +232,7 @@ function bumpConfigVersion(current: number): Prisma.PrismaPromise<unknown> {
 
 /** Overrides DB d'un groupe, clés sans préfixe, secrets déchiffrés. */
 export async function getConfigOverrides(
-  prefix: "smtp" | "oidc",
+  prefix: "smtp",
 ): Promise<Record<string, string>> {
   const rows = await prisma.setting.findMany({
     where: { key: { startsWith: `${prefix}.` } },
@@ -249,7 +249,7 @@ export async function getConfigOverrides(
 
 /** null supprime la clé ; le tout + bump de version en une transaction. */
 export async function setConfigOverrides(
-  prefix: "smtp" | "oidc",
+  prefix: "smtp",
   values: Record<string, string | null>,
 ): Promise<void> {
   const version = await getConfigVersion();
@@ -267,9 +267,7 @@ export async function setConfigOverrides(
   await prisma.$transaction(operations);
 }
 
-export async function clearConfigOverrides(
-  prefix: "smtp" | "oidc",
-): Promise<void> {
+export async function clearConfigOverrides(prefix: "smtp"): Promise<void> {
   const version = await getConfigVersion();
   await prisma.$transaction([
     prisma.setting.deleteMany({ where: { key: { startsWith: `${prefix}.` } } }),

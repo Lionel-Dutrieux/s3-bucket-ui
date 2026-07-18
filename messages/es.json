@@ -113,7 +113,6 @@
     "signIn": {
       "metaTitle": "Iniciar sesión",
       "title": "Iniciar sesión",
-      "oidcOnlySubtitle": "Esta instancia inicia sesión a través de {provider}.",
       "subtitle": "Bienvenido de nuevo — inicia sesión para explorar tus fuentes.",
       "emailLabel": "Correo electrónico",
       "emailPlaceholder": "you@example.com",
@@ -124,7 +123,8 @@
       "or": "o",
       "noAccount": "¿Todavía no tienes una cuenta?",
       "signUpLink": "Regístrate",
-      "errorFallback": "No se pudo iniciar sesión."
+      "errorFallback": "No se pudo iniciar sesión.",
+      "ssoOnlySubtitle": "Esta instancia inicia sesión mediante inicio de sesión único (SSO)."
     },
     "signUp": {
       "metaTitle": "Registrarse",
@@ -810,12 +810,17 @@
       "invalidGrant": "Permiso no válido.",
       "saveGrantFailed": "No se pudo guardar este permiso.",
       "removeGrantFailed": "No se pudo quitar este permiso.",
-      "oidcDiscoveryFailed": "No se pudo alcanzar o validar el punto de terminación de descubrimiento OIDC.",
       "smtpNotConfigured": "SMTP no está configurado.",
-      "testEmailFailed": "No se pudo enviar el correo de prueba."
+      "testEmailFailed": "No se pudo enviar el correo de prueba.",
+      "ssoInvalidIssuer": "La URL del emisor no es válida.",
+      "ssoRegisterFailed": "No se pudo registrar el proveedor SSO.",
+      "ssoProviderNotFound": "Ese proveedor SSO ya no existe."
     },
     "runtimeConfig": {
-      "provenance": { "env": "entorno", "custom": "personalizado" },
+      "provenance": {
+        "env": "entorno",
+        "custom": "personalizado"
+      },
       "resetToEnv": "Restaurar valores de entorno",
       "resetConfirm": "Esto elimina todos los valores guardados aquí y vuelve a las variables de entorno. ¿Continuar?",
       "saved": "Configuración guardada.",
@@ -834,20 +839,50 @@
         "from": "Remitente",
         "sendTest": "Enviar un correo de prueba",
         "testSent": "Correo de prueba enviado a {email}."
-      },
-      "oidc": {
-        "title": "Inicio de sesión único (OIDC)",
-        "description": "Proveedor OpenID Connect genérico. Las variables de entorno aportan los valores predeterminados; los valores guardados aquí los sustituyen.",
-        "discoveryUrl": "URL de descubrimiento",
-        "clientId": "ID de cliente",
-        "clientSecret": "Secreto de cliente",
-        "secretSet": "•••• (configurado — escribe para reemplazarlo)",
-        "secretUnset": "Sin definir",
-        "providerLabel": "Texto del botón de inicio de sesión",
-        "scopes": "Scopes",
-        "groupsClaim": "Claim de grupos",
-        "callbackInfo": "Registra esta URL de retorno con tu proveedor de identidad:",
-        "lockoutWarning": "Antes de activar «Solo OIDC», verifica que el inicio de sesión SSO funcione en una ventana privada — una configuración OIDC rota con el inicio de sesión por contraseña desactivado deja a todos fuera."
+      }
+    },
+    "sso": {
+      "title": "Inicio de sesión único (SSO)",
+      "description": "Proveedores de identidad OpenID Connect. Los usuarios inician sesión a través del proveedor; los claims de grupos coincidentes se asignan a grupos de la app.",
+      "empty": "Aún no hay proveedores SSO registrados.",
+      "addTitle": "Añadir un proveedor",
+      "addProvider": "Añadir proveedor",
+      "addPending": "Añadiendo…",
+      "added": "Proveedor SSO añadido.",
+      "removed": "Proveedor SSO eliminado.",
+      "remove": "Eliminar",
+      "removeTitle": "Eliminar proveedor SSO",
+      "removeConfirm": "¿Eliminar el proveedor «{provider}»? Los usuarios ya no podrán iniciar sesión con él, pero se conservan sus cuentas.",
+      "providerId": "ID del proveedor",
+      "issuer": "URL del emisor",
+      "clientId": "ID de cliente",
+      "clientSecret": "Secreto de cliente",
+      "domain": "Dominio de correo",
+      "groupsClaim": "Claim de grupos",
+      "scopes": "Ámbitos",
+      "presetLabel": "Proveedor de identidad",
+      "providerMeta": "Dominio {domain} · claim de grupos «{claim}»",
+      "verifyBeforeOnly": "Tras añadir un proveedor, verifica el inicio de sesión SSO en una ventana privada antes de activar «Solo SSO» — un proveedor defectuoso con el inicio de sesión por contraseña desactivado bloquea a todos.",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "El emisor es la URL base de tu Pocket ID. El claim de grupos es \"groups\"."
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/tu-realm",
+          "help": "El emisor incluye la ruta del realm. Añade un mapper de client-scope \"groups\" en Keycloak para que los nombres de grupo lleguen al token."
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "Activa el claim de grupos en el registro de la aplicación. Entra envía IDs de objeto de grupo (GUID) en el id_token — nombra tus grupos de la app según esos GUID."
+        },
+        "generic": {
+          "label": "OIDC genérico",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },

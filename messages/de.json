@@ -113,7 +113,6 @@
     "signIn": {
       "metaTitle": "Anmelden",
       "title": "Anmelden",
-      "oidcOnlySubtitle": "Diese Instanz meldet sich über {provider} an.",
       "subtitle": "Willkommen zurück — melden Sie sich an, um Ihre Quellen zu durchsuchen.",
       "emailLabel": "E-Mail",
       "emailPlaceholder": "you@example.com",
@@ -124,7 +123,8 @@
       "or": "oder",
       "noAccount": "Noch kein Konto?",
       "signUpLink": "Registrieren",
-      "errorFallback": "Anmeldung fehlgeschlagen."
+      "errorFallback": "Anmeldung fehlgeschlagen.",
+      "ssoOnlySubtitle": "Diese Instanz meldet sich über Single Sign-On an."
     },
     "signUp": {
       "metaTitle": "Registrieren",
@@ -810,12 +810,17 @@
       "invalidGrant": "Ungültige Berechtigung.",
       "saveGrantFailed": "Diese Berechtigung konnte nicht gespeichert werden.",
       "removeGrantFailed": "Diese Berechtigung konnte nicht entfernt werden.",
-      "oidcDiscoveryFailed": "Der OIDC-Discovery-Endpunkt konnte nicht erreicht oder validiert werden.",
       "smtpNotConfigured": "SMTP ist nicht konfiguriert.",
-      "testEmailFailed": "Die Test-E-Mail konnte nicht gesendet werden."
+      "testEmailFailed": "Die Test-E-Mail konnte nicht gesendet werden.",
+      "ssoInvalidIssuer": "Die Aussteller-URL ist ungültig.",
+      "ssoRegisterFailed": "Der SSO-Anbieter konnte nicht registriert werden.",
+      "ssoProviderNotFound": "Dieser SSO-Anbieter existiert nicht mehr."
     },
     "runtimeConfig": {
-      "provenance": { "env": "Umgebung", "custom": "Eigene" },
+      "provenance": {
+        "env": "Umgebung",
+        "custom": "Eigene"
+      },
       "resetToEnv": "Umgebungswerte wiederherstellen",
       "resetConfirm": "Dies entfernt alle hier gespeicherten Werte und greift wieder auf die Umgebungsvariablen zurück. Fortfahren?",
       "saved": "Einstellungen gespeichert.",
@@ -834,20 +839,50 @@
         "from": "Absender",
         "sendTest": "Test-E-Mail senden",
         "testSent": "Test-E-Mail an {email} gesendet."
-      },
-      "oidc": {
-        "title": "Single Sign-On (OIDC)",
-        "description": "Generischer OpenID-Connect-Anbieter. Umgebungsvariablen liefern die Standardwerte; hier gespeicherte Werte überschreiben sie.",
-        "discoveryUrl": "Discovery-URL",
-        "clientId": "Client-ID",
-        "clientSecret": "Client-Secret",
-        "secretSet": "•••• (konfiguriert — zum Ersetzen eingeben)",
-        "secretUnset": "Nicht festgelegt",
-        "providerLabel": "Beschriftung der Anmelde-Schaltfläche",
-        "scopes": "Scopes",
-        "groupsClaim": "Groups-Claim",
-        "callbackInfo": "Registrieren Sie diese Callback-URL bei Ihrem Identity Provider:",
-        "lockoutWarning": "Bevor Sie „Nur OIDC“ aktivieren, prüfen Sie die SSO-Anmeldung in einem privaten Fenster — eine fehlerhafte OIDC-Konfiguration bei deaktivierter Passwort-Anmeldung sperrt alle aus."
+      }
+    },
+    "sso": {
+      "title": "Single Sign-On (SSO)",
+      "description": "OpenID-Connect-Identitätsanbieter. Benutzer melden sich über den Anbieter an; passende Gruppen-Claims werden App-Gruppen zugeordnet.",
+      "empty": "Noch keine SSO-Anbieter registriert.",
+      "addTitle": "Anbieter hinzufügen",
+      "addProvider": "Anbieter hinzufügen",
+      "addPending": "Wird hinzugefügt…",
+      "added": "SSO-Anbieter hinzugefügt.",
+      "removed": "SSO-Anbieter entfernt.",
+      "remove": "Entfernen",
+      "removeTitle": "SSO-Anbieter entfernen",
+      "removeConfirm": "Anbieter „{provider}“ entfernen? Benutzer können sich darüber nicht mehr anmelden, ihre Konten bleiben jedoch erhalten.",
+      "providerId": "Anbieter-ID",
+      "issuer": "Aussteller-URL",
+      "clientId": "Client-ID",
+      "clientSecret": "Client-Secret",
+      "domain": "E-Mail-Domain",
+      "groupsClaim": "Gruppen-Claim",
+      "scopes": "Scopes",
+      "presetLabel": "Identitätsanbieter",
+      "providerMeta": "Domain {domain} · Gruppen-Claim „{claim}“",
+      "verifyBeforeOnly": "Prüfen Sie nach dem Hinzufügen eines Anbieters die SSO-Anmeldung in einem privaten Fenster, bevor Sie „Nur SSO“ aktivieren — ein defekter Anbieter mit deaktivierter Passwortanmeldung sperrt alle aus.",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "Der Aussteller ist die Basis-URL Ihrer Pocket ID. Der Gruppen-Claim ist \"groups\"."
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/ihr-realm",
+          "help": "Der Aussteller enthält den Realm-Pfad. Fügen Sie in Keycloak einen \"groups\"-Client-Scope-Mapper hinzu, damit Gruppennamen in das Token gelangen."
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "Aktivieren Sie den Gruppen-Claim in der App-Registrierung. Entra sendet Gruppen-Objekt-IDs (GUIDs) im id_token — benennen Sie Ihre App-Gruppen nach diesen GUIDs."
+        },
+        "generic": {
+          "label": "Generisches OIDC",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },

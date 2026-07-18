@@ -113,7 +113,6 @@
     "signIn": {
       "metaTitle": "Connexion",
       "title": "Connexion",
-      "oidcOnlySubtitle": "Cette instance utilise la connexion via {provider}.",
       "subtitle": "Bon retour — connectez-vous pour parcourir vos sources.",
       "emailLabel": "E-mail",
       "emailPlaceholder": "you@example.com",
@@ -124,7 +123,8 @@
       "or": "ou",
       "noAccount": "Pas encore de compte ?",
       "signUpLink": "S'inscrire",
-      "errorFallback": "Échec de la connexion."
+      "errorFallback": "Échec de la connexion.",
+      "ssoOnlySubtitle": "Cette instance utilise l'authentification unique (SSO)."
     },
     "signUp": {
       "metaTitle": "Inscription",
@@ -853,9 +853,11 @@
       "invalidGrant": "Droit invalide.",
       "saveGrantFailed": "Impossible d'enregistrer ce droit.",
       "removeGrantFailed": "Impossible de retirer ce droit.",
-      "oidcDiscoveryFailed": "Impossible d'atteindre ou de valider le point de terminaison de découverte OIDC.",
       "smtpNotConfigured": "SMTP n'est pas configuré.",
-      "testEmailFailed": "Impossible d'envoyer l'email de test."
+      "testEmailFailed": "Impossible d'envoyer l'email de test.",
+      "ssoInvalidIssuer": "L'URL de l'émetteur est invalide.",
+      "ssoRegisterFailed": "Impossible d'enregistrer le fournisseur SSO.",
+      "ssoProviderNotFound": "Ce fournisseur SSO n'existe plus."
     },
     "runtimeConfig": {
       "provenance": {
@@ -880,20 +882,50 @@
         "from": "Expéditeur",
         "sendTest": "Envoyer un email de test",
         "testSent": "Email de test envoyé à {email}."
-      },
-      "oidc": {
-        "title": "Authentification unique (OIDC)",
-        "description": "Fournisseur OpenID Connect générique. Les variables d'environnement fournissent les valeurs par défaut ; les valeurs enregistrées ici les remplacent.",
-        "discoveryUrl": "URL de découverte",
-        "clientId": "ID client",
-        "clientSecret": "Secret client",
-        "secretSet": "•••• (configuré — saisissez pour remplacer)",
-        "secretUnset": "Non défini",
-        "providerLabel": "Libellé du bouton de connexion",
-        "scopes": "Scopes",
-        "groupsClaim": "Claim des groupes",
-        "callbackInfo": "Enregistrez cette URL de rappel auprès de votre fournisseur d'identité :",
-        "lockoutWarning": "Avant d'activer « OIDC uniquement », vérifiez que la connexion SSO fonctionne dans une fenêtre privée — une configuration OIDC défectueuse avec la connexion par mot de passe désactivée bloque tout le monde dehors."
+      }
+    },
+    "sso": {
+      "title": "Authentification unique (SSO)",
+      "description": "Fournisseurs d'identité OpenID Connect. Les utilisateurs se connectent via le fournisseur ; les revendications de groupes correspondantes alimentent les groupes de l'app.",
+      "empty": "Aucun fournisseur SSO enregistré pour l'instant.",
+      "addTitle": "Ajouter un fournisseur",
+      "addProvider": "Ajouter le fournisseur",
+      "addPending": "Ajout…",
+      "added": "Fournisseur SSO ajouté.",
+      "removed": "Fournisseur SSO supprimé.",
+      "remove": "Supprimer",
+      "removeTitle": "Supprimer le fournisseur SSO",
+      "removeConfirm": "Supprimer le fournisseur « {provider} » ? Les utilisateurs ne pourront plus s'y connecter, mais leurs comptes sont conservés.",
+      "providerId": "Identifiant du fournisseur",
+      "issuer": "URL de l'émetteur",
+      "clientId": "Client ID",
+      "clientSecret": "Secret client",
+      "domain": "Domaine e-mail",
+      "groupsClaim": "Revendication de groupes",
+      "scopes": "Scopes",
+      "presetLabel": "Fournisseur d'identité",
+      "providerMeta": "Domaine {domain} · revendication de groupes « {claim} »",
+      "verifyBeforeOnly": "Après avoir ajouté un fournisseur, vérifiez la connexion SSO dans une fenêtre privée avant d'activer « SSO uniquement » — un fournisseur défaillant avec la connexion par mot de passe désactivée bloque tout le monde.",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "L'émetteur est l'URL de base de votre Pocket ID. La revendication de groupes est \"groups\"."
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/votre-realm",
+          "help": "L'émetteur inclut le chemin du realm. Ajoutez un mapper de client-scope \"groups\" dans Keycloak pour que les noms de groupes arrivent dans le jeton."
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "Activez la revendication de groupes dans l'app registration. Entra envoie des identifiants d'objet de groupe (GUID) dans l'id_token — nommez vos groupes d'app d'après ces GUID pour la correspondance."
+        },
+        "generic": {
+          "label": "OIDC générique",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },

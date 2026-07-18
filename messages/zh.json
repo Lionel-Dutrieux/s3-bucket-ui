@@ -113,7 +113,6 @@
     "signIn": {
       "metaTitle": "登录",
       "title": "登录",
-      "oidcOnlySubtitle": "此实例通过 {provider} 登录。",
       "subtitle": "欢迎回来 — 登录以浏览您的来源。",
       "emailLabel": "邮箱",
       "emailPlaceholder": "you@example.com",
@@ -124,7 +123,8 @@
       "or": "或",
       "noAccount": "还没有账户？",
       "signUpLink": "注册",
-      "errorFallback": "登录失败。"
+      "errorFallback": "登录失败。",
+      "ssoOnlySubtitle": "此实例通过单点登录 (SSO) 登录。"
     },
     "signUp": {
       "metaTitle": "注册",
@@ -810,12 +810,17 @@
       "invalidGrant": "授权无效。",
       "saveGrantFailed": "无法保存此授权。",
       "removeGrantFailed": "无法移除此授权。",
-      "oidcDiscoveryFailed": "无法访问或验证 OIDC 发现端点。",
       "smtpNotConfigured": "SMTP 未配置。",
-      "testEmailFailed": "无法发送测试邮件。"
+      "testEmailFailed": "无法发送测试邮件。",
+      "ssoInvalidIssuer": "颁发者 URL 无效。",
+      "ssoRegisterFailed": "无法注册 SSO 提供程序。",
+      "ssoProviderNotFound": "该 SSO 提供程序已不存在。"
     },
     "runtimeConfig": {
-      "provenance": { "env": "环境变量", "custom": "自定义" },
+      "provenance": {
+        "env": "环境变量",
+        "custom": "自定义"
+      },
       "resetToEnv": "恢复环境变量的值",
       "resetConfirm": "这将移除此处保存的所有值，并回退到环境变量。是否继续？",
       "saved": "设置已保存。",
@@ -834,20 +839,50 @@
         "from": "发件人",
         "sendTest": "发送测试邮件",
         "testSent": "测试邮件已发送至 {email}。"
-      },
-      "oidc": {
-        "title": "单点登录（OIDC）",
-        "description": "通用 OpenID Connect 提供商。环境变量提供默认值；此处保存的值会覆盖它们。",
-        "discoveryUrl": "发现 URL",
-        "clientId": "客户端 ID",
-        "clientSecret": "客户端密钥",
-        "secretSet": "••••（已配置 — 输入以替换）",
-        "secretUnset": "未设置",
-        "providerLabel": "登录按钮标签",
-        "scopes": "Scopes",
-        "groupsClaim": "分组声明（groups claim）",
-        "callbackInfo": "请在您的身份提供商处注册此回调 URL：",
-        "lockoutWarning": "启用「仅 OIDC」之前，请在隐私窗口中验证 SSO 登录是否正常 — 如果 OIDC 配置有误且已禁用密码登录，将导致所有人都无法登录。"
+      }
+    },
+    "sso": {
+      "title": "单点登录 (SSO)",
+      "description": "OpenID Connect 身份提供程序。用户通过提供程序登录；匹配的群组声明会映射到应用群组。",
+      "empty": "尚未注册任何 SSO 提供程序。",
+      "addTitle": "添加提供程序",
+      "addProvider": "添加提供程序",
+      "addPending": "正在添加…",
+      "added": "已添加 SSO 提供程序。",
+      "removed": "已移除 SSO 提供程序。",
+      "remove": "移除",
+      "removeTitle": "移除 SSO 提供程序",
+      "removeConfirm": "移除提供程序“{provider}”？用户将无法再通过它登录，但其账户会被保留。",
+      "providerId": "提供程序 ID",
+      "issuer": "颁发者 URL",
+      "clientId": "客户端 ID",
+      "clientSecret": "客户端密钥",
+      "domain": "邮箱域名",
+      "groupsClaim": "群组声明",
+      "scopes": "作用域",
+      "presetLabel": "身份提供程序",
+      "providerMeta": "域名 {domain} · 群组声明“{claim}”",
+      "verifyBeforeOnly": "添加提供程序后，请先在隐私窗口中验证 SSO 登录是否正常，再启用“仅 SSO”——若提供程序配置有误且已禁用密码登录，将导致所有人无法登录。",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "颁发者为你的 Pocket ID 基础 URL。群组声明为 \"groups\"。"
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/your-realm",
+          "help": "颁发者包含 realm 路径。在 Keycloak 中添加 \"groups\" client-scope 映射器，使群组名称进入令牌。"
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "在应用注册中启用群组声明。Entra 在 id_token 中发送群组对象 ID (GUID) — 将你的应用群组命名为这些 GUID 以进行匹配。"
+        },
+        "generic": {
+          "label": "通用 OIDC",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },

@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   BRANDING_LOGO_MAX_BYTES,
   brandingSchema,
-  oidcSettingsSchema,
   smtpSettingsSchema,
+  ssoProviderSchema,
 } from "@/features/admin/lib/schema";
 
 const svgLogo = `data:image/svg+xml;base64,${Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'/>").toString("base64")}`;
@@ -99,18 +99,45 @@ describe("smtpSettingsSchema", () => {
   });
 });
 
-describe("oidcSettingsSchema", () => {
-  it("requires an https discovery URL", () => {
+describe("ssoProviderSchema", () => {
+  const valid = {
+    providerId: "pocket-id",
+    issuer: "https://id.example.com",
+    clientId: "client",
+    clientSecret: "secret",
+    domain: "example.com",
+    scopes: "openid profile email groups",
+    groupsClaim: "groups",
+  };
+
+  it("accepts a well-formed provider", () => {
+    expect(ssoProviderSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("requires an https issuer", () => {
     expect(
-      oidcSettingsSchema.safeParse({
-        discoveryUrl:
-          "http://insecure.example/.well-known/openid-configuration",
-        clientId: "id",
-        clientSecret: "secret",
-        providerLabel: "SSO",
-        scopes: "openid profile",
-        groupsClaim: "groups",
-      }).success,
+      ssoProviderSchema.safeParse({ ...valid, issuer: "http://id.example.com" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("rejects a non-slug provider id and the reserved 'credential'", () => {
+    expect(
+      ssoProviderSchema.safeParse({ ...valid, providerId: "Pocket ID" })
+        .success,
+    ).toBe(false);
+    expect(
+      ssoProviderSchema.safeParse({ ...valid, providerId: "credential" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("requires a bare email domain and a client secret", () => {
+    expect(
+      ssoProviderSchema.safeParse({ ...valid, domain: "not a domain" }).success,
+    ).toBe(false);
+    expect(
+      ssoProviderSchema.safeParse({ ...valid, clientSecret: "" }).success,
     ).toBe(false);
   });
 });

@@ -8,21 +8,21 @@ import { signInSchema } from "@/features/auth/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
 import { authClient } from "@/lib/auth/client";
-import { OidcButton } from "./oidc-button";
+import { SsoButton, type SsoProviderOption } from "./sso-button";
 
 interface SignInFormProps {
-  /** Label of the OIDC provider button, or null when OIDC is not configured. */
-  oidcLabel: string | null;
+  /** Registered SSO providers, one sign-in button each (empty when none). */
+  ssoProviders: SsoProviderOption[];
   /** Whether self-registration is currently open (Admin → Settings). */
   showSignUpLink: boolean;
   /** Whether an SMTP relay is configured (enables "Forgot password?"). */
   showForgotLink: boolean;
-  /** OIDC-only mode: the email/password form is not rendered at all. */
+  /** SSO-only mode: the email/password form is not rendered at all. */
   oidcOnly: boolean;
 }
 
 export function SignInForm({
-  oidcLabel,
+  ssoProviders,
   showSignUpLink,
   showForgotLink,
   oidcOnly,
@@ -53,8 +53,8 @@ export function SignInForm({
     },
   });
 
-  // OIDC-only instances: no password form, no secondary links — one button.
-  if (oidcOnly && oidcLabel) {
+  // SSO-only instances: no password form, no secondary links — just buttons.
+  if (oidcOnly && ssoProviders.length > 0) {
     return (
       <div className="space-y-6">
         <div className="space-y-1.5">
@@ -62,10 +62,18 @@ export function SignInForm({
             {t("title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {t("oidcOnlySubtitle", { provider: oidcLabel })}
+            {t("ssoOnlySubtitle")}
           </p>
         </div>
-        <OidcButton label={oidcLabel} />
+        <div className="space-y-2">
+          {ssoProviders.map((provider) => (
+            <SsoButton
+              key={provider.providerId}
+              providerId={provider.providerId}
+              label={provider.label}
+            />
+          ))}
+        </div>
       </div>
     );
   }
@@ -128,14 +136,22 @@ export function SignInForm({
         </form.AppForm>
       </form>
 
-      {oidcLabel ? (
+      {ssoProviders.length > 0 ? (
         <>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <div className="h-px flex-1 bg-border" />
             {t("or")}
             <div className="h-px flex-1 bg-border" />
           </div>
-          <OidcButton label={oidcLabel} />
+          <div className="space-y-2">
+            {ssoProviders.map((provider) => (
+              <SsoButton
+                key={provider.providerId}
+                providerId={provider.providerId}
+                label={provider.label}
+              />
+            ))}
+          </div>
         </>
       ) : null}
 

@@ -8,14 +8,14 @@ import { signUpSchema } from "@/features/auth/lib/schema";
 import { FormAlert } from "@/forms/components/form-alert";
 import { useAppForm } from "@/forms/form";
 import { authClient } from "@/lib/auth/client";
-import { OidcButton } from "./oidc-button";
+import { SsoButton, type SsoProviderOption } from "./sso-button";
 
 interface SignUpFormProps {
-  /** Label of the OIDC provider button, or null when OIDC is not configured. */
-  oidcLabel: string | null;
+  /** Registered SSO providers, one sign-in button each (empty when none). */
+  ssoProviders: SsoProviderOption[];
 }
 
-export function SignUpForm({ oidcLabel }: SignUpFormProps) {
+export function SignUpForm({ ssoProviders }: SignUpFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string>();
   const t = useTranslations("auth.signUp");
@@ -97,14 +97,22 @@ export function SignUpForm({ oidcLabel }: SignUpFormProps) {
         </form.AppForm>
       </form>
 
-      {oidcLabel ? (
+      {ssoProviders.length > 0 ? (
         <>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <div className="h-px flex-1 bg-border" />
             {t("or")}
             <div className="h-px flex-1 bg-border" />
           </div>
-          <OidcButton label={oidcLabel} />
+          <div className="space-y-2">
+            {ssoProviders.map((provider) => (
+              <SsoButton
+                key={provider.providerId}
+                providerId={provider.providerId}
+                label={provider.label}
+              />
+            ))}
+          </div>
         </>
       ) : null}
 

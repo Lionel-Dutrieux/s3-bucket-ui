@@ -3,8 +3,6 @@
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import {
-  type OidcSettingsValues,
-  oidcSettingsSchema,
   type SharePolicyValues,
   type SmtpSettingsValues,
   sharePolicySchema,
@@ -12,19 +10,18 @@ import {
 } from "@/features/admin/lib/schema";
 import { withAdmin } from "@/features/admin/server/guard";
 import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
-import { getSmtpConfig, isOidcConfigured } from "@/lib/config";
+import { getSmtpConfig } from "@/lib/config";
 import {
   clearConfigOverrides,
   setAuditRetentionDays as dalSetAuditRetentionDays,
   setSharePolicy as dalSetSharePolicy,
   setTwoFactorPolicy as dalSetTwoFactorPolicy,
-  isOidcOnly,
   setConfigOverrides,
   setOidcOnly,
   setPublicSharingEnabled,
   setPublicSignUpEnabled,
 } from "@/lib/dal/settings";
-import { oidcEnabled } from "@/lib/env";
+import { hasSsoProviders } from "@/lib/dal/sso";
 import { sendMail } from "@/lib/mail";
 
 const twoFactorPolicySchema = z.enum(["off", "admins", "all"]);
@@ -84,7 +81,7 @@ export async function setOidcOnlyEnabled(
     },
     async () => {
       // Refuse to lock the door when there is no other way in.
-      if (enabled === true && !(await isOidcConfigured())) {
+      if (enabled === true && !(await hasSsoProviders())) {
         return actionError(t("oidcNotConfigured"));
       }
       await setOidcOnly(enabled === true);
@@ -197,73 +194,6 @@ export async function resetSmtpSettings(): Promise<ActionResult> {
     { action: "reset smtp settings", failureMessage: t("settingUpdateFailed") },
     async () => {
       await clearConfigOverrides("smtp");
-      return actionOk();
-    },
-  );
-}
-
-export async function updateOidcSettings(
-  input: OidcSettingsValues,
-): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    {
-      action: "update oidc settings",
-      failureMessage: t("settingUpdateFailed"),
-    },
-    async () => {
-      const parsed = oidcSettingsSchema.safeParse(input);
-      if (!parsed.success) {
-        return actionError(
-          parsed.error.issues[0]?.message ?? t("invalidInput"),
-        );
-      }
-      // The discovery document must respond — a broken config does not enter.
-      try {
-        const response = await fetch(parsed.data.discoveryUrl, {
-          signal: AbortSignal.timeout(5_000),
-        });
-        const doc = (await response.json()) as {
-          authorization_endpoint?: unknown;
-        };
-        if (!response.ok || typeof doc.authorization_endpoint !== "string") {
-          return actionError(t("oidcDiscoveryFailed"));
-        }
-      } catch {
-        return actionError(t("oidcDiscoveryFailed"));
-      }
-      const {
-        discoveryUrl,
-        clientId,
-        clientSecret,
-        providerLabel,
-        scopes,
-        groupsClaim,
-      } = parsed.data;
-      await setConfigOverrides("oidc", {
-        discoveryUrl,
-        clientId,
-        ...(clientSecret !== null ? { clientSecret } : {}),
-        providerLabel,
-        scopes,
-        groupsClaim,
-      });
-      return actionOk();
-    },
-  );
-}
-
-export async function resetOidcSettings(): Promise<ActionResult> {
-  const t = await getTranslations("admin.errors");
-  return withAdmin(
-    { action: "reset oidc settings", failureMessage: t("settingUpdateFailed") },
-    async () => {
-      // Resetting must not remove the only way in: when OIDC-only is active,
-      // the environment alone has to keep OIDC alive after the DB overrides go.
-      if ((await isOidcOnly()) && !oidcEnabled()) {
-        return actionError(t("oidcNotConfigured"));
-      }
-      await clearConfigOverrides("oidc");
       return actionOk();
     },
   );

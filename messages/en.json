@@ -113,7 +113,6 @@
     "signIn": {
       "metaTitle": "Sign in",
       "title": "Sign in",
-      "oidcOnlySubtitle": "This instance signs in through {provider}.",
       "subtitle": "Welcome back — sign in to browse your sources.",
       "emailLabel": "Email",
       "emailPlaceholder": "you@example.com",
@@ -124,7 +123,8 @@
       "or": "or",
       "noAccount": "No account yet?",
       "signUpLink": "Sign up",
-      "errorFallback": "Sign in failed."
+      "errorFallback": "Sign in failed.",
+      "ssoOnlySubtitle": "This instance signs in through single sign-on."
     },
     "signUp": {
       "metaTitle": "Sign up",
@@ -853,9 +853,11 @@
       "invalidGrant": "Invalid grant.",
       "saveGrantFailed": "Could not save this grant.",
       "removeGrantFailed": "Could not remove this grant.",
-      "oidcDiscoveryFailed": "Could not reach or validate the OIDC discovery endpoint.",
       "smtpNotConfigured": "SMTP is not configured.",
-      "testEmailFailed": "Could not send the test email."
+      "testEmailFailed": "Could not send the test email.",
+      "ssoInvalidIssuer": "The issuer URL is invalid.",
+      "ssoRegisterFailed": "Could not register the SSO provider.",
+      "ssoProviderNotFound": "That SSO provider no longer exists."
     },
     "runtimeConfig": {
       "provenance": {
@@ -880,20 +882,50 @@
         "from": "Sender",
         "sendTest": "Send a test email",
         "testSent": "Test email sent to {email}."
-      },
-      "oidc": {
-        "title": "Single Sign-On (OIDC)",
-        "description": "Generic OpenID Connect provider. Environment variables provide the defaults; values saved here override them.",
-        "discoveryUrl": "Discovery URL",
-        "clientId": "Client ID",
-        "clientSecret": "Client secret",
-        "secretSet": "•••• (configured — type to replace)",
-        "secretUnset": "Not set",
-        "providerLabel": "Sign-in button label",
-        "scopes": "Scopes",
-        "groupsClaim": "Groups claim",
-        "callbackInfo": "Register this callback URL with your identity provider:",
-        "lockoutWarning": "Before enabling “OIDC only”, verify the SSO sign-in works in a private window — a broken OIDC config with password sign-in disabled locks everyone out."
+      }
+    },
+    "sso": {
+      "title": "Single Sign-On (SSO)",
+      "description": "OpenID Connect identity providers. Users sign in through the provider; matching group claims map to app groups.",
+      "empty": "No SSO providers registered yet.",
+      "addTitle": "Add a provider",
+      "addProvider": "Add provider",
+      "addPending": "Adding…",
+      "added": "SSO provider added.",
+      "removed": "SSO provider removed.",
+      "remove": "Remove",
+      "removeTitle": "Remove SSO provider",
+      "removeConfirm": "Remove the “{provider}” provider? Users can no longer sign in through it, but their accounts are kept.",
+      "providerId": "Provider ID",
+      "issuer": "Issuer URL",
+      "clientId": "Client ID",
+      "clientSecret": "Client secret",
+      "domain": "Email domain",
+      "groupsClaim": "Groups claim",
+      "scopes": "Scopes",
+      "presetLabel": "Identity provider",
+      "providerMeta": "Domain {domain} · groups claim “{claim}”",
+      "verifyBeforeOnly": "After adding a provider, verify SSO sign-in works in a private window before enabling “SSO only” — a broken provider with password sign-in disabled locks everyone out.",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "Issuer is your Pocket ID base URL. The groups claim is \"groups\"."
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/your-realm",
+          "help": "Issuer includes the realm path. Add a \"groups\" client-scope mapper in Keycloak so group names reach the token."
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "Enable the groups claim in the app registration. Entra sends group object IDs (GUIDs) in the id_token — name your app groups after those GUIDs to match."
+        },
+        "generic": {
+          "label": "Generic OIDC",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },

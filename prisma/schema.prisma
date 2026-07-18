@@ -68,13 +68,34 @@ model User {
   // two-factor plugin
   twoFactorEnabled Boolean? @default(false) @map("two_factor_enabled")
 
-  sessions    Session[]
-  accounts    Account[]
-  memberships GroupMember[]
-  grants      SourcePermission[]
-  twoFactors  TwoFactor[]
+  sessions     Session[]
+  accounts     Account[]
+  memberships  GroupMember[]
+  grants       SourcePermission[]
+  twoFactors   TwoFactor[]
+  ssoProviders SsoProvider[]
 
   @@map("users")
+}
+
+/// SSO identity provider registered through the better-auth SSO plugin
+/// (@better-auth/sso). One row per IdP; `oidcConfig` holds the plugin's own
+/// JSON blob (client id/secret + discovered endpoints). Managed from
+/// Admin → Settings — the per-provider groups-claim name lives alongside in the
+/// Setting table (key `sso.groupsClaim.<providerId>`), read by provisionUser.
+model SsoProvider {
+  id             String  @id
+  issuer         String
+  domain         String
+  oidcConfig     String? @map("oidc_config")
+  samlConfig     String? @map("saml_config")
+  userId         String? @map("user_id")
+  providerId     String  @unique @map("provider_id")
+  organizationId String? @map("organization_id")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("sso_providers")
 }
 
 model TwoFactor {
