@@ -72,7 +72,12 @@ function withProviderRules<Schema extends typeof baseSourceSchema>(
       if (isLocal(values)) {
         // A provider switch mid-form can leave stray values behind; a local
         // source stores none of them.
-        return { ...values, endpoint: "", accessKeyId: "", secretAccessKey: "" };
+        return {
+          ...values,
+          endpoint: "",
+          accessKeyId: "",
+          secretAccessKey: "",
+        };
       }
       const checked = normalizeEndpoint(values.provider, values.endpoint);
       return checked.ok ? { ...values, endpoint: checked.value } : values;
