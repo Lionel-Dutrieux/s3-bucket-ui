@@ -30,6 +30,7 @@ import { SourceHealthDot } from "@/features/sources/components/source-health-dot
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { getProvider, PROVIDERS } from "@/lib/storage/providers";
+import { cn } from "@/lib/utils";
 
 export function AppSidebar({
   branding,
@@ -113,17 +114,15 @@ export function AppSidebar({
                         <Link
                           href={`/source/${source.id}`}
                           title={`${source.name} — ${source.bucket}`}
+                          className={admin ? undefined : "pe-7"}
                         >
                           <ProviderPlate
                             providerId={source.provider}
                             className="size-8"
                           />
                           <div className="grid min-w-0 flex-1 leading-tight">
-                            <span className="flex min-w-0 items-center gap-1.5">
-                              <span className="truncate text-sm font-medium">
-                                {source.name}
-                              </span>
-                              <SourceHealthDot sourceId={source.id} />
+                            <span className="truncate text-sm font-medium">
+                              {source.name}
                             </span>
                             {/* The bucket only helps when it differs from
                                 the display name. */}
@@ -135,6 +134,18 @@ export function AppSidebar({
                           </div>
                         </Link>
                       </SidebarMenuButton>
+                      {/* The dot lives in the action slot, right-aligned; for
+                          admins the hover "…" menu takes its place (mirror of
+                          SidebarMenuAction's showOnHover visibility). */}
+                      <span
+                        className={cn(
+                          "pointer-events-none absolute top-1/2 right-[11px] -translate-y-1/2",
+                          admin &&
+                            "transition-opacity max-md:opacity-0 pointer-coarse:opacity-0 group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0",
+                        )}
+                      >
+                        <SourceHealthDot sourceId={source.id} />
+                      </span>
                       {admin ? (
                         <SourceMenu source={source} isActive={isActive} />
                       ) : null}
