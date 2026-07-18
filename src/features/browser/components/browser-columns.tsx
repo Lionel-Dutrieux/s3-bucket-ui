@@ -64,6 +64,21 @@ const NUMERIC_CELL_CLASS =
 
 type ColumnsT = ReturnType<typeof useTranslations<"browser.columns">>;
 
+/** Shift/Ctrl/Cmd+click on a row's primary action means "select", not "open"
+ * — the Drive gesture. Returns true when consumed as a selection. */
+function selectionClick(
+  onToggleSelect: ((id: string, shift: boolean) => void) | undefined,
+  id: string,
+  event: React.MouseEvent,
+): boolean {
+  if (!onToggleSelect || !(event.shiftKey || event.ctrlKey || event.metaKey)) {
+    return false;
+  }
+  event.preventDefault();
+  onToggleSelect(id, event.shiftKey);
+  return true;
+}
+
 // Sorting is delegated to pure comparators; TanStack inverts them for the
 // descending direction, and the table re-groups folders first afterwards.
 const sortBy =
@@ -146,8 +161,14 @@ export function createBrowserColumns(
       meta: { cellClassName: "p-0" },
       cell: ({ row, table }) => {
         const entry = row.original;
-        const { sourceId, onPreview, onDetails, renamingId, onRenameEnd } =
-          table.options.meta ?? {};
+        const {
+          sourceId,
+          onPreview,
+          onDetails,
+          onToggleSelect,
+          renamingId,
+          onRenameEnd,
+        } = table.options.meta ?? {};
         if (renamingId === row.id && sourceId && onRenameEnd) {
           return (
             <div className={NAME_CELL_CLASS}>
@@ -174,6 +195,9 @@ export function createBrowserColumns(
                 pathname: `/source/${sourceId}`,
                 query: { prefix: entry.prefix },
               }}
+              // Modifier-clicks select instead of navigating (a shift-click
+              // on a bare link would even pop a new window).
+              onClick={(event) => selectionClick(onToggleSelect, row.id, event)}
               className={cn(NAME_CELL_CLASS, "font-medium")}
             >
               <Folder
@@ -187,7 +211,10 @@ export function createBrowserColumns(
         return isPreviewable(entry.name) ? (
           <button
             type="button"
-            onClick={() => onPreview?.(entry)}
+            onClick={(event) => {
+              if (selectionClick(onToggleSelect, row.id, event)) return;
+              onPreview?.(entry);
+            }}
             className={NAME_CELL_CLASS}
             title={t("previewFile", { name: entry.name })}
           >
@@ -199,7 +226,10 @@ export function createBrowserColumns(
           // download (that stays an explicit action).
           <button
             type="button"
-            onClick={() => onDetails?.(entry)}
+            onClick={(event) => {
+              if (selectionClick(onToggleSelect, row.id, event)) return;
+              onDetails?.(entry);
+            }}
             className={NAME_CELL_CLASS}
             title={t("detailsOf", { name: entry.name })}
           >
