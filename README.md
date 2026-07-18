@@ -97,6 +97,10 @@ SeaweedFS, Ceph RGW, …)
 **Protocols:** SFTP · FTP / FTPS · WebDAV (Nextcloud, ownCloud, NAS boxes) —
 same UI, downloads and previews stream through the app.
 
+**Local folders:** expose directories of the server itself (e.g. Docker
+volumes) — opt-in via the `LOCAL_FS_ROOTS` allowlist, no credentials, files
+stored as plain files so other tools can read and write the same directory.
+
 → Endpoints and credentials per provider: **[docs/providers.md](docs/providers.md)**
 
 ## 🚀 Quick start
