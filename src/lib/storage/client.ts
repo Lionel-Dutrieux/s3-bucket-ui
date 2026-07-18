@@ -1,12 +1,12 @@
 import "server-only";
 import { type Adapter, createFiles, Files } from "files-sdk";
 import { azure } from "files-sdk/azure";
-import { fs } from "files-sdk/fs";
 import { ftp } from "files-sdk/ftp";
 import { s3 } from "files-sdk/s3";
 import { sftp } from "files-sdk/sftp";
 import { webdav } from "files-sdk/webdav";
 import { zip } from "files-sdk/zip";
+import { localFs } from "@/lib/storage/fs-adapter";
 import { getProvider } from "@/lib/storage/providers";
 import { regionFromEndpoint } from "@/lib/storage/region";
 
@@ -67,7 +67,7 @@ function buildAdapter(credentials: StorageCredentials): Adapter {
   // LOCAL_FS_ROOTS by the source actions (lib/storage/local-roots.ts).
   // The adapter itself re-fences: keys resolving outside root throw.
   if (provider?.adapter === "fs") {
-    return fs({ root: credentials.bucket });
+    return localFs({ root: credentials.bucket });
   }
 
   const region =
