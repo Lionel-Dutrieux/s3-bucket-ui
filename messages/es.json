@@ -270,13 +270,18 @@
       "invalidShareOptions": "Opciones de compartición no válidas.",
       "onlyFilesShareable": "Solo se pueden compartir archivos.",
       "sharingDisabled": "Los enlaces públicos de compartición están desactivados en esta instancia.",
+      "sharingDisabledForSource": "Los enlaces de compartición pública están desactivados para esta fuente.",
+      "sharePasswordRequired": "Se requiere una contraseña para compartir un archivo aquí.",
       "fileNoLongerExists": "Este archivo ya no existe.",
       "sourceUnreachable": "No se pudo contactar con esta fuente.",
       "actionFailed": "No se pudo completar esta acción — inténtalo de nuevo.",
       "folderTooLargeToMove": "Esta carpeta contiene más de {max} objetos — demasiado grande para moverla de una vez.",
       "selectionTooLargeToCopy": "Esta selección contiene más de {max} objetos — demasiado grande para copiarla de una vez.",
       "objectsNotDeleted": "{count, plural, one {# objeto no se pudo eliminar} other {# objetos no se pudieron eliminar}}.",
-      "folderTooLargeToDelete": "Esta carpeta es demasiado grande para eliminarla de una vez — quedan objetos, vuelve a ejecutarlo."
+      "folderTooLargeToDelete": "Esta carpeta es demasiado grande para eliminarla de una vez — quedan objetos, vuelve a ejecutarlo.",
+      "onlyFoldersShareable": "Solo se pueden compartir carpetas de esta forma.",
+      "folderNoLongerExists": "Esta carpeta ya no existe.",
+      "invalidDropOptions": "Estas opciones de enlace de depósito no son válidas."
     },
     "filteredEmpty": {
       "title": "No hay {type} en esta carpeta",
@@ -299,7 +304,8 @@
       "filterPlaceholder": "Filtrar esta carpeta…",
       "matchCount": "{count, plural, one {# coincidencia} other {# coincidencias}}",
       "searchEverywhere": "Buscar en toda la fuente",
-      "upload": "Subir"
+      "upload": "Subir",
+      "dropLink": "Enlace de depósito"
     },
     "columns": {
       "name": "Nombre",
@@ -406,6 +412,7 @@
       "details": "Detalles",
       "download": "Descargar",
       "share": "Compartir",
+      "createDropLink": "Crear enlace de depósito",
       "duplicate": "Duplicar",
       "delete": "Eliminar"
     },
@@ -426,6 +433,33 @@
       "expiresLabel": "Caduca",
       "passwordLabel": "Contraseña (opcional)",
       "passwordPlaceholder": "Déjalo vacío para no usar ninguna",
+      "passwordRequiredLabel": "Contraseña (obligatoria)",
+      "passwordRequiredPlaceholder": "Define una contraseña para este enlace",
+      "maxDownloadsLabel": "Descargas máximas (opcional)",
+      "maxDownloadsPlaceholder": "Déjalo vacío para ilimitado",
+      "createLink": "Crear enlace",
+      "creating": "Creando…",
+      "titleFolder": "Compartir {name}",
+      "descriptionFolder": "Cualquiera con el enlace puede explorar y descargar esta carpeta — no se necesita cuenta. Gestiona los enlaces desde Enlaces compartidos."
+    },
+    "dropDialog": {
+      "title": "Enlace de depósito para {name}",
+      "titleRoot": "Enlace de depósito para esta fuente",
+      "description": "Cualquiera con el enlace puede subir archivos a esta carpeta — no se necesita cuenta. Nunca ve lo que ya hay dentro. Gestiona los enlaces desde Enlaces compartidos.",
+      "copyLink": "Copiar enlace",
+      "copiedToast": "Enlace copiado",
+      "copyFailedToast": "Error al copiar — selecciona el enlace y cópialo manualmente.",
+      "expiresLabel": "Caduca",
+      "passwordLabel": "Contraseña (opcional)",
+      "passwordPlaceholder": "Déjalo vacío para ninguna",
+      "passwordRequiredLabel": "Contraseña (obligatoria)",
+      "passwordRequiredPlaceholder": "Define una contraseña para este enlace",
+      "maxFilesLabel": "Archivos máximos (opcional)",
+      "maxFilesPlaceholder": "Ilimitado",
+      "maxSizeLabel": "MB máx. / archivo",
+      "maxSizePlaceholder": "Sin límite",
+      "noteLabel": "Nota para el invitado (opcional)",
+      "notePlaceholder": "p. ej. Sube tu contrato firmado",
       "createLink": "Crear enlace",
       "creating": "Creando…"
     },
@@ -557,6 +591,8 @@
       "namePlaceholder": "Documentos del equipo",
       "endpointLabel": "Endpoint",
       "accessNote": "Quién puede explorar, editar o eliminar en esta fuente se gestiona por usuario y por grupo desde el área de administración.",
+      "allowPublicSharesLabel": "Permitir enlaces de compartición pública",
+      "allowPublicSharesDescription": "Cuando está desactivado, nadie puede crear enlaces públicos para esta fuente y cualquier enlace existente deja de funcionar hasta que se vuelva a activar.",
       "connectionSuccessful": "Conexión correcta.",
       "secretPlaceholderEdit": "Déjalo en blanco para conservar el actual",
       "testConnection": "Probar conexión",
@@ -747,6 +783,13 @@
       "sharingDescription": "Permite que los usuarios con acceso a una fuente creen enlaces públicos a sus archivos (revocables, caducables y protegibles opcionalmente con contraseña). Desactivar esto bloquea la creación de nuevos enlaces — los existentes siguen funcionando hasta que se revoquen o caduquen.",
       "sharingEnabledToast": "Enlaces públicos activados",
       "sharingDisabledToast": "Enlaces públicos desactivados",
+      "shareMaxExpiryTitle": "Duración máxima del enlace",
+      "shareMaxExpiryDescription": "Limita cuánto tiempo puede vivir un enlace de compartición pública. Una vez definida, la caducidad se vuelve obligatoria y cualquier solicitud más larga (o sin caducidad) se ajusta a este límite.",
+      "shareMaxExpiryUnlimited": "Sin límite",
+      "shareMaxExpiryDays": "{count, plural, one {# día} other {# días}}",
+      "shareRequirePasswordTitle": "Exigir una contraseña",
+      "shareRequirePasswordDescription": "Obliga a que cada nuevo enlace de compartición pública esté protegido con contraseña.",
+      "sharePolicyToast": "Política de compartición actualizada",
       "twoFactorPolicyTitle": "Autenticación en dos pasos",
       "twoFactorPolicyDescription": "Exige a las cuentas configurar la autenticación en dos pasos antes de seguir usando la app: desactivada (nunca obligatoria), administradores (solo cuentas de administrador) o todas (cada cuenta). Se delega en el proveedor de identidad cuando el modo solo OIDC está activo.",
       "twoFactorPolicyOff": "Desactivada — nunca obligatoria",
@@ -930,7 +973,8 @@
       "signInFailed": "Error al iniciar sesión",
       "download": "Descargado",
       "downloadZip": "Descargado como ZIP",
-      "shareDownload": "Descargado mediante enlace compartido"
+      "shareDownload": "Descargado mediante enlace compartido",
+      "dropUpload": "Subido mediante enlace de depósito"
     },
     "exportCsv": "Exportar CSV",
     "exportJson": "Exportar JSON"
@@ -949,6 +993,7 @@
     "revokedToast": "Enlace revocado",
     "passwordProtected": "protegido con contraseña",
     "never": "Nunca",
+    "downloadsOfMax": "{count} de {max} descargas usadas",
     "columns": {
       "file": "Archivo",
       "source": "Fuente",
@@ -960,6 +1005,7 @@
     "status": {
       "active": "Activo",
       "expired": "Caducado",
+      "exhausted": "Agotado",
       "revoked": "Revocado"
     },
     "copyLinkAria": "Copiar enlace a {name}",
@@ -981,6 +1027,84 @@
       "linkNotFound": "Enlace no encontrado.",
       "notFound": "No encontrado.",
       "downloadFailed": "No se pudo descargar este archivo."
+    },
+    "fileLink": "Enlace de archivo",
+    "folderLink": "Enlace de carpeta",
+    "gallery": {
+      "breadcrumbAria": "Ruta de navegación",
+      "empty": "Esta carpeta está vacía.",
+      "foldersHeading": "Carpetas",
+      "filesHeading": "Archivos",
+      "previewFile": "Vista previa de {name}",
+      "download": "Descargar",
+      "downloadFileAria": "Descargar {name}",
+      "indexOfTotal": "{index} de {total}",
+      "previousFileAria": "Archivo anterior: {name}",
+      "previousFileTitle": "Archivo anterior (←)",
+      "nextFileAria": "Archivo siguiente: {name}",
+      "nextFileTitle": "Archivo siguiente (→)"
+    }
+  },
+  "drops": {
+    "publicUploader": {
+      "metaTitle": "Subir archivos",
+      "title": "Subir archivos",
+      "subtitle": "Añade archivos abajo. Se envían directamente al propietario — no verás nada de lo que ya hay aquí.",
+      "passwordProtected": "Este enlace está protegido con contraseña.",
+      "passwordLabel": "Contraseña",
+      "unlocking": "Desbloqueando…",
+      "unlock": "Desbloquear",
+      "dropHint": "Arrastra y suelta los archivos aquí, o",
+      "chooseFiles": "Elegir archivos",
+      "limitSize": "Hasta {max} MB por archivo",
+      "limitRemaining": "{count, plural, one {# subida restante} other {# subidas restantes}}",
+      "full": "Este enlace ha alcanzado su límite de subidas.",
+      "uploaded": "Subido",
+      "uploadError": "Error al subir — inténtalo de nuevo.",
+      "networkError": "Error de red — comprueba tu conexión y reinténtalo.",
+      "tooLargeClient": "Demasiado grande — {max} MB máx. por archivo.",
+      "dismiss": "Descartar {name}",
+      "successSummary": "{count, plural, one {# archivo subido} other {# archivos subidos}}"
+    },
+    "errors": {
+      "notFound": "Este enlace no está disponible.",
+      "passwordRequired": "Este enlace está protegido con contraseña.",
+      "missingBody": "No se recibió ningún archivo.",
+      "tooLarge": "El archivo es demasiado grande para este enlace.",
+      "limitReached": "Este enlace ha alcanzado su límite de subidas.",
+      "nameConflict": "Demasiados archivos con ese nombre — renómbralo y reinténtalo.",
+      "uploadFailed": "Error al subir — inténtalo de nuevo."
+    },
+    "management": {
+      "sectionTitle": "Enlaces de depósito",
+      "sectionDescriptionAdmin": "Todos los enlaces de compartición inversa donde los invitados suben archivos sin cuenta.",
+      "sectionDescriptionUser": "Enlaces de compartición inversa donde los invitados suben archivos a tus carpetas sin cuenta.",
+      "root": "Raíz de la fuente",
+      "dropLink": "Enlace de depósito",
+      "passwordProtected": "Protegido con contraseña",
+      "never": "Nunca",
+      "copiedToast": "Enlace copiado",
+      "copyFailedToast": "Error al copiar — selecciona el enlace y cópialo manualmente.",
+      "revokedToast": "Enlace revocado",
+      "emptyTitle": "Aún no hay enlaces de depósito",
+      "emptyDescription": "Crea uno desde el menú de una carpeta o el botón Enlace de depósito de la barra de herramientas.",
+      "copyLinkAria": "Copiar enlace para {name}",
+      "copyLinkTitle": "Copiar enlace",
+      "revokeLinkAria": "Revocar enlace para {name}",
+      "revokeLinkTitle": "Revocar enlace",
+      "columns": {
+        "destination": "Destino",
+        "source": "Fuente",
+        "created": "Creado",
+        "expires": "Caduca",
+        "deposits": "Depósitos",
+        "status": "Estado"
+      },
+      "status": {
+        "active": "Activo",
+        "expired": "Caducado",
+        "revoked": "Revocado"
+      }
     }
   },
   "api": {
