@@ -35,14 +35,29 @@ function extensionOf(name: string): string | null {
   return match ? match[1].toUpperCase() : null;
 }
 
-/** Multi-select wiring, present only when the source allows deletions.
- * Ids are the row ids the table uses: folder prefix or file key. */
+/** Multi-select wiring. Ids are the row ids the table uses: folder prefix or
+ * file key. */
 export interface GridSelection {
   isSelected: (id: string) => boolean;
   /** Shift-clicks extend the selection to the whole visible range. */
   toggle: (id: string, shift: boolean) => void;
   /** True while anything is selected — keeps every checkbox visible. */
   active: boolean;
+}
+
+/** Shift/Ctrl/Cmd+click means "select", wherever it lands on the card — the
+ * Drive gesture. Returns true when the event was consumed as a selection. */
+function selectionClick(
+  selection: GridSelection | undefined,
+  id: string,
+  event: React.MouseEvent,
+): boolean {
+  if (!selection || !(event.shiftKey || event.ctrlKey || event.metaKey)) {
+    return false;
+  }
+  event.preventDefault();
+  selection.toggle(id, event.shiftKey);
+  return true;
 }
 
 export function FileGrid({
@@ -251,6 +266,9 @@ function FolderCard({
             pathname: `/source/${sourceId}`,
             query: { prefix: folder.prefix },
           }}
+          // Modifier-clicks select instead of navigating (a shift-click on a
+          // bare link would even pop a new window).
+          onClick={(event) => selectionClick(selection, folder.prefix, event)}
           title={folder.name}
           className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -391,7 +409,10 @@ function FileCard({
         {isPreviewable(file.name) ? (
           <button
             type="button"
-            onClick={() => onPreview(file)}
+            onClick={(event) => {
+              if (selectionClick(selection, file.key, event)) return;
+              onPreview(file);
+            }}
             title={t("previewFile", { name: file.name })}
             className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
           >
@@ -402,7 +423,10 @@ function FileCard({
         ) : (
           <button
             type="button"
-            onClick={() => onDetails(file)}
+            onClick={(event) => {
+              if (selectionClick(selection, file.key, event)) return;
+              onDetails(file);
+            }}
             title={t("detailsOf", { name: file.name })}
             className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
           >
