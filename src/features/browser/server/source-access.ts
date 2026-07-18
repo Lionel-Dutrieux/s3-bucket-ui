@@ -24,8 +24,7 @@ interface SourceAccessOptions {
 }
 
 /**
- * next-safe-action port of `withWriteAccess`: the shared preamble for actions
- * scoped to a source. Re-checks the read grant server-side (uniform "Source
+ * The shared preamble for actions scoped to a source. Re-checks the read grant server-side (uniform "Source
  * not found." otherwise, so unreadable sources stay invisible), then enforces
  * the required capabilities — hiding a control is only cosmetic, this is the
  * real gate — and injects the decrypted source, a ready storage client and the

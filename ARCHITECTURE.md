@@ -24,10 +24,11 @@ src/app/          Routes only. Pages stay thin: parse params, call a
 src/features/     One folder per domain. Features may import from lib/,
                   forms/ and components/, never from app/ or from another
                   feature. Inside a feature:
-    actions.ts    'use server' — thin server actions: zod-parse input,
-                  delegate, return ActionResult. Large features split this
-                  into an actions/ folder by sub-domain (no barrel — call
-                  sites import the specific file).
+    actions.ts    'use server' — thin server actions built with
+                  next-safe-action (src/lib/safe-action.ts): declare an
+                  .inputSchema() zod schema, delegate, return the action's
+                  data. Large features split this into an actions/ folder by
+                  sub-domain (no barrel — call sites import the specific file).
     api/          client.ts (typed fetchers + URL builders for the feature's
                   routes) and queries.ts (TanStack Query queryOptions
                   factories — the only place query keys are defined).
@@ -36,7 +37,8 @@ src/features/     One folder per domain. Features may import from lib/,
     lib/          Pure logic: no I/O, no React — this is what unit tests
                   import (schemas, limits, listing/move planning…).
     server/       server-only modules: storage access, service functions,
-                  write guards, I/O helpers used by actions and routes.
+                  action middleware (e.g. sourceAccessMiddleware), I/O helpers
+                  used by actions and routes.
   sources/        Source management (admin-only): zod schema, actions,
                   add/edit/remove UI, provider icon mapping
                   (components/provider-icons.ts).
@@ -85,8 +87,9 @@ src/lib/shares/   Share-link logic shared by browser/ (creation) and shares/
 src/lib/branding/ White-label branding shared by admin/ (settings form), the
                   app shell and the public logo route.
 src/lib/          Shared low-level modules: prisma client, crypto, env,
-                  formatting, ActionResult, apiError, path helpers, SMTP
-                  mailer (mail.ts), clipboard helper (clipboard.ts).
+                  formatting, safe-action (next-safe-action clients +
+                  ActionError), apiError, path helpers, SMTP mailer (mail.ts),
+                  clipboard helper (clipboard.ts).
 src/components/   App shell (layout/), providers (providers/), shared widgets
                   (confirm-dialog) and shadcn/ui primitives (ui/, lint off).
 src/i18n/         next-intl configuration: config.ts (pure — locales, default,
@@ -128,8 +131,8 @@ Every server entry point re-validates (a layout check protects nothing else):
 | `(app)` layout, `/`, `/account`, `/shares` | `requireSession` (+ `listSourcesFor` for the sidebar) |
 | `/source/[id]` | `requireSourceAccess` → `notFound()` |
 | `/activity`, `/admin/*`, source actions | admin only (`requireAdmin` / `currentAdmin()`) |
-| admin actions | `withAdmin` (features/admin/server/guard.ts) |
-| 8 browser write actions | `withWriteAccess` (session + grant edit/delete) |
+| admin actions | `adminActionClient` (src/lib/safe-action.ts) |
+| browser write actions | `sourceAccessMiddleware` (session + grant edit/delete) |
 | `copyEntriesToSource` | `requireSourceAccess` on both ends + `canEdit` on the destination |
 | `createShareLink` | session + `requireSourceAccess` + instance-wide public-sharing setting |
 | Routes `details/download/folders/preview/search/text/thumbnail/zip` | `requireSourceAccess` → 404 |
@@ -146,12 +149,16 @@ callers return 404/notFound() and never reveal that a source exists.
 
 ## Conventions
 
-- **Server actions all return `ActionResult`** (`src/lib/action-result.ts`),
-  a discriminated union — callers narrow on `result.ok`. Actions zod-parse
-  their input first, stay thin, and return only what the UI needs (never a
-  raw DB record). Auth/permission checks happen inside the action path
-  (`withWriteAccess` for browser writes, `withAdmin` for admin actions,
-  `currentAdmin()` for source actions), not in the page.
+- **Server actions all use next-safe-action** (`src/lib/safe-action.ts`):
+  `authActionClient`/`adminActionClient` gate the caller, `actionClient` +
+  `sourceAccessMiddleware` gates browser writes. Inputs are declared with
+  `.inputSchema()` (the same zod schema the form uses); user-visible errors
+  are thrown as `ActionError` (already translated), everything else surfaces
+  through `metadata.failureKey`. Each action passes metadata `{ actionName,
+  revalidate?, failureKey? }`. Actions stay thin and return only what the UI
+  needs (never a raw DB record); callers read `result.data` /
+  `result.serverError` / `result.validationErrors`. Auth/permission checks
+  live in the client/middleware, not in the page.
 - **Route handlers all fail with `apiError(status, message)`**
   (`{ error: string }` JSON) — the fetchers in `api/client.ts` rely on it.
 - **Query keys live only in `api/queries.ts`** as `queryOptions` factories
@@ -169,7 +176,8 @@ callers return 404/notFound() and never reveal that a source exists.
   import next-intl — they expose message **keys** (e.g.
   `features/activity/lib/operation-labels.ts`) and the component resolves
   them at render with `t(key)`. Server-action errors are translated
-  server-side before they reach the `ActionResult`. Locale resolution is a
+  server-side before they surface (thrown as `ActionError`, or resolved from
+  `metadata.failureKey` in `handleServerError`). Locale resolution is a
   cookie, else `Accept-Language`, else English — no `[locale]` route segment,
   no middleware. Out of scope: zod messages, emails, server logs.
 
@@ -194,7 +202,7 @@ callers return 404/notFound() and never reveal that a source exists.
   the DAL is named functions per model; PrismaClient is already a typed
   repository.
 - **Writes are grant-gated server-side**: every write action re-checks the
-  session and the grant's capabilities via `withWriteAccess` — hiding a
+  session and the grant's capabilities via `sourceAccessMiddleware` — hiding a
   control is only cosmetic. Renaming and moving count as edits (the content
   survives under a new key, even though the implementation is copy +
   delete).
@@ -253,10 +261,12 @@ Run `pnpm test`. UI is verified manually (`pnpm dev`).
   `src/lib/storage/providers.ts` + its icon in
   `features/sources/components/provider-icons.ts`.
 - **Add a server action?** In the feature's `actions.ts` (or the matching
-  file under `actions/` when the feature splits them): zod-parse the
-  input (schema in `lib/`), delegate to a `server/` module or the DAL, return
-  `ActionResult`. Wrap browser writes in `withWriteAccess`, admin actions in
-  `withAdmin`; gate source actions with `currentAdmin()`.
+  file under `actions/` when the feature splits them): pick a client from
+  `src/lib/safe-action.ts` (`authActionClient`/`adminActionClient`, or
+  `actionClient.use(sourceAccessMiddleware(...))` for browser writes), declare
+  metadata `{ actionName, … }` and an `.inputSchema()` (schema in `lib/`),
+  delegate to a `server/` module or the DAL, and return only what the UI
+  needs. Throw `ActionError` for user-visible failures.
 - **Guard a new page or route?** Pages: `requireSession()` /
   `requireAdmin()` (`src/lib/auth/session.ts`); anything source-scoped:
   `requireSourceAccess(id)` (`src/lib/auth/access.ts`) and answer 404 on

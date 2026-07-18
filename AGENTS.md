@@ -17,10 +17,12 @@ the conventions. The short version:
 - Reads: RSC first, else GET route under `app/api/` + TanStack Query
   (`queryOptions` factories in `features/*/api/queries.ts`). Never a server
   action for a read.
-- Mutations: server actions returning `ActionResult`
-  (`src/lib/action-result.ts`), input validated with zod, permissions
-  re-checked server-side (`withWriteAccess` for browser writes, `withAdmin`
-  for admin actions, `currentAdmin()` for source actions).
+- Mutations: server actions built with next-safe-action
+  (`src/lib/safe-action.ts`) — `authActionClient`/`adminActionClient`, or
+  `actionClient` + `sourceAccessMiddleware` for browser writes. Inputs
+  validated with `.inputSchema()` zod schemas, user-visible errors thrown as
+  `ActionError`, each action carries metadata `{ actionName, revalidate?,
+  failureKey? }`. Permissions re-checked server-side by the client/middleware.
 - Auth: every server entry point re-validates — `requireSession`/
   `requireAdmin` for pages, `requireSourceAccess` for anything
   source-scoped (uniform 404). `proxy.ts` is optimistic UX, never a guard.
