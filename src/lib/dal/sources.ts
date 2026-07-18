@@ -15,6 +15,8 @@ export interface Source extends SourceSummary {
   endpoint: string;
   accessKeyId: string;
   secretAccessKey: string;
+  /** When false, no public share links may be minted and existing ones die. */
+  allowPublicShares: boolean;
 }
 
 export interface SourceInput {
@@ -24,6 +26,7 @@ export interface SourceInput {
   bucket: string;
   accessKeyId: string;
   secretAccessKey: string;
+  allowPublicShares: boolean;
 }
 
 // cache() deduplicates reads within one server render — the layout and the
@@ -86,6 +89,7 @@ export const getSource = cache(async (id: string): Promise<Source | null> => {
     endpoint: row.endpoint,
     accessKeyId: decrypt(row.accessKeyId),
     secretAccessKey: decrypt(row.secretAccessKey),
+    allowPublicShares: row.allowPublicShares,
   };
 });
 

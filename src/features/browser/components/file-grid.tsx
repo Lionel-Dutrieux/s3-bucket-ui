@@ -66,6 +66,8 @@ export function FileGrid({
   files,
   onPreview,
   onShare,
+  onShareFolder,
+  onCreateDrop,
   onDetails,
   onDelete,
   onRename,
@@ -83,6 +85,10 @@ export function FileGrid({
   onPreview: (file: FileEntry) => void;
   /** Absent when sharing is off (instance-wide setting) — hides the action. */
   onShare?: (file: FileEntry) => void;
+  /** Share a whole folder — absent when sharing is off. */
+  onShareFolder?: (folder: FolderEntry) => void;
+  /** Mint a deposit link for a folder — absent when drop links are off. */
+  onCreateDrop?: (folder: FolderEntry) => void;
   onDetails: (file: FileEntry) => void;
   /** Only set when the source allows deletions — absent hides the action.
    * Folders delete recursively (every object under the prefix). */
@@ -118,6 +124,8 @@ export function FileGrid({
                 folder={folder}
                 canMove={canMove}
                 selection={selection}
+                onShareFolder={onShareFolder}
+                onCreateDrop={onCreateDrop}
                 onRename={onRename}
                 onDelete={onDelete}
                 onMove={onMove}
@@ -166,6 +174,8 @@ function FolderCard({
   folder,
   canMove,
   selection,
+  onShareFolder,
+  onCreateDrop,
   onRename,
   onDelete,
   onMove,
@@ -176,6 +186,8 @@ function FolderCard({
   folder: FolderEntry;
   canMove: boolean;
   selection?: GridSelection;
+  onShareFolder?: (folder: FolderEntry) => void;
+  onCreateDrop?: (folder: FolderEntry) => void;
   onRename?: (entry: BrowserEntry) => void;
   onDelete?: (entry: BrowserEntry) => void;
   onMove?: (entry: BrowserEntry) => void;
@@ -194,7 +206,14 @@ function FolderCard({
     disabled: !canMove,
   });
   const entry = { kind: "folder" as const, ...folder };
-  const handlers = { sourceId, onRename, onDelete, onMove };
+  const handlers = {
+    sourceId,
+    onShareFolder,
+    onCreateDrop,
+    onRename,
+    onDelete,
+    onMove,
+  };
 
   return (
     <EntryContextMenu entry={entry} handlers={handlers}>

@@ -14,16 +14,6 @@ export const SMTP_FIELDS = [
 ] as const;
 export type SmtpField = (typeof SMTP_FIELDS)[number];
 
-export const OIDC_FIELDS = [
-  "discoveryUrl",
-  "clientId",
-  "clientSecret",
-  "providerLabel",
-  "scopes",
-  "groupsClaim",
-] as const;
-export type OidcField = (typeof OIDC_FIELDS)[number];
-
 export type Provenance = "db" | "env" | "unset";
 
 export interface SmtpConfig {
@@ -42,24 +32,6 @@ export interface SmtpEnvDefaults {
   user: string | undefined;
   password: string | undefined;
   from: string | undefined;
-}
-
-export interface OidcConfig {
-  discoveryUrl: string;
-  clientId: string;
-  clientSecret: string;
-  providerLabel: string;
-  scopes: string;
-  groupsClaim: string;
-}
-
-export interface OidcEnvDefaults {
-  discoveryUrl: string | undefined;
-  clientId: string | undefined;
-  clientSecret: string | undefined;
-  providerLabel: string;
-  scopes: string;
-  groupsClaim: string;
 }
 
 function pick(db: string | undefined, env: string | undefined): string | null {
@@ -90,25 +62,5 @@ export function resolveSmtpConfig(
     secure: db.secure !== undefined ? db.secure === "true" : envDefaults.secure,
     user: pick(db.user, envDefaults.user),
     password: pick(db.password, envDefaults.password),
-  };
-}
-
-/** null quand le trio discoveryUrl/clientId/clientSecret résolu est incomplet. */
-export function resolveOidcConfig(
-  db: Partial<Record<OidcField, string>>,
-  envDefaults: OidcEnvDefaults,
-): OidcConfig | null {
-  const discoveryUrl = pick(db.discoveryUrl, envDefaults.discoveryUrl);
-  const clientId = pick(db.clientId, envDefaults.clientId);
-  const clientSecret = pick(db.clientSecret, envDefaults.clientSecret);
-  if (!discoveryUrl || !clientId || !clientSecret) return null;
-  return {
-    discoveryUrl,
-    clientId,
-    clientSecret,
-    providerLabel: pick(db.providerLabel, envDefaults.providerLabel) ?? "SSO",
-    scopes:
-      pick(db.scopes, envDefaults.scopes) ?? "openid profile email groups",
-    groupsClaim: pick(db.groupsClaim, envDefaults.groupsClaim) ?? "groups",
   };
 }

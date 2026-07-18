@@ -26,7 +26,12 @@ export const config = {
   // proxy makes Next.js buffer its body in memory, silently truncated at
   // proxyClientMaxBodySize (10 MB) — uploads above that were corrupted without
   // any error. The route enforces auth itself (requireSourceAccess + canEdit).
+  // The public drop link surfaces (deposit page `d/` and its upload route
+  // `api/d/`) MUST stay excluded: they have no session, and the upload route —
+  // like the authenticated one — must not be routed through the proxy, which
+  // buffers and truncates bodies over proxyClientMaxBodySize (10 MB). Both
+  // enforce their own authorization from the token.
   matcher: [
-    "/((?!api/auth|api/health|api/s/|s/|api/sources/[^/]+/upload|sign-in|sign-up|two-factor|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|api/health|api/s/|s/|api/d/|d/|api/sources/[^/]+/upload|sign-in|sign-up|two-factor|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)",
   ],
 };

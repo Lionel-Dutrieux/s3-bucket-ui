@@ -7,12 +7,14 @@ import { SourceAccess } from "@/features/admin/components/source-access";
 import { AddSourceButton } from "@/features/sources/components/add-source-button";
 import { ProviderPlate } from "@/features/sources/components/provider-logos";
 import { SourceCardActions } from "@/features/sources/components/source-card-actions";
+import { getSourceHealth } from "@/features/sources/server/health";
 import { requireAdmin } from "@/lib/auth/session";
 import { listGroupOptions } from "@/lib/dal/groups";
 import { listGrantsForSource } from "@/lib/dal/permissions";
 import { getSource, listSources } from "@/lib/dal/sources";
 import { listUserOptions } from "@/lib/dal/users";
 import { getProvider } from "@/lib/storage/providers";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("sources");
@@ -27,9 +29,10 @@ export default async function AdminSourcesPage() {
     listUserOptions(),
     listGroupOptions(),
   ]);
-  const [grantsBySource, details] = await Promise.all([
+  const [grantsBySource, details, health] = await Promise.all([
     Promise.all(sources.map((source) => listGrantsForSource(source.id))),
     Promise.all(sources.map((source) => getSource(source.id))),
+    Promise.all(sources.map((source) => getSourceHealth(source.id))),
   ]);
 
   return (
@@ -48,6 +51,7 @@ export default async function AdminSourcesPage() {
         <div className="space-y-4">
           {sources.map((source, index) => {
             const detail = details[index];
+            const sourceHealth = health[index];
             return (
               <section
                 key={source.id}
@@ -67,6 +71,34 @@ export default async function AdminSourcesPage() {
                       {source.bucket}
                     </p>
                   </div>
+                  <div className="flex flex-col items-end gap-0.5 text-xs">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <span
+                        className={cn(
+                          "size-1.5 rounded-full",
+                          sourceHealth.status === "ok"
+                            ? "bg-emerald-500"
+                            : "bg-red-500",
+                        )}
+                        aria-hidden
+                      />
+                      {sourceHealth.status === "ok"
+                        ? t("health.reachable")
+                        : t("health.unreachable")}
+                    </span>
+                    {sourceHealth.status === "ok" ? (
+                      <span className="text-muted-foreground">
+                        {t("health.latency", { ms: sourceHealth.latencyMs })}
+                      </span>
+                    ) : sourceHealth.error ? (
+                      <span
+                        className="max-w-64 truncate text-muted-foreground"
+                        title={sourceHealth.error}
+                      >
+                        {sourceHealth.error}
+                      </span>
+                    ) : null}
+                  </div>
                   <SourceCardActions
                     source={source}
                     editValues={{
@@ -77,6 +109,7 @@ export default async function AdminSourcesPage() {
                       accessKeyId: detail?.accessKeyId ?? "",
                       // The secret never reaches the client — blank keeps it.
                       secretAccessKey: "",
+                      allowPublicShares: detail?.allowPublicShares ?? true,
                     }}
                     otherSources={sources.filter(
                       (other) => other.id !== source.id,

@@ -39,7 +39,12 @@
       "sharedLinks": "Geteilte Links",
       "activity": "Aktivität",
       "admin": "Admin",
-      "theme": "Design"
+      "theme": "Design",
+      "health": {
+        "reachable": "Quelle erreichbar",
+        "unreachable": "Quelle nicht erreichbar",
+        "checking": "Quelle wird geprüft…"
+      }
     },
     "commandPalette": {
       "title": "Befehlspalette",
@@ -108,7 +113,6 @@
     "signIn": {
       "metaTitle": "Anmelden",
       "title": "Anmelden",
-      "oidcOnlySubtitle": "Diese Instanz meldet sich über {provider} an.",
       "subtitle": "Willkommen zurück — melden Sie sich an, um Ihre Quellen zu durchsuchen.",
       "emailLabel": "E-Mail",
       "emailPlaceholder": "you@example.com",
@@ -119,7 +123,8 @@
       "or": "oder",
       "noAccount": "Noch kein Konto?",
       "signUpLink": "Registrieren",
-      "errorFallback": "Anmeldung fehlgeschlagen."
+      "errorFallback": "Anmeldung fehlgeschlagen.",
+      "ssoOnlySubtitle": "Diese Instanz meldet sich über Single Sign-On an."
     },
     "signUp": {
       "metaTitle": "Registrieren",
@@ -265,13 +270,18 @@
       "invalidShareOptions": "Ungültige Freigabeoptionen.",
       "onlyFilesShareable": "Nur Dateien können freigegeben werden.",
       "sharingDisabled": "Öffentliche Freigabelinks sind auf dieser Instanz deaktiviert.",
+      "sharingDisabledForSource": "Öffentliche Freigabelinks sind für diese Quelle deaktiviert.",
+      "sharePasswordRequired": "Zum Teilen einer Datei ist hier ein Passwort erforderlich.",
       "fileNoLongerExists": "Diese Datei existiert nicht mehr.",
       "sourceUnreachable": "Diese Quelle konnte nicht erreicht werden.",
       "actionFailed": "Diese Aktion konnte nicht abgeschlossen werden — versuchen Sie es erneut.",
       "folderTooLargeToMove": "Dieser Ordner enthält mehr als {max} Objekte — zu groß, um in einem Schritt verschoben zu werden.",
       "selectionTooLargeToCopy": "Diese Auswahl enthält mehr als {max} Objekte — zu groß, um in einem Schritt kopiert zu werden.",
       "objectsNotDeleted": "{count, plural, one {# Objekt konnte} other {# Objekte konnten}} nicht gelöscht werden.",
-      "folderTooLargeToDelete": "Dieser Ordner ist zu groß, um in einem Schritt gelöscht zu werden — es sind noch Objekte übrig, führen Sie den Vorgang erneut aus."
+      "folderTooLargeToDelete": "Dieser Ordner ist zu groß, um in einem Schritt gelöscht zu werden — es sind noch Objekte übrig, führen Sie den Vorgang erneut aus.",
+      "onlyFoldersShareable": "Nur Ordner können auf diese Weise geteilt werden.",
+      "folderNoLongerExists": "Dieser Ordner existiert nicht mehr.",
+      "invalidDropOptions": "Diese Drop-Link-Optionen sind ungültig."
     },
     "filteredEmpty": {
       "title": "Keine Objekte des Typs „{type}“ in diesem Ordner",
@@ -294,7 +304,8 @@
       "filterPlaceholder": "Diesen Ordner filtern…",
       "matchCount": "{count, plural, one {# Treffer} other {# Treffer}}",
       "searchEverywhere": "Gesamte Quelle durchsuchen",
-      "upload": "Hochladen"
+      "upload": "Hochladen",
+      "dropLink": "Drop-Link"
     },
     "columns": {
       "name": "Name",
@@ -401,6 +412,7 @@
       "details": "Details",
       "download": "Herunterladen",
       "share": "Teilen",
+      "createDropLink": "Drop-Link erstellen",
       "duplicate": "Duplizieren",
       "delete": "Löschen"
     },
@@ -421,6 +433,33 @@
       "expiresLabel": "Läuft ab",
       "passwordLabel": "Passwort (optional)",
       "passwordPlaceholder": "Leer lassen für keines",
+      "passwordRequiredLabel": "Passwort (erforderlich)",
+      "passwordRequiredPlaceholder": "Passwort für diesen Link festlegen",
+      "maxDownloadsLabel": "Max. Downloads (optional)",
+      "maxDownloadsPlaceholder": "Leer lassen für unbegrenzt",
+      "createLink": "Link erstellen",
+      "creating": "Wird erstellt…",
+      "titleFolder": "{name} teilen",
+      "descriptionFolder": "Jeder mit dem Link kann diesen Ordner durchsuchen und herunterladen — kein Konto nötig. Verwalten Sie Links unter Geteilte Links."
+    },
+    "dropDialog": {
+      "title": "Drop-Link für {name}",
+      "titleRoot": "Drop-Link für diese Quelle",
+      "description": "Jeder mit dem Link kann Dateien in diesen Ordner hochladen — kein Konto nötig. Was bereits vorhanden ist, sieht er nie. Verwalten Sie Links unter Geteilte Links.",
+      "copyLink": "Link kopieren",
+      "copiedToast": "Link kopiert",
+      "copyFailedToast": "Kopieren fehlgeschlagen — markieren Sie den Link und kopieren Sie ihn manuell.",
+      "expiresLabel": "Läuft ab",
+      "passwordLabel": "Passwort (optional)",
+      "passwordPlaceholder": "Leer lassen für keins",
+      "passwordRequiredLabel": "Passwort (erforderlich)",
+      "passwordRequiredPlaceholder": "Passwort für diesen Link festlegen",
+      "maxFilesLabel": "Max. Dateien (optional)",
+      "maxFilesPlaceholder": "Unbegrenzt",
+      "maxSizeLabel": "Max. MB / Datei",
+      "maxSizePlaceholder": "Keine Grenze",
+      "noteLabel": "Notiz für den Gast (optional)",
+      "notePlaceholder": "z. B. Bitte laden Sie Ihren unterschriebenen Vertrag hoch",
       "createLink": "Link erstellen",
       "creating": "Wird erstellt…"
     },
@@ -530,6 +569,11 @@
     "remove": "Entfernen",
     "removeAria": "{name} entfernen",
     "connectionVerifiedNote": "Die Verbindung wird beim Speichern erneut geprüft.",
+    "health": {
+      "reachable": "Erreichbar",
+      "unreachable": "Nicht erreichbar",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "Quelle bearbeiten",
       "title": "{name} bearbeiten",
@@ -547,6 +591,8 @@
       "namePlaceholder": "Team-Dokumente",
       "endpointLabel": "Endpunkt",
       "accessNote": "Wer diese Quelle durchsuchen, bearbeiten oder löschen darf, wird pro Benutzer und Gruppe im Admin-Bereich verwaltet.",
+      "allowPublicSharesLabel": "Öffentliche Freigabelinks zulassen",
+      "allowPublicSharesDescription": "Wenn deaktiviert, kann niemand öffentliche Links für diese Quelle erstellen und alle bestehenden Links funktionieren erst nach erneuter Aktivierung wieder.",
       "connectionSuccessful": "Verbindung erfolgreich.",
       "secretPlaceholderEdit": "Leer lassen, um das aktuelle beizubehalten",
       "testConnection": "Verbindung testen",
@@ -737,6 +783,13 @@
       "sharingDescription": "Erlaubt Benutzern mit Zugriff auf eine Quelle, öffentliche Links zu ihren Dateien zu erstellen (widerrufbar, mit Ablaufdatum, optional passwortgeschützt). Das Deaktivieren blockiert das Erstellen neuer Links — bestehende funktionieren weiter, bis sie widerrufen werden oder ablaufen.",
       "sharingEnabledToast": "Öffentliche Freigabelinks aktiviert",
       "sharingDisabledToast": "Öffentliche Freigabelinks deaktiviert",
+      "shareMaxExpiryTitle": "Maximale Link-Lebensdauer",
+      "shareMaxExpiryDescription": "Begrenzt, wie lange ein öffentlicher Freigabelink bestehen darf. Sobald gesetzt, wird ein Ablaufdatum verpflichtend und jede längere (oder unbefristete) Anfrage wird auf diese Grenze zurückgesetzt.",
+      "shareMaxExpiryUnlimited": "Keine Grenze",
+      "shareMaxExpiryDays": "{count, plural, one {# Tag} other {# Tage}}",
+      "shareRequirePasswordTitle": "Passwort erforderlich",
+      "shareRequirePasswordDescription": "Erzwingt für jeden neuen öffentlichen Freigabelink einen Passwortschutz.",
+      "sharePolicyToast": "Freigaberichtlinie aktualisiert",
       "twoFactorPolicyTitle": "Zwei-Faktor-Authentifizierung",
       "twoFactorPolicyDescription": "Verlangt von Konten, die Zwei-Faktor-Authentifizierung einzurichten, bevor sie die App weiter nutzen können: Aus (nie erforderlich), Admins (nur Admin-Konten) oder Alle (jedes Konto). Im Nur-OIDC-Modus an den Identitätsanbieter delegiert.",
       "twoFactorPolicyOff": "Aus — nie erforderlich",
@@ -800,12 +853,17 @@
       "invalidGrant": "Ungültige Berechtigung.",
       "saveGrantFailed": "Diese Berechtigung konnte nicht gespeichert werden.",
       "removeGrantFailed": "Diese Berechtigung konnte nicht entfernt werden.",
-      "oidcDiscoveryFailed": "Der OIDC-Discovery-Endpunkt konnte nicht erreicht oder validiert werden.",
       "smtpNotConfigured": "SMTP ist nicht konfiguriert.",
-      "testEmailFailed": "Die Test-E-Mail konnte nicht gesendet werden."
+      "testEmailFailed": "Die Test-E-Mail konnte nicht gesendet werden.",
+      "ssoInvalidIssuer": "Die Aussteller-URL ist ungültig.",
+      "ssoRegisterFailed": "Der SSO-Anbieter konnte nicht registriert werden.",
+      "ssoProviderNotFound": "Dieser SSO-Anbieter existiert nicht mehr."
     },
     "runtimeConfig": {
-      "provenance": { "env": "Umgebung", "custom": "Eigene" },
+      "provenance": {
+        "env": "Umgebung",
+        "custom": "Eigene"
+      },
       "resetToEnv": "Umgebungswerte wiederherstellen",
       "resetConfirm": "Dies entfernt alle hier gespeicherten Werte und greift wieder auf die Umgebungsvariablen zurück. Fortfahren?",
       "saved": "Einstellungen gespeichert.",
@@ -824,20 +882,50 @@
         "from": "Absender",
         "sendTest": "Test-E-Mail senden",
         "testSent": "Test-E-Mail an {email} gesendet."
-      },
-      "oidc": {
-        "title": "Single Sign-On (OIDC)",
-        "description": "Generischer OpenID-Connect-Anbieter. Umgebungsvariablen liefern die Standardwerte; hier gespeicherte Werte überschreiben sie.",
-        "discoveryUrl": "Discovery-URL",
-        "clientId": "Client-ID",
-        "clientSecret": "Client-Secret",
-        "secretSet": "•••• (konfiguriert — zum Ersetzen eingeben)",
-        "secretUnset": "Nicht festgelegt",
-        "providerLabel": "Beschriftung der Anmelde-Schaltfläche",
-        "scopes": "Scopes",
-        "groupsClaim": "Groups-Claim",
-        "callbackInfo": "Registrieren Sie diese Callback-URL bei Ihrem Identity Provider:",
-        "lockoutWarning": "Bevor Sie „Nur OIDC“ aktivieren, prüfen Sie die SSO-Anmeldung in einem privaten Fenster — eine fehlerhafte OIDC-Konfiguration bei deaktivierter Passwort-Anmeldung sperrt alle aus."
+      }
+    },
+    "sso": {
+      "title": "Single Sign-On (SSO)",
+      "description": "OpenID-Connect-Identitätsanbieter. Benutzer melden sich über den Anbieter an; passende Gruppen-Claims werden App-Gruppen zugeordnet.",
+      "empty": "Noch keine SSO-Anbieter registriert.",
+      "addTitle": "Anbieter hinzufügen",
+      "addProvider": "Anbieter hinzufügen",
+      "addPending": "Wird hinzugefügt…",
+      "added": "SSO-Anbieter hinzugefügt.",
+      "removed": "SSO-Anbieter entfernt.",
+      "remove": "Entfernen",
+      "removeTitle": "SSO-Anbieter entfernen",
+      "removeConfirm": "Anbieter „{provider}“ entfernen? Benutzer können sich darüber nicht mehr anmelden, ihre Konten bleiben jedoch erhalten.",
+      "providerId": "Anbieter-ID",
+      "issuer": "Aussteller-URL",
+      "clientId": "Client-ID",
+      "clientSecret": "Client-Secret",
+      "domain": "E-Mail-Domain",
+      "groupsClaim": "Gruppen-Claim",
+      "scopes": "Scopes",
+      "presetLabel": "Identitätsanbieter",
+      "providerMeta": "Domain {domain} · Gruppen-Claim „{claim}“",
+      "verifyBeforeOnly": "Prüfen Sie nach dem Hinzufügen eines Anbieters die SSO-Anmeldung in einem privaten Fenster, bevor Sie „Nur SSO“ aktivieren — ein defekter Anbieter mit deaktivierter Passwortanmeldung sperrt alle aus.",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "Der Aussteller ist die Basis-URL Ihrer Pocket ID. Der Gruppen-Claim ist \"groups\"."
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/ihr-realm",
+          "help": "Der Aussteller enthält den Realm-Pfad. Fügen Sie in Keycloak einen \"groups\"-Client-Scope-Mapper hinzu, damit Gruppennamen in das Token gelangen."
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "Aktivieren Sie den Gruppen-Claim in der App-Registrierung. Entra sendet Gruppen-Objekt-IDs (GUIDs) im id_token — benennen Sie Ihre App-Gruppen nach diesen GUIDs."
+        },
+        "generic": {
+          "label": "Generisches OIDC",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },
@@ -885,7 +973,8 @@
       "signInFailed": "Anmeldung fehlgeschlagen",
       "download": "Heruntergeladen",
       "downloadZip": "Als ZIP heruntergeladen",
-      "shareDownload": "Über Freigabelink heruntergeladen"
+      "shareDownload": "Über Freigabelink heruntergeladen",
+      "dropUpload": "Über Drop-Link hochgeladen"
     },
     "exportCsv": "CSV exportieren",
     "exportJson": "JSON exportieren"
@@ -904,6 +993,7 @@
     "revokedToast": "Link widerrufen",
     "passwordProtected": "passwortgeschützt",
     "never": "Nie",
+    "downloadsOfMax": "{count} von {max} Downloads verwendet",
     "columns": {
       "file": "Datei",
       "source": "Quelle",
@@ -915,6 +1005,7 @@
     "status": {
       "active": "Aktiv",
       "expired": "Abgelaufen",
+      "exhausted": "Erschöpft",
       "revoked": "Widerrufen"
     },
     "copyLinkAria": "Link zu {name} kopieren",
@@ -936,6 +1027,84 @@
       "linkNotFound": "Link nicht gefunden.",
       "notFound": "Nicht gefunden.",
       "downloadFailed": "Diese Datei konnte nicht heruntergeladen werden."
+    },
+    "fileLink": "Dateilink",
+    "folderLink": "Ordnerlink",
+    "gallery": {
+      "breadcrumbAria": "Navigationspfad",
+      "empty": "Dieser Ordner ist leer.",
+      "foldersHeading": "Ordner",
+      "filesHeading": "Dateien",
+      "previewFile": "Vorschau von {name}",
+      "download": "Herunterladen",
+      "downloadFileAria": "{name} herunterladen",
+      "indexOfTotal": "{index} von {total}",
+      "previousFileAria": "Vorherige Datei: {name}",
+      "previousFileTitle": "Vorherige Datei (←)",
+      "nextFileAria": "Nächste Datei: {name}",
+      "nextFileTitle": "Nächste Datei (→)"
+    }
+  },
+  "drops": {
+    "publicUploader": {
+      "metaTitle": "Dateien hochladen",
+      "title": "Dateien hochladen",
+      "subtitle": "Fügen Sie unten Dateien hinzu. Sie werden direkt an den Eigentümer gesendet — was bereits vorhanden ist, sehen Sie nicht.",
+      "passwordProtected": "Dieser Link ist passwortgeschützt.",
+      "passwordLabel": "Passwort",
+      "unlocking": "Wird entsperrt…",
+      "unlock": "Entsperren",
+      "dropHint": "Dateien hierher ziehen und ablegen, oder",
+      "chooseFiles": "Dateien auswählen",
+      "limitSize": "Bis zu {max} MB pro Datei",
+      "limitRemaining": "{count, plural, one {# Upload übrig} other {# Uploads übrig}}",
+      "full": "Dieser Link hat sein Upload-Limit erreicht.",
+      "uploaded": "Hochgeladen",
+      "uploadError": "Upload fehlgeschlagen — erneut versuchen.",
+      "networkError": "Netzwerkfehler — prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "tooLargeClient": "Zu groß — maximal {max} MB pro Datei.",
+      "dismiss": "{name} verwerfen",
+      "successSummary": "{count, plural, one {# Datei hochgeladen} other {# Dateien hochgeladen}}"
+    },
+    "errors": {
+      "notFound": "Dieser Link ist nicht verfügbar.",
+      "passwordRequired": "Dieser Link ist passwortgeschützt.",
+      "missingBody": "Es wurde keine Datei empfangen.",
+      "tooLarge": "Datei ist zu groß für diesen Link.",
+      "limitReached": "Dieser Link hat sein Upload-Limit erreicht.",
+      "nameConflict": "Zu viele Dateien mit diesem Namen — benennen Sie sie um und versuchen Sie es erneut.",
+      "uploadFailed": "Upload fehlgeschlagen — erneut versuchen."
+    },
+    "management": {
+      "sectionTitle": "Drop-Links",
+      "sectionDescriptionAdmin": "Alle Reverse-Share-Links, über die Gäste ohne Konto Dateien hochladen.",
+      "sectionDescriptionUser": "Reverse-Share-Links, über die Gäste ohne Konto Dateien in Ihre Ordner hochladen.",
+      "root": "Quellenstamm",
+      "dropLink": "Drop-Link",
+      "passwordProtected": "Passwortgeschützt",
+      "never": "Nie",
+      "copiedToast": "Link kopiert",
+      "copyFailedToast": "Kopieren fehlgeschlagen — markieren Sie den Link und kopieren Sie ihn manuell.",
+      "revokedToast": "Link widerrufen",
+      "emptyTitle": "Noch keine Drop-Links",
+      "emptyDescription": "Erstellen Sie einen über das Menü eines Ordners oder die Schaltfläche Drop-Link in der Symbolleiste.",
+      "copyLinkAria": "Link für {name} kopieren",
+      "copyLinkTitle": "Link kopieren",
+      "revokeLinkAria": "Link für {name} widerrufen",
+      "revokeLinkTitle": "Link widerrufen",
+      "columns": {
+        "destination": "Ziel",
+        "source": "Quelle",
+        "created": "Erstellt",
+        "expires": "Läuft ab",
+        "deposits": "Uploads",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Aktiv",
+        "expired": "Abgelaufen",
+        "revoked": "Widerrufen"
+      }
     }
   },
   "api": {

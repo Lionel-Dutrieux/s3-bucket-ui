@@ -39,7 +39,12 @@
       "sharedLinks": "分享链接",
       "activity": "活动",
       "admin": "管理",
-      "theme": "主题"
+      "theme": "主题",
+      "health": {
+        "reachable": "数据源可访问",
+        "unreachable": "数据源不可访问",
+        "checking": "正在检查数据源…"
+      }
     },
     "commandPalette": {
       "title": "命令面板",
@@ -108,7 +113,6 @@
     "signIn": {
       "metaTitle": "登录",
       "title": "登录",
-      "oidcOnlySubtitle": "此实例通过 {provider} 登录。",
       "subtitle": "欢迎回来 — 登录以浏览您的来源。",
       "emailLabel": "邮箱",
       "emailPlaceholder": "you@example.com",
@@ -119,7 +123,8 @@
       "or": "或",
       "noAccount": "还没有账户？",
       "signUpLink": "注册",
-      "errorFallback": "登录失败。"
+      "errorFallback": "登录失败。",
+      "ssoOnlySubtitle": "此实例通过单点登录 (SSO) 登录。"
     },
     "signUp": {
       "metaTitle": "注册",
@@ -265,13 +270,18 @@
       "invalidShareOptions": "分享选项无效。",
       "onlyFilesShareable": "只有文件可以分享。",
       "sharingDisabled": "此实例已停用公开分享链接。",
+      "sharingDisabledForSource": "此来源已关闭公开分享链接。",
+      "sharePasswordRequired": "在此分享文件需要设置密码。",
       "fileNoLongerExists": "此文件已不存在。",
       "sourceUnreachable": "无法访问此来源。",
       "actionFailed": "无法完成此操作 — 请重试。",
       "folderTooLargeToMove": "此文件夹包含超过 {max} 个对象 — 太大，无法一次移动。",
       "selectionTooLargeToCopy": "所选内容包含超过 {max} 个对象 — 太大，无法一次复制。",
       "objectsNotDeleted": "{count, plural, other {有 # 个对象无法删除。}}",
-      "folderTooLargeToDelete": "此文件夹太大，无法一次删除 — 部分对象仍在，请再次运行。"
+      "folderTooLargeToDelete": "此文件夹太大，无法一次删除 — 部分对象仍在，请再次运行。",
+      "onlyFoldersShareable": "只有文件夹才能以此方式分享。",
+      "folderNoLongerExists": "此文件夹已不存在。",
+      "invalidDropOptions": "这些投递链接选项无效。"
     },
     "filteredEmpty": {
       "title": "此文件夹中没有{type}",
@@ -294,7 +304,8 @@
       "filterPlaceholder": "筛选此文件夹…",
       "matchCount": "{count, plural, other {# 个匹配}}",
       "searchEverywhere": "搜索整个来源",
-      "upload": "上传"
+      "upload": "上传",
+      "dropLink": "投递链接"
     },
     "columns": {
       "name": "名称",
@@ -401,6 +412,7 @@
       "details": "详情",
       "download": "下载",
       "share": "分享",
+      "createDropLink": "创建投递链接",
       "duplicate": "创建副本",
       "delete": "删除"
     },
@@ -421,8 +433,35 @@
       "expiresLabel": "过期时间",
       "passwordLabel": "密码（可选）",
       "passwordPlaceholder": "留空表示无密码",
+      "passwordRequiredLabel": "密码（必填）",
+      "passwordRequiredPlaceholder": "为此链接设置密码",
+      "maxDownloadsLabel": "最大下载次数（可选）",
+      "maxDownloadsPlaceholder": "留空表示不限",
       "createLink": "创建链接",
-      "creating": "创建中…"
+      "creating": "创建中…",
+      "titleFolder": "分享 {name}",
+      "descriptionFolder": "任何拥有链接的人都可以浏览并下载此文件夹 — 无需账户。可在“分享链接”中管理链接。"
+    },
+    "dropDialog": {
+      "title": "{name} 的投递链接",
+      "titleRoot": "此来源的投递链接",
+      "description": "任何拥有链接的人都可以向此文件夹上传文件 — 无需账户。他们永远看不到其中已有的内容。可在“分享链接”中管理链接。",
+      "copyLink": "复制链接",
+      "copiedToast": "链接已复制",
+      "copyFailedToast": "复制失败 — 请选中链接并手动复制。",
+      "expiresLabel": "过期时间",
+      "passwordLabel": "密码（可选）",
+      "passwordPlaceholder": "留空表示不设置",
+      "passwordRequiredLabel": "密码（必填）",
+      "passwordRequiredPlaceholder": "为此链接设置密码",
+      "maxFilesLabel": "最大文件数（可选）",
+      "maxFilesPlaceholder": "不限",
+      "maxSizeLabel": "每个文件最大 MB",
+      "maxSizePlaceholder": "无限制",
+      "noteLabel": "给访客的备注（可选）",
+      "notePlaceholder": "例如：请上传您已签署的合同",
+      "createLink": "创建链接",
+      "creating": "正在创建…"
     },
     "copyToDialog": {
       "title": "复制 {count, plural, other {# 个项目}} 到…",
@@ -530,6 +569,11 @@
     "remove": "移除",
     "removeAria": "移除 {name}",
     "connectionVerifiedNote": "保存时会再次验证连接。",
+    "health": {
+      "reachable": "可访问",
+      "unreachable": "不可访问",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "编辑来源",
       "title": "编辑 {name}",
@@ -547,6 +591,8 @@
       "namePlaceholder": "团队文档",
       "endpointLabel": "端点",
       "accessNote": "谁可以在此来源上浏览、编辑或删除，由管理区域按用户和组管理。",
+      "allowPublicSharesLabel": "允许公开分享链接",
+      "allowPublicSharesDescription": "关闭后，任何人都无法为此来源创建公开链接，且所有现有链接将停止工作，直到重新开启。",
       "connectionSuccessful": "连接成功。",
       "secretPlaceholderEdit": "留空以保留当前值",
       "testConnection": "测试连接",
@@ -737,6 +783,13 @@
       "sharingDescription": "允许有权访问某来源的用户为其文件创建公开链接（可撤销、可设过期、可选密码保护）。关闭此项会阻止创建新链接 — 现有链接在被撤销或过期前仍可使用。",
       "sharingEnabledToast": "公开分享链接已启用",
       "sharingDisabledToast": "公开分享链接已停用",
+      "shareMaxExpiryTitle": "链接最长有效期",
+      "shareMaxExpiryDescription": "限制公开分享链接的最长存活时间。设置后，过期时间将成为必填，任何更长（或永不过期）的请求都会被收紧至此上限。",
+      "shareMaxExpiryUnlimited": "无限制",
+      "shareMaxExpiryDays": "{count, plural, other {# 天}}",
+      "shareRequirePasswordTitle": "要求设置密码",
+      "shareRequirePasswordDescription": "强制每个新的公开分享链接都必须设置密码。",
+      "sharePolicyToast": "分享策略已更新",
       "twoFactorPolicyTitle": "双重身份验证",
       "twoFactorPolicyDescription": "要求账户在继续使用应用前设置双重身份验证：关闭（从不要求）、仅管理员（仅管理员账户）或全部（所有账户）。启用仅 OIDC 模式时，该项交由身份提供商处理。",
       "twoFactorPolicyOff": "关闭 — 从不要求",
@@ -800,12 +853,17 @@
       "invalidGrant": "授权无效。",
       "saveGrantFailed": "无法保存此授权。",
       "removeGrantFailed": "无法移除此授权。",
-      "oidcDiscoveryFailed": "无法访问或验证 OIDC 发现端点。",
       "smtpNotConfigured": "SMTP 未配置。",
-      "testEmailFailed": "无法发送测试邮件。"
+      "testEmailFailed": "无法发送测试邮件。",
+      "ssoInvalidIssuer": "颁发者 URL 无效。",
+      "ssoRegisterFailed": "无法注册 SSO 提供程序。",
+      "ssoProviderNotFound": "该 SSO 提供程序已不存在。"
     },
     "runtimeConfig": {
-      "provenance": { "env": "环境变量", "custom": "自定义" },
+      "provenance": {
+        "env": "环境变量",
+        "custom": "自定义"
+      },
       "resetToEnv": "恢复环境变量的值",
       "resetConfirm": "这将移除此处保存的所有值，并回退到环境变量。是否继续？",
       "saved": "设置已保存。",
@@ -824,20 +882,50 @@
         "from": "发件人",
         "sendTest": "发送测试邮件",
         "testSent": "测试邮件已发送至 {email}。"
-      },
-      "oidc": {
-        "title": "单点登录（OIDC）",
-        "description": "通用 OpenID Connect 提供商。环境变量提供默认值；此处保存的值会覆盖它们。",
-        "discoveryUrl": "发现 URL",
-        "clientId": "客户端 ID",
-        "clientSecret": "客户端密钥",
-        "secretSet": "••••（已配置 — 输入以替换）",
-        "secretUnset": "未设置",
-        "providerLabel": "登录按钮标签",
-        "scopes": "Scopes",
-        "groupsClaim": "分组声明（groups claim）",
-        "callbackInfo": "请在您的身份提供商处注册此回调 URL：",
-        "lockoutWarning": "启用「仅 OIDC」之前，请在隐私窗口中验证 SSO 登录是否正常 — 如果 OIDC 配置有误且已禁用密码登录，将导致所有人都无法登录。"
+      }
+    },
+    "sso": {
+      "title": "单点登录 (SSO)",
+      "description": "OpenID Connect 身份提供程序。用户通过提供程序登录；匹配的群组声明会映射到应用群组。",
+      "empty": "尚未注册任何 SSO 提供程序。",
+      "addTitle": "添加提供程序",
+      "addProvider": "添加提供程序",
+      "addPending": "正在添加…",
+      "added": "已添加 SSO 提供程序。",
+      "removed": "已移除 SSO 提供程序。",
+      "remove": "移除",
+      "removeTitle": "移除 SSO 提供程序",
+      "removeConfirm": "移除提供程序“{provider}”？用户将无法再通过它登录，但其账户会被保留。",
+      "providerId": "提供程序 ID",
+      "issuer": "颁发者 URL",
+      "clientId": "客户端 ID",
+      "clientSecret": "客户端密钥",
+      "domain": "邮箱域名",
+      "groupsClaim": "群组声明",
+      "scopes": "作用域",
+      "presetLabel": "身份提供程序",
+      "providerMeta": "域名 {domain} · 群组声明“{claim}”",
+      "verifyBeforeOnly": "添加提供程序后，请先在隐私窗口中验证 SSO 登录是否正常，再启用“仅 SSO”——若提供程序配置有误且已禁用密码登录，将导致所有人无法登录。",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "颁发者为你的 Pocket ID 基础 URL。群组声明为 \"groups\"。"
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/your-realm",
+          "help": "颁发者包含 realm 路径。在 Keycloak 中添加 \"groups\" client-scope 映射器，使群组名称进入令牌。"
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "在应用注册中启用群组声明。Entra 在 id_token 中发送群组对象 ID (GUID) — 将你的应用群组命名为这些 GUID 以进行匹配。"
+        },
+        "generic": {
+          "label": "通用 OIDC",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },
@@ -885,7 +973,8 @@
       "signInFailed": "登录失败",
       "download": "已下载",
       "downloadZip": "已下载为 ZIP",
-      "shareDownload": "已通过分享链接下载"
+      "shareDownload": "已通过分享链接下载",
+      "dropUpload": "通过投递链接上传"
     },
     "exportCsv": "导出 CSV",
     "exportJson": "导出 JSON"
@@ -904,6 +993,7 @@
     "revokedToast": "链接已撤销",
     "passwordProtected": "密码保护",
     "never": "永不",
+    "downloadsOfMax": "已使用 {count}/{max} 次下载",
     "columns": {
       "file": "文件",
       "source": "来源",
@@ -915,6 +1005,7 @@
     "status": {
       "active": "有效",
       "expired": "已过期",
+      "exhausted": "已用尽",
       "revoked": "已撤销"
     },
     "copyLinkAria": "复制 {name} 的链接",
@@ -936,6 +1027,84 @@
       "linkNotFound": "链接未找到。",
       "notFound": "未找到。",
       "downloadFailed": "无法下载此文件。"
+    },
+    "fileLink": "文件链接",
+    "folderLink": "文件夹链接",
+    "gallery": {
+      "breadcrumbAria": "面包屑导航",
+      "empty": "此文件夹为空。",
+      "foldersHeading": "文件夹",
+      "filesHeading": "文件",
+      "previewFile": "预览 {name}",
+      "download": "下载",
+      "downloadFileAria": "下载 {name}",
+      "indexOfTotal": "{index} / {total}",
+      "previousFileAria": "上一个文件：{name}",
+      "previousFileTitle": "上一个文件 (←)",
+      "nextFileAria": "下一个文件：{name}",
+      "nextFileTitle": "下一个文件 (→)"
+    }
+  },
+  "drops": {
+    "publicUploader": {
+      "metaTitle": "上传文件",
+      "title": "上传文件",
+      "subtitle": "在下方添加文件。它们将直接发送给所有者 — 你看不到这里已有的任何内容。",
+      "passwordProtected": "此链接受密码保护。",
+      "passwordLabel": "密码",
+      "unlocking": "正在解锁…",
+      "unlock": "解锁",
+      "dropHint": "将文件拖放到此处，或",
+      "chooseFiles": "选择文件",
+      "limitSize": "每个文件最多 {max} MB",
+      "limitRemaining": "{count, plural, other {剩余 # 次上传}}",
+      "full": "此链接已达到上传上限。",
+      "uploaded": "已上传",
+      "uploadError": "上传失败 — 请重试。",
+      "networkError": "网络错误 — 请检查你的连接后重试。",
+      "tooLargeClient": "文件过大 — 每个文件最大 {max} MB。",
+      "dismiss": "忽略 {name}",
+      "successSummary": "{count, plural, other {已上传 # 个文件}}"
+    },
+    "errors": {
+      "notFound": "此链接不可用。",
+      "passwordRequired": "此链接受密码保护。",
+      "missingBody": "未收到任何文件。",
+      "tooLarge": "文件对此链接而言过大。",
+      "limitReached": "此链接已达到上传上限。",
+      "nameConflict": "同名文件过多 — 请重命名后重试。",
+      "uploadFailed": "上传失败 — 请重试。"
+    },
+    "management": {
+      "sectionTitle": "投递链接",
+      "sectionDescriptionAdmin": "所有访客无需账户即可上传文件的反向分享链接。",
+      "sectionDescriptionUser": "访客无需账户即可向你的文件夹上传文件的反向分享链接。",
+      "root": "来源根目录",
+      "dropLink": "投递链接",
+      "passwordProtected": "受密码保护",
+      "never": "永不",
+      "copiedToast": "链接已复制",
+      "copyFailedToast": "复制失败 — 请选中链接并手动复制。",
+      "revokedToast": "链接已撤销",
+      "emptyTitle": "尚无投递链接",
+      "emptyDescription": "可从文件夹菜单，或工具栏中的“投递链接”按钮创建一个。",
+      "copyLinkAria": "复制 {name} 的链接",
+      "copyLinkTitle": "复制链接",
+      "revokeLinkAria": "撤销 {name} 的链接",
+      "revokeLinkTitle": "撤销链接",
+      "columns": {
+        "destination": "目标位置",
+        "source": "来源",
+        "created": "创建时间",
+        "expires": "过期时间",
+        "deposits": "投递数",
+        "status": "状态"
+      },
+      "status": {
+        "active": "有效",
+        "expired": "已过期",
+        "revoked": "已撤销"
+      }
     }
   },
   "api": {

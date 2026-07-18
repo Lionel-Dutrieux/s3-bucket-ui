@@ -7,15 +7,26 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
 
-/** Starts the generic OIDC flow — rendered only when the provider is configured. */
-export function OidcButton({ label }: { label: string }) {
+export interface SsoProviderOption {
+  providerId: string;
+  label: string;
+}
+
+/** Starts the SSO flow for one registered provider. */
+export function SsoButton({
+  providerId,
+  label,
+}: {
+  providerId: string;
+  label: string;
+}) {
   const [pending, setPending] = useState(false);
   const t = useTranslations("auth.oidc");
 
   const handleClick = async () => {
     setPending(true);
-    const { error } = await authClient.signIn.oauth2({
-      providerId: "oidc",
+    const { error } = await authClient.signIn.sso({
+      providerId,
       callbackURL: "/",
     });
     // On success the browser navigates away; only errors land here.

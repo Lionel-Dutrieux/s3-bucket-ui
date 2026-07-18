@@ -56,6 +56,7 @@ export function SourceForm({
       bucket: "",
       accessKeyId: "",
       secretAccessKey: "",
+      allowPublicShares: true,
     },
     validators: {
       // Same schemas as the server actions — errors map onto the fields.
@@ -172,6 +173,17 @@ export function SourceForm({
       </form.AppField>
 
       <p className="text-xs text-muted-foreground">{t("form.accessNote")}</p>
+
+      <div className="rounded-lg border p-3">
+        <form.AppField name="allowPublicShares">
+          {(field) => (
+            <field.SwitchField
+              label={t("form.allowPublicSharesLabel")}
+              description={t("form.allowPublicSharesDescription")}
+            />
+          )}
+        </form.AppField>
+      </div>
 
       <FormAlert
         error={test.state === "failed" ? test.message : serverError}

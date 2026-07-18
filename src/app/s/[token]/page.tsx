@@ -3,12 +3,20 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { type BrandingInfo, BrandMark } from "@/components/layout/brand-mark";
 import { categoryOf } from "@/features/browser/lib/file-types";
+import { listFolder } from "@/features/browser/server/service";
 import { PublicShareCard } from "@/features/shares/components/public-share-card";
+import { PublicShareGallery } from "@/features/shares/components/public-share-gallery";
 import { SharePasswordForm } from "@/features/shares/components/share-password-form";
+import {
+  type PublicFile,
+  type PublicFolder,
+  shareCrumbs,
+} from "@/features/shares/lib/gallery";
 import { sharePreviewKind } from "@/features/shares/lib/preview";
 import { getBranding } from "@/lib/branding/branding";
 import { getActiveShare } from "@/lib/dal/shares";
 import { getSource } from "@/lib/dal/sources";
+import { isPrefixShare, resolveSubPrefix } from "@/lib/shares/scope";
 import { isUnlocked } from "@/lib/shares/unlock";
 import { getFilesClient } from "@/lib/storage/client";
 
@@ -19,8 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function SharePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { token } = await params;
   const branding = await getBranding();
@@ -39,6 +49,40 @@ export default async function SharePage({
 
   const source = await getSource(share.sourceId);
   if (!source) notFound();
+
+  if (isPrefixShare(share.kind)) {
+    const sp = await searchParams;
+    // ?p= carries the FULL prefix the visitor navigated into. Anything not at
+    // or under share.key is a 404 — the boundary that keeps the link scoped.
+    const requested = typeof sp.p === "string" ? sp.p : "";
+    const currentPrefix = resolveSubPrefix(share.key, requested);
+    if (!currentPrefix) notFound();
+
+    const listing = await listFolder(source, currentPrefix);
+    if (!listing.ok) notFound();
+
+    const folders: PublicFolder[] = listing.folders.map((folder) => ({
+      prefix: folder.prefix,
+      name: folder.name,
+    }));
+    const files: PublicFile[] = listing.files.map((file) => ({
+      key: file.key,
+      name: file.name,
+      size: file.size,
+      preview: sharePreviewKind(categoryOf(file.name)),
+    }));
+
+    return (
+      <ShareShell branding={branding} wide>
+        <PublicShareGallery
+          token={token}
+          crumbs={shareCrumbs(share.key, currentPrefix)}
+          folders={folders}
+          files={files}
+        />
+      </ShareShell>
+    );
+  }
 
   const filename = share.key.split("/").pop() || t("unnamedFile");
   let size: number;
@@ -64,13 +108,16 @@ export default async function SharePage({
 function ShareShell({
   branding,
   children,
+  wide = false,
 }: {
   branding: BrandingInfo;
   children: React.ReactNode;
+  /** The gallery needs room; the single-file card stays narrow. */
+  wide?: boolean;
 }) {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-muted/20 p-4">
-      <div className="w-full max-w-lg space-y-6">
+    <div className="flex min-h-dvh justify-center bg-muted/20 p-4 sm:items-center">
+      <div className={`w-full space-y-6 ${wide ? "max-w-5xl" : "max-w-lg"}`}>
         <div className="flex justify-center">
           <BrandMark branding={branding} />
         </div>

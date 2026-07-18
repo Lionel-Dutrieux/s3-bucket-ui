@@ -26,6 +26,7 @@ import {
 } from "@/features/auth/components/user-menu";
 import { providerIcon } from "@/features/sources/components/provider-icons";
 import { ProviderPlate } from "@/features/sources/components/provider-logos";
+import { SourceHealthDot } from "@/features/sources/components/source-health-dot";
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { getProvider, PROVIDERS } from "@/lib/storage/providers";
@@ -112,6 +113,7 @@ export function AppSidebar({
                         <Link
                           href={`/source/${source.id}`}
                           title={`${source.name} — ${source.bucket}`}
+                          className={admin ? undefined : "pe-7"}
                         >
                           <ProviderPlate
                             providerId={source.provider}
@@ -131,9 +133,20 @@ export function AppSidebar({
                           </div>
                         </Link>
                       </SidebarMenuButton>
+                      {/* The health dot lives in the right action slot. For
+                          admins it is the idle face of the "…" menu trigger;
+                          for everyone else it's a plain right-aligned dot. */}
                       {admin ? (
-                        <SourceMenu source={source} isActive={isActive} />
-                      ) : null}
+                        <SourceMenu
+                          source={source}
+                          isActive={isActive}
+                          indicator={<SourceHealthDot sourceId={source.id} />}
+                        />
+                      ) : (
+                        <span className="pointer-events-none absolute top-1/2 right-[11px] -translate-y-1/2">
+                          <SourceHealthDot sourceId={source.id} />
+                        </span>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}

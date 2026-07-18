@@ -1,7 +1,9 @@
 import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ShareMedia } from "@/features/shares/components/share-media";
 import type { SharePreviewKind } from "@/features/shares/lib/preview";
+import { shareDownloadHref, shareInlineSrc } from "@/features/shares/lib/urls";
 import { formatBytes } from "@/lib/format";
 
 export function PublicShareCard({
@@ -17,8 +19,6 @@ export function PublicShareCard({
   preview: SharePreviewKind | null;
 }) {
   const t = useTranslations("shares.publicViewer");
-  const downloadHref = `/api/s/${token}/download`;
-  const inlineSrc = `/api/s/${token}/download?inline=1`;
 
   return (
     <div className="space-y-4">
@@ -29,39 +29,25 @@ export function PublicShareCard({
 
       {preview ? (
         <div className="flex items-center justify-center overflow-hidden rounded-md border bg-muted/40">
-          {preview === "image" ? (
-            // biome-ignore lint/performance/noImgElement: streamed/presigned object, not optimizable
-            <img
-              src={inlineSrc}
-              alt={filename}
-              className="max-h-[60vh] w-auto max-w-full object-contain"
-            />
-          ) : preview === "video" ? (
-            // biome-ignore lint/a11y/useMediaCaption: arbitrary bucket objects carry no caption tracks
-            <video
-              src={inlineSrc}
-              controls
-              className="max-h-[60vh] w-full bg-black"
-            />
-          ) : preview === "audio" ? (
-            // biome-ignore lint/a11y/useMediaCaption: arbitrary bucket objects carry no caption tracks
-            <audio src={inlineSrc} controls className="w-full px-6 py-10" />
-          ) : (
-            // No sandbox: Chrome blocks its PDF viewer in sandboxed frames.
-            // The download route only serves inline what is safe to render
-            // (presigned = bucket origin; streamed = forced application/pdf
-            // + nosniff).
-            <iframe
-              src={inlineSrc}
-              title={filename}
-              className="h-[60vh] w-full"
-            />
-          )}
+          <ShareMedia
+            src={shareInlineSrc(token)}
+            kind={preview}
+            filename={filename}
+            className={
+              preview === "image"
+                ? "max-h-[60vh] w-auto max-w-full object-contain"
+                : preview === "video"
+                  ? "max-h-[60vh] w-full bg-black"
+                  : preview === "audio"
+                    ? "w-full px-6 py-10"
+                    : "h-[60vh] w-full"
+            }
+          />
         </div>
       ) : null}
 
       <Button asChild className="w-full">
-        <a href={downloadHref}>
+        <a href={shareDownloadHref(token)}>
           <Download aria-hidden />
           {t("download")}
         </a>

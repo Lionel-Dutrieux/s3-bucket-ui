@@ -1,36 +1,31 @@
 import "server-only";
+import { sso } from "@better-auth/sso";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { APIError, createAuthMiddleware } from "better-auth/api";
+import {
+  APIError,
+  createAuthMiddleware,
+  getSessionFromCtx,
+} from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { admin, genericOAuth, twoFactor } from "better-auth/plugins";
-import { normalizeGroupsClaim } from "@/lib/authz/oidc-groups";
-import { getOidcConfig, type OidcConfig } from "@/lib/config";
+import { admin, twoFactor } from "better-auth/plugins";
+import { extractGroups } from "@/lib/authz/oidc-groups";
 import { syncOidcMemberships } from "@/lib/dal/groups";
 import {
   getConfigVersion,
   isOidcOnly,
   isPublicSignUpEnabled,
 } from "@/lib/dal/settings";
+import { getProviderGroupsClaim, getSsoTrustedOrigins } from "@/lib/dal/sso";
 import { env } from "@/lib/env";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { prisma } from "@/lib/prisma";
 import { shouldRefresh } from "./auth-cache";
-import { buildOidcProvider } from "./oidc";
-
-/** Runs the Homarr-style group sync after an OIDC sign-in touched the user. */
-async function syncGroupsFromOidcCallback(
-  user: { id: string } & Record<string, unknown>,
-  ctxPath: string | undefined,
-): Promise<void> {
-  if (!ctxPath?.includes("/oauth2/callback")) return;
-  await syncOidcMemberships(user.id, normalizeGroupsClaim(user.oidcGroups));
-}
 
 /** Label shown in users' authenticator apps for TOTP entries. */
 const TWO_FACTOR_ISSUER = "Bucket UI";
 
-/** Email/password endpoints refused when the instance runs OIDC-only. */
+/** Email/password endpoints refused when the instance runs SSO-only. */
 const PASSWORD_ENDPOINTS = new Set([
   "/sign-in/email",
   "/sign-up/email",
@@ -38,6 +33,22 @@ const PASSWORD_ENDPOINTS = new Set([
   "/reset-password",
   "/change-password",
 ]);
+
+/**
+ * SSO endpoints that mutate or expose provider configuration. The plugin leaves
+ * these open to any authenticated user, which would let a regular user register
+ * a rogue IdP — so they are gated to admins here (the admin UI drives them
+ * through auth.api with the admin's session, which passes this check). Sign-in
+ * (`/sign-in/sso`) and the IdP callbacks stay public by design.
+ */
+const SSO_ADMIN_PREFIXES = [
+  "/sso/register",
+  "/sso/update-provider",
+  "/sso/providers",
+  "/sso/get-provider",
+  "/sso/request-domain-verification",
+  "/sso/verify-domain",
+];
 
 /**
  * Failed sign-in → audit trail. Written with Prisma directly: the DAL's
@@ -60,12 +71,17 @@ async function recordFailedSignIn(email: unknown): Promise<void> {
   }
 }
 
-function buildAuth(oidcConfig: OidcConfig | null) {
+function buildAuth() {
   return betterAuth({
     database: prismaAdapter(prisma, { provider: "postgresql" }),
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : [],
+    // Dynamic: the app URL plus every registered SSO issuer's origin, which
+    // better-auth requires trusted before it will run OIDC discovery.
+    trustedOrigins: async () => [
+      ...(env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : []),
+      ...(await getSsoTrustedOrigins()),
+    ],
     session: {
       // Disable better-auth's session-freshness gate (default freshAge: 24h).
       // The gate is keyed on session *createdAt*, so once a session crosses 24h
@@ -105,14 +121,23 @@ function buildAuth(oidcConfig: OidcConfig | null) {
       },
     },
     hooks: {
-      // OIDC-only mode: the switch lives in Admin → Settings and can only be
-      // enabled while OIDC is configured. Blocking here (not in the UI) is the
-      // real gate; /admin/create-user stays available to admins.
       before: createAuthMiddleware(async (ctx) => {
+        // SSO-only mode: the switch lives in Admin → Settings and can only be
+        // enabled while an SSO provider is registered. Blocking here (not in
+        // the UI) is the real gate; /admin/create-user stays available.
         if (PASSWORD_ENDPOINTS.has(ctx.path) && (await isOidcOnly())) {
           throw new APIError("FORBIDDEN", {
             message: "Password sign-in is disabled — use the SSO provider.",
           });
+        }
+        // Only admins may register/read/mutate SSO providers.
+        if (SSO_ADMIN_PREFIXES.some((prefix) => ctx.path.startsWith(prefix))) {
+          const session = await getSessionFromCtx(ctx);
+          if (session?.user.role !== "admin") {
+            throw new APIError("FORBIDDEN", {
+              message: "Admin access required.",
+            });
+          }
         }
       }),
       after: createAuthMiddleware(async (ctx) => {
@@ -129,7 +154,7 @@ function buildAuth(oidcConfig: OidcConfig | null) {
     user: {
       additionalFields: {
         // `input: false` — never settable from the client (no mass assignment);
-        // written only by mapProfileToUser on OIDC sign-in (see oidc.ts).
+        // written only by the SSO provisionUser callback on sign-in.
         oidcGroups: {
           type: "string[]",
           required: false,
@@ -144,7 +169,7 @@ function buildAuth(oidcConfig: OidcConfig | null) {
           // The very first account becomes admin (self-hosted bootstrap).
           // Accounts created by an admin (admin plugin endpoint) keep the role
           // the admin chose. Email/password self-registration is refused
-          // unless an admin enabled it (Admin → Settings) — OIDC sign-ins are
+          // unless an admin enabled it (Admin → Settings) — SSO sign-ins are
           // not governed by that switch, the IdP decides who exists. Every
           // non-admin creation is forced to "user" — defence in depth on top
           // of the admin plugin already marking `role` as non-inputable. The
@@ -166,27 +191,37 @@ function buildAuth(oidcConfig: OidcConfig | null) {
             }
             return { data: { ...user, role: "user" } };
           },
-          after: async (user, ctx) => {
-            await syncGroupsFromOidcCallback(user, ctx?.path);
-          },
-        },
-        update: {
-          after: async (user, ctx) => {
-            await syncGroupsFromOidcCallback(user, ctx?.path);
-          },
         },
       },
     },
     plugins: [
       admin(),
-      // twoFactor() must come before the conditional genericOAuth spread:
-      // a conditional array spread widens the plugins tuple type for every
-      // element after it, which silently drops twoFactorEnabled from the
-      // inferred session user type.
+      // twoFactor() must come before sso(): a plugin whose type widens the
+      // plugins tuple after twoFactor can silently drop twoFactorEnabled from
+      // the inferred session user type.
       twoFactor({ issuer: TWO_FACTOR_ISSUER }),
-      ...(oidcConfig
-        ? [genericOAuth({ config: [buildOidcProvider(oidcConfig)] })]
-        : []),
+      sso({
+        // Re-run on every sign-in so upstream group changes reach us each time.
+        provisionUserOnEveryLogin: true,
+        provisionUser: async ({ user, userInfo, token, provider }) => {
+          // Resolve the group names from userinfo, falling back to the
+          // id_token (Microsoft Entra only puts groups there), then reconcile
+          // app-group memberships (à la Homarr). Never throws: syncOidc-
+          // Memberships swallows its own errors, and a snapshot write that
+          // fails must not break sign-in.
+          const claim = await getProviderGroupsClaim(provider.providerId);
+          const groups = extractGroups(userInfo, token?.idToken, claim);
+          try {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { oidcGroups: groups },
+            });
+          } catch (error) {
+            console.error("[auth] failed to snapshot SSO groups:", error);
+          }
+          await syncOidcMemberships(user.id, groups);
+        },
+      }),
       nextCookies(), // must stay last so server actions can set cookies
     ],
   });
@@ -202,8 +237,11 @@ const globalForAuth = globalThis as unknown as {
 };
 
 /**
- * better-auth instance, rebuilt when the SMTP/OIDC config changes (the
- * Setting `configVersion` key, checked at most once every 5 s).
+ * better-auth instance, rebuilt when the SMTP config changes (the Setting
+ * `configVersion` key, checked at most once every 5 s). SSO providers and their
+ * trusted origins are read from the database per request (dynamic
+ * trustedOrigins + the plugin's own provider lookup), so registering or
+ * removing a provider needs no rebuild.
  */
 export async function getAuth(): Promise<Auth> {
   const cache = globalForAuth.authCache ?? null;
@@ -214,7 +252,7 @@ export async function getAuth(): Promise<Auth> {
     cache.checkedAt = now;
     return cache.instance;
   }
-  const instance = buildAuth(await getOidcConfig());
+  const instance = buildAuth();
   globalForAuth.authCache = { instance, version: dbVersion, checkedAt: now };
   return instance;
 }

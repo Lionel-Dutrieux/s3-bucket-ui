@@ -76,6 +76,25 @@ export const brandingSchema = z.object({
 
 export type BrandingValues = z.infer<typeof brandingSchema>;
 
+// --- share policy (org-wide) ---
+
+// Discrete lifetime caps offered in Admin → Settings; 0 = no cap (unlimited).
+export const SHARE_MAX_EXPIRY_OPTIONS = [0, 1, 7, 30, 90, 365] as const;
+
+export const sharePolicySchema = z.object({
+  // 0 means "no cap"; the DAL stores null for it.
+  maxExpiryDays: z.union([
+    z.literal(0),
+    z.literal(1),
+    z.literal(7),
+    z.literal(30),
+    z.literal(90),
+    z.literal(365),
+  ]),
+  requirePassword: z.boolean(),
+});
+export type SharePolicyValues = z.infer<typeof sharePolicySchema>;
+
 // --- runtime config (SMTP / OIDC) ---
 
 export const smtpSettingsSchema = z.object({
@@ -89,15 +108,35 @@ export const smtpSettingsSchema = z.object({
 });
 export type SmtpSettingsValues = z.infer<typeof smtpSettingsSchema>;
 
-export const oidcSettingsSchema = z.object({
-  discoveryUrl: z
-    .url("Enter the full discovery URL.")
-    .startsWith("https://", "The discovery URL must use https."),
+// --- SSO providers (better-auth @better-auth/sso plugin) ---
+
+// providerId is embedded in callback/sign-in URLs — a strict slug. Reserved
+// built-in ids ("credential") are rejected here for a friendly error; the
+// plugin re-checks server-side.
+export const ssoProviderIdSchema = z
+  .string()
+  .trim()
+  .regex(
+    /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/,
+    "Use lowercase letters, digits and hyphens (e.g. pocket-id).",
+  )
+  .refine((id) => id !== "credential", "That provider id is reserved.");
+
+export const ssoProviderSchema = z.object({
+  providerId: ssoProviderIdSchema,
+  issuer: z
+    .url("Enter the issuer URL.")
+    .startsWith("https://", "The issuer URL must use https."),
   clientId: z.string().trim().min(1, "Client ID is required.").max(255),
-  // null → keep the currently stored secret (write-only field).
-  clientSecret: z.string().min(1).max(1024).nullable(),
-  providerLabel: z.string().trim().min(1).max(64),
+  clientSecret: z.string().min(1, "Client secret is required.").max(1024),
+  // Bare email domain used to route email-based SSO sign-ins to this provider.
+  domain: z
+    .string()
+    .trim()
+    .min(1, "Email domain is required.")
+    .max(255)
+    .regex(/^[^\s@]+\.[^\s@]+$/, "Enter a bare domain, e.g. example.com."),
   scopes: z.string().trim().min(1).max(255),
   groupsClaim: z.string().trim().min(1).max(64),
 });
-export type OidcSettingsValues = z.infer<typeof oidcSettingsSchema>;
+export type SsoProviderValues = z.infer<typeof ssoProviderSchema>;

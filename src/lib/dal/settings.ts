@@ -2,6 +2,9 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { decrypt, encrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
+import type { SharePolicy } from "@/lib/shares/policy";
+
+export type { SharePolicy };
 
 const SIGN_UP_KEY = "allowPublicSignUp";
 const OIDC_ONLY_KEY = "oidcOnly";
@@ -67,6 +70,57 @@ export async function isPublicSharingEnabled(): Promise<boolean> {
 
 export async function setPublicSharingEnabled(enabled: boolean): Promise<void> {
   await setBoolSetting(SHARING_KEY, enabled);
+}
+
+// --- share policy (org-wide) ---
+
+const SHARE_POLICY_MAX_EXPIRY_DAYS_KEY = "sharePolicy.maxExpiryDays";
+const SHARE_POLICY_REQUIRE_PASSWORD_KEY = "sharePolicy.requirePassword";
+
+/**
+ * Org-wide constraints on new share links, enforced server-side in
+ * createShareLink and reflected in the share dialog. Defaults are permissive:
+ * no expiry cap, no mandatory password.
+ */
+export async function getSharePolicy(): Promise<SharePolicy> {
+  const rows = await prisma.setting.findMany({
+    where: {
+      key: {
+        in: [
+          SHARE_POLICY_MAX_EXPIRY_DAYS_KEY,
+          SHARE_POLICY_REQUIRE_PASSWORD_KEY,
+        ],
+      },
+    },
+    select: { key: true, value: true },
+  });
+  const map = new Map(rows.map((row) => [row.key, row.value]));
+  const rawMax = map.get(SHARE_POLICY_MAX_EXPIRY_DAYS_KEY);
+  const parsedMax = rawMax !== undefined ? Number(rawMax) : Number.NaN;
+  return {
+    maxExpiryDays:
+      Number.isFinite(parsedMax) && parsedMax > 0
+        ? Math.floor(parsedMax)
+        : null,
+    requirePassword: map.get(SHARE_POLICY_REQUIRE_PASSWORD_KEY) === "true",
+  };
+}
+
+export async function setSharePolicy(policy: SharePolicy): Promise<void> {
+  const maxExpiry =
+    policy.maxExpiryDays !== null && policy.maxExpiryDays > 0
+      ? setStringSetting(
+          SHARE_POLICY_MAX_EXPIRY_DAYS_KEY,
+          String(Math.floor(policy.maxExpiryDays)),
+        )
+      : deleteSettings([SHARE_POLICY_MAX_EXPIRY_DAYS_KEY]);
+  await prisma.$transaction([
+    maxExpiry,
+    setStringSetting(
+      SHARE_POLICY_REQUIRE_PASSWORD_KEY,
+      String(policy.requirePassword),
+    ),
+  ]);
 }
 
 // --- branding (white labelling) ---
@@ -158,7 +212,7 @@ export async function clearBrandingSettings(): Promise<void> {
 // --- runtime config (SMTP / OIDC overrides + version) ---
 
 const CONFIG_VERSION_KEY = "configVersion";
-const SECRET_KEYS = new Set(["smtp.password", "oidc.clientSecret"]);
+const SECRET_KEYS = new Set(["smtp.password"]);
 
 export async function getConfigVersion(): Promise<number> {
   const row = await prisma.setting.findUnique({
@@ -178,7 +232,7 @@ function bumpConfigVersion(current: number): Prisma.PrismaPromise<unknown> {
 
 /** Overrides DB d'un groupe, clés sans préfixe, secrets déchiffrés. */
 export async function getConfigOverrides(
-  prefix: "smtp" | "oidc",
+  prefix: "smtp",
 ): Promise<Record<string, string>> {
   const rows = await prisma.setting.findMany({
     where: { key: { startsWith: `${prefix}.` } },
@@ -195,7 +249,7 @@ export async function getConfigOverrides(
 
 /** null supprime la clé ; le tout + bump de version en une transaction. */
 export async function setConfigOverrides(
-  prefix: "smtp" | "oidc",
+  prefix: "smtp",
   values: Record<string, string | null>,
 ): Promise<void> {
   const version = await getConfigVersion();
@@ -213,9 +267,7 @@ export async function setConfigOverrides(
   await prisma.$transaction(operations);
 }
 
-export async function clearConfigOverrides(
-  prefix: "smtp" | "oidc",
-): Promise<void> {
+export async function clearConfigOverrides(prefix: "smtp"): Promise<void> {
   const version = await getConfigVersion();
   await prisma.$transaction([
     prisma.setting.deleteMany({ where: { key: { startsWith: `${prefix}.` } } }),

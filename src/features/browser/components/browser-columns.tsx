@@ -16,7 +16,7 @@ import {
   compareByName,
   compareBySize,
 } from "@/features/browser/lib/entries";
-import type { FileEntry } from "@/features/browser/lib/listing";
+import type { FileEntry, FolderEntry } from "@/features/browser/lib/listing";
 import { isPreviewable } from "@/features/browser/lib/preview-kind";
 import { formatBytes, formatDate, formatRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,10 @@ declare module "@tanstack/react-table" {
     onPreview: (file: FileEntry) => void;
     /** Absent when sharing is off (instance-wide setting) — hides the action. */
     onShare?: (file: FileEntry) => void;
+    /** Share a whole folder — absent when sharing is off. */
+    onShareFolder?: (folder: FolderEntry) => void;
+    /** Mint a deposit link for a folder — absent when drop links are off. */
+    onCreateDrop?: (folder: FolderEntry) => void;
     onDetails: (file: FileEntry) => void;
     /** Only set when the source allows deletions — absent hides the action.
      * Folders delete recursively (every object under the prefix). */

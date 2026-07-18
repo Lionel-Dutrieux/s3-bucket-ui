@@ -52,6 +52,7 @@ import { OPEN_SOURCE_SEARCH_EVENT } from "@/features/browser/lib/search-event";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
+import type { SharePolicy } from "@/lib/shares/policy";
 
 export interface BrowserPermissions {
   upload: boolean;
@@ -76,6 +77,8 @@ export function FileBrowser({
   view,
   permissions,
   canShare = true,
+  canDrop = false,
+  sharePolicy,
 }: {
   sourceId: string;
   prefix: string;
@@ -85,6 +88,11 @@ export function FileBrowser({
   permissions: BrowserPermissions;
   /** False when the admin switched public share links off. */
   canShare?: boolean;
+  /** True when the viewer may mint deposit (drop) links: public sharing on for
+   * this source AND the edit capability (depositing is writing). */
+  canDrop?: boolean;
+  /** Org-wide share constraints reflected in the share dialog. */
+  sharePolicy?: SharePolicy;
 }) {
   const router = useRouter();
   const t = useTranslations("browser.fileBrowser");
@@ -197,6 +205,8 @@ export function FileBrowser({
       sourceId,
       onPreview: openPreview,
       onShare: canShare ? dialogs.openShare : undefined,
+      onShareFolder: canShare ? dialogs.openShareFolder : undefined,
+      onCreateDrop: canDrop ? dialogs.openDropFolder : undefined,
       onDetails: setDetails,
       onDelete: permissions.delete ? dialogs.openDelete : undefined,
       // Rename moves the object (write + delete), so it needs both.
@@ -335,6 +345,15 @@ export function FileBrowser({
               sorting={sorting}
               onSortingChange={handleSortingChange}
               canUpload={permissions.upload}
+              canDrop={canDrop}
+              onCreateDropHere={() =>
+                dialogs.openDropHere(
+                  prefix,
+                  prefix === ""
+                    ? ""
+                    : (prefix.replace(/\/$/, "").split("/").pop() ?? ""),
+                )
+              }
               sourceId={sourceId}
               prefix={prefix}
               onFolderCreated={refresh}
@@ -395,6 +414,8 @@ export function FileBrowser({
                     .filter((entry) => entry.kind === "file")}
                   onPreview={openPreview}
                   onShare={canShare ? dialogs.openShare : undefined}
+                  onShareFolder={canShare ? dialogs.openShareFolder : undefined}
+                  onCreateDrop={canDrop ? dialogs.openDropFolder : undefined}
                   onDetails={setDetails}
                   onDelete={permissions.delete ? dialogs.openDelete : undefined}
                   onRename={canRename ? setRenameTarget : undefined}
@@ -447,6 +468,7 @@ export function FileBrowser({
       <BrowserDialogs
         sourceId={sourceId}
         dialogs={dialogs}
+        sharePolicy={sharePolicy}
         preview={preview}
         previewFiles={previewFiles}
         onPreviewFileChange={openPreview}

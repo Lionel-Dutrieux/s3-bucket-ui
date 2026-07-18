@@ -39,7 +39,12 @@
       "sharedLinks": "Liens partagés",
       "activity": "Activité",
       "admin": "Administration",
-      "theme": "Thème"
+      "theme": "Thème",
+      "health": {
+        "reachable": "Source joignable",
+        "unreachable": "Source injoignable",
+        "checking": "Vérification de la source…"
+      }
     },
     "commandPalette": {
       "title": "Palette de commandes",
@@ -108,7 +113,6 @@
     "signIn": {
       "metaTitle": "Connexion",
       "title": "Connexion",
-      "oidcOnlySubtitle": "Cette instance utilise la connexion via {provider}.",
       "subtitle": "Bon retour — connectez-vous pour parcourir vos sources.",
       "emailLabel": "E-mail",
       "emailPlaceholder": "you@example.com",
@@ -119,7 +123,8 @@
       "or": "ou",
       "noAccount": "Pas encore de compte ?",
       "signUpLink": "S'inscrire",
-      "errorFallback": "Échec de la connexion."
+      "errorFallback": "Échec de la connexion.",
+      "ssoOnlySubtitle": "Cette instance utilise l'authentification unique (SSO)."
     },
     "signUp": {
       "metaTitle": "Inscription",
@@ -265,13 +270,18 @@
       "invalidShareOptions": "Options de partage invalides.",
       "onlyFilesShareable": "Seuls les fichiers peuvent être partagés.",
       "sharingDisabled": "Les liens de partage publics sont désactivés sur cette instance.",
+      "sharingDisabledForSource": "Les liens de partage publics sont désactivés pour cette source.",
+      "sharePasswordRequired": "Un mot de passe est obligatoire pour partager un fichier ici.",
       "fileNoLongerExists": "Ce fichier n'existe plus.",
       "sourceUnreachable": "Impossible d'atteindre cette source.",
       "actionFailed": "Impossible d'effectuer cette action — réessayez.",
       "folderTooLargeToMove": "Ce dossier contient plus de {max} objets — trop volumineux pour être déplacé en une fois.",
       "selectionTooLargeToCopy": "Cette sélection contient plus de {max} objets — trop volumineuse pour être copiée en une fois.",
       "objectsNotDeleted": "{count, plural, one {# objet n'a pas pu être supprimé} other {# objets n'ont pas pu être supprimés}}.",
-      "folderTooLargeToDelete": "Ce dossier est trop volumineux pour être supprimé en une fois — des objets restent, relancez l'opération."
+      "folderTooLargeToDelete": "Ce dossier est trop volumineux pour être supprimé en une fois — des objets restent, relancez l'opération.",
+      "onlyFoldersShareable": "Seuls les dossiers peuvent être partagés ainsi.",
+      "folderNoLongerExists": "Ce dossier n'existe plus.",
+      "invalidDropOptions": "Options de lien de dépôt invalides."
     },
     "filteredEmpty": {
       "title": "Aucun élément « {type} » dans ce dossier",
@@ -294,7 +304,8 @@
       "filterPlaceholder": "Filtrer ce dossier…",
       "matchCount": "{count, plural, one {# résultat} other {# résultats}}",
       "searchEverywhere": "Chercher dans toute la source",
-      "upload": "Importer"
+      "upload": "Importer",
+      "dropLink": "Lien de dépôt"
     },
     "columns": {
       "name": "Nom",
@@ -401,6 +412,7 @@
       "details": "Détails",
       "download": "Télécharger",
       "share": "Partager",
+      "createDropLink": "Créer un lien de dépôt",
       "duplicate": "Dupliquer",
       "delete": "Supprimer"
     },
@@ -421,6 +433,33 @@
       "expiresLabel": "Expire",
       "passwordLabel": "Mot de passe (optionnel)",
       "passwordPlaceholder": "Laisser vide pour aucun",
+      "passwordRequiredLabel": "Mot de passe (obligatoire)",
+      "passwordRequiredPlaceholder": "Définissez un mot de passe pour ce lien",
+      "maxDownloadsLabel": "Nombre max de téléchargements (optionnel)",
+      "maxDownloadsPlaceholder": "Laisser vide pour illimité",
+      "createLink": "Créer le lien",
+      "creating": "Création…",
+      "titleFolder": "Partager {name}",
+      "descriptionFolder": "Toute personne disposant du lien peut parcourir et télécharger ce dossier — aucun compte n'est nécessaire. Gérez les liens depuis Liens partagés."
+    },
+    "dropDialog": {
+      "title": "Lien de dépôt pour {name}",
+      "titleRoot": "Lien de dépôt pour cette source",
+      "description": "Toute personne disposant du lien peut y déposer des fichiers — aucun compte n'est nécessaire. Elle ne voit jamais ce qui s'y trouve déjà. Gérez les liens depuis Liens partagés.",
+      "copyLink": "Copier le lien",
+      "copiedToast": "Lien copié",
+      "copyFailedToast": "Échec de la copie — sélectionnez le lien et copiez-le manuellement.",
+      "expiresLabel": "Expire",
+      "passwordLabel": "Mot de passe (optionnel)",
+      "passwordPlaceholder": "Laisser vide pour aucun",
+      "passwordRequiredLabel": "Mot de passe (obligatoire)",
+      "passwordRequiredPlaceholder": "Définissez un mot de passe pour ce lien",
+      "maxFilesLabel": "Fichiers max (optionnel)",
+      "maxFilesPlaceholder": "Illimité",
+      "maxSizeLabel": "Mo max / fichier",
+      "maxSizePlaceholder": "Sans limite",
+      "noteLabel": "Note pour l'invité (optionnel)",
+      "notePlaceholder": "ex. Merci de déposer votre contrat signé",
       "createLink": "Créer le lien",
       "creating": "Création…"
     },
@@ -530,6 +569,11 @@
     "remove": "Supprimer",
     "removeAria": "Supprimer {name}",
     "connectionVerifiedNote": "La connexion est revérifiée lors de l'enregistrement.",
+    "health": {
+      "reachable": "Joignable",
+      "unreachable": "Injoignable",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "Modifier la source",
       "title": "Modifier {name}",
@@ -547,6 +591,8 @@
       "namePlaceholder": "Documents d'équipe",
       "endpointLabel": "Point de terminaison",
       "accessNote": "Qui peut parcourir, modifier ou supprimer sur cette source se gère par utilisateur et par groupe depuis l'administration.",
+      "allowPublicSharesLabel": "Autoriser les liens de partage publics",
+      "allowPublicSharesDescription": "Une fois désactivé, plus personne ne peut créer de liens publics pour cette source et tout lien existant cesse de fonctionner jusqu'à réactivation.",
       "connectionSuccessful": "Connexion réussie.",
       "secretPlaceholderEdit": "Laisser vide pour conserver la valeur actuelle",
       "testConnection": "Tester la connexion",
@@ -737,6 +783,13 @@
       "sharingDescription": "Permet aux utilisateurs ayant accès à une source de créer des liens publics vers ses fichiers (révocables, expirables, protégeables par mot de passe). Désactiver ceci bloque la création de nouveaux liens — les liens existants continuent de fonctionner jusqu'à révocation ou expiration.",
       "sharingEnabledToast": "Liens publics activés",
       "sharingDisabledToast": "Liens publics désactivés",
+      "shareMaxExpiryTitle": "Durée de vie maximale des liens",
+      "shareMaxExpiryDescription": "Plafonne la durée de vie d'un lien de partage public. Une fois définie, l'expiration devient obligatoire et toute demande plus longue (ou sans expiration) est ramenée à cette limite.",
+      "shareMaxExpiryUnlimited": "Sans limite",
+      "shareMaxExpiryDays": "{count, plural, one {# jour} other {# jours}}",
+      "shareRequirePasswordTitle": "Mot de passe obligatoire",
+      "shareRequirePasswordDescription": "Impose un mot de passe sur chaque nouveau lien de partage public.",
+      "sharePolicyToast": "Politique de partage mise à jour",
       "twoFactorPolicyTitle": "Authentification à deux facteurs",
       "twoFactorPolicyDescription": "Exige des comptes qu'ils configurent l'authentification à deux facteurs avant de pouvoir continuer à utiliser l'application : désactivée (jamais requise), admins (comptes admin uniquement) ou tous (chaque compte). Déléguée au fournisseur d'identité lorsque le mode OIDC uniquement est actif.",
       "twoFactorPolicyOff": "Désactivée — jamais requise",
@@ -800,12 +853,17 @@
       "invalidGrant": "Droit invalide.",
       "saveGrantFailed": "Impossible d'enregistrer ce droit.",
       "removeGrantFailed": "Impossible de retirer ce droit.",
-      "oidcDiscoveryFailed": "Impossible d'atteindre ou de valider le point de terminaison de découverte OIDC.",
       "smtpNotConfigured": "SMTP n'est pas configuré.",
-      "testEmailFailed": "Impossible d'envoyer l'email de test."
+      "testEmailFailed": "Impossible d'envoyer l'email de test.",
+      "ssoInvalidIssuer": "L'URL de l'émetteur est invalide.",
+      "ssoRegisterFailed": "Impossible d'enregistrer le fournisseur SSO.",
+      "ssoProviderNotFound": "Ce fournisseur SSO n'existe plus."
     },
     "runtimeConfig": {
-      "provenance": { "env": "env.", "custom": "personnalisé" },
+      "provenance": {
+        "env": "env.",
+        "custom": "personnalisé"
+      },
       "resetToEnv": "Restaurer les valeurs d'environnement",
       "resetConfirm": "Cela supprime toutes les valeurs enregistrées ici et revient aux variables d'environnement. Continuer ?",
       "saved": "Paramètres enregistrés.",
@@ -824,20 +882,50 @@
         "from": "Expéditeur",
         "sendTest": "Envoyer un email de test",
         "testSent": "Email de test envoyé à {email}."
-      },
-      "oidc": {
-        "title": "Authentification unique (OIDC)",
-        "description": "Fournisseur OpenID Connect générique. Les variables d'environnement fournissent les valeurs par défaut ; les valeurs enregistrées ici les remplacent.",
-        "discoveryUrl": "URL de découverte",
-        "clientId": "ID client",
-        "clientSecret": "Secret client",
-        "secretSet": "•••• (configuré — saisissez pour remplacer)",
-        "secretUnset": "Non défini",
-        "providerLabel": "Libellé du bouton de connexion",
-        "scopes": "Scopes",
-        "groupsClaim": "Claim des groupes",
-        "callbackInfo": "Enregistrez cette URL de rappel auprès de votre fournisseur d'identité :",
-        "lockoutWarning": "Avant d'activer « OIDC uniquement », vérifiez que la connexion SSO fonctionne dans une fenêtre privée — une configuration OIDC défectueuse avec la connexion par mot de passe désactivée bloque tout le monde dehors."
+      }
+    },
+    "sso": {
+      "title": "Authentification unique (SSO)",
+      "description": "Fournisseurs d'identité OpenID Connect. Les utilisateurs se connectent via le fournisseur ; les revendications de groupes correspondantes alimentent les groupes de l'app.",
+      "empty": "Aucun fournisseur SSO enregistré pour l'instant.",
+      "addTitle": "Ajouter un fournisseur",
+      "addProvider": "Ajouter le fournisseur",
+      "addPending": "Ajout…",
+      "added": "Fournisseur SSO ajouté.",
+      "removed": "Fournisseur SSO supprimé.",
+      "remove": "Supprimer",
+      "removeTitle": "Supprimer le fournisseur SSO",
+      "removeConfirm": "Supprimer le fournisseur « {provider} » ? Les utilisateurs ne pourront plus s'y connecter, mais leurs comptes sont conservés.",
+      "providerId": "Identifiant du fournisseur",
+      "issuer": "URL de l'émetteur",
+      "clientId": "Client ID",
+      "clientSecret": "Secret client",
+      "domain": "Domaine e-mail",
+      "groupsClaim": "Revendication de groupes",
+      "scopes": "Scopes",
+      "presetLabel": "Fournisseur d'identité",
+      "providerMeta": "Domaine {domain} · revendication de groupes « {claim} »",
+      "verifyBeforeOnly": "Après avoir ajouté un fournisseur, vérifiez la connexion SSO dans une fenêtre privée avant d'activer « SSO uniquement » — un fournisseur défaillant avec la connexion par mot de passe désactivée bloque tout le monde.",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "L'émetteur est l'URL de base de votre Pocket ID. La revendication de groupes est \"groups\"."
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/votre-realm",
+          "help": "L'émetteur inclut le chemin du realm. Ajoutez un mapper de client-scope \"groups\" dans Keycloak pour que les noms de groupes arrivent dans le jeton."
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "Activez la revendication de groupes dans l'app registration. Entra envoie des identifiants d'objet de groupe (GUID) dans l'id_token — nommez vos groupes d'app d'après ces GUID pour la correspondance."
+        },
+        "generic": {
+          "label": "OIDC générique",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },
@@ -885,7 +973,8 @@
       "signInFailed": "Échec de connexion",
       "download": "Téléchargé",
       "downloadZip": "Téléchargé en ZIP",
-      "shareDownload": "Téléchargé via un lien de partage"
+      "shareDownload": "Téléchargé via un lien de partage",
+      "dropUpload": "Déposé via un lien de dépôt"
     },
     "exportCsv": "Exporter en CSV",
     "exportJson": "Exporter en JSON"
@@ -904,6 +993,7 @@
     "revokedToast": "Lien révoqué",
     "passwordProtected": "protégé par mot de passe",
     "never": "Jamais",
+    "downloadsOfMax": "{count} téléchargements sur {max} utilisés",
     "columns": {
       "file": "Fichier",
       "source": "Source",
@@ -915,6 +1005,7 @@
     "status": {
       "active": "Actif",
       "expired": "Expiré",
+      "exhausted": "Épuisé",
       "revoked": "Révoqué"
     },
     "copyLinkAria": "Copier le lien vers {name}",
@@ -936,6 +1027,84 @@
       "linkNotFound": "Lien introuvable.",
       "notFound": "Introuvable.",
       "downloadFailed": "Impossible de télécharger ce fichier."
+    },
+    "fileLink": "Lien fichier",
+    "folderLink": "Lien dossier",
+    "gallery": {
+      "breadcrumbAria": "Fil d'Ariane",
+      "empty": "Ce dossier est vide.",
+      "foldersHeading": "Dossiers",
+      "filesHeading": "Fichiers",
+      "previewFile": "Aperçu de {name}",
+      "download": "Télécharger",
+      "downloadFileAria": "Télécharger {name}",
+      "indexOfTotal": "{index} sur {total}",
+      "previousFileAria": "Fichier précédent : {name}",
+      "previousFileTitle": "Fichier précédent (←)",
+      "nextFileAria": "Fichier suivant : {name}",
+      "nextFileTitle": "Fichier suivant (→)"
+    }
+  },
+  "drops": {
+    "publicUploader": {
+      "metaTitle": "Déposer des fichiers",
+      "title": "Déposer des fichiers",
+      "subtitle": "Ajoutez vos fichiers ci-dessous. Ils sont envoyés directement au propriétaire — vous ne voyez rien de ce qui s'y trouve déjà.",
+      "passwordProtected": "Ce lien est protégé par mot de passe.",
+      "passwordLabel": "Mot de passe",
+      "unlocking": "Déverrouillage…",
+      "unlock": "Déverrouiller",
+      "dropHint": "Glissez-déposez vos fichiers ici, ou",
+      "chooseFiles": "Choisir des fichiers",
+      "limitSize": "Jusqu'à {max} Mo par fichier",
+      "limitRemaining": "{count, plural, one {# dépôt restant} other {# dépôts restants}}",
+      "full": "Ce lien a atteint sa limite de dépôts.",
+      "uploaded": "Déposé",
+      "uploadError": "Échec du dépôt — réessayez.",
+      "networkError": "Erreur réseau — vérifiez votre connexion et réessayez.",
+      "tooLargeClient": "Trop volumineux — {max} Mo max par fichier.",
+      "dismiss": "Ignorer {name}",
+      "successSummary": "{count, plural, one {# fichier déposé} other {# fichiers déposés}}"
+    },
+    "errors": {
+      "notFound": "Ce lien n'est pas disponible.",
+      "passwordRequired": "Ce lien est protégé par mot de passe.",
+      "missingBody": "Aucun fichier n'a été reçu.",
+      "tooLarge": "Fichier trop volumineux pour ce lien.",
+      "limitReached": "Ce lien a atteint sa limite de dépôts.",
+      "nameConflict": "Trop de fichiers portent ce nom — renommez-le et réessayez.",
+      "uploadFailed": "Échec du dépôt — réessayez."
+    },
+    "management": {
+      "sectionTitle": "Liens de dépôt",
+      "sectionDescriptionAdmin": "Tous les liens de dépôt inversé où des invités déposent des fichiers sans compte.",
+      "sectionDescriptionUser": "Liens de dépôt inversé où des invités déposent des fichiers dans vos dossiers sans compte.",
+      "root": "Racine de la source",
+      "dropLink": "Lien de dépôt",
+      "passwordProtected": "Protégé par mot de passe",
+      "never": "Jamais",
+      "copiedToast": "Lien copié",
+      "copyFailedToast": "Échec de la copie — sélectionnez le lien et copiez-le manuellement.",
+      "revokedToast": "Lien révoqué",
+      "emptyTitle": "Aucun lien de dépôt",
+      "emptyDescription": "Créez-en un depuis le menu d'un dossier, ou le bouton Lien de dépôt de la barre d'outils.",
+      "copyLinkAria": "Copier le lien pour {name}",
+      "copyLinkTitle": "Copier le lien",
+      "revokeLinkAria": "Révoquer le lien pour {name}",
+      "revokeLinkTitle": "Révoquer le lien",
+      "columns": {
+        "destination": "Destination",
+        "source": "Source",
+        "created": "Créé",
+        "expires": "Expire",
+        "deposits": "Dépôts",
+        "status": "Statut"
+      },
+      "status": {
+        "active": "Actif",
+        "expired": "Expiré",
+        "revoked": "Révoqué"
+      }
     }
   },
   "api": {

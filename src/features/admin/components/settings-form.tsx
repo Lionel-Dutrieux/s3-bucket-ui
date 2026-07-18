@@ -17,9 +17,14 @@ import {
   setAuditRetention,
   setOidcOnlyEnabled,
   setPublicSharing,
+  setSharePolicy,
   setSignUpEnabled,
   setTwoFactorPolicy,
 } from "@/features/admin/actions/settings";
+import {
+  SHARE_MAX_EXPIRY_OPTIONS,
+  type SharePolicyValues,
+} from "@/features/admin/lib/schema";
 import type { ActionResult } from "@/lib/action-result";
 import type { TwoFactorPolicy } from "@/lib/dal/settings";
 
@@ -46,6 +51,7 @@ export function SettingsForm({
   oidcOnly,
   oidcConfigured,
   sharingEnabled,
+  sharePolicy,
   twoFactorPolicy,
   auditRetentionDays,
 }: {
@@ -53,6 +59,7 @@ export function SettingsForm({
   oidcOnly: boolean;
   oidcConfigured: boolean;
   sharingEnabled: boolean;
+  sharePolicy: SharePolicyValues;
   twoFactorPolicy: TwoFactorPolicy;
   auditRetentionDays: number;
 }) {
@@ -60,6 +67,7 @@ export function SettingsForm({
   const [pendingPolicy, setPendingPolicy] = useState<TwoFactorPolicy | null>(
     null,
   );
+  const [policy, setPolicy] = useState<SharePolicyValues>(sharePolicy);
   const router = useRouter();
   const t = useTranslations("admin.settingsForm");
   const tCommon = useTranslations("common");
@@ -78,6 +86,13 @@ export function SettingsForm({
 
   const applyTwoFactorPolicy = (policy: TwoFactorPolicy) =>
     run(() => setTwoFactorPolicy(policy), t("twoFactorPolicyToast"));
+
+  // The share policy is two controls saved as one row — merge the change onto
+  // the current values and persist both together.
+  const applySharePolicy = (next: SharePolicyValues) => {
+    setPolicy(next);
+    run(() => setSharePolicy(next), t("sharePolicyToast"));
+  };
 
   const onTwoFactorPolicyChange = (policy: TwoFactorPolicy) => {
     if (POLICY_RANK[policy] > POLICY_RANK[twoFactorPolicy]) {
@@ -127,6 +142,34 @@ export function SettingsForm({
             () => setPublicSharing(enabled),
             enabled ? t("sharingEnabledToast") : t("sharingDisabledToast"),
           )
+        }
+      />
+      <SettingSelectRow
+        title={t("shareMaxExpiryTitle")}
+        description={t("shareMaxExpiryDescription")}
+        value={String(policy.maxExpiryDays)}
+        disabled={pending || !sharingEnabled}
+        onChange={(value) =>
+          applySharePolicy({
+            ...policy,
+            maxExpiryDays: Number(value) as SharePolicyValues["maxExpiryDays"],
+          })
+        }
+        options={SHARE_MAX_EXPIRY_OPTIONS.map((days) => ({
+          value: String(days),
+          label:
+            days === 0
+              ? t("shareMaxExpiryUnlimited")
+              : t("shareMaxExpiryDays", { count: days }),
+        }))}
+      />
+      <SettingRow
+        title={t("shareRequirePasswordTitle")}
+        description={t("shareRequirePasswordDescription")}
+        checked={policy.requirePassword}
+        disabled={pending || !sharingEnabled}
+        onChange={(requirePassword) =>
+          applySharePolicy({ ...policy, requirePassword })
         }
       />
       {!oidcOnly && (

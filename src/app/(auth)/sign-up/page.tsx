@@ -5,8 +5,10 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
-import { getOidcConfig } from "@/lib/config";
+import type { SsoProviderOption } from "@/features/auth/components/sso-button";
+import { labelForProvider } from "@/features/auth/lib/provider-label";
 import { isOidcOnly, isPublicSignUpEnabled } from "@/lib/dal/settings";
+import { listSsoProviders } from "@/lib/dal/sso";
 import { hasAnyUser } from "@/lib/dal/users";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,7 +45,12 @@ export default async function SignUpPage() {
     );
   }
 
-  const oidc = await getOidcConfig();
+  const ssoProviders: SsoProviderOption[] = (await listSsoProviders()).map(
+    (provider) => ({
+      providerId: provider.providerId,
+      label: labelForProvider(provider.providerId),
+    }),
+  );
 
-  return <SignUpForm oidcLabel={oidc ? oidc.providerLabel : null} />;
+  return <SignUpForm ssoProviders={ssoProviders} />;
 }

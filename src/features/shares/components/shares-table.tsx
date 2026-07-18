@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Link2, Link2Off } from "lucide-react";
+import { Copy, File, Folder, Link2, Link2Off } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
@@ -23,28 +23,38 @@ import { formatDate, formatRelative } from "@/lib/format";
 export interface ShareRow {
   id: string;
   key: string;
+  /** "file" or "prefix" (a whole folder). */
+  kind: string;
   sourceName: string;
   createdAt: number;
   expiresAt: number | null;
   revoked: boolean;
   downloads: number;
+  maxDownloads: number | null;
   hasPassword: boolean;
 }
 
-function statusOf(share: ShareRow): "active" | "expired" | "revoked" {
+function statusOf(
+  share: ShareRow,
+): "active" | "expired" | "exhausted" | "revoked" {
   if (share.revoked) return "revoked";
   if (share.expiresAt !== null && share.expiresAt <= Date.now()) {
     return "expired";
   }
+  if (share.maxDownloads !== null && share.downloads >= share.maxDownloads) {
+    return "exhausted";
+  }
   return "active";
 }
 
-// A live link reads green, a lapsed one grey, a killed one red — the status
-// is scannable without reading the words.
+// A live link reads green, a lapsed one grey, an exhausted one amber, a killed
+// one red — the status is scannable without reading the words.
 const STATUS_BADGE: Record<ReturnType<typeof statusOf>, string> = {
   active:
     "border-transparent bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
   expired: "border-transparent bg-muted text-muted-foreground",
+  exhausted:
+    "border-transparent bg-amber-500/15 text-amber-700 dark:text-amber-400",
   revoked: "",
 };
 
@@ -103,21 +113,34 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
         <TableBody>
           {shares.map((share) => {
             const status = statusOf(share);
-            const name = share.key.split("/").pop() || share.key;
+            const isFolder = share.kind === "prefix";
+            // A folder key ends with "/", so pop() would be empty — trim it
+            // first, then take the last segment.
+            const name =
+              share.key.replace(/\/$/, "").split("/").pop() || share.key;
             return (
               <TableRow key={share.id}>
                 <TableCell className="max-w-64">
-                  <span
-                    className="block truncate font-medium"
-                    title={share.key}
-                  >
-                    {name}
-                  </span>
-                  {share.hasPassword ? (
-                    <span className="text-xs text-muted-foreground">
-                      {t("passwordProtected")}
+                  <div className="flex items-center gap-2">
+                    {isFolder ? (
+                      <Folder
+                        className="size-4 shrink-0 fill-amber-400/80 text-primary"
+                        aria-hidden
+                      />
+                    ) : (
+                      <File
+                        className="size-4 shrink-0 text-muted-foreground"
+                        aria-hidden
+                      />
+                    )}
+                    <span className="truncate font-medium" title={share.key}>
+                      {name}
                     </span>
-                  ) : null}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {isFolder ? t("folderLink") : t("fileLink")}
+                    {share.hasPassword ? ` · ${t("passwordProtected")}` : null}
+                  </span>
                 </TableCell>
                 <TableCell>{share.sourceName}</TableCell>
                 <TableCell className="text-muted-foreground">
@@ -141,7 +164,23 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
                   )}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {share.downloads}
+                  {share.maxDownloads === null ? (
+                    share.downloads
+                  ) : (
+                    <span
+                      className={
+                        status === "exhausted"
+                          ? "font-medium text-amber-700 dark:text-amber-400"
+                          : undefined
+                      }
+                      title={t("downloadsOfMax", {
+                        count: share.downloads,
+                        max: share.maxDownloads,
+                      })}
+                    >
+                      {share.downloads} / {share.maxDownloads}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  fieldProvenance,
-  resolveOidcConfig,
-  resolveSmtpConfig,
-} from "./resolve";
+import { fieldProvenance, resolveSmtpConfig } from "./resolve";
 
 const smtpEnv = {
   host: "mail.env.example",
@@ -62,37 +58,6 @@ describe("resolveSmtpConfig", () => {
       },
     );
     expect(config).toMatchObject({ host: "db.example", port: 587 });
-  });
-});
-
-const oidcEnv = {
-  discoveryUrl: "https://idp.example/.well-known/openid-configuration",
-  clientId: "env-client",
-  clientSecret: "env-secret",
-  providerLabel: "SSO",
-  scopes: "openid profile email groups",
-  groupsClaim: "groups",
-};
-
-describe("resolveOidcConfig", () => {
-  it("returns env trio when DB is empty", () => {
-    expect(resolveOidcConfig({}, oidcEnv)).toMatchObject({
-      clientId: "env-client",
-      providerLabel: "SSO",
-    });
-  });
-
-  it("null when the resolved trio is incomplete", () => {
-    expect(
-      resolveOidcConfig({}, { ...oidcEnv, clientSecret: undefined }),
-    ).toBeNull();
-    // DB completes a partial env
-    expect(
-      resolveOidcConfig(
-        { clientSecret: "db-secret" },
-        { ...oidcEnv, clientSecret: undefined },
-      ),
-    ).toMatchObject({ clientSecret: "db-secret" });
   });
 });
 

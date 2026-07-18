@@ -39,7 +39,12 @@
       "sharedLinks": "Shared links",
       "activity": "Activity",
       "admin": "Admin",
-      "theme": "Theme"
+      "theme": "Theme",
+      "health": {
+        "reachable": "Source reachable",
+        "unreachable": "Source unreachable",
+        "checking": "Checking source…"
+      }
     },
     "commandPalette": {
       "title": "Command palette",
@@ -108,7 +113,6 @@
     "signIn": {
       "metaTitle": "Sign in",
       "title": "Sign in",
-      "oidcOnlySubtitle": "This instance signs in through {provider}.",
       "subtitle": "Welcome back — sign in to browse your sources.",
       "emailLabel": "Email",
       "emailPlaceholder": "you@example.com",
@@ -119,7 +123,8 @@
       "or": "or",
       "noAccount": "No account yet?",
       "signUpLink": "Sign up",
-      "errorFallback": "Sign in failed."
+      "errorFallback": "Sign in failed.",
+      "ssoOnlySubtitle": "This instance signs in through single sign-on."
     },
     "signUp": {
       "metaTitle": "Sign up",
@@ -265,13 +270,18 @@
       "invalidShareOptions": "Invalid share options.",
       "onlyFilesShareable": "Only files can be shared.",
       "sharingDisabled": "Public share links are disabled on this instance.",
+      "sharingDisabledForSource": "Public share links are turned off for this source.",
+      "sharePasswordRequired": "A password is required to share a file here.",
       "fileNoLongerExists": "This file no longer exists.",
       "sourceUnreachable": "Could not reach this source.",
       "actionFailed": "Could not complete this action — try again.",
       "folderTooLargeToMove": "This folder holds more than {max} objects — too large to move in one go.",
       "selectionTooLargeToCopy": "This selection holds more than {max} objects — too large to copy in one go.",
       "objectsNotDeleted": "{count, plural, one {# object} other {# objects}} could not be deleted.",
-      "folderTooLargeToDelete": "This folder is too large to delete in one go — some objects remain, run it again."
+      "folderTooLargeToDelete": "This folder is too large to delete in one go — some objects remain, run it again.",
+      "onlyFoldersShareable": "Only folders can be shared this way.",
+      "folderNoLongerExists": "This folder no longer exists.",
+      "invalidDropOptions": "These drop-link options are invalid."
     },
     "filteredEmpty": {
       "title": "No {type} in this folder",
@@ -294,7 +304,8 @@
       "filterPlaceholder": "Filter this folder…",
       "matchCount": "{count, plural, one {# match} other {# matches}}",
       "searchEverywhere": "Search the entire source",
-      "upload": "Upload"
+      "upload": "Upload",
+      "dropLink": "Drop link"
     },
     "columns": {
       "name": "Name",
@@ -401,6 +412,7 @@
       "details": "Details",
       "download": "Download",
       "share": "Share",
+      "createDropLink": "Create drop link",
       "duplicate": "Duplicate",
       "delete": "Delete"
     },
@@ -421,6 +433,33 @@
       "expiresLabel": "Expires",
       "passwordLabel": "Password (optional)",
       "passwordPlaceholder": "Leave empty for none",
+      "passwordRequiredLabel": "Password (required)",
+      "passwordRequiredPlaceholder": "Set a password for this link",
+      "maxDownloadsLabel": "Max downloads (optional)",
+      "maxDownloadsPlaceholder": "Leave empty for unlimited",
+      "createLink": "Create link",
+      "creating": "Creating…",
+      "titleFolder": "Share {name}",
+      "descriptionFolder": "Anyone with the link can browse and download this folder — no account needed. Manage links from Shared links."
+    },
+    "dropDialog": {
+      "title": "Drop link for {name}",
+      "titleRoot": "Drop link for this source",
+      "description": "Anyone with the link can upload files into this folder — no account needed. They never see what is already there. Manage links from Shared links.",
+      "copyLink": "Copy link",
+      "copiedToast": "Link copied",
+      "copyFailedToast": "Copy failed — select the link and copy it manually.",
+      "expiresLabel": "Expires",
+      "passwordLabel": "Password (optional)",
+      "passwordPlaceholder": "Leave empty for none",
+      "passwordRequiredLabel": "Password (required)",
+      "passwordRequiredPlaceholder": "Set a password for this link",
+      "maxFilesLabel": "Max files (optional)",
+      "maxFilesPlaceholder": "Unlimited",
+      "maxSizeLabel": "Max MB / file",
+      "maxSizePlaceholder": "No limit",
+      "noteLabel": "Note for the guest (optional)",
+      "notePlaceholder": "e.g. Please upload your signed contract",
       "createLink": "Create link",
       "creating": "Creating…"
     },
@@ -530,6 +569,11 @@
     "remove": "Remove",
     "removeAria": "Remove {name}",
     "connectionVerifiedNote": "The connection is verified again when you save.",
+    "health": {
+      "reachable": "Reachable",
+      "unreachable": "Unreachable",
+      "latency": "{ms} ms"
+    },
     "editPage": {
       "metaTitle": "Edit source",
       "title": "Edit {name}",
@@ -547,6 +591,8 @@
       "namePlaceholder": "Team documents",
       "endpointLabel": "Endpoint",
       "accessNote": "Who can browse, edit or delete on this source is managed per user and group from the admin area.",
+      "allowPublicSharesLabel": "Allow public share links",
+      "allowPublicSharesDescription": "When off, no one can mint public links for this source and any existing link stops working until it's turned back on.",
       "connectionSuccessful": "Connection successful.",
       "secretPlaceholderEdit": "Leave blank to keep the current one",
       "testConnection": "Test connection",
@@ -737,6 +783,13 @@
       "sharingDescription": "Let users with access to a source create public links to its files (revocable, expirable, optionally password-protected). Turning this off blocks creating new links — existing ones keep working until revoked or expired.",
       "sharingEnabledToast": "Public share links enabled",
       "sharingDisabledToast": "Public share links disabled",
+      "shareMaxExpiryTitle": "Maximum link lifetime",
+      "shareMaxExpiryDescription": "Cap how long a public share link may live. When set, an expiry becomes mandatory and any longer (or never-expiring) request is pulled back to this limit.",
+      "shareMaxExpiryUnlimited": "No limit",
+      "shareMaxExpiryDays": "{count, plural, one {# day} other {# days}}",
+      "shareRequirePasswordTitle": "Require a password",
+      "shareRequirePasswordDescription": "Force every new public share link to be password-protected.",
+      "sharePolicyToast": "Share policy updated",
       "twoFactorPolicyTitle": "Two-factor authentication",
       "twoFactorPolicyDescription": "Require accounts to enroll in two-factor authentication before they can keep using the app: off (never required), admins (admin accounts only) or all (every account). Delegated to the identity provider when OIDC-only is on.",
       "twoFactorPolicyOff": "Off — never required",
@@ -800,12 +853,17 @@
       "invalidGrant": "Invalid grant.",
       "saveGrantFailed": "Could not save this grant.",
       "removeGrantFailed": "Could not remove this grant.",
-      "oidcDiscoveryFailed": "Could not reach or validate the OIDC discovery endpoint.",
       "smtpNotConfigured": "SMTP is not configured.",
-      "testEmailFailed": "Could not send the test email."
+      "testEmailFailed": "Could not send the test email.",
+      "ssoInvalidIssuer": "The issuer URL is invalid.",
+      "ssoRegisterFailed": "Could not register the SSO provider.",
+      "ssoProviderNotFound": "That SSO provider no longer exists."
     },
     "runtimeConfig": {
-      "provenance": { "env": "env", "custom": "custom" },
+      "provenance": {
+        "env": "env",
+        "custom": "custom"
+      },
       "resetToEnv": "Restore environment values",
       "resetConfirm": "This removes every value saved here and falls back to the environment variables. Continue?",
       "saved": "Settings saved.",
@@ -824,20 +882,50 @@
         "from": "Sender",
         "sendTest": "Send a test email",
         "testSent": "Test email sent to {email}."
-      },
-      "oidc": {
-        "title": "Single Sign-On (OIDC)",
-        "description": "Generic OpenID Connect provider. Environment variables provide the defaults; values saved here override them.",
-        "discoveryUrl": "Discovery URL",
-        "clientId": "Client ID",
-        "clientSecret": "Client secret",
-        "secretSet": "•••• (configured — type to replace)",
-        "secretUnset": "Not set",
-        "providerLabel": "Sign-in button label",
-        "scopes": "Scopes",
-        "groupsClaim": "Groups claim",
-        "callbackInfo": "Register this callback URL with your identity provider:",
-        "lockoutWarning": "Before enabling “OIDC only”, verify the SSO sign-in works in a private window — a broken OIDC config with password sign-in disabled locks everyone out."
+      }
+    },
+    "sso": {
+      "title": "Single Sign-On (SSO)",
+      "description": "OpenID Connect identity providers. Users sign in through the provider; matching group claims map to app groups.",
+      "empty": "No SSO providers registered yet.",
+      "addTitle": "Add a provider",
+      "addProvider": "Add provider",
+      "addPending": "Adding…",
+      "added": "SSO provider added.",
+      "removed": "SSO provider removed.",
+      "remove": "Remove",
+      "removeTitle": "Remove SSO provider",
+      "removeConfirm": "Remove the “{provider}” provider? Users can no longer sign in through it, but their accounts are kept.",
+      "providerId": "Provider ID",
+      "issuer": "Issuer URL",
+      "clientId": "Client ID",
+      "clientSecret": "Client secret",
+      "domain": "Email domain",
+      "groupsClaim": "Groups claim",
+      "scopes": "Scopes",
+      "presetLabel": "Identity provider",
+      "providerMeta": "Domain {domain} · groups claim “{claim}”",
+      "verifyBeforeOnly": "After adding a provider, verify SSO sign-in works in a private window before enabling “SSO only” — a broken provider with password sign-in disabled locks everyone out.",
+      "presets": {
+        "pocketId": {
+          "label": "Pocket ID",
+          "issuerPlaceholder": "https://id.example.com",
+          "help": "Issuer is your Pocket ID base URL. The groups claim is \"groups\"."
+        },
+        "keycloak": {
+          "label": "Keycloak",
+          "issuerPlaceholder": "https://keycloak.example.com/realms/your-realm",
+          "help": "Issuer includes the realm path. Add a \"groups\" client-scope mapper in Keycloak so group names reach the token."
+        },
+        "entra": {
+          "label": "Microsoft Entra",
+          "issuerPlaceholder": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+          "help": "Enable the groups claim in the app registration. Entra sends group object IDs (GUIDs) in the id_token — name your app groups after those GUIDs to match."
+        },
+        "generic": {
+          "label": "Generic OIDC",
+          "issuerPlaceholder": "https://idp.example.com"
+        }
       }
     }
   },
@@ -885,7 +973,8 @@
       "signInFailed": "Sign-in failed",
       "download": "Downloaded",
       "downloadZip": "Downloaded as ZIP",
-      "shareDownload": "Downloaded via shared link"
+      "shareDownload": "Downloaded via shared link",
+      "dropUpload": "Uploaded via drop link"
     },
     "exportCsv": "Export CSV",
     "exportJson": "Export JSON"
@@ -904,6 +993,7 @@
     "revokedToast": "Link revoked",
     "passwordProtected": "password-protected",
     "never": "Never",
+    "downloadsOfMax": "{count} of {max} downloads used",
     "columns": {
       "file": "File",
       "source": "Source",
@@ -915,6 +1005,7 @@
     "status": {
       "active": "Active",
       "expired": "Expired",
+      "exhausted": "Exhausted",
       "revoked": "Revoked"
     },
     "copyLinkAria": "Copy link to {name}",
@@ -936,6 +1027,84 @@
       "linkNotFound": "Link not found.",
       "notFound": "Not found.",
       "downloadFailed": "Could not download this file."
+    },
+    "fileLink": "File link",
+    "folderLink": "Folder link",
+    "gallery": {
+      "breadcrumbAria": "Breadcrumb",
+      "empty": "This folder is empty.",
+      "foldersHeading": "Folders",
+      "filesHeading": "Files",
+      "previewFile": "Preview {name}",
+      "download": "Download",
+      "downloadFileAria": "Download {name}",
+      "indexOfTotal": "{index} of {total}",
+      "previousFileAria": "Previous file: {name}",
+      "previousFileTitle": "Previous file (←)",
+      "nextFileAria": "Next file: {name}",
+      "nextFileTitle": "Next file (→)"
+    }
+  },
+  "drops": {
+    "publicUploader": {
+      "metaTitle": "Upload files",
+      "title": "Upload files",
+      "subtitle": "Add files below. They are sent straight to the owner — you won't see anything already here.",
+      "passwordProtected": "This link is password-protected.",
+      "passwordLabel": "Password",
+      "unlocking": "Unlocking…",
+      "unlock": "Unlock",
+      "dropHint": "Drag and drop files here, or",
+      "chooseFiles": "Choose files",
+      "limitSize": "Up to {max} MB per file",
+      "limitRemaining": "{count, plural, one {# upload left} other {# uploads left}}",
+      "full": "This link has reached its upload limit.",
+      "uploaded": "Uploaded",
+      "uploadError": "Upload failed — try again.",
+      "networkError": "Network error — check your connection and retry.",
+      "tooLargeClient": "Too large — {max} MB max per file.",
+      "dismiss": "Dismiss {name}",
+      "successSummary": "{count, plural, one {# file uploaded} other {# files uploaded}}"
+    },
+    "errors": {
+      "notFound": "This link is unavailable.",
+      "passwordRequired": "This link is password-protected.",
+      "missingBody": "No file was received.",
+      "tooLarge": "File is too large for this link.",
+      "limitReached": "This link has reached its upload limit.",
+      "nameConflict": "Too many files with that name — rename it and retry.",
+      "uploadFailed": "Upload failed — try again."
+    },
+    "management": {
+      "sectionTitle": "Drop links",
+      "sectionDescriptionAdmin": "Every reverse-share link where guests upload files without an account.",
+      "sectionDescriptionUser": "Reverse-share links where guests upload files into your folders without an account.",
+      "root": "Source root",
+      "dropLink": "Drop link",
+      "passwordProtected": "Password-protected",
+      "never": "Never",
+      "copiedToast": "Link copied",
+      "copyFailedToast": "Copy failed — select the link and copy it manually.",
+      "revokedToast": "Link revoked",
+      "emptyTitle": "No drop links yet",
+      "emptyDescription": "Create one from a folder's menu, or the Drop link button in the toolbar.",
+      "copyLinkAria": "Copy link for {name}",
+      "copyLinkTitle": "Copy link",
+      "revokeLinkAria": "Revoke link for {name}",
+      "revokeLinkTitle": "Revoke link",
+      "columns": {
+        "destination": "Destination",
+        "source": "Source",
+        "created": "Created",
+        "expires": "Expires",
+        "deposits": "Deposits",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      }
     }
   },
   "api": {

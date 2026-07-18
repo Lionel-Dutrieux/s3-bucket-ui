@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { CopyToDialog } from "@/features/browser/components/dialogs/copy-to-dialog";
+import { DropLinkDialog } from "@/features/browser/components/dialogs/drop-link-dialog";
 import { MoveDialog } from "@/features/browser/components/dialogs/move-dialog";
 import { MoveToDialog } from "@/features/browser/components/dialogs/move-to-dialog";
 import { PreviewDialog } from "@/features/browser/components/dialogs/preview-dialog";
@@ -10,6 +11,7 @@ import { SearchCommand } from "@/features/browser/components/dialogs/search-comm
 import { ShareDialog } from "@/features/browser/components/dialogs/share-dialog";
 import type { useBrowserDialogs } from "@/features/browser/hooks/use-browser-dialogs";
 import type { FileEntry } from "@/features/browser/lib/listing";
+import type { SharePolicy } from "@/lib/shares/policy";
 
 /**
  * The browser's mutually-exclusive overlay stack, grouped out of FileBrowser:
@@ -21,6 +23,7 @@ import type { FileEntry } from "@/features/browser/lib/listing";
 export function BrowserDialogs({
   sourceId,
   dialogs,
+  sharePolicy,
   preview,
   previewFiles,
   onPreviewFileChange,
@@ -35,6 +38,8 @@ export function BrowserDialogs({
 }: {
   sourceId: string;
   dialogs: ReturnType<typeof useBrowserDialogs>;
+  /** Org-wide share constraints reflected in the share dialog. */
+  sharePolicy?: SharePolicy;
   preview: FileEntry | null;
   previewFiles: FileEntry[];
   onPreviewFileChange: (file: FileEntry) => void;
@@ -67,7 +72,16 @@ export function BrowserDialogs({
       />
       <ShareDialog
         sourceId={sourceId}
-        file={dialogs.dialog?.kind === "share" ? dialogs.dialog.file : null}
+        target={dialogs.dialog?.kind === "share" ? dialogs.dialog.target : null}
+        policy={sharePolicy}
+        onOpenChange={(open) => {
+          if (!open) dialogs.close();
+        }}
+      />
+      <DropLinkDialog
+        sourceId={sourceId}
+        target={dialogs.dialog?.kind === "drop" ? dialogs.dialog.target : null}
+        policy={sharePolicy}
         onOpenChange={(open) => {
           if (!open) dialogs.close();
         }}

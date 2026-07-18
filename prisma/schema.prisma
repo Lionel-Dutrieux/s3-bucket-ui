@@ -17,10 +17,14 @@ model Source {
   accessKeyId     String   @map("access_key_id")
   /// Encrypted with ENCRYPTION_KEY (AES-256-GCM)
   secretAccessKey String   @map("secret_access_key")
+  /// When false, no public share links may be minted for this source and any
+  /// existing link resolves as a uniform 404 until it's turned back on.
+  allowPublicShares Boolean @default(true) @map("allow_public_shares")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  grants SourcePermission[]
-  shares Share[]
+  grants    SourcePermission[]
+  shares    Share[]
+  dropLinks DropLink[]
 
   @@map("sources")
 }
@@ -64,13 +68,34 @@ model User {
   // two-factor plugin
   twoFactorEnabled Boolean? @default(false) @map("two_factor_enabled")
 
-  sessions    Session[]
-  accounts    Account[]
-  memberships GroupMember[]
-  grants      SourcePermission[]
-  twoFactors  TwoFactor[]
+  sessions     Session[]
+  accounts     Account[]
+  memberships  GroupMember[]
+  grants       SourcePermission[]
+  twoFactors   TwoFactor[]
+  ssoProviders SsoProvider[]
 
   @@map("users")
+}
+
+/// SSO identity provider registered through the better-auth SSO plugin
+/// (@better-auth/sso). One row per IdP; `oidcConfig` holds the plugin's own
+/// JSON blob (client id/secret + discovered endpoints). Managed from
+/// Admin → Settings — the per-provider groups-claim name lives alongside in the
+/// Setting table (key `sso.groupsClaim.<providerId>`), read by provisionUser.
+model SsoProvider {
+  id             String  @id
+  issuer         String
+  domain         String
+  oidcConfig     String? @map("oidc_config")
+  samlConfig     String? @map("saml_config")
+  userId         String? @map("user_id")
+  providerId     String  @unique @map("provider_id")
+  organizationId String? @map("organization_id")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("sso_providers")
 }
 
 model TwoFactor {
@@ -208,12 +233,18 @@ model SourcePermission {
 model Share {
   id           String    @id
   sourceId     String    @map("source_id") @db.Uuid
+  /// "file" — key is a single object; "prefix" — key is a folder prefix
+  /// (ends with "/") and the link exposes every object under it.
+  kind         String    @default("file")
   key          String
   createdById  String    @map("created_by_id")
   expiresAt    DateTime? @map("expires_at") @db.Timestamptz(3)
   passwordHash String?   @map("password_hash")
   revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
   downloads    Int       @default(0)
+  /// Download cap — null means unlimited. Enforced race-free with a conditional
+  /// updateMany (downloads < maxDownloads); an exhausted link reads as expired.
+  maxDownloads Int?      @map("max_downloads")
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
@@ -221,4 +252,38 @@ model Share {
   @@index([sourceId])
   @@index([createdById])
   @@map("shares")
+}
+
+/// Public reverse-share ("drop") link — the app-minted token (the row id) is
+/// the capability: anyone holding the URL may DEPOSIT files into `prefix`
+/// without an account, but never see what is already there. Expiry, revocation
+/// and an optional password gate it, exactly like Share. `maxFiles` caps how
+/// many objects may ever be dropped (enforced race-free with a conditional
+/// updateMany, mirroring Share.maxDownloads) and `maxSizeMb` the size of each.
+/// Deleting a source cascades and kills its links; createdById has no FK so
+/// links survive account deletion (mirrors Operation.userId / Share).
+model DropLink {
+  id           String    @id
+  sourceId     String    @map("source_id") @db.Uuid
+  /// Destination prefix — "" is the bucket root, otherwise ends with "/".
+  prefix       String
+  createdById  String    @map("created_by_id")
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz(3)
+  passwordHash String?   @map("password_hash")
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
+  /// Cap on the number of deposits — null means unlimited. Enforced race-free
+  /// with a conditional updateMany (uploadsCount < maxFiles).
+  maxFiles     Int?      @map("max_files")
+  /// Per-file size cap in mebibytes — null means only the global upload ceiling.
+  maxSizeMb    Int?      @map("max_size_mb")
+  /// Free-text instruction shown to the guest on the deposit page.
+  note         String?
+  uploadsCount Int       @default(0) @map("uploads_count")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+  @@index([createdById])
+  @@map("drop_links")
 }
