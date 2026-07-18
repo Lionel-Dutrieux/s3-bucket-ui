@@ -128,6 +128,27 @@ describe("localFs adapter", () => {
     expect(files.capabilities.delimiter).toBe(true);
   });
 
+  it("prunes emptied parent directories on delete", async () => {
+    await files.upload("folder/.keep", "");
+    await files.upload("folder/sub/deep.txt", "d");
+    await files.delete("folder/sub/deep.txt");
+    await files.delete("folder/.keep");
+    expect(await readdir(root)).toEqual([]);
+  });
+
+  it("keeps a parent directory that still has other files", async () => {
+    await files.upload("folder/a.txt", "a");
+    await files.upload("folder/b.txt", "b");
+    await files.delete("folder/a.txt");
+    expect(await readdir(path.join(root, "folder"))).toEqual(["b.txt"]);
+  });
+
+  it("prunes the emptied source directory on move", async () => {
+    await files.upload("from/only.txt", "x");
+    await files.move("from/only.txt", "to/only.txt");
+    expect(await readdir(root)).toEqual(["to"]);
+  });
+
   it("upload creates a real directory for .keep folder markers", async () => {
     await files.upload("empty-folder/.keep", "");
     expect((await stat(path.join(root, "empty-folder"))).isDirectory()).toBe(

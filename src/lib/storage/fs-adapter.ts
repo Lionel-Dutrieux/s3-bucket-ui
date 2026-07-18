@@ -176,6 +176,27 @@ async function* walk(root: string): AsyncGenerator<string> {
   }
 }
 
+/**
+ * Removes now-empty directories from `dir` up to (never including) root —
+ * object-store semantics have no folders, so a delete or move that empties a
+ * directory must not leave its skeleton on disk. `rmdir` only ever removes
+ * empty directories, so a concurrent write simply stops the climb
+ * (ENOTEMPTY), as does anything else going wrong — pruning is best-effort
+ * cleanup, never worth failing the operation that triggered it.
+ */
+async function pruneEmptyDirs(root: string, dir: string): Promise<void> {
+  const rootWithSep = root.endsWith(path.sep) ? root : root + path.sep;
+  let current = dir;
+  while (current !== root && current.startsWith(rootWithSep)) {
+    try {
+      await fsp.rmdir(current);
+    } catch {
+      return;
+    }
+    current = path.dirname(current);
+  }
+}
+
 interface KeyPage {
   keys: string[];
   prefixes?: string[];
@@ -398,6 +419,7 @@ export function localFs(opts: LocalFsOptions): Adapter<{ root: string }> {
       const bodyPath = resolveKeyPath(root, key);
       try {
         await fsp.rm(bodyPath, { force: true });
+        await pruneEmptyDirs(root, path.dirname(bodyPath));
       } catch (error) {
         throw mapFsError(error);
       }
@@ -421,6 +443,7 @@ export function localFs(opts: LocalFsOptions): Adapter<{ root: string }> {
       try {
         await fsp.mkdir(path.dirname(toPath), { recursive: true });
         await fsp.rename(fromPath, toPath);
+        await pruneEmptyDirs(root, path.dirname(fromPath));
       } catch (error) {
         throw mapFsError(error);
       }
