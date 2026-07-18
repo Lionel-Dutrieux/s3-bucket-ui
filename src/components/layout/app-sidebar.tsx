@@ -30,7 +30,6 @@ import { SourceHealthDot } from "@/features/sources/components/source-health-dot
 import { SourceMenu } from "@/features/sources/components/source-menu";
 import type { SourceSummary } from "@/lib/dal/sources";
 import { getProvider, PROVIDERS } from "@/lib/storage/providers";
-import { cn } from "@/lib/utils";
 
 export function AppSidebar({
   branding,
@@ -134,21 +133,20 @@ export function AppSidebar({
                           </div>
                         </Link>
                       </SidebarMenuButton>
-                      {/* The dot lives in the action slot, right-aligned; for
-                          admins the hover "…" menu takes its place (mirror of
-                          SidebarMenuAction's showOnHover visibility). */}
-                      <span
-                        className={cn(
-                          "pointer-events-none absolute top-1/2 right-[11px] -translate-y-1/2",
-                          admin &&
-                            "transition-opacity max-md:opacity-0 pointer-coarse:opacity-0 group-focus-within/menu-item:opacity-0 group-hover/menu-item:opacity-0",
-                        )}
-                      >
-                        <SourceHealthDot sourceId={source.id} />
-                      </span>
+                      {/* The health dot lives in the right action slot. For
+                          admins it is the idle face of the "…" menu trigger;
+                          for everyone else it's a plain right-aligned dot. */}
                       {admin ? (
-                        <SourceMenu source={source} isActive={isActive} />
-                      ) : null}
+                        <SourceMenu
+                          source={source}
+                          isActive={isActive}
+                          indicator={<SourceHealthDot sourceId={source.id} />}
+                        />
+                      ) : (
+                        <span className="pointer-events-none absolute top-1/2 right-[11px] -translate-y-1/2">
+                          <SourceHealthDot sourceId={source.id} />
+                        </span>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}
