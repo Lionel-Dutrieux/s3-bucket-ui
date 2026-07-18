@@ -103,3 +103,20 @@ describe("new S3-compatible providers", () => {
     ).toEqual({ ok: true, value: "https://cos.ap-guangzhou.myqcloud.com" });
   });
 });
+
+describe("local provider", () => {
+  it("is registered with the fs adapter", () => {
+    expect(getProvider("local")?.adapter).toBe("fs");
+  });
+
+  it("normalizeEndpoint accepts an empty endpoint and blanks it", () => {
+    expect(normalizeEndpoint("local", "")).toEqual({ ok: true, value: "" });
+  });
+
+  it("normalizeEndpoint blanks a stray non-empty endpoint", () => {
+    expect(normalizeEndpoint("local", "https://ignored.example.com")).toEqual({
+      ok: true,
+      value: "",
+    });
+  });
+});

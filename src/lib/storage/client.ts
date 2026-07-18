@@ -1,6 +1,7 @@
 import "server-only";
 import { type Adapter, createFiles, Files } from "files-sdk";
 import { azure } from "files-sdk/azure";
+import { fs } from "files-sdk/fs";
 import { ftp } from "files-sdk/ftp";
 import { s3 } from "files-sdk/s3";
 import { sftp } from "files-sdk/sftp";
@@ -60,6 +61,13 @@ function buildAdapter(credentials: StorageCredentials): Adapter {
       password: credentials.secretAccessKey,
       root: credentials.bucket,
     });
+  }
+
+  // Local sources: "bucket" holds a root directory already vetted against
+  // LOCAL_FS_ROOTS by the source actions (lib/storage/local-roots.ts).
+  // The adapter itself re-fences: keys resolving outside root throw.
+  if (provider?.adapter === "fs") {
+    return fs({ root: credentials.bucket });
   }
 
   const region =
