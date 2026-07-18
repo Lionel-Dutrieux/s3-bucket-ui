@@ -5,7 +5,9 @@ import { z } from "zod";
 import {
   type OidcSettingsValues,
   oidcSettingsSchema,
+  type SharePolicyValues,
   type SmtpSettingsValues,
+  sharePolicySchema,
   smtpSettingsSchema,
 } from "@/features/admin/lib/schema";
 import { withAdmin } from "@/features/admin/server/guard";
@@ -14,6 +16,7 @@ import { getSmtpConfig, isOidcConfigured } from "@/lib/config";
 import {
   clearConfigOverrides,
   setAuditRetentionDays as dalSetAuditRetentionDays,
+  setSharePolicy as dalSetSharePolicy,
   setTwoFactorPolicy as dalSetTwoFactorPolicy,
   isOidcOnly,
   setConfigOverrides,
@@ -105,6 +108,33 @@ export async function setTwoFactorPolicy(
         return actionError(t("invalidInput"));
       }
       await dalSetTwoFactorPolicy(parsed.data);
+      return actionOk();
+    },
+  );
+}
+
+export async function setSharePolicy(
+  input: SharePolicyValues,
+): Promise<ActionResult> {
+  const t = await getTranslations("admin.errors");
+  return withAdmin(
+    {
+      action: "set share policy",
+      failureMessage: t("settingUpdateFailed"),
+      // The source pages read this on render — a new setting takes effect on
+      // the next navigation, no path revalidation needed.
+      revalidate: false,
+    },
+    async () => {
+      const parsed = sharePolicySchema.safeParse(input);
+      if (!parsed.success) {
+        return actionError(t("invalidInput"));
+      }
+      await dalSetSharePolicy({
+        maxExpiryDays:
+          parsed.data.maxExpiryDays > 0 ? parsed.data.maxExpiryDays : null,
+        requirePassword: parsed.data.requirePassword,
+      });
       return actionOk();
     },
   );

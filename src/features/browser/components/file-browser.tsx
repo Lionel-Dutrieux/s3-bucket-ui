@@ -52,6 +52,7 @@ import { OPEN_SOURCE_SEARCH_EVENT } from "@/features/browser/lib/search-event";
 import { sortParser } from "@/features/browser/lib/sort-param";
 import type { ViewMode } from "@/features/browser/lib/view";
 import { parentPrefix as parentPrefixOf } from "@/lib/paths";
+import type { SharePolicy } from "@/lib/shares/policy";
 
 export interface BrowserPermissions {
   upload: boolean;
@@ -76,6 +77,7 @@ export function FileBrowser({
   view,
   permissions,
   canShare = true,
+  sharePolicy,
 }: {
   sourceId: string;
   prefix: string;
@@ -85,6 +87,8 @@ export function FileBrowser({
   permissions: BrowserPermissions;
   /** False when the admin switched public share links off. */
   canShare?: boolean;
+  /** Org-wide share constraints reflected in the share dialog. */
+  sharePolicy?: SharePolicy;
 }) {
   const router = useRouter();
   const t = useTranslations("browser.fileBrowser");
@@ -447,6 +451,7 @@ export function FileBrowser({
       <BrowserDialogs
         sourceId={sourceId}
         dialogs={dialogs}
+        sharePolicy={sharePolicy}
         preview={preview}
         previewFiles={previewFiles}
         onPreviewFileChange={openPreview}

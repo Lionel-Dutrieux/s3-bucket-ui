@@ -18,6 +18,8 @@ const baseSourceSchema = z.object({
   bucket: z.string().trim().min(1, "Bucket is required."),
   accessKeyId: z.string().trim().min(1, "Access key is required."),
   secretAccessKey: z.string().trim().min(1, "Secret is required."),
+  // Whether public share links may be minted for this source (default on).
+  allowPublicShares: z.boolean(),
 });
 
 function withEndpointRule<Schema extends typeof baseSourceSchema>(

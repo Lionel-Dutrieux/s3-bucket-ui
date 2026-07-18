@@ -19,12 +19,18 @@ export async function createShare(input: ShareInput): Promise<void> {
 }
 
 /**
- * The public lookup: token → live share. Unknown, revoked and expired all
- * return null alike — public surfaces answer a uniform 404 from it.
+ * The public lookup: token → live share. Unknown, revoked, expired and links
+ * whose source has public sharing switched off all return null alike — public
+ * surfaces answer a uniform 404 from it. A source with allowPublicShares=false
+ * kills every one of its links for as long as it stays off.
  */
 export async function getActiveShare(token: string) {
-  const share = await prisma.share.findUnique({ where: { id: token } });
+  const share = await prisma.share.findUnique({
+    where: { id: token },
+    include: { source: { select: { allowPublicShares: true } } },
+  });
   if (!share) return null;
+  if (!share.source.allowPublicShares) return null;
   if (!isShareLive(share, new Date())) return null;
   return share;
 }

@@ -2,6 +2,9 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { decrypt, encrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
+import type { SharePolicy } from "@/lib/shares/policy";
+
+export type { SharePolicy };
 
 const SIGN_UP_KEY = "allowPublicSignUp";
 const OIDC_ONLY_KEY = "oidcOnly";
@@ -67,6 +70,57 @@ export async function isPublicSharingEnabled(): Promise<boolean> {
 
 export async function setPublicSharingEnabled(enabled: boolean): Promise<void> {
   await setBoolSetting(SHARING_KEY, enabled);
+}
+
+// --- share policy (org-wide) ---
+
+const SHARE_POLICY_MAX_EXPIRY_DAYS_KEY = "sharePolicy.maxExpiryDays";
+const SHARE_POLICY_REQUIRE_PASSWORD_KEY = "sharePolicy.requirePassword";
+
+/**
+ * Org-wide constraints on new share links, enforced server-side in
+ * createShareLink and reflected in the share dialog. Defaults are permissive:
+ * no expiry cap, no mandatory password.
+ */
+export async function getSharePolicy(): Promise<SharePolicy> {
+  const rows = await prisma.setting.findMany({
+    where: {
+      key: {
+        in: [
+          SHARE_POLICY_MAX_EXPIRY_DAYS_KEY,
+          SHARE_POLICY_REQUIRE_PASSWORD_KEY,
+        ],
+      },
+    },
+    select: { key: true, value: true },
+  });
+  const map = new Map(rows.map((row) => [row.key, row.value]));
+  const rawMax = map.get(SHARE_POLICY_MAX_EXPIRY_DAYS_KEY);
+  const parsedMax = rawMax !== undefined ? Number(rawMax) : Number.NaN;
+  return {
+    maxExpiryDays:
+      Number.isFinite(parsedMax) && parsedMax > 0
+        ? Math.floor(parsedMax)
+        : null,
+    requirePassword: map.get(SHARE_POLICY_REQUIRE_PASSWORD_KEY) === "true",
+  };
+}
+
+export async function setSharePolicy(policy: SharePolicy): Promise<void> {
+  const maxExpiry =
+    policy.maxExpiryDays !== null && policy.maxExpiryDays > 0
+      ? setStringSetting(
+          SHARE_POLICY_MAX_EXPIRY_DAYS_KEY,
+          String(Math.floor(policy.maxExpiryDays)),
+        )
+      : deleteSettings([SHARE_POLICY_MAX_EXPIRY_DAYS_KEY]);
+  await prisma.$transaction([
+    maxExpiry,
+    setStringSetting(
+      SHARE_POLICY_REQUIRE_PASSWORD_KEY,
+      String(policy.requirePassword),
+    ),
+  ]);
 }
 
 // --- branding (white labelling) ---

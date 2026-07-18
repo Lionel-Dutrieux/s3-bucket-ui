@@ -15,7 +15,7 @@ import {
   listFolder,
 } from "@/features/browser/server/service";
 import { requireSourceAccess } from "@/lib/auth/access";
-import { isPublicSharingEnabled } from "@/lib/dal/settings";
+import { getSharePolicy, isPublicSharingEnabled } from "@/lib/dal/settings";
 
 interface SourcePageProps {
   params: Promise<{ id: string }>;
@@ -52,9 +52,14 @@ export default async function SourcePage({
   const view: ViewMode =
     (await cookies()).get(VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
 
-  // Sharing is app-minted now (streaming fallback covers unsigned providers),
-  // so the only gate is the instance-wide switch in Admin → Settings.
-  const canShare = await isPublicSharingEnabled();
+  // Sharing is app-minted now (streaming fallback covers unsigned providers).
+  // Two gates: the instance-wide switch (Admin → Settings) and this source's
+  // own allowPublicShares toggle. The org policy pre-constrains the dialog.
+  const [sharingEnabled, sharePolicy] = await Promise.all([
+    isPublicSharingEnabled(),
+    getSharePolicy(),
+  ]);
+  const canShare = sharingEnabled && source.allowPublicShares;
 
   const listing = await listFolder(source, prefix, cursor);
   // An active type filter hides folders and keeps only matching files.
@@ -109,6 +114,7 @@ export default async function SourcePage({
                 delete: access.canDelete,
               }}
               canShare={canShare}
+              sharePolicy={sharePolicy}
             />
             {listing.nextCursor ? (
               <div className="flex justify-center py-4">

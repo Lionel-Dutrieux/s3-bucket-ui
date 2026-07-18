@@ -50,6 +50,7 @@ export default async function EditSourcePage({
             accessKeyId: source.accessKeyId,
             // The secret never reaches the client — blank means "keep it".
             secretAccessKey: "",
+            allowPublicShares: source.allowPublicShares,
           },
         }}
       />

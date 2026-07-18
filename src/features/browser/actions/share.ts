@@ -6,10 +6,11 @@ import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
 import { requireSourceAccess } from "@/lib/auth/access";
 import { getSession } from "@/lib/auth/session";
 import { recordOperation } from "@/lib/dal/operations";
-import { isPublicSharingEnabled } from "@/lib/dal/settings";
+import { getSharePolicy, isPublicSharingEnabled } from "@/lib/dal/settings";
 import { createShare } from "@/lib/dal/shares";
 import { expiresAtFrom, type ShareExpiry } from "@/lib/shares/expiry";
 import { hashSharePassword } from "@/lib/shares/password";
+import { capExpiresAt } from "@/lib/shares/policy";
 import { generateShareToken } from "@/lib/shares/token";
 import { getFilesClient } from "@/lib/storage/client";
 
@@ -44,6 +45,20 @@ export async function createShareLink(
   if (!session || !result) return actionError(t("sourceNotFound"));
   const { source } = result;
 
+  // This source may have public sharing switched off individually.
+  if (!source.allowPublicShares) {
+    return actionError(t("sharingDisabledForSource"));
+  }
+
+  // Org-wide policy: a password may be mandatory, and the lifetime capped
+  // (an over-long or "never" expiry is pulled back to the ceiling). The server
+  // is the real guard — the dialog only pre-constrains the inputs.
+  const policy = await getSharePolicy();
+  const password = parsed.data.password || undefined;
+  if (policy.requirePassword && !password) {
+    return actionError(t("sharePasswordRequired"));
+  }
+
   const files = getFilesClient(source);
   try {
     if (!(await files.exists(key))) {
@@ -55,8 +70,12 @@ export async function createShareLink(
   }
 
   const token = generateShareToken();
-  const expiresAt = expiresAtFrom(parsed.data.expiresIn, new Date());
-  const password = parsed.data.password || undefined;
+  const now = new Date();
+  const expiresAt = capExpiresAt(
+    expiresAtFrom(parsed.data.expiresIn, now),
+    policy.maxExpiryDays,
+    now,
+  );
   await createShare({
     id: token,
     sourceId: source.id,

@@ -5,6 +5,7 @@ import { BrandingForm } from "@/features/admin/components/branding-form";
 import { OidcSettingsForm } from "@/features/admin/components/oidc-settings-form";
 import { SettingsForm } from "@/features/admin/components/settings-form";
 import { SmtpSettingsForm } from "@/features/admin/components/smtp-settings-form";
+import type { SharePolicyValues } from "@/features/admin/lib/schema";
 import { requireAdmin } from "@/lib/auth/session";
 import { getBranding } from "@/lib/branding/branding";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@/lib/config";
 import {
   getAuditRetentionDays,
+  getSharePolicy,
   getTwoFactorPolicy,
   isOidcOnly,
   isPublicSharingEnabled,
@@ -34,6 +36,7 @@ export default async function AdminSettingsPage() {
     signUpEnabled,
     oidcOnly,
     sharingEnabled,
+    sharePolicy,
     twoFactorPolicy,
     auditRetentionDays,
     branding,
@@ -45,6 +48,7 @@ export default async function AdminSettingsPage() {
     isPublicSignUpEnabled(),
     isOidcOnly(),
     isPublicSharingEnabled(),
+    getSharePolicy(),
     getTwoFactorPolicy(),
     getAuditRetentionDays(),
     getBranding(),
@@ -63,6 +67,11 @@ export default async function AdminSettingsPage() {
           oidcOnly={oidcOnly}
           oidcConfigured={oidc !== null}
           sharingEnabled={sharingEnabled}
+          sharePolicy={{
+            maxExpiryDays: (sharePolicy.maxExpiryDays ??
+              0) as SharePolicyValues["maxExpiryDays"],
+            requirePassword: sharePolicy.requirePassword,
+          }}
           twoFactorPolicy={twoFactorPolicy}
           auditRetentionDays={auditRetentionDays}
         />

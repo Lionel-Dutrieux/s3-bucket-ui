@@ -76,6 +76,25 @@ export const brandingSchema = z.object({
 
 export type BrandingValues = z.infer<typeof brandingSchema>;
 
+// --- share policy (org-wide) ---
+
+// Discrete lifetime caps offered in Admin → Settings; 0 = no cap (unlimited).
+export const SHARE_MAX_EXPIRY_OPTIONS = [0, 1, 7, 30, 90, 365] as const;
+
+export const sharePolicySchema = z.object({
+  // 0 means "no cap"; the DAL stores null for it.
+  maxExpiryDays: z.union([
+    z.literal(0),
+    z.literal(1),
+    z.literal(7),
+    z.literal(30),
+    z.literal(90),
+    z.literal(365),
+  ]),
+  requirePassword: z.boolean(),
+});
+export type SharePolicyValues = z.infer<typeof sharePolicySchema>;
+
 // --- runtime config (SMTP / OIDC) ---
 
 export const smtpSettingsSchema = z.object({

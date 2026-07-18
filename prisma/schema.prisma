@@ -17,6 +17,9 @@ model Source {
   accessKeyId     String   @map("access_key_id")
   /// Encrypted with ENCRYPTION_KEY (AES-256-GCM)
   secretAccessKey String   @map("secret_access_key")
+  /// When false, no public share links may be minted for this source and any
+  /// existing link resolves as a uniform 404 until it's turned back on.
+  allowPublicShares Boolean @default(true) @map("allow_public_shares")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   grants SourcePermission[]

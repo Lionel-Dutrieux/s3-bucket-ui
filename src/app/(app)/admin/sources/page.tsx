@@ -77,6 +77,7 @@ export default async function AdminSourcesPage() {
                       accessKeyId: detail?.accessKeyId ?? "",
                       // The secret never reaches the client — blank keeps it.
                       secretAccessKey: "",
+                      allowPublicShares: detail?.allowPublicShares ?? true,
                     }}
                     otherSources={sources.filter(
                       (other) => other.id !== source.id,

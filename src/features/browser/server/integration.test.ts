@@ -23,6 +23,7 @@ const source: Source = {
   bucket: "bucket-ui-test",
   accessKeyId,
   secretAccessKey,
+  allowPublicShares: true,
 };
 
 describe.skipIf(!endpoint)("listFolder against a real S3 endpoint", () => {

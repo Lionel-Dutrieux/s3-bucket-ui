@@ -8,6 +8,7 @@ const validInput = {
   bucket: "documents",
   accessKeyId: "key",
   secretAccessKey: "secret",
+  allowPublicShares: true,
 };
 
 describe("sourceInputSchema", () => {

@@ -3,7 +3,7 @@
 import { useStore } from "@tanstack/react-form";
 import { Check, Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -20,27 +20,48 @@ import { createShareLink } from "@/features/browser/actions/share";
 import type { FileEntry } from "@/features/browser/lib/listing";
 import { useAppForm } from "@/forms/form";
 import { copyText } from "@/lib/clipboard";
-import { SHARE_EXPIRY_OPTIONS, type ShareExpiry } from "@/lib/shares/expiry";
+import type { ShareExpiry } from "@/lib/shares/expiry";
+import { allowedExpiryOptions, type SharePolicy } from "@/lib/shares/policy";
 
-const shareSchema = z.object({
-  expiresIn: z.enum(["1d", "7d", "30d", "never"]),
-  password: z.string().max(128),
-  // Kept as a string (the input value); empty means unlimited. Validated as an
-  // optional whole number ≥ 1 — zod messages are out of i18n scope by design.
-  maxDownloads: z
-    .string()
-    .refine((value) => value.trim() === "" || /^[1-9]\d*$/.test(value.trim()), {
-      message: "Enter a whole number of 1 or more, or leave it empty.",
-    }),
-});
+/**
+ * Builds the dialog's validation schema from the org policy: the expiry enum is
+ * restricted to the options the policy allows, and the password becomes
+ * required when the policy mandates one. The server re-checks both regardless.
+ */
+function makeShareSchema(
+  options: readonly { value: ShareExpiry }[],
+  requirePassword: boolean,
+) {
+  const values = options.map((option) => option.value) as [
+    ShareExpiry,
+    ...ShareExpiry[],
+  ];
+  return z.object({
+    expiresIn: z.enum(values),
+    password: requirePassword
+      ? z.string().trim().min(1).max(128)
+      : z.string().max(128),
+    // Kept as a string (the input value); empty means unlimited. Validated as an
+    // optional whole number ≥ 1 — zod messages are out of i18n scope by design.
+    maxDownloads: z
+      .string()
+      .refine(
+        (value) => value.trim() === "" || /^[1-9]\d*$/.test(value.trim()),
+        { message: "Enter a whole number of 1 or more, or leave it empty." },
+      ),
+  });
+}
 
 export function ShareDialog({
   sourceId,
   file,
+  policy,
   onOpenChange,
 }: {
   sourceId: string;
   file: FileEntry | null;
+  /** Org-wide constraints — pre-constrains expiry and password inputs. */
+  policy?: SharePolicy;
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("browser.shareDialog");
@@ -48,9 +69,26 @@ export function ShareDialog({
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const maxExpiryDays = policy?.maxExpiryDays ?? null;
+  const requirePassword = policy?.requirePassword ?? false;
+  const expiryOptions = useMemo(
+    () => allowedExpiryOptions(maxExpiryDays),
+    [maxExpiryDays],
+  );
+  // The longest option still allowed under the cap (the plain "7d" default when
+  // there is none) — never offer, or default to, a lifetime the policy forbids.
+  const defaultExpiry: ShareExpiry = useMemo(() => {
+    if (maxExpiryDays === null) return "7d";
+    return expiryOptions[expiryOptions.length - 1]?.value ?? "1d";
+  }, [maxExpiryDays, expiryOptions]);
+  const shareSchema = useMemo(
+    () => makeShareSchema(expiryOptions, requirePassword),
+    [expiryOptions, requirePassword],
+  );
+
   const form = useAppForm({
     defaultValues: {
-      expiresIn: "7d" as ShareExpiry,
+      expiresIn: defaultExpiry,
       password: "",
       maxDownloads: "",
     },
@@ -122,17 +160,25 @@ export function ShareDialog({
               {(field) => (
                 <field.SelectField
                   label={t("expiresLabel")}
-                  options={SHARE_EXPIRY_OPTIONS}
+                  options={expiryOptions}
                 />
               )}
             </form.AppField>
             <form.AppField name="password">
               {(field) => (
                 <field.TextField
-                  label={t("passwordLabel")}
+                  label={
+                    requirePassword
+                      ? t("passwordRequiredLabel")
+                      : t("passwordLabel")
+                  }
                   type="password"
                   autoComplete="off"
-                  placeholder={t("passwordPlaceholder")}
+                  placeholder={
+                    requirePassword
+                      ? t("passwordRequiredPlaceholder")
+                      : t("passwordPlaceholder")
+                  }
                 />
               )}
             </form.AppField>
