@@ -40,6 +40,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
   const [serverError, setServerError] = useState<string>();
   const router = useRouter();
   const t = useTranslations("admin.createUserDialog");
+  const tErrors = useTranslations("admin.errors");
 
   const form = useAppForm({
     defaultValues: {
@@ -52,8 +53,18 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
     onSubmit: async ({ value }) => {
       setServerError(undefined);
       const result = await createUser(value);
-      if (!result.ok) {
-        setServerError(result.error);
+      if (result.serverError) {
+        setServerError(result.serverError);
+        return;
+      }
+      if (result.validationErrors) {
+        setServerError(
+          result.validationErrors.formErrors?.[0] ??
+            result.validationErrors.fieldErrors.name?.[0] ??
+            result.validationErrors.fieldErrors.email?.[0] ??
+            result.validationErrors.fieldErrors.password?.[0] ??
+            tErrors("invalidInput"),
+        );
         return;
       }
       toast.success(t("createdToast", { email: value.email }));

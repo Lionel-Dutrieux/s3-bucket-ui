@@ -35,7 +35,6 @@ import {
   setUserRole,
   unbanUser,
 } from "@/features/admin/actions/users";
-import type { ActionResult } from "@/lib/action-result";
 import type { UserRow } from "@/lib/dal/users";
 import { formatDateTime } from "@/lib/format";
 
@@ -105,11 +104,14 @@ export function UsersTable({
   const tCommon = useTranslations("common");
   const locale = useLocale();
 
-  const run = (work: () => Promise<ActionResult>, done?: () => void) => {
+  const run = (
+    work: () => Promise<{ serverError?: string }>,
+    done?: () => void,
+  ) => {
     startTransition(async () => {
       const result = await work();
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       done?.();
@@ -224,7 +226,9 @@ export function UsersTable({
                       {user.banned ? (
                         // Unbanning restores access — no confirmation needed.
                         <DropdownMenuItem
-                          onSelect={() => run(() => unbanUser(user.id))}
+                          onSelect={() =>
+                            run(() => unbanUser({ userId: user.id }))
+                          }
                         >
                           <ShieldOff aria-hidden />
                           {t("unban")}
@@ -273,10 +277,13 @@ export function UsersTable({
           run(
             () =>
               kind === "role"
-                ? setUserRole(user.id, user.role === "admin" ? "user" : "admin")
+                ? setUserRole({
+                    userId: user.id,
+                    role: user.role === "admin" ? "user" : "admin",
+                  })
                 : kind === "ban"
-                  ? banUser(user.id)
-                  : removeUser(user.id),
+                  ? banUser({ userId: user.id })
+                  : removeUser({ userId: user.id }),
             () => setConfirming(null),
           );
         }}
