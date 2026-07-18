@@ -1,59 +1,59 @@
 "use server";
 
 import { getTranslations } from "next-intl/server";
-import { type ActionResult, actionError, actionOk } from "@/lib/action-result";
-import { getSession, isAdmin } from "@/lib/auth/session";
+import { z } from "zod";
+import { isAdmin } from "@/lib/auth/session";
 import { recordOperation } from "@/lib/dal/operations";
 import {
   getActiveShare,
   getShareWithSource,
   revokeShare,
 } from "@/lib/dal/shares";
+import { ActionError, actionClient, authActionClient } from "@/lib/safe-action";
 import { verifySharePassword } from "@/lib/shares/password";
 import { grantUnlock } from "@/lib/shares/unlock";
 
 /**
  * Trades the share's password for the unlock cookie. Public by design (the
- * visitor has no session); the uniform error never confirms a token exists.
+ * visitor has no session, so no auth middleware); the uniform error never
+ * confirms a token exists.
  */
-export async function unlockShare(
-  token: string,
-  password: string,
-): Promise<ActionResult> {
-  const t = await getTranslations("shares.errors");
-  const share = await getActiveShare(token);
-  if (!share?.passwordHash) {
-    return actionError(t("linkUnavailable"));
-  }
-  if (!verifySharePassword(password, share.passwordHash)) {
-    // Blunt brute-force damper — enough for a share-link password.
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return actionError(t("wrongPassword"));
-  }
-  await grantUnlock(token);
-  return actionOk();
-}
+export const unlockShare = actionClient
+  .metadata({ actionName: "shares.unlockShare" })
+  .inputSchema(
+    z.object({ token: z.string().min(1), password: z.string().min(1) }),
+  )
+  .action(async ({ parsedInput: { token, password } }) => {
+    const t = await getTranslations("shares.errors");
+    const share = await getActiveShare(token);
+    if (!share?.passwordHash) {
+      throw new ActionError(t("linkUnavailable"));
+    }
+    if (!verifySharePassword(password, share.passwordHash)) {
+      // Blunt brute-force damper — enough for a share-link password.
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      throw new ActionError(t("wrongPassword"));
+    }
+    await grantUnlock(token);
+  });
 
 /** Owners revoke their own links; admins revoke anyone's. Uniform error. */
-export async function revokeShareLink(id: string): Promise<ActionResult> {
-  const t = await getTranslations("shares.errors");
-  const session = await getSession();
-  if (!session) return actionError(t("linkNotFound"));
-  const share = await getShareWithSource(id);
-  if (
-    !share ||
-    (share.createdById !== session.user.id && !isAdmin(session.user))
-  ) {
-    return actionError(t("linkNotFound"));
-  }
-  if (!share.revokedAt) {
-    await revokeShare(id);
-    await recordOperation({
-      action: "share-revoke",
-      sourceId: share.sourceId,
-      sourceName: share.source?.name ?? "(deleted source)",
-      target: share.key,
-    });
-  }
-  return actionOk();
-}
+export const revokeShareLink = authActionClient
+  .metadata({ actionName: "shares.revokeShareLink" })
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput: { id }, ctx: { user } }) => {
+    const t = await getTranslations("shares.errors");
+    const share = await getShareWithSource(id);
+    if (!share || (share.createdById !== user.id && !isAdmin(user))) {
+      throw new ActionError(t("linkNotFound"));
+    }
+    if (!share.revokedAt) {
+      await revokeShare(id);
+      await recordOperation({
+        action: "share-revoke",
+        sourceId: share.sourceId,
+        sourceName: share.source?.name ?? "(deleted source)",
+        target: share.key,
+      });
+    }
+  });

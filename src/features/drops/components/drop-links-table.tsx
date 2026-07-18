@@ -62,9 +62,9 @@ export function DropLinksTable({ drops }: { drops: DropLinkRow[] }) {
 
   const revoke = (id: string) => {
     startTransition(async () => {
-      const result = await revokeDropLinkAction(id);
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await revokeDropLinkAction({ id });
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       toast.success(t("revokedToast"));

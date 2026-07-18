@@ -74,9 +74,9 @@ export function SharesTable({ shares }: { shares: ShareRow[] }) {
 
   const revoke = (id: string) => {
     startTransition(async () => {
-      const result = await revokeShareLink(id);
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await revokeShareLink({ id });
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       toast.success(t("revokedToast"));
