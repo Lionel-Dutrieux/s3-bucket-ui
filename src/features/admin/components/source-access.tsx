@@ -12,7 +12,6 @@ import {
   upsertSourceGrant,
 } from "@/features/admin/actions/groups";
 import { SearchCombobox } from "@/features/admin/components/search-combobox";
-import type { ActionResult } from "@/lib/action-result";
 import type { GrantRow } from "@/lib/dal/permissions";
 
 export interface SubjectOption {
@@ -40,11 +39,11 @@ export function SourceAccess({
   const router = useRouter();
   const t = useTranslations("admin.sourceAccess");
 
-  const run = (work: () => Promise<ActionResult>) => {
+  const run = (work: () => Promise<{ serverError?: string }>) => {
     startTransition(async () => {
       const result = await work();
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       router.refresh();
@@ -147,7 +146,9 @@ export function SourceAccess({
                 size="icon"
                 className="size-6 text-muted-foreground"
                 disabled={pending}
-                onClick={() => run(() => removeSourceGrant(grant.id))}
+                onClick={() =>
+                  run(() => removeSourceGrant({ grantId: grant.id }))
+                }
                 aria-label={t("revokeAria", { name: grant.subject.label })}
               >
                 <X className="size-3.5" aria-hidden />

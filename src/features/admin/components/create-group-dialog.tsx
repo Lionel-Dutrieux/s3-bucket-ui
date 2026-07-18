@@ -40,15 +40,24 @@ function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
   const [serverError, setServerError] = useState<string>();
   const router = useRouter();
   const t = useTranslations("admin.createGroupDialog");
+  const tErrors = useTranslations("admin.errors");
 
   const form = useAppForm({
     defaultValues: { name: "" },
     validators: { onChange: createGroupSchema },
     onSubmit: async ({ value }) => {
       setServerError(undefined);
-      const result = await createGroup(value.name);
-      if (!result.ok) {
-        setServerError(result.error);
+      const result = await createGroup({ name: value.name });
+      if (result.serverError) {
+        setServerError(result.serverError);
+        return;
+      }
+      if (result.validationErrors) {
+        setServerError(
+          result.validationErrors.formErrors?.[0] ??
+            result.validationErrors.fieldErrors.name?.[0] ??
+            tErrors("invalidName"),
+        );
         return;
       }
       toast.success(t("createdToast", { name: value.name.trim() }));

@@ -104,9 +104,9 @@ export function GroupsTable({
         onConfirm={() => {
           if (!deleting) return;
           startTransition(async () => {
-            const result = await deleteGroup(deleting.id);
-            if (!result.ok) {
-              toast.error(result.error);
+            const result = await deleteGroup({ groupId: deleting.id });
+            if (result.serverError) {
+              toast.error(result.serverError);
               return;
             }
             setDeleting(null);

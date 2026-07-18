@@ -19,7 +19,6 @@ import {
   removeGroupMember,
 } from "@/features/admin/actions/groups";
 import { SearchCombobox } from "@/features/admin/components/search-combobox";
-import type { ActionResult } from "@/lib/action-result";
 import type { GroupRow } from "@/lib/dal/groups";
 import type { UserOption } from "@/lib/dal/users";
 
@@ -37,11 +36,11 @@ export function GroupMembersDialog({
   const router = useRouter();
   const t = useTranslations("admin.groupMembersDialog");
 
-  const run = (work: () => Promise<ActionResult>) => {
+  const run = (work: () => Promise<{ serverError?: string }>) => {
     startTransition(async () => {
       const result = await work();
-      if (!result.ok) {
-        toast.error(result.error);
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       router.refresh();
@@ -92,7 +91,12 @@ export function GroupMembersDialog({
                     className="size-6 text-muted-foreground"
                     disabled={pending}
                     onClick={() =>
-                      run(() => removeGroupMember(group.id, member.userId))
+                      run(() =>
+                        removeGroupMember({
+                          groupId: group.id,
+                          userId: member.userId,
+                        }),
+                      )
                     }
                     aria-label={t("removeAria", {
                       email: member.email,
@@ -111,7 +115,9 @@ export function GroupMembersDialog({
             searchPlaceholder={t("searchPlaceholder")}
             emptyMessage={t("emptyMessage")}
             groups={[{ heading: t("usersHeading"), options: candidates }]}
-            onSelect={(userId) => run(() => addGroupMember(group.id, userId))}
+            onSelect={(userId) =>
+              run(() => addGroupMember({ groupId: group.id, userId }))
+            }
             disabled={pending}
           />
         </div>
