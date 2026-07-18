@@ -639,7 +639,10 @@
       "invalidSource": "Ungültige Quelle.",
       "sameSourceDestination": "Wählen Sie eine andere Quelle als Ziel.",
       "migrationFailed": "Migration fehlgeschlagen — prüfen Sie die Erreichbarkeit beider Quellen und versuchen Sie es erneut.",
-      "removeFailed": "Diese Quelle konnte nicht entfernt werden."
+      "removeFailed": "Diese Quelle konnte nicht entfernt werden.",
+      "localDisabled": "Lokale Ordnerquellen sind deaktiviert — setzen Sie LOCAL_FS_ROOTS auf dem Server, um sie zu aktivieren.",
+      "localRootNotAllowed": "Dieser Pfad liegt unter keinem erlaubten Stammverzeichnis (LOCAL_FS_ROOTS).",
+      "localRootUnreachable": "Dieses Verzeichnis existiert nicht oder ist auf dem Server nicht lesbar."
     }
   },
   "admin": {

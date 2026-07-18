@@ -639,7 +639,10 @@
       "invalidSource": "Source invalide.",
       "sameSourceDestination": "Choisissez une source différente comme destination.",
       "migrationFailed": "Échec de la migration — vérifiez la connectivité des deux sources et réessayez.",
-      "removeFailed": "Impossible de supprimer cette source."
+      "removeFailed": "Impossible de supprimer cette source.",
+      "localDisabled": "Les sources de type dossier local sont désactivées — définissez LOCAL_FS_ROOTS sur le serveur pour les activer.",
+      "localRootNotAllowed": "Ce chemin n'est sous aucune racine autorisée (LOCAL_FS_ROOTS).",
+      "localRootUnreachable": "Ce dossier n'existe pas ou n'est pas lisible sur le serveur."
     }
   },
   "admin": {

@@ -639,7 +639,10 @@
       "invalidSource": "Fuente no válida.",
       "sameSourceDestination": "Elige una fuente diferente como destino.",
       "migrationFailed": "Error en la migración — revisa la conectividad de ambas fuentes e inténtalo de nuevo.",
-      "removeFailed": "No se pudo eliminar esta fuente."
+      "removeFailed": "No se pudo eliminar esta fuente.",
+      "localDisabled": "Las fuentes de carpeta local están desactivadas — define LOCAL_FS_ROOTS en el servidor para activarlas.",
+      "localRootNotAllowed": "Esta ruta no está bajo ninguna raíz permitida (LOCAL_FS_ROOTS).",
+      "localRootUnreachable": "Este directorio no existe o no se puede leer en el servidor."
     }
   },
   "admin": {

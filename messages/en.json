@@ -639,7 +639,10 @@
       "invalidSource": "Invalid source.",
       "sameSourceDestination": "Pick a different source as the destination.",
       "migrationFailed": "Migration failed — check both sources' connectivity and try again.",
-      "removeFailed": "Could not remove this source."
+      "removeFailed": "Could not remove this source.",
+      "localDisabled": "Local folder sources are disabled — set LOCAL_FS_ROOTS on the server to enable them.",
+      "localRootNotAllowed": "This path is not under any allowed root (LOCAL_FS_ROOTS).",
+      "localRootUnreachable": "This directory does not exist or cannot be read on the server."
     }
   },
   "admin": {

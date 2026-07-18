@@ -639,7 +639,10 @@
       "invalidSource": "来源无效。",
       "sameSourceDestination": "请选择另一个来源作为目标。",
       "migrationFailed": "迁移失败 — 请检查两个来源的连接后重试。",
-      "removeFailed": "无法移除此来源。"
+      "removeFailed": "无法移除此来源。",
+      "localDisabled": "本地文件夹源已禁用 — 在服务器上设置 LOCAL_FS_ROOTS 以启用。",
+      "localRootNotAllowed": "该路径不在任何允许的根目录（LOCAL_FS_ROOTS）之下。",
+      "localRootUnreachable": "该目录不存在，或服务器无法读取。"
     }
   },
   "admin": {
