@@ -16,7 +16,7 @@ const getTranslationsLoose = getTranslations as (
 ) => Promise<(key: string) => string>;
 
 /** Resolves a full i18n key like "admin.errors.notAuthorized" to its text. */
-async function resolveKey(key: string): Promise<string> {
+export async function resolveActionMessage(key: string): Promise<string> {
   const i = key.lastIndexOf(".");
   const t = await getTranslationsLoose(key.slice(0, i));
   return t(key.slice(i + 1));
@@ -40,7 +40,7 @@ export const actionClient = createSafeActionClient({
     // ActionError messages are already translated and UI-safe.
     if (error instanceof ActionError) return error.message;
     console.error(`[${metadata?.actionName ?? "action"}] failed:`, error);
-    return resolveKey(metadata?.failureKey ?? "common.actionFailed");
+    return resolveActionMessage(metadata?.failureKey ?? "common.actionFailed");
   },
 });
 
