@@ -160,9 +160,9 @@ export function FileBrowser({
   };
 
   const handleDuplicate = async (file: FileEntry) => {
-    const result = await duplicateObject(sourceId, file.key);
-    if (!result.ok) {
-      toast.error(result.error);
+    const result = await duplicateObject({ sourceId, key: file.key });
+    if (result.serverError) {
+      toast.error(result.serverError);
       return;
     }
     toast.success(t("duplicatedToast", { name: file.name }));

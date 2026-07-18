@@ -37,9 +37,9 @@ export function NewFolderPopover({
       onChange: newFolderSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await createFolder(sourceId, prefix, value.name);
-      if (!result.ok) {
-        toast.error(result.error);
+      const result = await createFolder({ sourceId, prefix, name: value.name });
+      if (result.serverError) {
+        toast.error(result.serverError);
         return;
       }
       toast.success(t("createdToast", { name: value.name.trim() }));

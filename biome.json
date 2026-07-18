@@ -308,6 +308,16 @@
       }
     },
     {
+      "includes": ["src/features/browser/actions/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useHookAtTopLevel": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/lib/dal/**", "src/lib/prisma.ts", "src/lib/auth/**"],
       "linter": {
         "rules": {
