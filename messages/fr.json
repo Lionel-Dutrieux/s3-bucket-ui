@@ -1,5 +1,6 @@
 {
   "common": {
+    "actionFailed": "Une erreur est survenue. Veuillez réessayer.",
     "cancel": "Annuler",
     "confirm": "Confirmer",
     "save": "Enregistrer",
