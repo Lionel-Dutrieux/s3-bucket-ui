@@ -313,6 +313,21 @@ export function getProvider(id: string): ProviderDefinition | undefined {
   return PROVIDERS.find((provider) => provider.id === id);
 }
 
+/** Marker file that materializes an empty folder on keep-file providers. */
+export const KEEP_FILE_NAME = ".keep";
+
+/**
+ * Object stores represent an empty folder as a zero-byte `prefix/` marker
+ * object. Filesystem-backed adapters (fs, sftp, ftp, webdav) cannot store a
+ * key ending in "/" — the fs adapter would write a plain file named like the
+ * folder, which then blocks every upload under it — so they get a real
+ * `.keep` file inside the directory instead (hidden from listings).
+ */
+export function usesKeepFileMarkers(providerId: string): boolean {
+  const adapter = getProvider(providerId)?.adapter ?? "s3";
+  return adapter !== "s3" && adapter !== "azure";
+}
+
 export type EndpointCheck =
   | { ok: true; value: string }
   | { ok: false; message: string };

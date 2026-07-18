@@ -41,6 +41,28 @@ describe("partitionListing", () => {
     expect(listing.files.map((file) => file.name)).toEqual(["real.txt"]);
   });
 
+  it("hides .keep markers when asked (filesystem-backed sources)", () => {
+    const listing = partitionListing(
+      {
+        items: [
+          { key: "docs/.keep", size: 0 },
+          { key: "docs/real.txt", size: 10 },
+        ],
+      },
+      "docs/",
+      { hideKeepMarkers: true },
+    );
+    expect(listing.files.map((file) => file.name)).toEqual(["real.txt"]);
+  });
+
+  it("keeps .keep files visible by default (object stores)", () => {
+    const listing = partitionListing(
+      { items: [{ key: "docs/.keep", size: 0 }] },
+      "docs/",
+    );
+    expect(listing.files.map((file) => file.name)).toEqual([".keep"]);
+  });
+
   it("excludes the current prefix from folders", () => {
     const listing = partitionListing(
       { items: [], prefixes: ["docs/", "docs/sub/"] },

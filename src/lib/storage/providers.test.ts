@@ -3,6 +3,7 @@ import {
   getProvider,
   normalizeEndpoint,
   PROVIDERS,
+  usesKeepFileMarkers,
 } from "@/lib/storage/providers";
 
 describe("normalizeEndpoint", () => {
@@ -118,5 +119,16 @@ describe("local provider", () => {
       ok: true,
       value: "",
     });
+  });
+});
+
+describe("usesKeepFileMarkers", () => {
+  it("is true for filesystem-backed adapters, false for object stores", () => {
+    expect(usesKeepFileMarkers("local")).toBe(true);
+    expect(usesKeepFileMarkers("sftp")).toBe(true);
+    expect(usesKeepFileMarkers("webdav")).toBe(true);
+    expect(usesKeepFileMarkers("aws-s3")).toBe(false);
+    expect(usesKeepFileMarkers("azure-blob")).toBe(false);
+    expect(usesKeepFileMarkers("unknown-id")).toBe(false); // s3 fallback
   });
 });

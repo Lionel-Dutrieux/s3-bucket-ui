@@ -1,5 +1,7 @@
 // Pure listing helpers — no I/O, unit-tested in listing.test.ts.
 
+import { KEEP_FILE_NAME } from "@/lib/storage/providers";
+
 export interface FolderEntry {
   /** Full prefix including trailing slash, e.g. "photos/2024/" */
   prefix: string;
@@ -28,11 +30,14 @@ export interface FolderListing {
 /**
  * Turns a raw S3-style delimiter listing into folders + files relative to
  * `prefix`, skipping the zero-byte "folder marker" objects some dashboards
- * (e.g. Cloudflare R2) create.
+ * (e.g. Cloudflare R2) create. With `hideKeepMarkers`, also hides the
+ * `.keep` files that materialize empty folders on filesystem-backed sources
+ * (see usesKeepFileMarkers in lib/storage/providers.ts).
  */
 export function partitionListing(
   result: RawListResult,
   prefix: string,
+  opts?: { hideKeepMarkers?: boolean },
 ): FolderListing {
   const folders = (result.prefixes ?? [])
     .filter((folderPrefix) => folderPrefix !== prefix)
@@ -43,6 +48,13 @@ export function partitionListing(
 
   const files = result.items
     .filter((item) => item.key !== prefix && !item.key.endsWith("/"))
+    .filter(
+      (item) =>
+        !(
+          opts?.hideKeepMarkers &&
+          item.key.slice(prefix.length) === KEEP_FILE_NAME
+        ),
+    )
     .map((item) => ({
       key: item.key,
       name: item.key.slice(prefix.length),
