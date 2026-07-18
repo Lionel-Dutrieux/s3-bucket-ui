@@ -22,7 +22,11 @@ export const config = {
   // already deleted the session cookie (only a short-lived 2FA cookie exists),
   // so the optimistic session-cookie check below would bounce the challenge
   // page straight back to /sign-in and the code prompt would never show.
+  // The upload route MUST stay excluded too: routing a request through the
+  // proxy makes Next.js buffer its body in memory, silently truncated at
+  // proxyClientMaxBodySize (10 MB) — uploads above that were corrupted without
+  // any error. The route enforces auth itself (requireSourceAccess + canEdit).
   matcher: [
-    "/((?!api/auth|api/health|api/s/|s/|sign-in|sign-up|two-factor|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|api/health|api/s/|s/|api/sources/[^/]+/upload|sign-in|sign-up|two-factor|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)",
   ],
 };
