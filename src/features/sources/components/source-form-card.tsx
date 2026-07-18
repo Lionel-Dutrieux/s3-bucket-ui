@@ -14,8 +14,11 @@ import type { SourceFormValues } from "@/features/sources/lib/schema";
  */
 export function SourceFormCard({
   edit,
+  localFsRoots = [],
 }: {
   edit: { sourceId: string; initialValues: SourceFormValues };
+  /** LOCAL_FS_ROOTS allowlist, threaded from the RSC page ([] = disabled). */
+  localFsRoots?: string[];
 }) {
   const router = useRouter();
   const [provider, setProvider] = useState(edit.initialValues.provider);
@@ -25,7 +28,7 @@ export function SourceFormCard({
     <div className="max-w-xl rounded-xl border bg-card p-4 shadow-sm">
       {picking ? (
         <ProviderPicker
-          localFsEnabled={false}
+          localFsEnabled={localFsRoots.length > 0}
           onSelect={(id) => {
             setProvider(id);
             setPicking(false);
@@ -35,6 +38,7 @@ export function SourceFormCard({
       <div className={picking ? "hidden" : undefined}>
         <SourceForm
           provider={provider}
+          localFsRoots={localFsRoots}
           onChangeProvider={() => setPicking(true)}
           edit={edit}
           onSuccess={() => {
